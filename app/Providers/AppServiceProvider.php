@@ -19,11 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
 public function boot(): void
 {
-    if (app()->environment('production')) {
-        // Mengarahkan folder sementara ke /tmp milik Vercel
-        config(['session.files' => '/tmp/sessions']);
-        config(['view.compiled' => '/tmp/views']);
-        config(['cache.stores.file.path' => '/tmp/cache']);
+    if ($this->app->environment('production')) {
+        \URL::forceScheme('https');
     }
 }
 }
