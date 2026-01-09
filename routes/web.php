@@ -131,3 +131,12 @@ Route::post('/audit/{id}/{clause}', [AuditController::class, 'store'])->name('au
 Route::get('/audit/finish', function() {
     return "<h1 style='text-align:center; margin-top:50px;'>Terima Kasih, Audit Selesai!</h1>";
 })->name('audit.finish');
+
+Route::get('/test-db', function () {
+    try {
+        DB::connection()->getPdo();
+        return "Koneksi Berhasil ke: " . DB::connection()->getDatabaseName();
+    } catch (\Exception $e) {
+        return "Gagal konek database: " . $e->getMessage();
+    }
+});
