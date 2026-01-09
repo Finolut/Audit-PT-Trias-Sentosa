@@ -17,8 +17,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        //
+public function boot(): void
+{
+    // Tambahkan ini agar folder bootstrap bisa ditulis di folder /tmp Vercel
+    if (config('app.env') === 'production') {
+        config(['session.files' => '/tmp/sessions']);
+        config(['view.compiled' => '/tmp/views']);
+        config(['cache.stores.file.path' => '/tmp/cache']);
     }
+}
 }
