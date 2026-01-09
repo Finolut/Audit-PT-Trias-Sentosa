@@ -1,0 +1,105 @@
+body { font-family: Arial; }
+.item { padding:10px; border-bottom:1px solid #ccc; }
+.answer-btn { margin-left:10px; cursor:pointer; }
+
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+}
+
+.modal-box {
+  background:#f5f5f5;
+  width:360px;
+  padding:20px;
+  margin:100px auto;
+  border-radius:6px;
+}
+
+/* PEMBEDA WARNA */
+.member {
+  padding:6px;
+  margin-bottom:4px;
+  border-radius:4px;
+}
+
+.auditor {
+  background:#dbeafe; /* biru muda */
+}
+
+.responder {
+  background:#dcfce7; /* hijau muda */
+}
+
+.answer-btn {
+  margin-left:10px;
+  padding:4px 10px;
+  cursor:pointer;
+  border:1px solid #999;
+  background:#f5f5f5;
+  border-radius:4px;
+}
+
+.answer-btn.active-yes {
+  background:#16a34a; /* hijau */
+  color:white;
+  border-color:#16a34a;
+}
+
+.answer-btn.active-no {
+  background:#dc2626; /* merah */
+  color:white;
+  border-color:#dc2626;
+}
+
+/* CLOSE (X) */
+.modal-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.modal-close {
+  cursor:pointer;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.answer-auditor {
+  color:#2563eb; /* biru */
+  font-weight:bold;
+}
+
+.answer-responder {
+  color:#7c3aed; /* ungu */
+}
+
+.answer-btn.active-na {
+  background:#6b7280; /* abu */
+  color:white;
+  border-color:#6b7280;
+}
+
+/* Style tambahan untuk tombol cepat */
+.q-btn-yes:hover { border-color: #16a34a; color: #16a34a; }
+.q-btn-no:hover { border-color: #dc2626; color: #dc2626; }
+.q-btn-na:hover { border-color: #6b7280; color: #6b7280; }
+
+.answer-btn.active-yes {
+    background: #16a34a !important;
+    color: white !important;
+    border-color: #16a34a !important;
+}
+
+.answer-btn.active-no {
+    background: #dc2626 !important;
+    color: white !important;
+    border-color: #dc2626 !important;
+}
+
+.answer-btn.active-na {
+    background: #6b7280 !important;
+    color: white !important;
+    border-color: #6b7280 !important;
+}
