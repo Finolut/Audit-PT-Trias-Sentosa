@@ -100,34 +100,45 @@ class AuditController extends Controller
     // ==========================================
     // 3. MULAI AUDIT BARU
     // ==========================================
-   public function startAudit(Request $request) 
-    {
-        // ... (Validasi & Save Logic sama seperti sebelumnya) ...
-        // Copy logic penyimpanan dari jawaban sebelumnya di sini
-        
-        return DB::transaction(function () use ($request) {
-            // ... (Kode insert session, responders, audits sama persis) ...
-            
-            // CONTOH SINGKAT (Pastikan code insert lengkap Anda tetap ada):
-            $sessionId = (string) Str::uuid();
-            // DB::table('audit_sessions')->insert(...);
-            
-            $newAuditId = (string) Str::uuid();
-            DB::table('audits')->insert([
-                'id' => $newAuditId,
-                'audit_session_id' => $sessionId,
-                'department_id'    => $request->department_id,
-                'status'           => 'IN_PROGRESS',
-                'created_at'       => now(),
-            ]);
+  public function startAudit(Request $request) 
+{
+    // 1. Validasi input terlebih dahulu
+    $request->validate([
+        'department_id' => 'required|uuid|exists:departments,id',
+        // Tambahkan validasi lain sesuai kebutuhan (nama auditor, dll)
+    ]);
 
-            // PERUBAHAN DISINI: Redirect ke Menu Dashboard
-            return redirect()->route('audit.menu', ['id' => $newAuditId]);
-        });
-    }
-    
-    // UPDATE method checkPendingAudit (Opsional, agar resume lari ke menu juga)
-    // Ubah bagian 'resume_link' menjadi: route('audit.menu', ['id' => $pendingAudit->audit_id])
+    return DB::transaction(function () use ($request) {
+        // 2. Generate UUID untuk Session
+        $sessionId = (string) Str::uuid();
+
+        // 3. INSERT ke tabel audit_sessions (WAJIB DULUAN)
+        // Berdasarkan skema: id, auditor_name, auditor_nik, auditor_department, company_name, audit_date
+        DB::table('audit_sessions')->insert([
+            'id'                 => $sessionId,
+            'auditor_name'       => $request->user()->name, // Contoh ambil dari user login
+            'auditor_nik'        => $request->user()->nik,
+            'auditor_department' => $request->user()->department,
+            'company_name'       => 'Nama Perusahaan',
+            'audit_date'         => now()->toDateString(),
+            'created_at'         => now(),
+        ]);
+
+        // 4. INSERT ke tabel audits
+        // Berdasarkan skema: id, audit_session_id, department_id, status
+        $newAuditId = (string) Str::uuid();
+        DB::table('audits')->insert([
+            'id'               => $newAuditId,
+            'audit_session_id' => $sessionId, // Merujuk ke ID session di atas
+            'department_id'    => $request->department_id,
+            'status'           => 'IN_PROGRESS',
+            'created_at'       => now(),
+        ]);
+
+        // 5. Redirect ke Menu Dashboard Audit
+        return redirect()->route('audit.menu', ['id' => $newAuditId]);
+    });
+}
 
     // ==========================================
     // 4. SHOW QUESTIONNAIRE
