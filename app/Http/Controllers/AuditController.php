@@ -100,36 +100,43 @@ class AuditController extends Controller
     // ==========================================
     // 3. MULAI AUDIT BARU
     // ==========================================
-  public function startAudit(Request $request) 
+ public function startAudit(Request $request) 
 {
-    // 1. Validasi input terlebih dahulu
+    // 1. Validasi input
     $request->validate([
-        'department_id' => 'required|uuid|exists:departments,id',
-        // Tambahkan validasi lain sesuai kebutuhan (nama auditor, dll)
+        'department_id' => 'required|exists:departments,id',
+        'auditor_nik'   => 'required', // Pastikan form mengirim name="auditor_nik"
     ]);
 
     return DB::transaction(function () use ($request) {
+        // A. CARI DATA AUDITOR DARI ARRAY HARDCODED
+        // Kita cari data auditor di $this->auditorsList berdasarkan NIK yang dipilih
+        $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->auditor_nik);
+
+        // Fallback jika data tidak ditemukan (untuk jaga-jaga)
+        $auditorName = $selectedAuditor['name'] ?? 'Unknown Auditor';
+        $auditorNik  = $selectedAuditor['nik'] ?? $request->auditor_nik;
+        $auditorDept = $selectedAuditor['dept'] ?? '-';
+
         // 2. Generate UUID untuk Session
         $sessionId = (string) Str::uuid();
 
-        // 3. INSERT ke tabel audit_sessions (WAJIB DULUAN)
-        // Berdasarkan skema: id, auditor_name, auditor_nik, auditor_department, company_name, audit_date
+        // 3. INSERT ke tabel audit_sessions
         DB::table('audit_sessions')->insert([
             'id'                 => $sessionId,
-            'auditor_name'       => $request->user()->name, // Contoh ambil dari user login
-            'auditor_nik'        => $request->user()->nik,
-            'auditor_department' => $request->user()->department,
+            'auditor_name'       => $auditorName, // Gunakan hasil pencarian array
+            'auditor_nik'        => $auditorNik,
+            'auditor_department' => $auditorDept,
             'company_name'       => 'Nama Perusahaan',
             'audit_date'         => now()->toDateString(),
             'created_at'         => now(),
         ]);
 
         // 4. INSERT ke tabel audits
-        // Berdasarkan skema: id, audit_session_id, department_id, status
         $newAuditId = (string) Str::uuid();
         DB::table('audits')->insert([
             'id'               => $newAuditId,
-            'audit_session_id' => $sessionId, // Merujuk ke ID session di atas
+            'audit_session_id' => $sessionId,
             'department_id'    => $request->department_id,
             'status'           => 'IN_PROGRESS',
             'created_at'       => now(),
