@@ -215,32 +215,32 @@ class AuditController extends Controller
         $answers = $request->input('answers', []);
         $questionText = $request->input('audit_question');
 
-        DB::transaction(function () use ($answers, $auditId, $clause, $questionText, $request) {
-    // 1. Ambil department_id dari tabel audits berdasarkan auditId
+DB::transaction(function () use ($answers, $auditId, $clause, $questionText, $request) {
+    // 1. Ambil data audit untuk mendapatkan department_id yang terkait
     $audit = DB::table('audits')->where('id', $auditId)->first();
     
     if (!$audit) {
-        throw new \Exception("Audit data tidak ditemukan.");
+        throw new \Exception("Data Audit tidak ditemukan.");
     }
 
     // 2. Update atau Insert Audit Questions Note
     if ($questionText !== null) {
         DB::table('audit_questions')->updateOrInsert(
-            // Kriteria pencarian
+            // Kriteria pencarian unik
             ['audit_id' => $auditId, 'clause_code' => $clause],
-            // Data yang diupdate atau diinsert
+            // Data yang harus diisi (termasuk department_id)
             [
                 'id'            => (string) Str::uuid(), 
-                'department_id' => $audit->department_id, // Tambahkan kolom yang hilang ini
+                'department_id' => $audit->department_id, // <--- Solusi Error: Ambil dari tabel audits
                 'question_text' => $questionText, 
                 'updated_at'    => now(),
-                'created_at'    => now()
+                'created_at'    => now() 
             ]
         );
     }
 
-            // Save Answers loop (sama seperti code Anda sebelumnya)
- foreach ($answers as $itemId => $data) {
+    // 3. Simpan Jawaban (Answers)
+    foreach ($answers as $itemId => $data) {
         if (!empty($data['answer']) && !empty($data['auditor_name'])) {
             DB::table('answers')->updateOrInsert(
                 ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $data['auditor_name']],
