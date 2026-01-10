@@ -1,122 +1,179 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Setup Audit</title>
+    <title>Sistem Audit Internal</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
-        ul#auditor-suggestions { padding: 0; margin: 5px 0; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; }
-        ul#auditor-suggestions li { list-style: none; padding: 8px; cursor: pointer; background: #fff; border-bottom: 1px solid #eee; }
-        ul#auditor-suggestions li:hover { background: #f0f9ff; }
-        .responder-box { background: #f9fafb; padding: 15px; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 10px; }
-        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { cursor: pointer; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f3f4f6; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #111827; margin-bottom: 30px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #374151; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; }
+        
+        .section-box { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .blue-box { background: #eff6ff; border: 1px solid #bfdbfe; }
+        .green-box { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .pink-box { background: #fdf2f8; border: 1px solid #fbcfe8; }
+        .yellow-box { background: #fffbeb; border: 1px solid #fcd34d; display: none; text-align: center; }
+
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-warning { background: #d97706; color: white; }
+        
+        .hidden { display: none; }
+        .responder-row { display: flex; gap: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<h2>Identitas Auditor & Responder</h2>
+<div class="container">
+    <h2>📋 Setup Audit Internal</h2>
 
-<form method="POST" action="{{ route('audit.start') }}">
-    @csrf
-
-    <div style="background: #eff6ff; padding: 20px; border-radius: 8px; border: 1px solid #bfdbfe;">
-        <h4 style="margin-top:0; color: #1e40af;">Data Auditor</h4>
-        <label>Nama Auditor</label>
-        <div style="position: relative;">
-            <input type="text" id="auditor_name" name="auditor_name" autocomplete="off" required placeholder="Ketik nama...">
-            <ul id="auditor-suggestions"></ul>
-        </div>
-        <div style="display: flex; gap: 15px;">
-            <div style="flex: 1;">
-                <label>NIK Auditor</label>
-                <input type="text" id="auditor_nik" name="auditor_nik">
-            </div>
-            <div style="flex: 1;">
-                <label>Departemen Auditor</label>
-                <input type="text" id="auditor_department" name="auditor_department">
-            </div>
-        </div>
+    <div id="resume-alert" class="section-box yellow-box">
+        <h3 style="margin-top:0; color:#92400e;">⚠️ Audit Belum Selesai Ditemukan</h3>
+        <p>Anda memiliki audit yang sedang berjalan untuk departemen <strong id="resume-dept"></strong> tanggal <span id="resume-date"></span>.</p>
+        <a id="resume-btn" href="#" class="btn btn-warning" style="display:block; text-decoration:none; box-sizing:border-box;">Lanjutkan Audit Terakhir</a>
+        <br>
+        <small style="color:#666;">Atau abaikan dan isi form di bawah untuk membuat audit baru.</small>
     </div>
-    <br>
 
-    <div style="background: #fdf2f8; padding: 20px; border-radius: 8px; border: 1px solid #fbcfe8;">
-        <h4 style="margin-top:0; color: #9d174d;">Responder (Opsional)</h4>
-        <div id="responders"></div>
-        <button type="button" onclick="addResponder()" style="padding: 6px 12px; border: 1px solid #ccc; background: white; border-radius: 4px;">+ Tambah Responder</button>
-    </div>
-    <br>
+    <form method="POST" action="{{ route('audit.start') }}">
+        @csrf
 
-    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; border: 1px solid #bbf7d0;">
-        <h4 style="margin-top:0; color: #166534;">Informasi Audit</h4>
-        
-        <label>Departemen yang Diaudit</label>
-        <select name="department_id" required>
-            <option value="">-- Pilih Departemen --</option>
-            {{-- Bagian ini yang sebelumnya error, sekarang aman karena Controller sudah benar --}}
-            @if(isset($departments))
-                @foreach ($departments as $d)
-                    <option value="{{ $d->id }}">{{ $d->name }}</option>
+        <div class="section-box blue-box">
+            <h4 style="margin-top:0; color: #1e40af;">1. Identitas Auditor</h4>
+            
+            <label>Nama Auditor (Pilih)</label>
+            <select id="auditor_select" name="auditor_name" required onchange="selectAuditor(this)">
+                <option value="">-- Pilih Nama Anda --</option>
+                @foreach($auditors as $aud)
+                    <option value="{{ $aud['name'] }}" 
+                            data-nik="{{ $aud['nik'] }}" 
+                            data-dept="{{ $aud['dept'] }}">
+                        {{ $aud['name'] }}
+                    </option>
                 @endforeach
-            @endif
-        </select>
+            </select>
 
-        <label>Tanggal Audit</label>
-        <input type="date" name="audit_date" value="{{ date('Y-m-d') }}" required>
-    </div>
-    <br><br>
+            <div style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label>NIK</label>
+                    <input type="text" id="auditor_nik" name="auditor_nik" readonly style="background: #e5e7eb; cursor: not-allowed;">
+                </div>
+                <div style="flex: 1;">
+                    <label>Departemen Asal</label>
+                    <input type="text" id="auditor_department" name="auditor_department" readonly style="background: #e5e7eb; cursor: not-allowed;">
+                </div>
+            </div>
+        </div>
 
-    <button type="submit" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold;">Mulai Audit</button>
-</form>
+        <div id="audit-details" class="hidden">
+            
+            <div class="section-box pink-box">
+                <h4 style="margin-top:0; color: #9d174d;">2. Responder (Opsional)</h4>
+                <div id="responders-container"></div>
+                <button type="button" onclick="addResponder()" style="padding: 5px 10px; background: white; border: 1px solid #ccc; cursor: pointer;">+ Tambah Responder</button>
+            </div>
+
+            <div class="section-box green-box">
+                <h4 style="margin-top:0; color: #166534;">3. Detail Audit Baru</h4>
+                
+                <label>Departemen yang Di-Audit</label>
+                <select name="department_id" required>
+                    <option value="">-- Pilih Departemen Target --</option>
+                    @foreach ($departments as $d)
+                        <option value="{{ $d->id }}">{{ $d->name }}</option>
+                    @endforeach
+                </select>
+
+                <label>Tanggal Audit</label>
+                <input type="date" name="audit_date" value="{{ date('Y-m-d') }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Mulai Audit Baru</button>
+        </div>
+
+    </form>
+</div>
 
 <script>
-/* SCRIPT JS SAMA SEPERTI SEBELUMNYA */
-const auditorInput = document.getElementById('auditor_name');
-const suggestionBox = document.getElementById('auditor-suggestions');
+    let responderIndex = 0;
 
-auditorInput.addEventListener('input', async function () {
-    const q = this.value;
-    suggestionBox.innerHTML = '';
-    if (q.length < 2) return;
-    try {
-        const res = await fetch('/api/auditors/search?q=' + q);
-        if(res.ok) {
-            const data = await res.json();
-            data.forEach(a => {
-                const li = document.createElement('li');
-                li.innerText = a.name;
-                li.onclick = function () {
-                    auditorInput.value = a.name;
-                    document.getElementById('auditor_nik').value = a.nik ?? '';
-                    document.getElementById('auditor_department').value = a.department ?? '';
-                    suggestionBox.innerHTML = '';
-                };
-                suggestionBox.appendChild(li);
-            });
+    // Fungsi saat memilih nama dari dropdown
+    async function selectAuditor(selectElement) {
+        const option = selectElement.options[selectElement.selectedIndex];
+        const nik = option.getAttribute('data-nik');
+        const dept = option.getAttribute('data-dept');
+        const detailsDiv = document.getElementById('audit-details');
+        const resumeAlert = document.getElementById('resume-alert');
+
+        // Reset
+        resumeAlert.style.display = 'none';
+
+        if (selectElement.value) {
+            // Isi NIK dan Dept otomatis
+            document.getElementById('auditor_nik').value = nik;
+            document.getElementById('auditor_department').value = dept;
+            
+            // Tampilkan form bawah
+            detailsDiv.classList.remove('hidden');
+
+            // Cek ke server apakah ada audit pending
+            if(nik && nik !== 'N/A') {
+                checkPendingAudit(nik);
+            }
+        } else {
+            // Kosongkan jika batal pilih
+            document.getElementById('auditor_nik').value = '';
+            document.getElementById('auditor_department').value = '';
+            detailsDiv.classList.add('hidden');
         }
-    } catch (e) { console.log("API Error or not found"); }
-});
+    }
 
-let responderIndex = 0;
-function addResponder() {
-    const container = document.getElementById('responders');
-    const html = `
-        <div class="responder-box">
-            <div style="display:flex; justify-content:space-between;">
-                <strong>Responder #${responderIndex + 1}</strong>
-                <button type="button" onclick="this.parentElement.parentElement.remove()" style="color:red; border:none; background:none;">Hapus</button>
+    // Fungsi Ajax cek pending audit
+    async function checkPendingAudit(nik) {
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]').content;
+            const res = await fetch('/audit/check-resume', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({ nik: nik })
+            });
+
+            const data = await res.json();
+
+            if (data.found) {
+                // Tampilkan alert kuning
+                document.getElementById('resume-alert').style.display = 'block';
+                document.getElementById('resume-dept').innerText = data.dept_name;
+                document.getElementById('resume-date').innerText = data.date;
+                document.getElementById('resume-btn').href = data.resume_link;
+            }
+        } catch (error) {
+            console.error('Gagal cek pending audit:', error);
+        }
+    }
+
+    // Fungsi Tambah Responder
+    function addResponder() {
+        const container = document.getElementById('responders-container');
+        const html = `
+            <div class="responder-row">
+                <input type="text" name="responders[${responderIndex}][name]" placeholder="Nama Responder" required style="margin-bottom:0;">
+                <button type="button" onclick="this.parentElement.remove()" style="background:#fecaca; border:1px solid #ef4444; color:#b91c1c; cursor:pointer;">X</button>
             </div>
-            <br>
-            <input type="text" name="responders[${responderIndex}][name]" placeholder="Nama Responder" required>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" name="responders[${responderIndex}][department]" placeholder="Departemen">
-                <input type="text" name="responders[${responderIndex}][nik]" placeholder="NIK (opsional)">
-            </div>
-        </div>`;
-    container.insertAdjacentHTML('beforeend', html);
-    responderIndex++;
-}
+            <input type="hidden" name="responders[${responderIndex}][department]" value="">
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+        responderIndex++;
+    }
 </script>
+
 </body>
 </html>

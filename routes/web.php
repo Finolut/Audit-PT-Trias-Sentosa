@@ -140,3 +140,23 @@ Route::get('/test-db', function () {
         return "Gagal konek database: " . $e->getMessage();
     }
 });
+
+/* -------------------------------------------------------------------------- */
+/* WEB ROUTES                                */
+/* -------------------------------------------------------------------------- */
+
+
+// 2. API: Cek apakah Auditor punya audit yang belum selesai
+Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
+
+// 5. Halaman Finish
+Route::get('/audit/finish', function() {
+    return "<div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
+            <h1 style='color:green;'>Terima Kasih!</h1>
+            <p>Audit telah selesai disimpan.</p>
+            <a href='/audit/setup'>Kembali ke Menu Awal</a>
+            </div>";
+})->name('audit.finish');
+
+// Redirect root ke setup
+Route::get('/', function () { return redirect()->route('audit.setup'); });
