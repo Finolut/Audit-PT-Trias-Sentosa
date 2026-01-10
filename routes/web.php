@@ -79,14 +79,6 @@ Route::post('/test-form', function (Request $request) {
     return redirect("/audit/{$auditId}/4-1");
 });
 
-Route::get('/api/auditors/search', function (Request $request) {
-    return DB::table('users')
-        ->where('role', 'auditor')
-        ->where('name', 'ILIKE', '%' . $request->q . '%')
-        ->select('name', 'nik', 'department')
-        ->limit(10)
-        ->get();
-});
 
 Route::post('/audit/{audit}/4-1/submit', function ($auditId) {
 
@@ -171,3 +163,5 @@ Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])->name('audi
 Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
     ->name('audit.show')
     ->where('id', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+
+    Route::get('/admin/audit/{id}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause');
