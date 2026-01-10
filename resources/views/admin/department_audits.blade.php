@@ -6,7 +6,7 @@
         <div>
             <nav class="flex mb-2" aria-label="Breadcrumb">
                 <ol class="flex items-center space-x-2 text-sm text-gray-500">
-                    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600 transition-colors">Dashboard</a></li>
+                    <li><a href="{{ route('layouts.admin') }}" class="hover:text-blue-600 transition-colors">Dashboard</a></li>
                     <li><span class="mx-2">/</span></li>
                     <li class="text-gray-800 font-bold">Log Audit</li>
                 </ol>
