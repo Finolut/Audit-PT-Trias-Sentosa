@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AuditController extends Controller
 {
@@ -235,4 +236,15 @@ class AuditController extends Controller
             ]
         );
     }
+    // AuditController.php
+public function showForm() {
+    try {
+        $departments = DB::table('departments')->orderBy('name')->get();
+        return view('test-form', compact('departments'));
+    } catch (\Exception $e) {
+        // Ini akan membantu kamu melihat error di log Vercel
+        Log::error("Gagal ambil departemen: " . $e->getMessage());
+        return view('test-form', ['departments' => []]);
+    }
+}
 }
