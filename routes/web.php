@@ -122,7 +122,6 @@ Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup
 Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
 
 // 3. Halaman Soal Audit (Dinamis per Clause)
-Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])->name('audit.show');
 
 // 4. Simpan Jawaban Soal
 Route::post('/audit/{id}/{clause}', [AuditController::class, 'store'])->name('audit.store');
@@ -166,3 +165,9 @@ Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.me
 // Pastikan route show tetap ada
 Route::get('/audit/{id}/{clause}', [App\Http\Controllers\AuditController::class, 'show'])->name('audit.show');
 Route::post('/audit/{id}/{clause}', [App\Http\Controllers\AuditController::class, 'store']);
+
+Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])->name('audit.show');
+
+Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
+    ->name('audit.show')
+    ->where('id', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
