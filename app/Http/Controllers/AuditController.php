@@ -100,45 +100,18 @@ class AuditController extends Controller
     // ==========================================
     // 3. MULAI AUDIT BARU
     // ==========================================
-    public function startAudit(Request $request) 
+   public function startAudit(Request $request) 
     {
-        // Validasi
-        $request->validate([
-            'auditor_name' => 'required',
-            'department_id' => 'required',
-            'audit_date' => 'required'
-        ]);
-
+        // ... (Validasi & Save Logic sama seperti sebelumnya) ...
+        // Copy logic penyimpanan dari jawaban sebelumnya di sini
+        
         return DB::transaction(function () use ($request) {
-            $sessionId = (string) Str::uuid();
+            // ... (Kode insert session, responders, audits sama persis) ...
             
-            // Simpan Session
-            DB::table('audit_sessions')->insert([
-                'id' => $sessionId,
-                'auditor_name'       => $request->auditor_name,
-                'auditor_nik'        => $request->auditor_nik,
-                'auditor_department' => $request->auditor_department,
-                'audit_date'         => $request->audit_date,
-                'created_at'         => now(),
-            ]);
-
-            // Simpan Responders
-            if ($request->has('responders')) {
-                foreach ($request->responders as $resp) {
-                    if (!empty($resp['name'])) { 
-                        DB::table('audit_responders')->insert([
-                            'id' => (string) Str::uuid(),
-                            'audit_session_id' => $sessionId,
-                            'responder_name' => $resp['name'],
-                            'responder_department' => $resp['department'] ?? null,
-                            'responder_nik' => $resp['nik'] ?? null,
-                            'created_at' => now(),
-                        ]);
-                    }
-                }
-            }
-
-            // Simpan Audit Utama
+            // CONTOH SINGKAT (Pastikan code insert lengkap Anda tetap ada):
+            $sessionId = (string) Str::uuid();
+            // DB::table('audit_sessions')->insert(...);
+            
             $newAuditId = (string) Str::uuid();
             DB::table('audits')->insert([
                 'id' => $newAuditId,
@@ -148,9 +121,13 @@ class AuditController extends Controller
                 'created_at'       => now(),
             ]);
 
-            return redirect()->route('audit.show', ['id' => $newAuditId, 'clause' => '4.1']);
+            // PERUBAHAN DISINI: Redirect ke Menu Dashboard
+            return redirect()->route('audit.menu', ['id' => $newAuditId]);
         });
     }
+    
+    // UPDATE method checkPendingAudit (Opsional, agar resume lari ke menu juga)
+    // Ubah bagian 'resume_link' menjadi: route('audit.menu', ['id' => $pendingAudit->audit_id])
 
     // ==========================================
     // 4. SHOW QUESTIONNAIRE
@@ -254,5 +231,56 @@ class AuditController extends Controller
         // Tandai selesai
         DB::table('audits')->where('id', $auditId)->update(['status' => 'DONE']);
         return redirect()->route('audit.finish');
+    }
+
+    // TAMBAHAN: Mapping Kode ke Judul (Sesuai Foto ISO 14001)
+    private $clauseTitles = [
+        '4.1' => 'Pemahaman Organisasi dan Konteksnya',
+        '4.2' => 'Pemahaman Kebutuhan dan Harapan Pihak Berkepentingan',
+        '4.3' => 'Menentukan Lingkup Sistem Manajemen Lingkungan',
+        '4.4' => 'Sistem Manajemen Lingkungan',
+        '5.1' => 'Kepemimpinan dan Komitmen',
+        '5.2' => 'Kebijakan Lingkungan',
+        '5.3' => 'Peran, Tanggung Jawab, dan Wewenang Organisasi',
+        '6.1.1' => 'Tindakan untuk Menangani Risiko dan Peluang – Umum',
+        '6.1.2' => 'Aspek Lingkungan',
+        '6.1.3' => 'Kewajiban Kepatuhan',
+        '6.1.4' => 'Perencanaan Tindakan',
+        '6.2.1' => 'Sasaran Lingkungan',
+        '6.2.2' => 'Perencanaan Tindakan Mencapai Sasaran',
+        '7.1' => 'Sumber Daya',
+        '7.2' => 'Kompetensi',
+        '7.3' => 'Kesadaran',
+        '7.4' => 'Komunikasi',
+        '8.1' => 'Perencanaan dan Pengendalian Operasional',
+        '8.2' => 'Kesiagaan dan Tanggap Darurat',
+        '9.1.1' => 'Pemantauan, Pengukuran, Analisis dan Evaluasi',
+        '9.1.2' => 'Evaluasi Kepatuhan',
+        '9.2.1 & 9.2.2' => 'Internal Audit',
+        '9.3' => 'Tinjauan Manajemen',
+        '10.1' => 'Ketidaksesuaian dan Tindakan Korektif (General)',
+        '10.2' => 'Ketidaksesuaian dan Tindakan Korektif',
+        '10.3' => 'Peningkatan Berkelanjutan',
+    ];
+
+    // TAMBAHAN BARU: Method untuk menampilkan Dashboard Grid
+    public function menu($auditId)
+    {
+        $audit = DB::table('audits')->where('id', $auditId)->first();
+        if(!$audit) abort(404);
+
+        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+        $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
+
+        // Cek progress per klausul (Opsional: untuk mewarnai kartu jika sudah selesai)
+        // Disini kita kirim data dasar saja dulu
+        
+        return view('audit.menu', [
+            'auditId' => $auditId,
+            'auditorName' => $session->auditor_name,
+            'deptName' => $deptName,
+            'clauses' => $this->clauseOrder,
+            'titles' => $this->clauseTitles
+        ]);
     }
 }

@@ -160,3 +160,10 @@ Route::get('/audit/finish', function() {
 
 // Redirect root ke setup
 Route::get('/', function () { return redirect()->route('audit.setup'); });
+
+// Tambahkan baris ini di dalam group middleware atau sejajar dengan route audit lainnya
+Route::get('/audit/{id}/menu', [App\Http\Controllers\AuditController::class, 'menu'])->name('audit.menu');
+
+// Pastikan route show tetap ada
+Route::get('/audit/{id}/{clause}', [App\Http\Controllers\AuditController::class, 'show'])->name('audit.show');
+Route::post('/audit/{id}/{clause}', [App\Http\Controllers\AuditController::class, 'store']);
