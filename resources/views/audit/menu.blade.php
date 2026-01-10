@@ -114,15 +114,18 @@
     </div>
 
     <div class="grid-container">
-        @foreach($clauses as $clauseCode)
-            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $clauseCode]) }}" class="card">
-                <span class="card-number">{{ $clauseCode }}</span>
-                <span class="card-title">
-                    {{ $titles[$clauseCode] ?? 'Klausul ' . $clauseCode }}
-                </span>
-                <span class="arrow-icon">→</span>
-            </a>
-        @endforeach
+@foreach($mainClauses as $code)
+    <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" class="card">
+        {{-- Tampilkan Angka Besar: 4, 5, 6 --}}
+        <span class="card-number">{{ $code }}</span>
+        
+        {{-- Tampilkan Judul: Context, Leadership, dll --}}
+        <span class="card-title">
+            {{ $titles[$code] ?? 'Clause ' . $code }}
+        </span>
+        <span class="arrow-icon">→</span>
+    </a>
+@endforeach
     </div>
 
     <div class="finish-section">

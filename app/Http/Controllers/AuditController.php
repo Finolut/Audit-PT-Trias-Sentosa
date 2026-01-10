@@ -5,17 +5,34 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
 class AuditController extends Controller
 {
-    // Daftar Klausul
-    private $clauseOrder = ['4.1', '4.2', '4.3', '4.4', '5.1', '5.2','5.3','6.1.1','6.1.2','6.1.3','6.1.4','6.2.1','6.2.2','7.1','7.2','7.3','7.4','8.1','8.2','9.1.1','9.1.2', '9.2.1 & 9.2.2', '9.3','10.1','10.2','10.3'];
+    // A. STRUKTUR GRUP KLAUSUL (Main Clause -> Sub Clauses)
+    private $mainClauses = [
+        '4'  => ['4.1', '4.2', '4.3', '4.4'],
+        '5'  => ['5.1', '5.2', '5.3'],
+        '6'  => ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2'],
+        '7'  => ['7.1', '7.2', '7.3', '7.4'],
+        '8'  => ['8.1', '8.2'],
+        '9'  => ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3'],
+        '10' => ['10.1', '10.2', '10.3'],
+    ];
 
-    // DATA AUDITOR (HARDCODED SESUAI GAMBAR UNTUK DROPDOWN)
+    private $mainClauseTitles = [
+        '4'  => 'Context of the organization',
+        '5'  => 'Leadership',
+        '6'  => 'Planning',
+        '7'  => 'Support',
+        '8'  => 'Operation',
+        '9'  => 'Performance evaluation',
+        '10' => 'Improvement',
+    ];
+
+    // Data Auditor Hardcoded (Sesuai Kebutuhan Form)
     private $auditorsList = [
         ['name' => 'Joko Nofrianto', 'nik' => '2477', 'dept' => 'BOPET'],
-        ['name' => 'Laurentius Kelik Dwi Ananta', 'nik' => 'N/A', 'dept' => 'Q A'], // NIK Kosong di gambar
+        ['name' => 'Laurentius Kelik Dwi Ananta', 'nik' => 'N/A', 'dept' => 'Q A'],
         ['name' => 'Edy Setiono', 'nik' => '1631', 'dept' => 'Q A-Product Stewardship'],
         ['name' => 'Mugi Slamet Priyanto', 'nik' => '943', 'dept' => 'Q A'],
         ['name' => 'Satyo Ady Prihatno', 'nik' => '1522', 'dept' => 'QA'],
@@ -37,7 +54,7 @@ class AuditController extends Controller
         ['name' => 'Lisa Santoso', 'nik' => '2319', 'dept' => 'PURCHASING'],
         ['name' => 'Fenny Maria Veronica Lukman', 'nik' => '2910', 'dept' => 'PURCHASING'],
         ['name' => 'Melisa', 'nik' => '2833', 'dept' => 'PURCHASING'],
-        ['name' => 'Catur Putra Prajoko', 'nik' => 'N/A', 'dept' => 'R&D'], // NIK Kosong di gambar
+        ['name' => 'Catur Putra Prajoko', 'nik' => 'N/A', 'dept' => 'R&D'],
         ['name' => 'Sari Dewi Cahyaning Tyas', 'nik' => '2615', 'dept' => 'R&D'],
         ['name' => 'Ahmad Solihudin', 'nik' => '3055', 'dept' => 'TTA'],
         ['name' => 'Fahrisal Surya Kusuma', 'nik' => '2605', 'dept' => 'MFG SUPPORT'],
@@ -48,38 +65,24 @@ class AuditController extends Controller
         ['name' => 'Solikan', 'nik' => '1207', 'dept' => 'PROJECT'],
     ];
 
-    // ==========================================
-    // 1. FORM SETUP (Halaman Login/Awal)
-    // ==========================================
     public function setup()
     {
         $departments = DB::table('departments')->orderBy('name')->get();
-        // Kirim list auditor hardcoded ke view
         return view('test-form', [
             'departments' => $departments,
             'auditors' => $this->auditorsList
         ]);
     }
 
-    // ==========================================
-    // 2. CEK PENDING AUDIT (Resume Feature)
-    // ==========================================
     public function checkPendingAudit(Request $request)
     {
         $nik = $request->input('nik');
-
-        // Cari sesi audit milik NIK ini yang statusnya masih 'IN_PROGRESS'
-        // Join antara tabel audits dan audit_sessions
         $pendingAudit = DB::table('audits')
             ->join('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id')
             ->join('departments', 'audits.department_id', '=', 'departments.id')
             ->where('audit_sessions.auditor_nik', $nik)
-            ->where('audits.status', 'IN_PROGRESS') // Status belum selesai
-            ->select(
-                'audits.id as audit_id',
-                'departments.name as dept_name',
-                'audit_sessions.audit_date'
-            )
+            ->where('audits.status', 'IN_PROGRESS')
+            ->select('audits.id as audit_id', 'departments.name as dept_name', 'audit_sessions.audit_date')
             ->orderBy('audits.created_at', 'desc')
             ->first();
 
@@ -89,208 +92,46 @@ class AuditController extends Controller
                 'audit_id' => $pendingAudit->audit_id,
                 'dept_name' => $pendingAudit->dept_name,
                 'date' => $pendingAudit->audit_date,
-                // Default redirect ke 4.1, nanti di logic show() bisa dibuat lebih pintar kalau mau
-                'resume_link' => route('audit.show', ['id' => $pendingAudit->audit_id, 'clause' => '4.1'])
+                'resume_link' => route('audit.menu', ['id' => $pendingAudit->audit_id])
             ]);
         }
-
         return response()->json(['found' => false]);
     }
 
-    // ==========================================
-    // 3. MULAI AUDIT BARU
-    // ==========================================
- public function startAudit(Request $request) 
-{
-    // 1. Validasi input
-    $request->validate([
-        'department_id' => 'required|exists:departments,id',
-        'auditor_nik'   => 'required', // Pastikan form mengirim name="auditor_nik"
-    ]);
-
-    return DB::transaction(function () use ($request) {
-        // A. CARI DATA AUDITOR DARI ARRAY HARDCODED
-        // Kita cari data auditor di $this->auditorsList berdasarkan NIK yang dipilih
-        $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->auditor_nik);
-
-        // Fallback jika data tidak ditemukan (untuk jaga-jaga)
-        $auditorName = $selectedAuditor['name'] ?? 'Unknown Auditor';
-        $auditorNik  = $selectedAuditor['nik'] ?? $request->auditor_nik;
-        $auditorDept = $selectedAuditor['dept'] ?? '-';
-
-        // 2. Generate UUID untuk Session
-        $sessionId = (string) Str::uuid();
-
-        // 3. INSERT ke tabel audit_sessions
-        DB::table('audit_sessions')->insert([
-            'id'                 => $sessionId,
-            'auditor_name'       => $auditorName, // Gunakan hasil pencarian array
-            'auditor_nik'        => $auditorNik,
-            'auditor_department' => $auditorDept,
-            'company_name'       => 'Nama Perusahaan',
-            'audit_date'         => now()->toDateString(),
-            'created_at'         => now(),
-        ]);
-
-        // 4. INSERT ke tabel audits
-        $newAuditId = (string) Str::uuid();
-        DB::table('audits')->insert([
-            'id'               => $newAuditId,
-            'audit_session_id' => $sessionId,
-            'department_id'    => $request->department_id,
-            'status'           => 'IN_PROGRESS',
-            'created_at'       => now(),
-        ]);
-
-        // 5. Redirect ke Menu Dashboard Audit
-        return redirect()->route('audit.menu', ['id' => $newAuditId]);
-    });
-}
-
-    // ==========================================
-    // 4. SHOW QUESTIONNAIRE
-    // ==========================================
-    public function show($auditId, $clause)
+    public function startAudit(Request $request) 
     {
-        $audit = DB::table('audits')->where('id', $auditId)->first();
-        if(!$audit) abort(404, 'Audit Not Found');
-
-        // Logic Navigasi Clause
-        $clauseData = DB::table('clauses')->where('clause_code', $clause)->first();
-        if(!$clauseData) abort(404, 'Clause Not Found');
-
-        $itemsRaw = DB::table('items')
-            ->where('clause_id', $clauseData->id)
-            ->orderBy('item_order')
-            ->get();
-
-        $maturityLevels = DB::table('maturity_levels')
-            ->whereIn('id', $itemsRaw->pluck('maturity_level_id'))
-            ->orderBy('level_number')
-            ->get();
-
-        $items = $itemsRaw->groupBy('maturity_level_id');
-        
-        // Data Pendukung View
-        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-        $responders = DB::table('audit_responders')->where('audit_session_id', $session->id)->get();
-        $departmentName = DB::table('departments')->where('id', $audit->department_id)->value('name');
-        
-        $existingQuestion = DB::table('audit_questions')
-            ->where('audit_id', $auditId)
-            ->where('clause_code', $clause)
-            ->value('question_text');
-
-        $currentIndex = array_search($clause, $this->clauseOrder);
-        $nextClause = $this->clauseOrder[$currentIndex + 1] ?? null;
-
-        return view('audit.questionnaire', [
-            'auditId'          => $auditId,
-            'clause'           => $clause,
-            'nextClause'       => $nextClause,
-            'auditorName'      => $session->auditor_name,
-            'auditDate'        => $session->audit_date,
-            'targetDept'       => $departmentName,
-            'responders'       => $responders,
-            'maturityLevels'   => $maturityLevels,
-            'items'            => $items,
-            'existingQuestion' => $existingQuestion,
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'auditor_nik'   => 'required',
         ]);
+
+        return DB::transaction(function () use ($request) {
+            $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->auditor_nik);
+            
+            $sessionId = (string) Str::uuid();
+            DB::table('audit_sessions')->insert([
+                'id'                 => $sessionId,
+                'auditor_name'       => $selectedAuditor['name'] ?? 'Unknown',
+                'auditor_nik'        => $selectedAuditor['nik'] ?? $request->auditor_nik,
+                'auditor_department' => $selectedAuditor['dept'] ?? '-',
+                'company_name'       => 'Indopoly',
+                'audit_date'         => now()->toDateString(),
+                'created_at'         => now(),
+            ]);
+
+            $newAuditId = (string) Str::uuid();
+            DB::table('audits')->insert([
+                'id'               => $newAuditId,
+                'audit_session_id' => $sessionId,
+                'department_id'    => $request->department_id,
+                'status'           => 'IN_PROGRESS',
+                'created_at'       => now(),
+            ]);
+
+            return redirect()->route('audit.menu', ['id' => $newAuditId]);
+        });
     }
 
-    // ==========================================
-    // 5. STORE ANSWER (Simpan)
-    // ==========================================
-    public function store(Request $request, $auditId, $clause)
-    {
-        // ... (Logika sama persis dengan yang Anda berikan sebelumnya) ...
-        // Agar response tidak terlalu panjang, saya gunakan logika store() 
-        // yang sudah Anda miliki di prompt sebelumnya. Itu sudah benar.
-        
-        // Copy paste isi function store() Anda di sini
-        // Pastikan di bagian akhir, jika tidak ada next clause:
-        // DB::table('audits')->where('id', $auditId)->update(['status' => 'DONE']);
-        // return redirect()->route('audit.finish');
-        
-        $answers = $request->input('answers', []);
-        $questionText = $request->input('audit_question');
-
-DB::transaction(function () use ($answers, $auditId, $clause, $questionText, $request) {
-    // 1. Ambil data audit untuk mendapatkan department_id yang terkait
-    $audit = DB::table('audits')->where('id', $auditId)->first();
-    
-    if (!$audit) {
-        throw new \Exception("Data Audit tidak ditemukan.");
-    }
-
-    // 2. Update atau Insert Audit Questions Note
-    if ($questionText !== null) {
-        DB::table('audit_questions')->updateOrInsert(
-            // Kriteria pencarian unik
-            ['audit_id' => $auditId, 'clause_code' => $clause],
-            // Data yang harus diisi (termasuk department_id)
-            [
-                'id'            => (string) Str::uuid(), 
-                'department_id' => $audit->department_id, // <--- Solusi Error: Ambil dari tabel audits
-                'question_text' => $questionText, 
-                'updated_at'    => now(),
-                'created_at'    => now() 
-            ]
-        );
-    }
-
-    // 3. Simpan Jawaban (Answers)
-    foreach ($answers as $itemId => $data) {
-        if (!empty($data['answer']) && !empty($data['auditor_name'])) {
-            DB::table('answers')->updateOrInsert(
-                ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $data['auditor_name']],
-                ['answer' => $data['answer'], 'answered_at' => now(), 'id' => (string) Str::uuid()]
-            );
-        }
-    }
-});
-
-        $currentIndex = array_search($clause, $this->clauseOrder);
-        if (isset($this->clauseOrder[$currentIndex + 1])) {
-            return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $this->clauseOrder[$currentIndex + 1]]);
-        }
-
-        // Tandai selesai
-        DB::table('audits')->where('id', $auditId)->update(['status' => 'DONE']);
-        return redirect()->route('audit.finish');
-    }
-
-    // TAMBAHAN: Mapping Kode ke Judul (Sesuai Foto ISO 14001)
-    private $clauseTitles = [
-        '4.1' => 'Pemahaman Organisasi dan Konteksnya',
-        '4.2' => 'Pemahaman Kebutuhan dan Harapan Pihak Berkepentingan',
-        '4.3' => 'Menentukan Lingkup Sistem Manajemen Lingkungan',
-        '4.4' => 'Sistem Manajemen Lingkungan',
-        '5.1' => 'Kepemimpinan dan Komitmen',
-        '5.2' => 'Kebijakan Lingkungan',
-        '5.3' => 'Peran, Tanggung Jawab, dan Wewenang Organisasi',
-        '6.1.1' => 'Tindakan untuk Menangani Risiko dan Peluang – Umum',
-        '6.1.2' => 'Aspek Lingkungan',
-        '6.1.3' => 'Kewajiban Kepatuhan',
-        '6.1.4' => 'Perencanaan Tindakan',
-        '6.2.1' => 'Sasaran Lingkungan',
-        '6.2.2' => 'Perencanaan Tindakan Mencapai Sasaran',
-        '7.1' => 'Sumber Daya',
-        '7.2' => 'Kompetensi',
-        '7.3' => 'Kesadaran',
-        '7.4' => 'Komunikasi',
-        '8.1' => 'Perencanaan dan Pengendalian Operasional',
-        '8.2' => 'Kesiagaan dan Tanggap Darurat',
-        '9.1.1' => 'Pemantauan, Pengukuran, Analisis dan Evaluasi',
-        '9.1.2' => 'Evaluasi Kepatuhan',
-        '9.2.1 & 9.2.2' => 'Internal Audit',
-        '9.3' => 'Tinjauan Manajemen',
-        '10.1' => 'Ketidaksesuaian dan Tindakan Korektif (General)',
-        '10.2' => 'Ketidaksesuaian dan Tindakan Korektif',
-        '10.3' => 'Peningkatan Berkelanjutan',
-    ];
-
-    // TAMBAHAN BARU: Method untuk menampilkan Dashboard Grid
     public function menu($auditId)
     {
         $audit = DB::table('audits')->where('id', $auditId)->first();
@@ -299,15 +140,103 @@ DB::transaction(function () use ($answers, $auditId, $clause, $questionText, $re
         $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
         $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
 
-        // Cek progress per klausul (Opsional: untuk mewarnai kartu jika sudah selesai)
-        // Disini kita kirim data dasar saja dulu
-        
         return view('audit.menu', [
-            'auditId' => $auditId,
+            'auditId'     => $auditId,
             'auditorName' => $session->auditor_name,
-            'deptName' => $deptName,
-            'clauses' => $this->clauseOrder,
-            'titles' => $this->clauseTitles
+            'deptName'    => $deptName,
+            'mainClauses' => array_keys($this->mainClauses), 
+            'titles'      => $this->mainClauseTitles
         ]);
+    }
+
+    public function show($auditId, $mainClause)
+    {
+        // Validasi apakah mainClause (4, 5, dll) ada di daftar
+        if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
+
+        $audit = DB::table('audits')->where('id', $auditId)->first();
+        if(!$audit) abort(404);
+
+        $subCodes = $this->mainClauses[$mainClause];
+        $clausesData = DB::table('clauses')->whereIn('clause_code', $subCodes)->get();
+
+        // Ambil item pertanyaan yang dikelompokkan
+        $itemsRaw = DB::table('items')
+            ->whereIn('clause_id', $clausesData->pluck('id'))
+            ->orderBy('item_order')
+            ->get();
+
+        // Map Clause ID ke Clause Code untuk grouping di View
+        $idToCode = $clausesData->pluck('clause_code', 'id');
+        $itemsGrouped = $itemsRaw->groupBy(fn($item) => $idToCode[$item->clause_id]);
+
+        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+        $existingNotes = DB::table('audit_questions')
+            ->where('audit_id', $auditId)
+            ->whereIn('clause_code', $subCodes)
+            ->pluck('question_text', 'clause_code');
+
+        $mainKeys = array_keys($this->mainClauses);
+        $nextMain = $mainKeys[array_search($mainClause, $mainKeys) + 1] ?? null;
+
+        return view('audit.questionnaire', [
+            'auditId'        => $auditId,
+            'currentMain'    => $mainClause,
+            'subClauses'     => $subCodes,
+            'clauseTitles'   => $clausesData->pluck('title', 'clause_code'),
+            'nextMainClause' => $nextMain,
+            'auditorName'    => $session->auditor_name,
+            'targetDept'     => DB::table('departments')->where('id', $audit->department_id)->value('name'),
+            'itemsGrouped'   => $itemsGrouped,
+            'existingNotes'  => $existingNotes,
+            'maturityLevels' => DB::table('maturity_levels')->orderBy('level_number')->get(),
+            'responders'     => DB::table('audit_responders')->where('audit_session_id', $session->id)->get(),
+        ]);
+    }
+
+    public function store(Request $request, $auditId, $mainClause)
+    {
+        $answers = $request->input('answers', []);
+        $notes = $request->input('audit_notes', []); // Array of [code => text]
+
+        DB::transaction(function () use ($answers, $notes, $auditId) {
+            $audit = DB::table('audits')->where('id', $auditId)->first();
+
+            // Simpan Notes per Sub-Clause
+            foreach ($notes as $code => $text) {
+                if (!empty($text)) {
+                    DB::table('audit_questions')->updateOrInsert(
+                        ['audit_id' => $auditId, 'clause_code' => $code],
+                        [
+                            'id'            => (string) Str::uuid(),
+                            'department_id' => $audit->department_id,
+                            'question_text' => $text,
+                            'updated_at'    => now(),
+                            'created_at'    => now()
+                        ]
+                    );
+                }
+            }
+
+            // Simpan Answers
+            foreach ($answers as $itemId => $data) {
+                if (!empty($data['answer'])) {
+                    DB::table('answers')->updateOrInsert(
+                        ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $data['auditor_name']],
+                        ['answer' => $data['answer'], 'answered_at' => now(), 'id' => (string) Str::uuid()]
+                    );
+                }
+            }
+        });
+
+        $mainKeys = array_keys($this->mainClauses);
+        $nextIdx = array_search($mainClause, $mainKeys) + 1;
+
+        if (isset($mainKeys[$nextIdx])) {
+            return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $mainKeys[$nextIdx]]);
+        }
+
+        DB::table('audits')->where('id', $auditId)->update(['status' => 'DONE']);
+        return redirect()->route('audit.finish');
     }
 }
