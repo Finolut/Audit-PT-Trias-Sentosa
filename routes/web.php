@@ -95,15 +95,6 @@ Route::post('/audit/{audit}/4-1/submit', function ($auditId) {
     ]);
 });
 
-// Halaman Depan
-Route::get('/admin', [DashboardController::class, 'index'])->name('dashboard');
-
-// Level 1: List Audit per Dept
-Route::get('/dept/{id}', [DashboardController::class, 'showDepartment'])->name('dept.show');
-
-
-// Level 3: Detail Soal per Klausul + Diagram
-Route::get('/audit/{id}/clause/{clause_id}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause');
 
 // 1. Halaman Setup Awal (Mengakses fungsi setup di Controller)
 Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
@@ -162,4 +153,18 @@ Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
     ->name('audit.show')
     ->where('id', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 
-    Route::get('/admin/audit/{id}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause');
+   Route::prefix('admin')->group(function () {
+    
+    // 1. Dashboard Utama
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    // 2. List Audit per Departemen
+    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('dept.show');
+
+    // 3. Overview Klausul (PENTING: Ini yang menyebabkan error tadi)
+    Route::get('/audit/{id}/overview', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
+
+    // 4. Detail Klausul (Sesuai update terakhir kita yang per Main Clause)
+    Route::get('/audit/{id}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause');
+
+});
