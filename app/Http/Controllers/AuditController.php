@@ -216,30 +216,39 @@ class AuditController extends Controller
         $questionText = $request->input('audit_question');
 
         DB::transaction(function () use ($answers, $auditId, $clause, $questionText, $request) {
-            // Update Audit Questions Note
-             if ($questionText !== null) {
-                DB::table('audit_questions')->updateOrInsert(
-                    ['audit_id' => $auditId, 'clause_code' => $clause],
-                    [
-                        'id' => (string) Str::uuid(), 
-                        'question_text' => $questionText, 
-                        'updated_at' => now(),
-                        'created_at' => now() // Use timestamps properly
-                    ]
-                );
-            }
+    // 1. Ambil department_id dari tabel audits berdasarkan auditId
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    
+    if (!$audit) {
+        throw new \Exception("Audit data tidak ditemukan.");
+    }
+
+    // 2. Update atau Insert Audit Questions Note
+    if ($questionText !== null) {
+        DB::table('audit_questions')->updateOrInsert(
+            // Kriteria pencarian
+            ['audit_id' => $auditId, 'clause_code' => $clause],
+            // Data yang diupdate atau diinsert
+            [
+                'id'            => (string) Str::uuid(), 
+                'department_id' => $audit->department_id, // Tambahkan kolom yang hilang ini
+                'question_text' => $questionText, 
+                'updated_at'    => now(),
+                'created_at'    => now()
+            ]
+        );
+    }
 
             // Save Answers loop (sama seperti code Anda sebelumnya)
-             foreach ($answers as $itemId => $data) {
-                 // ... logika delete & insert answers ...
-                 if (!empty($data['answer']) && !empty($data['auditor_name'])) {
-                    DB::table('answers')->updateOrInsert(
-                        ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $data['auditor_name']],
-                        ['answer' => $data['answer'], 'answered_at' => now(), 'id' => (string) Str::uuid()]
-                    );
-                 }
-             }
-        });
+ foreach ($answers as $itemId => $data) {
+        if (!empty($data['answer']) && !empty($data['auditor_name'])) {
+            DB::table('answers')->updateOrInsert(
+                ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $data['auditor_name']],
+                ['answer' => $data['answer'], 'answered_at' => now(), 'id' => (string) Str::uuid()]
+            );
+        }
+    }
+});
 
         $currentIndex = array_search($clause, $this->clauseOrder);
         if (isset($this->clauseOrder[$currentIndex + 1])) {
