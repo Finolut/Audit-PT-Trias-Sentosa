@@ -218,40 +218,37 @@ public function store(Request $request, $auditId, $mainClause)
     $answers = $request->input('answers', []);
     $notes   = $request->input('audit_notes', []);
 
-    DB::transaction(function () use ($answers, $notes, $auditId, $request) {
+DB::transaction(function () use ($answers, $notes, $auditId, $request) {
+    
+    // Fallback: If request doesn't have it, get it from the parent Audit record
+    $departmentId = $request->input('department_id') ?? 
+                    DB::table('audits')->where('id', $auditId)->value('department_id');
 
-        /* ===============================
-           1. SIMPAN NOTES AUDIT
-        =============================== */
-        foreach ($notes as $clauseCode => $text) {
-           $existing = DB::table('audit_questions')
-    ->where('audit_id', $auditId)
-    ->where('clause_code', $clauseCode)
-    ->first();
+    foreach ($notes as $clauseCode => $text) {
+        $existing = DB::table('audit_questions')
+            ->where('audit_id', $auditId)
+            ->where('clause_code', $clauseCode)
+            ->first();
 
-if ($existing) {
-    DB::table('audit_questions')
-        ->where('id', $existing->id)
-        ->update([
-            'question_text' => $text,
-            'updated_at'    => now(),
-        ]);
-} else {
-    // If department_id is available in the request or audit record:
-$departmentId = $request->input('department_id'); 
-
-DB::table('audit_questions')->insert([
-    'id'            => (string) Str::uuid(),
-    'audit_id'      => $auditId,
-    'department_id' => $departmentId, // Add this line
-    'clause_code'   => $clauseCode,
-    'question_text' => $text,
-    'created_at'    => now(),
-    'updated_at'    => now(),
-]);
-}
-
+        if ($existing) {
+            DB::table('audit_questions')
+                ->where('id', $existing->id)
+                ->update([
+                    'question_text' => $text,
+                    'updated_at'    => now(),
+                ]);
+        } else {
+            DB::table('audit_questions')->insert([
+                'id'            => (string) Str::uuid(),
+                'audit_id'      => $auditId,
+                'department_id' => $departmentId, // Ensure this is not null
+                'clause_code'   => $clauseCode,
+                'question_text' => $text,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
         }
+    }
 
         /* ===============================
            2. SIMPAN JAWABAN INDIVIDUAL
