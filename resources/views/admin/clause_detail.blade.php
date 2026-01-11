@@ -70,64 +70,66 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-white">
-                            @php 
-                                $subItems = $itemsGrouped[$code] ?? collect(); 
-                                $currentMaturity = null;
-                            @endphp
+    @php 
+        $subItems = $itemsGrouped[$code] ?? collect(); 
+        $currentMaturity = null;
+    @endphp
 
-                            @forelse($subItems as $item)
-                                {{-- Separator Maturity Level --}}
-                                @if($currentMaturity !== $item->level_number)
-                                    <tr class="bg-blue-50/50">
-                                        <td colspan="5" class="px-6 py-2 text-[11px] font-bold text-blue-800 uppercase tracking-wide border-t border-blue-100">
-                                            Maturity Level {{ $item->level_number }}
-                                        </td>
-                                    </tr>
-                                    @php $currentMaturity = $item->level_number; @endphp
-                                @endif
+    @forelse($subItems as $item)
+        {{-- Separator Maturity Level --}}
+        @if($currentMaturity !== $item->level_number)
+            <tr class="bg-blue-50/50">
+                <td colspan="5" class="px-6 py-2 text-[11px] font-bold text-blue-800 uppercase tracking-wide border-t border-blue-100">
+                    Maturity Level {{ $item->level_number }}
+                </td>
+            </tr>
+            @php $currentMaturity = $item->level_number; @endphp
+        @endif
 
-                                @php
-                                    $final = $item->answerFinals->first();
-                                    $yes = $final->yes_count ?? 0;
-                                    $no = $final->no_count ?? 0;
-                                    $isNA = ($final && $yes == 0 && $no == 0);
-                                @endphp
+        @php
+            // DATA DIAMBIL LANGSUNG DARI ITEM (HASIL JOIN CONTROLLER)
+            $yes = $item->yes_count ?? 0;
+            $no  = $item->no_count ?? 0;
+            // Cek logika N/A (misal jika belum ada jawaban sama sekali)
+            $isNA = ($yes == 0 && $no == 0); 
+            
+            $finalYes = $item->final_yes ?? 0;
+            $finalNo  = $item->final_no ?? 0;
+        @endphp
 
-                                <tr class="hover:bg-gray-50 transition-colors {{ $isNA ? 'bg-gray-50/50' : '' }}">
-                                    <td class="px-6 py-3 text-sm text-gray-700 leading-snug">
-                                        {{ $item->item_text }}
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-blue-600 bg-blue-100 rounded-full">
-                                            {{ $item->level_number }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-center font-bold {{ $isNA ? 'text-gray-300' : 'text-green-600' }}">
-                                        {{ $isNA ? '-' : $yes }}
-                                    </td>
-                                    <td class="px-4 py-3 text-center font-bold {{ $isNA ? 'text-gray-300' : 'text-red-600' }}">
-                                        {{ $isNA ? '-' : $no }}
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        @if($isNA)
-                                            <span class="px-2 py-1 text-[10px] font-bold text-yellow-700 bg-yellow-100 rounded border border-yellow-200">N/A</span>
-                                        @elseif($final && $final->final_yes > $final->final_no)
-                                            <span class="px-2 py-1 text-[10px] font-bold text-green-700 bg-green-100 rounded border border-green-200">SESUAI</span>
-                                        @elseif($final && $final->final_no > $final->final_yes)
-                                            <span class="px-2 py-1 text-[10px] font-bold text-red-700 bg-red-100 rounded border border-red-200">TIDAK</span>
-                                        @elseif($final)
-                                            <span class="px-2 py-1 text-[10px] font-bold text-gray-600 bg-gray-100 rounded border border-gray-200">PARTIAL</span>
-                                        @else
-                                            <span class="text-xs text-gray-300 italic">Empty</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-400 italic">Data item belum dikonfigurasi.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+        <tr class="hover:bg-gray-50 transition-colors {{ $isNA ? 'bg-gray-50/50' : '' }}">
+            <td class="px-6 py-3 text-sm text-gray-700 leading-snug">
+                {{ $item->item_text }}
+            </td>
+            <td class="px-4 py-3 text-center">
+                <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-blue-600 bg-blue-100 rounded-full">
+                    {{ $item->level_number }}
+                </span>
+            </td>
+            <td class="px-4 py-3 text-center font-bold {{ $isNA ? 'text-gray-300' : 'text-green-600' }}">
+                {{ $isNA ? '-' : $yes }}
+            </td>
+            <td class="px-4 py-3 text-center font-bold {{ $isNA ? 'text-gray-300' : 'text-red-600' }}">
+                {{ $isNA ? '-' : $no }}
+            </td>
+            <td class="px-4 py-3 text-center">
+                @if($isNA)
+                    <span class="px-2 py-1 text-[10px] font-bold text-yellow-700 bg-yellow-100 rounded border border-yellow-200">N/A</span>
+                @elseif($finalYes > $finalNo)
+                    <span class="px-2 py-1 text-[10px] font-bold text-green-700 bg-green-100 rounded border border-green-200">SESUAI</span>
+                @elseif($finalNo > $finalYes)
+                    <span class="px-2 py-1 text-[10px] font-bold text-red-700 bg-red-100 rounded border border-red-200">TIDAK</span>
+                @else
+                    <span class="px-2 py-1 text-[10px] font-bold text-gray-600 bg-gray-100 rounded border border-gray-200">PARTIAL</span>
+                @endif
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-gray-400 italic">Data item belum dikonfigurasi.</td>
+        </tr>
+    @endforelse
+</tbody>
                     </table>
                 </div>
 

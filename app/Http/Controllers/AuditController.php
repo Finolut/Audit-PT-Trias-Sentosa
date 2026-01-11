@@ -98,7 +98,7 @@ class AuditController extends Controller
         return response()->json(['found' => false]);
     }
 
-    public function startAudit(Request $request) 
+public function startAudit(Request $request) 
     {
         $request->validate([
             'department_id' => 'required|exists:departments,id',
@@ -106,8 +106,10 @@ class AuditController extends Controller
         ]);
 
         return DB::transaction(function () use ($request) {
+            // 1. Cari data auditor
             $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->auditor_nik);
             
+            // 2. Buat Session
             $sessionId = (string) Str::uuid();
             DB::table('audit_sessions')->insert([
                 'id'                 => $sessionId,
@@ -119,6 +121,23 @@ class AuditController extends Controller
                 'created_at'         => now(),
             ]);
 
+            // 3. LOGIKA BARU: Simpan Responder (Looping array dari form)
+            $responders = $request->input('responders', []);
+            foreach($responders as $resp) {
+                // Pastikan nama tidak kosong
+                if(!empty($resp['name'])) {
+                    DB::table('audit_responders')->insert([
+                        'id'                   => (string) Str::uuid(),
+                        'audit_session_id'     => $sessionId,
+                        'responder_name'       => $resp['name'],
+                        'responder_department' => $resp['department'] ?? null,
+                        'responder_nik'        => $resp['nik'] ?? null, // Pastikan di form ada input name="responders[x][nik]"
+                        'created_at'           => now(),
+                    ]);
+                }
+            }
+
+            // 4. Buat Audit Record
             $newAuditId = (string) Str::uuid();
             DB::table('audits')->insert([
                 'id'               => $newAuditId,
@@ -238,5 +257,78 @@ class AuditController extends Controller
 
         DB::table('audits')->where('id', $auditId)->update(['status' => 'DONE']);
         return redirect()->route('audit.finish');
+    }
+
+    public function clauseDetail($auditId, $mainClause)
+    {
+        // Validasi Main Clause
+        if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
+
+        $audit = DB::table('audits')->where('id', $auditId)->first();
+        if(!$audit) abort(404);
+
+        $subCodes = $this->mainClauses[$mainClause];
+        $clausesData = DB::table('clauses')->whereIn('clause_code', $subCodes)->get();
+
+        // QUERY KUNCI: Join Items dengan Answer_Finals
+        // Kita gunakan LEFT JOIN agar item tetap muncul meski belum ada jawaban
+        $itemsRaw = DB::table('items')
+            ->leftJoin('answer_finals', function($join) use ($auditId) {
+                $join->on('items.id', '=', 'answer_finals.item_id')
+                     ->where('answer_finals.audit_id', '=', $auditId);
+            })
+            ->whereIn('items.clause_id', $clausesData->pluck('id'))
+            ->select(
+                'items.*', 
+                // Ambil kolom dari answer_finals
+                'answer_finals.yes_count', 
+                'answer_finals.no_count', 
+                'answer_finals.final_yes', 
+                'answer_finals.final_no'
+            )
+            ->orderBy('items.item_order')
+            ->get();
+
+        // Grouping Item berdasarkan Clause Code
+        $idToCode = $clausesData->pluck('clause_code', 'id');
+        $itemsGrouped = $itemsRaw->groupBy(fn($item) => $idToCode[$item->clause_id]);
+
+        // Ambil data pendukung lain untuk Chart & Header
+        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+        
+        // Hitung Total Result untuk Chart Atas
+        $totalYes  = $itemsRaw->where('final_yes', '>', 'final_no')->count(); // Logic sederhana, sesuaikan jika ada threshold
+        $totalNo   = $itemsRaw->where('final_no', '>', 'final_yes')->count();
+        $totalNA   = $itemsRaw->where('yes_count', 0)->where('no_count', 0)->count(); // Asumsi N/A jika counts 0
+        $totalDraw = $itemsRaw->count() - ($totalYes + $totalNo + $totalNA); // Partial/Draw
+
+        // Data Chart Line (1 = Yes, -1 = No, 0 = Partial/Empty)
+        $chartData = $itemsRaw->map(function($item) {
+            if($item->final_yes > $item->final_no) return 1;
+            if($item->final_no > $item->final_yes) return -1;
+            return 0;
+        });
+
+        // Ambil Catatan Auditor
+        $auditorNotes = DB::table('audit_questions')
+            ->where('audit_id', $auditId)
+            ->whereIn('clause_code', $subCodes)
+            ->pluck('question_text', 'clause_code');
+
+        return view('clause_detail', [
+            'audit'           => $audit,
+            'mainClause'      => $mainClause,
+            'subCodes'        => $subCodes,
+            'subClauseTitles' => $clausesData->pluck('title', 'clause_code'),
+            'itemsGrouped'    => $itemsGrouped,
+            'auditorNotes'    => $auditorNotes,
+            'items'           => $itemsRaw, // Untuk chart loop
+            // Data Chart
+            'totalYes'  => $totalYes,
+            'totalNo'   => $totalNo,
+            'totalNA'   => $totalNA,
+            'totalDraw' => $totalDraw,
+            'chartData' => $chartData
+        ]);
     }
 }

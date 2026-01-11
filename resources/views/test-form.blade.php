@@ -173,6 +173,25 @@
         container.insertAdjacentHTML('beforeend', html);
         responderIndex++;
     }
+
+    // Fungsi Tambah Responder (Updated)
+function addResponder() {
+    const container = document.getElementById('responders-container');
+    const html = `
+        <div class="responder-row" style="background:#fff; padding:10px; border:1px solid #ddd; border-radius:6px; flex-direction:column; align-items:flex-start;">
+            <div style="display:flex; width:100%; gap:10px; margin-bottom:5px;">
+                <input type="text" name="responders[${responderIndex}][name]" placeholder="Nama Responder" required style="flex:2; margin-bottom:0;">
+                <input type="text" name="responders[${responderIndex}][nik]" placeholder="NIK (Opsional)" style="flex:1; margin-bottom:0;">
+            </div>
+            <div style="display:flex; width:100%; gap:10px;">
+                <input type="text" name="responders[${responderIndex}][department]" placeholder="Departemen" style="flex:2; margin-bottom:0;">
+                <button type="button" onclick="this.closest('.responder-row').remove()" style="flex:0.5; background:#fecaca; border:1px solid #ef4444; color:#b91c1c; cursor:pointer; border-radius:4px;">Hapus</button>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+    responderIndex++;
+}
 </script>
 
 </body>
