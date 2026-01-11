@@ -218,7 +218,7 @@ public function store(Request $request, $auditId, $mainClause)
     $answers = $request->input('answers', []);
     $notes   = $request->input('audit_notes', []);
 
-    DB::transaction(function () use ($answers, $notes, $auditId) {
+    DB::transaction(function () use ($answers, $notes, $auditId, $request) {
 
         /* ===============================
            1. SIMPAN NOTES AUDIT
@@ -237,14 +237,18 @@ if ($existing) {
             'updated_at'    => now(),
         ]);
 } else {
-    DB::table('audit_questions')->insert([
-        'id'            => (string) Str::uuid(),
-        'audit_id'      => $auditId,
-        'clause_code'   => $clauseCode,
-        'question_text' => $text,
-        'created_at'    => now(),
-        'updated_at'    => now(),
-    ]);
+    // If department_id is available in the request or audit record:
+$departmentId = $request->input('department_id'); 
+
+DB::table('audit_questions')->insert([
+    'id'            => (string) Str::uuid(),
+    'audit_id'      => $auditId,
+    'department_id' => $departmentId, // Add this line
+    'clause_code'   => $clauseCode,
+    'question_text' => $text,
+    'created_at'    => now(),
+    'updated_at'    => now(),
+]);
 }
 
         }
