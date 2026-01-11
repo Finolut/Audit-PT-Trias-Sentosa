@@ -60,6 +60,11 @@
             justify-content: center;
             z-index: 100;
         }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 8px; }
+    .responder-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
     </style>
 </head>
 <body style="background-color: #f1f5f9; padding: 40px 20px 120px 20px; font-family: sans-serif;">
@@ -89,27 +94,25 @@
 
                             @php $items = $itemsGrouped[$subCode] ?? collect(); @endphp
                             
-                            @foreach ($items->where('maturity_level_id', $level->id) as $item)
-                                <div class="item" style="padding: 15px 0; border-bottom: 1px dashed #e2e8f0;">
-                                    <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
-                                    
-                                    <div class="button-group" id="btn_group_{{ $item->id }}">
-                                        @if($responders->isEmpty())
-                                            <button type="button" class="answer-btn q-btn q-btn-yes" onclick="submitQuickAnswer('{{ $item->id }}', 'YES')">YES</button>
-                                            <button type="button" class="answer-btn q-btn q-btn-no" onclick="submitQuickAnswer('{{ $item->id }}', 'NO')">NO</button>
-                                            <button type="button" class="answer-btn q-btn q-btn-na" onclick="submitQuickAnswer('{{ $item->id }}', 'N/A')">N/A</button>
-                                        @else
-                                            <button type="button" class="answer-btn" onclick="openModal('{{ $item->id }}')">Isi Jawaban</button>
-                                            <button type="button" class="answer-btn na-btn" style="background: #64748b; color: white;" onclick="setAbsoluteNA('{{ $item->id }}')">N/A Mutlak</button>
-                                        @endif
-                                    </div>
+@foreach ($items->where('maturity_level_id', $level->id) as $item)
+    <div class="item" style="padding: 15px 0; border-bottom: 1px dashed #e2e8f0;">
+        <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
+        
+        <div class="button-group">
+            <button type="button" class="answer-btn" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
+                Pilih Jawaban (Auditor & Responder)
+            </button>
+            <button type="button" class="answer-btn" style="background: #64748b; color: white;" onclick="setAbsoluteNA('{{ $item->id }}')">
+                N/A Mutlak
+            </button>
+        </div>
 
-                                    <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
-                                        <em>Belum ada jawaban</em>
-                                    </div>
-                                    <div id="hidden_inputs_{{ $item->id }}"></div>
-                                </div>
-                            @endforeach
+        <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
+            <em>Belum ada jawaban</em>
+        </div>
+        <div id="hidden_inputs_{{ $item->id }}"></div>
+    </div>
+@endforeach
                         </div>
                     @endforeach
 
@@ -139,7 +142,17 @@
         </form>
     </div>
 
-    {{-- MODAL (Tetap sama namun pastikan JS mendukung) --}}
+    <div id="answerModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalItemText" style="margin-top:0; font-size: 1rem; color: #1e293b;"></h3>
+        <hr>
+        <div id="modalRespondersList">
+            </div>
+        <div style="margin-top: 20px; text-align: right;">
+            <button type="button" onclick="closeModal()" style="padding: 8px 20px; cursor:pointer;">Tutup & Simpan</button>
+        </div>
+    </div>
+</div>
     <script>
         const auditorName = "{{ $auditorName }}";
 
@@ -161,6 +174,110 @@
             if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
             if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
         }
+
+        const auditorName = "{{ $auditorName }}";
+    const responders = @json($responders); // Mengambil data responder dari controller
+    let currentEditingItemId = null;
+
+    // Simpanan sementara jawaban (agar UI tetap update sebelum disubmit)
+    let sessionAnswers = {};
+
+    function openModal(itemId, itemText) {
+        currentEditingItemId = itemId;
+        document.getElementById('modalItemText').innerText = itemText;
+        const listDiv = document.getElementById('modalRespondersList');
+        listDiv.innerHTML = '';
+
+        // 1. Baris untuk Auditor
+        listDiv.appendChild(createResponderRow(auditorName, 'Auditor', itemId));
+
+        // 2. Baris untuk setiap Responder
+        responders.forEach(resp => {
+            listDiv.appendChild(createResponderRow(resp.responder_name, 'Responder', itemId));
+        });
+
+        document.getElementById('answerModal').style.display = 'block';
+    }
+
+    function createResponderRow(name, role, itemId) {
+        const div = document.createElement('div');
+        div.className = 'responder-row';
+        
+        // Cari jawaban yang sudah dipilih sebelumnya
+        const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
+
+        div.innerHTML = `
+            <div>
+                <span style="font-weight:bold">${name}</span> <br>
+                <small class="badge" style="background:#e2e8f0">${role}</small>
+            </div>
+            <div class="button-group">
+                <button type="button" class="answer-btn q-btn ${existingVal === 'YES' ? 'active-yes' : ''}" onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
+                <button type="button" class="answer-btn q-btn ${existingVal === 'NO' ? 'active-no' : ''}" onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
+                <button type="button" class="answer-btn q-btn ${existingVal === 'N/A' ? 'active-na' : ''}" onclick="setVal('${itemId}', '${name}', 'N/A', this)">N/A</button>
+            </div>
+        `;
+        return div;
+    }
+
+    function setVal(itemId, userName, val, btn) {
+        // Update UI tombol di dalam modal
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+        if(val === 'YES') btn.classList.add('active-yes');
+        if(val === 'NO') btn.classList.add('active-no');
+        if(val === 'N/A') btn.classList.add('active-na');
+
+        // Simpan ke sessionAnswers
+        sessionAnswers[`${itemId}_${userName}`] = val;
+
+        // Update Hidden Inputs untuk Form Submission
+        updateHiddenInputs(itemId);
+        
+        // Update tampilan info di halaman utama
+        updateMainInfo(itemId);
+    }
+
+    function updateHiddenInputs(itemId) {
+        const container = document.getElementById(`hidden_inputs_${itemId}`);
+        container.innerHTML = ''; // reset
+        
+        // Loop semua data yang item_id nya cocok
+        for (let key in sessionAnswers) {
+            if (key.startsWith(itemId + '_')) {
+                const name = key.replace(itemId + '_', '');
+                const val = sessionAnswers[key];
+                
+                container.innerHTML += `
+                    <input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
+                    <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
+                `;
+            }
+        }
+    }
+
+    function updateMainInfo(itemId) {
+        const infoBox = document.getElementById(`info_${itemId}`);
+        let count = 0;
+        for (let key in sessionAnswers) {
+            if (key.startsWith(itemId + '_')) count++;
+        }
+        infoBox.innerHTML = `<span style="color: #16a34a; font-weight:bold;">✓ ${count} Orang telah mengisi</span>`;
+    }
+
+    function closeModal() {
+        document.getElementById('answerModal').style.display = 'none';
+    }
+
+    function setAbsoluteNA(itemId) {
+        if(confirm('Set N/A untuk semua (Auditor & Responder)?')) {
+            setVal(itemId, auditorName, 'N/A', {parentElement: document.createElement('div'), classList: {add:()=>{}, remove:()=>{}} });
+            responders.forEach(resp => {
+                setVal(itemId, resp.responder_name, 'N/A', {parentElement: document.createElement('div'), classList: {add:()=>{}, remove:()=>{}} });
+            });
+            updateMainInfo(itemId);
+        }
+    }
     </script>
 </body>
 </html>

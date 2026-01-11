@@ -213,51 +213,62 @@ public function startAudit(Request $request)
         ]);
     }
 
-    public function store(Request $request, $auditId, $mainClause)
-    {
-        $answers = $request->input('answers', []);
-        $notes = $request->input('audit_notes', []); // Array of [code => text]
+   public function store(Request $request, $auditId, $mainClause)
+{
+    $answers = $request->input('answers', []); // format: [item_id][nama_orang][val => YES/NO]
+    $notes = $request->input('audit_notes', []);
 
-        DB::transaction(function () use ($answers, $notes, $auditId) {
-            $audit = DB::table('audits')->where('id', $auditId)->first();
+    DB::transaction(function () use ($answers, $notes, $auditId) {
+        // 1. Simpan Notes (Sama seperti sebelumnya)
+        // ...
 
-            // Simpan Notes per Sub-Clause
-            foreach ($notes as $code => $text) {
-                if (!empty($text)) {
-                    DB::table('audit_questions')->updateOrInsert(
-                        ['audit_id' => $auditId, 'clause_code' => $code],
+        // 2. Simpan Jawaban Individual
+        foreach ($answers as $itemId => $people) {
+            foreach ($people as $personName => $data) {
+                if (!empty($data['val'])) {
+                    DB::table('answers')->updateOrInsert(
                         [
-                            'id'            => (string) Str::uuid(),
-                            'department_id' => $audit->department_id,
-                            'question_text' => $text,
-                            'updated_at'    => now(),
-                            'created_at'    => now()
+                            'audit_id' => $auditId, 
+                            'item_id' => $itemId, 
+                            'auditor_name' => $personName // Kolom ini menyimpan nama auditor/responder
+                        ],
+                        [
+                            'id' => (string) Str::uuid(),
+                            'answer' => $data['val'], 
+                            'answered_at' => now(),
                         ]
                     );
                 }
             }
-
-            // Simpan Answers
-            foreach ($answers as $itemId => $data) {
-                if (!empty($data['answer'])) {
-                    DB::table('answers')->updateOrInsert(
-                        ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $data['auditor_name']],
-                        ['answer' => $data['answer'], 'answered_at' => now(), 'id' => (string) Str::uuid()]
-                    );
-                }
-            }
-        });
-
-        $mainKeys = array_keys($this->mainClauses);
-        $nextIdx = array_search($mainClause, $mainKeys) + 1;
-
-        if (isset($mainKeys[$nextIdx])) {
-            return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $mainKeys[$nextIdx]]);
         }
 
-        DB::table('audits')->where('id', $auditId)->update(['status' => 'DONE']);
-        return redirect()->route('audit.finish');
-    }
+        // 3. LOGIKA OTOMATIS HITUNG POINT (Simpan ke answer_finals)
+        foreach ($answers as $itemId => $people) {
+            $yesCount = 0;
+            $noCount = 0;
+            
+            foreach($people as $data) {
+                if($data['val'] === 'YES') $yesCount++;
+                if($data['val'] === 'NO') $noCount++;
+            }
+
+            // Simpan ke tabel rekap (answer_finals)
+            DB::table('answer_finals')->updateOrInsert(
+                ['audit_id' => $auditId, 'item_id' => $itemId],
+                [
+                    'id' => (string) Str::uuid(),
+                    'yes_count' => $yesCount,
+                    'no_count' => $noCount,
+                    'final_yes' => ($yesCount > $noCount) ? 1 : 0, // Contoh logic 1 poin
+                    'final_no' => ($noCount > $yesCount) ? 1 : 0,
+                    'updated_at' => now()
+                ]
+            );
+        }
+    });
+
+    // Redirect logic...
+}
 
     public function clauseDetail($auditId, $mainClause)
     {
