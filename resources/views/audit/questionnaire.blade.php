@@ -98,23 +98,25 @@
     <div class="item" style="padding: 15px 0; border-bottom: 1px dashed #e2e8f0;">
         <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
         
-        <div class="button-group">
-            <button type="button" class="answer-btn" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
-                Pilih Jawaban (Auditor & Responder)
-            </button>
-            <button type="button" class="answer-btn" style="background: #64748b; color: white;" onclick="setAbsoluteNA('{{ $item->id }}')">
-                N/A Mutlak
+        <div class="button-group" id="btn_group_{{ $item->id }}">
+            <button type="button" class="answer-btn q-btn q-btn-yes" onclick="submitQuickAnswer('{{ $item->id }}', 'YES')">YES</button>
+            <button type="button" class="answer-btn q-btn q-btn-no" onclick="submitQuickAnswer('{{ $item->id }}', 'NO')">NO</button>
+            <button type="button" class="answer-btn q-btn q-btn-na" onclick="submitQuickAnswer('{{ $item->id }}', 'N/A')">N/A</button>
+
+            <span style="margin: 0 10px; color: #cbd5e1;">|</span>
+
+            <button type="button" class="answer-btn" style="background: #f8fafc; border-style: dashed;" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
+                Jawaban Berbeda...
             </button>
         </div>
 
         <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
             <em>Belum ada jawaban</em>
         </div>
+        
         <div id="hidden_inputs_{{ $item->id }}"></div>
     </div>
 @endforeach
-                        </div>
-                    @endforeach
 
                     {{-- Catatan per SUB-KLAUSUL --}}
                     <div class="question-box">
@@ -154,33 +156,34 @@
     </div>
 </div>
     <script>
-        const auditorName = "{{ $auditorName }}";
+      const auditorName = "{{ $auditorName }}";
+    const responders = @json($responders);
+    let sessionAnswers = {}; // Menyimpan state jawaban per item dan per orang
 
-        function submitQuickAnswer(itemId, val) {
-            const container = document.getElementById(`hidden_inputs_${itemId}`);
-            container.innerHTML = `
-                <input type="hidden" name="answers[${itemId}][auditor_name]" value="${auditorName}">
-                <input type="hidden" name="answers[${itemId}][answer]" value="${val}">
-            `;
+    // FUNGSI 1: Tombol Cepat (Langsung set jawaban Auditor)
+    function submitQuickAnswer(itemId, val) {
+        // Hapus data "Jawaban Berbeda" jika sebelumnya ada
+        clearHiddenInputs(itemId);
 
-            const infoBox = document.getElementById(`info_${itemId}`);
-            let colorClass = val === 'YES' ? 'active-yes' : (val === 'NO' ? 'active-no' : 'active-na');
-            infoBox.innerHTML = `<span class="${colorClass}" style="padding: 2px 8px; border-radius: 4px;">Terpilih: ${val}</span>`;
+        // Set state untuk auditor
+        sessionAnswers[`${itemId}_${auditorName}`] = val;
+        
+        // Update UI tombol utama
+        const btnGroup = document.getElementById(`btn_group_${itemId}`);
+        btnGroup.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
+        
+        if(val === 'YES') btnGroup.querySelector('.q-btn-yes').classList.add('active-yes');
+        if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
+        if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
 
-            const btnGroup = document.getElementById(`btn_group_${itemId}`);
-            btnGroup.querySelectorAll('.answer-btn').forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
-            
-            if(val === 'YES') btnGroup.querySelector('.q-btn-yes').classList.add('active-yes');
-            if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
-            if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
-        }
+        // Update Hidden Input & Info
+        updateHiddenInputs(itemId);
+        const infoBox = document.getElementById(`info_${itemId}`);
+        infoBox.innerHTML = `<span style="color: #16a34a;">Terpilih secara cepat: <strong>${val}</strong></span>`;
+    }
 
-        const auditorName = "{{ $auditorName }}";
-    const responders = @json($responders); // Mengambil data responder dari controller
+    // FUNGSI 2: Modal (Jawaban Berbeda)
     let currentEditingItemId = null;
-
-    // Simpanan sementara jawaban (agar UI tetap update sebelum disubmit)
-    let sessionAnswers = {};
 
     function openModal(itemId, itemText) {
         currentEditingItemId = itemId;
@@ -188,10 +191,10 @@
         const listDiv = document.getElementById('modalRespondersList');
         listDiv.innerHTML = '';
 
-        // 1. Baris untuk Auditor
+        // Tampilkan Auditor
         listDiv.appendChild(createResponderRow(auditorName, 'Auditor', itemId));
 
-        // 2. Baris untuk setiap Responder
+        // Tampilkan Responder
         responders.forEach(resp => {
             listDiv.appendChild(createResponderRow(resp.responder_name, 'Responder', itemId));
         });
@@ -202,8 +205,6 @@
     function createResponderRow(name, role, itemId) {
         const div = document.createElement('div');
         div.className = 'responder-row';
-        
-        // Cari jawaban yang sudah dipilih sebelumnya
         const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
 
         div.innerHTML = `
@@ -221,33 +222,32 @@
     }
 
     function setVal(itemId, userName, val, btn) {
-        // Update UI tombol di dalam modal
+        // Update UI di dalam modal
         const parent = btn.parentElement;
         parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
         if(val === 'YES') btn.classList.add('active-yes');
         if(val === 'NO') btn.classList.add('active-no');
         if(val === 'N/A') btn.classList.add('active-na');
 
-        // Simpan ke sessionAnswers
+        // Simpan state
         sessionAnswers[`${itemId}_${userName}`] = val;
-
-        // Update Hidden Inputs untuk Form Submission
-        updateHiddenInputs(itemId);
         
-        // Update tampilan info di halaman utama
+        // Matikan highlight tombol cepat di luar modal karena sekarang menggunakan "Jawaban Berbeda"
+        const btnGroup = document.getElementById(`btn_group_${itemId}`);
+        btnGroup.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+
+        updateHiddenInputs(itemId);
         updateMainInfo(itemId);
     }
 
     function updateHiddenInputs(itemId) {
         const container = document.getElementById(`hidden_inputs_${itemId}`);
-        container.innerHTML = ''; // reset
+        container.innerHTML = ''; 
         
-        // Loop semua data yang item_id nya cocok
         for (let key in sessionAnswers) {
             if (key.startsWith(itemId + '_')) {
                 const name = key.replace(itemId + '_', '');
                 const val = sessionAnswers[key];
-                
                 container.innerHTML += `
                     <input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
                     <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
@@ -258,11 +258,17 @@
 
     function updateMainInfo(itemId) {
         const infoBox = document.getElementById(`info_${itemId}`);
-        let count = 0;
+        let names = [];
         for (let key in sessionAnswers) {
-            if (key.startsWith(itemId + '_')) count++;
+            if (key.startsWith(itemId + '_')) names.push(key.replace(itemId + '_', ''));
         }
-        infoBox.innerHTML = `<span style="color: #16a34a; font-weight:bold;">✓ ${count} Orang telah mengisi</span>`;
+        infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">✓ Jawaban tersimpan untuk: ${names.join(', ')}</span>`;
+    }
+
+    function clearHiddenInputs(itemId) {
+        for (let key in sessionAnswers) {
+            if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
+        }
     }
 
     function closeModal() {
@@ -270,12 +276,8 @@
     }
 
     function setAbsoluteNA(itemId) {
-        if(confirm('Set N/A untuk semua (Auditor & Responder)?')) {
-            setVal(itemId, auditorName, 'N/A', {parentElement: document.createElement('div'), classList: {add:()=>{}, remove:()=>{}} });
-            responders.forEach(resp => {
-                setVal(itemId, resp.responder_name, 'N/A', {parentElement: document.createElement('div'), classList: {add:()=>{}, remove:()=>{}} });
-            });
-            updateMainInfo(itemId);
+        if(confirm('Set N/A untuk semua pihak?')) {
+            submitQuickAnswer(itemId, 'N/A');
         }
     }
     </script>
