@@ -242,29 +242,39 @@ public function startAudit(Request $request)
             }
         }
 
-        // 3. LOGIKA OTOMATIS HITUNG POINT (Simpan ke answer_finals)
-        foreach ($answers as $itemId => $people) {
-            $yesCount = 0;
-            $noCount = 0;
-            
-            foreach($people as $data) {
-                if($data['val'] === 'YES') $yesCount++;
-                if($data['val'] === 'NO') $noCount++;
-            }
+// 3. LOGIKA OTOMATIS HITUNG POINT (Simpan ke answer_finals)
+foreach ($answers as $itemId => $people) {
+    $hasYes = false;
+    $hasNo = false;
+    $yesCount = 0;
+    $noCount = 0;
 
-            // Simpan ke tabel rekap (answer_finals)
-            DB::table('answer_finals')->updateOrInsert(
-                ['audit_id' => $auditId, 'item_id' => $itemId],
-                [
-                    'id' => (string) Str::uuid(),
-                    'yes_count' => $yesCount,
-                    'no_count' => $noCount,
-                    'final_yes' => ($yesCount > $noCount) ? 1 : 0, // Contoh logic 1 poin
-                    'final_no' => ($noCount > $yesCount) ? 1 : 0,
-                    'updated_at' => now()
-                ]
-            );
+    foreach ($people as $data) {
+        if (($data['val'] ?? '') === 'YES') {
+            $hasYes = true;
+            $yesCount++;
         }
+        if (($data['val'] ?? '') === 'NO') {
+            $hasNo = true;
+            $noCount++;
+        }
+    }
+
+    // Jika ada setidaknya satu YES, poin final_yes = 1
+    // Jika ada setidaknya satu NO, poin final_no = 1
+    // Jika keduanya ada (jawaban berbeda), keduanya tetap mendapat poin 1
+    DB::table('answer_finals')->updateOrInsert(
+        ['audit_id' => $auditId, 'item_id' => $itemId],
+        [
+            'id' => (string) Str::uuid(),
+            'yes_count' => $yesCount,
+            'no_count' => $noCount,
+            'final_yes' => $hasYes ? 1 : 0,
+            'final_no'  => $hasNo ? 1 : 0,
+            'decided_at' => now() // Menggunakan kolom yang ada di database
+        ]
+    );
+}
     });
 
     // Redirect logic...
