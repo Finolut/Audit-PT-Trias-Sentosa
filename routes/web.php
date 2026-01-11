@@ -168,3 +168,12 @@ Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
     Route::get('/audit/{id}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause');
 
 });
+
+// tampilkan klausul
+Route::get('/audit/{audit}/{mainClause}', [AuditController::class, 'show'])
+    ->name('audit.show');
+
+// simpan klausul
+Route::post('/audit/{audit}/{mainClause}', [AuditController::class, 'store'])
+    ->name('audit.store');
+

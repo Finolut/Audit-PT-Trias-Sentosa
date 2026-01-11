@@ -213,28 +213,44 @@ public function startAudit(Request $request)
         ]);
     }
 
-   public function store(Request $request, $auditId, $mainClause)
+public function store(Request $request, $auditId, $mainClause)
 {
-    $answers = $request->input('answers', []); // format: [item_id][nama_orang][val => YES/NO]
-    $notes = $request->input('audit_notes', []);
+    $answers = $request->input('answers', []);
+    $notes   = $request->input('audit_notes', []);
 
     DB::transaction(function () use ($answers, $notes, $auditId) {
-        // 1. Simpan Notes (Sama seperti sebelumnya)
-        // ...
 
-        // 2. Simpan Jawaban Individual
+        /* ===============================
+           1. SIMPAN NOTES AUDIT
+        =============================== */
+        foreach ($notes as $clauseCode => $text) {
+            DB::table('audit_questions')->updateOrInsert(
+                [
+                    'audit_id'    => $auditId,
+                    'clause_code' => $clauseCode,
+                ],
+                [
+                    'question_text' => $text,
+                    'updated_at'    => now(),
+                ]
+            );
+        }
+
+        /* ===============================
+           2. SIMPAN JAWABAN INDIVIDUAL
+        =============================== */
         foreach ($answers as $itemId => $people) {
             foreach ($people as $personName => $data) {
                 if (!empty($data['val'])) {
                     DB::table('answers')->updateOrInsert(
                         [
-                            'audit_id' => $auditId, 
-                            'item_id' => $itemId, 
-                            'auditor_name' => $personName // Kolom ini menyimpan nama auditor/responder
+                            'audit_id'     => $auditId,
+                            'item_id'      => $itemId,
+                            'auditor_name' => $personName,
                         ],
                         [
-                            'id' => (string) Str::uuid(),
-                            'answer' => $data['val'], 
+                            'id'          => (string) Str::uuid(),
+                            'answer'      => $data['val'],
                             'answered_at' => now(),
                         ]
                     );
@@ -242,43 +258,71 @@ public function startAudit(Request $request)
             }
         }
 
-// 3. LOGIKA OTOMATIS HITUNG POINT (Simpan ke answer_finals)
-foreach ($answers as $itemId => $people) {
-    $hasYes = false;
-    $hasNo = false;
-    $yesCount = 0;
-    $noCount = 0;
+        /* ===============================
+           3. HITUNG & SIMPAN FINAL RESULT
+        =============================== */
+        foreach ($answers as $itemId => $people) {
 
-    foreach ($people as $data) {
-        if (($data['val'] ?? '') === 'YES') {
-            $hasYes = true;
-            $yesCount++;
-        }
-        if (($data['val'] ?? '') === 'NO') {
-            $hasNo = true;
-            $noCount++;
-        }
-    }
+            $yesCount = 0;
+            $noCount  = 0;
 
-    // Jika ada setidaknya satu YES, poin final_yes = 1
-    // Jika ada setidaknya satu NO, poin final_no = 1
-    // Jika keduanya ada (jawaban berbeda), keduanya tetap mendapat poin 1
-    DB::table('answer_finals')->updateOrInsert(
-        ['audit_id' => $auditId, 'item_id' => $itemId],
-        [
-            'id' => (string) Str::uuid(),
-            'yes_count' => $yesCount,
-            'no_count' => $noCount,
-            'final_yes' => $hasYes ? 1 : 0,
-            'final_no'  => $hasNo ? 1 : 0,
-            'decided_at' => now() // Menggunakan kolom yang ada di database
-        ]
-    );
-}
+            foreach ($people as $data) {
+                if (($data['val'] ?? '') === 'YES') $yesCount++;
+                if (($data['val'] ?? '') === 'NO')  $noCount++;
+            }
+
+            // aturan final
+            if ($yesCount === 0 && $noCount === 0) {
+                $finalYes = 0;
+                $finalNo  = 0;
+            } elseif ($yesCount > $noCount) {
+                $finalYes = 1;
+                $finalNo  = 0;
+            } elseif ($noCount > $yesCount) {
+                $finalYes = 0;
+                $finalNo  = 1;
+            } else {
+                $finalYes = 1;
+                $finalNo  = 1;
+            }
+
+            DB::table('answer_finals')->updateOrInsert(
+                [
+                    'audit_id' => $auditId,
+                    'item_id'  => $itemId,
+                ],
+                [
+                    'id'         => (string) Str::uuid(),
+                    'yes_count'  => $yesCount,
+                    'no_count'   => $noCount,
+                    'final_yes'  => $finalYes,
+                    'final_no'   => $finalNo,
+                    'decided_at' => now(),
+                ]
+            );
+        }
     });
 
-    // Redirect logic...
+    /* ===============================
+       4. REDIRECT KE CLAUSE BERIKUTNYA
+    =============================== */
+
+    $mainKeys = array_keys($this->mainClauses);
+    $currentIndex = array_search($mainClause, $mainKeys);
+    $nextMain = $mainKeys[$currentIndex + 1] ?? null;
+
+    if ($nextMain) {
+        return redirect()->route('audit.show', [
+            'audit'      => $auditId,
+            'mainClause' => $nextMain
+        ])->with('success', "Clause {$mainClause} berhasil disimpan");
+    }
+
+    // clause terakhir
+    return redirect()->route('audit.menu', $auditId)
+        ->with('success', 'Audit selesai 🎉');
 }
+
 
     public function clauseDetail($auditId, $mainClause)
     {
