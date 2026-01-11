@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    // Definisi Struktur Klausul
+    // --- KONFIGURASI STRUKTUR KLAUSUL ---
     private $mainClauses = [
         '4'  => ['4.1', '4.2', '4.3', '4.4'],
         '5'  => ['5.1', '5.2', '5.3'],
@@ -33,7 +33,8 @@ class DashboardController extends Controller
     ];
 
     /**
-     * HALAMAN DASHBOARD UTAMA (Method yang tadi hilang)
+     * 1. HALAMAN DASHBOARD UTAMA
+     * Route: /admin/dashboard (atau sejenisnya)
      */
     public function index()
     {
@@ -42,22 +43,38 @@ class DashboardController extends Controller
         $totalDepartments = Department::count();
         $totalAuditors = DB::table('audit_sessions')->distinct('auditor_name')->count('auditor_name');
 
-        // Pastikan Anda memiliki view 'admin.dashboard' atau sesuaikan dengan nama view dashboard utama Anda
-        // Jika sebelumnya Anda menggunakan 'layouts.admin', ganti string di bawah ini.
-        return view('layouts.admin', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
+        // Pastikan view ini ada (biasanya layouts.admin atau admin.dashboard)
+        return view('admin.dashboard', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
     }
 
     /**
-     * HALAMAN OVERVIEW AUDIT (GRAFIK UTAMA)
+     * 2. HALAMAN DETAIL DEPARTEMEN (Menu Sidebar)
+     * Route: /admin/department/{id}
+     */
+    public function showDepartment($deptId)
+    {
+        $departments = Department::all();
+        $currentDept = Department::findOrFail($deptId);
+        
+        // Ambil audit milik departemen ini
+        $audits = Audit::where('department_id', $deptId)
+                    ->with(['session']) 
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+        return view('admin.department_audits', compact('departments', 'currentDept', 'audits'));
+    }
+
+    /**
+     * 3. HALAMAN OVERVIEW AUDIT (GRAFIK UTAMA)
+     * Route: /admin/audit/{id}
      */
     public function showAuditOverview($auditId)
     {
         $departments = Department::all();
         $audit = Audit::with(['session', 'department'])->findOrFail($auditId);
 
-        // --- LOGIKA UNTUK GRAFIK ADMIN DASHBOARD (ALL CLAUSES & MAIN CLAUSES) ---
-        
-        // 1. Ambil semua item dan jawabannya untuk audit ini
+        // --- LOGIKA GRAFIK ---
         $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->leftJoin('answer_finals', function($join) use ($auditId) {
                 $join->on('items.id', '=', 'answer_finals.item_id')
@@ -72,11 +89,10 @@ class DashboardController extends Controller
             )
             ->get();
 
-        // 2. Siapkan wadah data
-        $detailedStats = []; // Untuk 4.1, 4.2, dst
-        $mainStats = [];     // Untuk 4, 5, 6, dst
+        $detailedStats = []; 
+        $mainStats = [];     
 
-        // Inisialisasi Main Stats
+        // Inisialisasi Array Kosong
         foreach($this->mainClauses as $main => $subs) {
             $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0];
             foreach($subs as $sub) {
@@ -84,12 +100,10 @@ class DashboardController extends Controller
             }
         }
 
-        // 3. Looping hitung statistik
+        // Hitung Data
         foreach ($allItems as $item) {
-            // Tentukan status item ini
-            $status = 'na'; // Default N/A
+            $status = 'na';
             
-            // Logika N/A: Jika count 0 semua atau belum ada data
             if (is_null($item->final_yes) || ($item->yes_count == 0 && $item->no_count == 0)) {
                 $status = 'na';
             } elseif ($item->final_yes > $item->final_no) {
@@ -100,12 +114,10 @@ class DashboardController extends Controller
                 $status = 'partial';
             }
 
-            // Masukkan ke Detailed Stats (4.1, 4.2...)
             if (isset($detailedStats[$item->clause_code])) {
                 $detailedStats[$item->clause_code][$status]++;
             }
 
-            // Masukkan ke Main Stats (4, 5...)
             foreach($this->mainClauses as $mainKey => $subArray) {
                 if (in_array($item->clause_code, $subArray)) {
                     $mainStats[$mainKey][$status]++;
@@ -119,13 +131,14 @@ class DashboardController extends Controller
             'audit' => $audit,
             'mainClauses' => $this->mainClauses,
             'titles' => $this->mainClauseTitles,
-            'detailedStats' => $detailedStats, // Data untuk Grafik Rinci
-            'mainStats' => $mainStats          // Data untuk Grafik Inti
+            'detailedStats' => $detailedStats, 
+            'mainStats' => $mainStats          
         ]);
     }
 
     /**
-     * HALAMAN DETAIL PER KLAUSUL (TABEL ITEM & GRAFIK BATANG)
+     * 4. HALAMAN DETAIL PER KLAUSUL (TABEL & CHART BAR)
+     * Route: /admin/audit/{id}/clause/{mainClause}
      */
     public function showClauseDetail($auditId, $mainClause)
     {
@@ -139,13 +152,11 @@ class DashboardController extends Controller
         $clauseIds = $clausesDb->pluck('id');
         $subClauseTitles = $clausesDb->pluck('title', 'clause_code');
 
-        // Ambil Notes
         $auditorNotes = DB::table('audit_questions')
             ->where('audit_id', $auditId)
             ->whereIn('clause_code', $subCodes)
             ->pluck('question_text', 'clause_code');
 
-        // Ambil Items + Jawaban
         $items = Item::whereIn('clause_id', $clauseIds)
             ->join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
@@ -160,10 +171,10 @@ class DashboardController extends Controller
 
         $itemsGrouped = $items->groupBy('current_code');
 
-        // --- STATISTIK GLOBAL (Doughnut Chart) ---
+        // Statistik Global (Doughnut)
         $totalYes = 0; $totalNo = 0; $totalDraw = 0; $totalNA = 0;
 
-        // --- DATA UNTUK STACKED BAR CHART (Per Sub-Clause) ---
+        // Statistik Stacked Bar
         $stackedChartData = [];
         foreach($subCodes as $code) {
             $stackedChartData[$code] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0];
@@ -171,13 +182,9 @@ class DashboardController extends Controller
 
         $items->each(function($item) use (&$totalYes, &$totalNo, &$totalDraw, &$totalNA, &$stackedChartData) {
             $final = $item->answerFinals->first();
-            
             $status = 'na';
 
-            if ($final && $final->yes_count == 0 && $final->no_count == 0) {
-                $totalNA++;
-                $status = 'na';
-            } elseif (!$final) {
+            if (!$final || ($final->yes_count == 0 && $final->no_count == 0)) {
                 $totalNA++;
                 $status = 'na';
             } elseif ($final->final_yes > $final->final_no) {
@@ -191,7 +198,6 @@ class DashboardController extends Controller
                 $status = 'partial';
             }
 
-            // Push ke array Stacked Chart
             if(isset($stackedChartData[$item->current_code])) {
                 $stackedChartData[$item->current_code][$status]++;
             }
