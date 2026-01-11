@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    // ... (Definisi $mainClauses dan $mainClauseTitles biarkan sama) ...
+    // Definisi Struktur Klausul
     private $mainClauses = [
         '4'  => ['4.1', '4.2', '4.3', '4.4'],
         '5'  => ['5.1', '5.2', '5.3'],
@@ -32,12 +32,30 @@ class DashboardController extends Controller
         '10' => 'Improvement',
     ];
 
+    /**
+     * HALAMAN DASHBOARD UTAMA (Method yang tadi hilang)
+     */
+    public function index()
+    {
+        $departments = Department::all();
+        $totalAudits = Audit::count();
+        $totalDepartments = Department::count();
+        $totalAuditors = DB::table('audit_sessions')->distinct('auditor_name')->count('auditor_name');
+
+        // Pastikan Anda memiliki view 'admin.dashboard' atau sesuaikan dengan nama view dashboard utama Anda
+        // Jika sebelumnya Anda menggunakan 'layouts.admin', ganti string di bawah ini.
+        return view('admin.dashboard', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
+    }
+
+    /**
+     * HALAMAN OVERVIEW AUDIT (GRAFIK UTAMA)
+     */
     public function showAuditOverview($auditId)
     {
         $departments = Department::all();
-        $audit = Audit::with(['session'])->findOrFail($auditId);
+        $audit = Audit::with(['session', 'department'])->findOrFail($auditId);
 
-        // --- NEW: LOGIKA UNTUK GRAFIK ADMIN DASHBOARD (ALL CLAUSES & MAIN CLAUSES) ---
+        // --- LOGIKA UNTUK GRAFIK ADMIN DASHBOARD (ALL CLAUSES & MAIN CLAUSES) ---
         
         // 1. Ambil semua item dan jawabannya untuk audit ini
         $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
@@ -71,8 +89,8 @@ class DashboardController extends Controller
             // Tentukan status item ini
             $status = 'na'; // Default N/A
             
-            // Logika N/A: Jika belum ada di answer_finals atau count 0 semua
-            if ($item->yes_count == 0 && $item->no_count == 0 && is_null($item->final_yes)) {
+            // Logika N/A: Jika count 0 semua atau belum ada data
+            if (is_null($item->final_yes) || ($item->yes_count == 0 && $item->no_count == 0)) {
                 $status = 'na';
             } elseif ($item->final_yes > $item->final_no) {
                 $status = 'yes';
@@ -88,7 +106,6 @@ class DashboardController extends Controller
             }
 
             // Masukkan ke Main Stats (4, 5...)
-            // Cari Main Clause dari Sub Clause
             foreach($this->mainClauses as $mainKey => $subArray) {
                 if (in_array($item->clause_code, $subArray)) {
                     $mainStats[$mainKey][$status]++;
@@ -107,6 +124,9 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * HALAMAN DETAIL PER KLAUSUL (TABEL ITEM & GRAFIK BATANG)
+     */
     public function showClauseDetail($auditId, $mainClause)
     {
         $departments = Department::all();
@@ -140,13 +160,11 @@ class DashboardController extends Controller
 
         $itemsGrouped = $items->groupBy('current_code');
 
-        // --- STATISTIK GLOBAL (Pie Chart) ---
+        // --- STATISTIK GLOBAL (Doughnut Chart) ---
         $totalYes = 0; $totalNo = 0; $totalDraw = 0; $totalNA = 0;
 
-        // --- DATA UNTUK STACKED BAR CHART (PER SUB-CLAUSE) ---
-        // Format: ['4.1' => ['yes'=>2, 'no'=>1...], '4.2' => ...]
+        // --- DATA UNTUK STACKED BAR CHART (Per Sub-Clause) ---
         $stackedChartData = [];
-
         foreach($subCodes as $code) {
             $stackedChartData[$code] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0];
         }
@@ -154,14 +172,13 @@ class DashboardController extends Controller
         $items->each(function($item) use (&$totalYes, &$totalNo, &$totalDraw, &$totalNA, &$stackedChartData) {
             $final = $item->answerFinals->first();
             
-            $status = 'na'; // Default
+            $status = 'na';
 
-            // Logika Penentuan Status
             if ($final && $final->yes_count == 0 && $final->no_count == 0) {
                 $totalNA++;
                 $status = 'na';
             } elseif (!$final) {
-                $totalNA++; // Belum ada record = N/A
+                $totalNA++;
                 $status = 'na';
             } elseif ($final->final_yes > $final->final_no) {
                 $totalYes++;
@@ -174,7 +191,7 @@ class DashboardController extends Controller
                 $status = 'partial';
             }
 
-            // Push ke array Stacked Chart berdasarkan kode sub-clause item ini
+            // Push ke array Stacked Chart
             if(isset($stackedChartData[$item->current_code])) {
                 $stackedChartData[$item->current_code][$status]++;
             }
@@ -184,7 +201,7 @@ class DashboardController extends Controller
             'departments', 'audit', 'mainClause', 'subCodes', 'subClauseTitles',
             'itemsGrouped', 'auditorNotes', 
             'totalYes', 'totalNo', 'totalDraw', 'totalNA', 
-            'stackedChartData', // Variabel baru untuk grafik batang
+            'stackedChartData',
             'items'
         ));
     }
