@@ -98,87 +98,58 @@ class AuditController extends Controller
         return response()->json(['found' => false]);
     }
 
-public function startAudit(Request $request)
-{
-    $request->validate([
-        'department_id' => 'required|exists:departments,id',
-        'auditor_nik'   => 'required',
-    ]);
+public function startAudit(Request $request) 
+    {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'auditor_nik'   => 'required',
+        ]);
 
-    try {
         return DB::transaction(function () use ($request) {
-
-            /* =========================
-               1. Ambil Auditor
-            ========================= */
-            $selectedAuditor = collect($this->auditorsList)
-                ->firstWhere('nik', $request->auditor_nik);
-
-            if (!$selectedAuditor) {
-                throw new \Exception('Auditor tidak ditemukan');
-            }
-
-            /* =========================
-               2. Audit Session
-            ========================= */
+            // 1. Cari data auditor
+            $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->auditor_nik);
+            
+            // 2. Buat Session
             $sessionId = (string) Str::uuid();
-
             DB::table('audit_sessions')->insert([
                 'id'                 => $sessionId,
-                'auditor_name'       => $selectedAuditor['name'],
-                'auditor_nik'        => $selectedAuditor['nik'],
-                'auditor_department' => $selectedAuditor['dept'],
+                'auditor_name'       => $selectedAuditor['name'] ?? 'Unknown',
+                'auditor_nik'        => $selectedAuditor['nik'] ?? $request->auditor_nik,
+                'auditor_department' => $selectedAuditor['dept'] ?? '-',
                 'company_name'       => 'Indopoly',
                 'audit_date'         => now()->toDateString(),
                 'created_at'         => now(),
             ]);
 
-            /* =========================
-               3. Responders (VALIDASI!)
-            ========================= */
-            foreach ($request->input('responders', []) as $resp) {
-                if (!empty($resp['name'])) {
+            // 3. LOGIKA BARU: Simpan Responder (Looping array dari form)
+            $responders = $request->input('responders', []);
+            foreach($responders as $resp) {
+                // Pastikan nama tidak kosong
+                if(!empty($resp['name'])) {
                     DB::table('audit_responders')->insert([
                         'id'                   => (string) Str::uuid(),
                         'audit_session_id'     => $sessionId,
                         'responder_name'       => $resp['name'],
-                        'responder_department' => $resp['department'] ?? '-',
-                        'responder_nik'        => $resp['nik'] ?? null,
+                        'responder_department' => $resp['department'] ?? null,
+                        'responder_nik'        => $resp['nik'] ?? null, // Pastikan di form ada input name="responders[x][nik]"
                         'created_at'           => now(),
                     ]);
                 }
             }
 
-            /* =========================
-               4. Audit
-            ========================= */
-            $auditId = (string) Str::uuid();
-
+            // 4. Buat Audit Record
+            $newAuditId = (string) Str::uuid();
             DB::table('audits')->insert([
-                'id'               => $auditId,
+                'id'               => $newAuditId,
                 'audit_session_id' => $sessionId,
                 'department_id'    => $request->department_id,
                 'status'           => 'IN_PROGRESS',
                 'created_at'       => now(),
             ]);
 
-            return redirect()->route('audit.menu', ['id' => $auditId]);
+            return redirect()->route('audit.menu', ['id' => $newAuditId]);
         });
-
-    } catch (\Throwable $e) {
-
-        // ⛔ INI YANG PENTING
-        logger()->error('START AUDIT FAILED', [
-            'message' => $e->getMessage(),
-            'trace'   => $e->getTraceAsString(),
-        ]);
-
-        return back()->withErrors([
-            'error' => 'Gagal memulai audit: ' . $e->getMessage()
-        ]);
     }
-}
-
 
     public function menu($auditId)
     {
