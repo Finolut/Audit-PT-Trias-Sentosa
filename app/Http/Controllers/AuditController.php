@@ -324,24 +324,25 @@ DB::transaction(function () use ($answers, $notes, $auditId, $request) {
         }
     });
 
-    /* ===============================
-       4. REDIRECT KE CLAUSE BERIKUTNYA
-    =============================== */
+/* ===============================
+   4. REDIRECT KE CLAUSE BERIKUTNYA
+=============================== */
 
-    $mainKeys = array_keys($this->mainClauses);
-    $currentIndex = array_search($mainClause, $mainKeys);
-    $nextMain = $mainKeys[$currentIndex + 1] ?? null;
+$mainKeys = array_keys($this->mainClauses);
+$currentIndex = array_search($mainClause, $mainKeys);
+$nextMain = $mainKeys[$currentIndex + 1] ?? null;
 
-    if ($nextMain) {
-        return redirect()->route('audit.show', [
-            'audit'      => $auditId,
-            'mainClause' => $nextMain
-        ])->with('success', "Clause {$mainClause} berhasil disimpan");
-    }
+if ($nextMain) {
+    // Pastikan key array ('audit' dan 'mainClause') SAMA PERSIS dengan di Route
+    return redirect()->route('audit.show', [
+        'audit'      => $auditId, 
+        'mainClause' => $nextMain
+    ])->with('success', "Clause {$mainClause} berhasil disimpan");
+}
 
-    // clause terakhir
-    return redirect()->route('audit.menu', $auditId)
-        ->with('success', 'Audit selesai 🎉');
+// Jika ini adalah clause terakhir, kembali ke menu
+return redirect()->route('audit.menu', ['id' => $auditId])
+    ->with('success', 'Audit selesai 🎉');
 }
 
 
