@@ -62,9 +62,9 @@
         }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-    .modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 8px; }
-    .responder-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 8px; }
+        .responder-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
     </style>
 </head>
 <body style="background-color: #f1f5f9; padding: 40px 20px 120px 20px; font-family: sans-serif;">
@@ -94,31 +94,32 @@
 
                             @php $items = $itemsGrouped[$subCode] ?? collect(); @endphp
                             
-@foreach ($items->where('maturity_level_id', $level->id) as $item)
-    <div class="item" style="padding: 15px 0; border-bottom: 1px dashed #e2e8f0;">
-        <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
-        
-        <div class="button-group" id="btn_group_{{ $item->id }}">
-            <button type="button" class="answer-btn q-btn q-btn-yes" onclick="submitQuickAnswer('{{ $item->id }}', 'YES')">YES</button>
-            <button type="button" class="answer-btn q-btn q-btn-no" onclick="submitQuickAnswer('{{ $item->id }}', 'NO')">NO</button>
-            <button type="button" class="answer-btn q-btn q-btn-na" onclick="submitQuickAnswer('{{ $item->id }}', 'N/A')">N/A</button>
+                            @foreach ($items->where('maturity_level_id', $level->id) as $item)
+                                <div class="item" style="padding: 15px 0; border-bottom: 1px dashed #e2e8f0;">
+                                    <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
+                                    
+                                    <div class="button-group" id="btn_group_{{ $item->id }}">
+                                        <button type="button" class="answer-btn q-btn q-btn-yes" onclick="submitQuickAnswer('{{ $item->id }}', 'YES')">YES</button>
+                                        <button type="button" class="answer-btn q-btn q-btn-no" onclick="submitQuickAnswer('{{ $item->id }}', 'NO')">NO</button>
+                                        <button type="button" class="answer-btn q-btn q-btn-na" onclick="submitQuickAnswer('{{ $item->id }}', 'N/A')">N/A</button>
 
-            <span style="margin: 0 10px; color: #cbd5e1;">|</span>
+                                        <span style="margin: 0 10px; color: #cbd5e1;">|</span>
 
-            <button type="button" class="answer-btn" style="background: #f8fafc; border-style: dashed;" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
-                Jawaban Berbeda...
-            </button>
-        </div>
+                                        <button type="button" class="answer-btn" style="background: #f8fafc; border-style: dashed;" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
+                                            Jawaban Berbeda...
+                                        </button>
+                                    </div>
 
-        <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
-            <em>Belum ada jawaban</em>
-        </div>
-        
-        <div id="hidden_inputs_{{ $item->id }}"></div>
-    </div>
-@endforeach
+                                    <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
+                                        <em>Belum ada jawaban</em>
+                                    </div>
+                                    
+                                    <div id="hidden_inputs_{{ $item->id }}"></div>
+                                </div>
+                            @endforeach
+                        </div> {{-- End of level-section --}}
+                    @endforeach
 
-                    {{-- Catatan per SUB-KLAUSUL --}}
                     <div class="question-box">
                         <label style="font-weight: bold; color: #92400e;">Catatan Temuan / Pertanyaan Auditor ({{ $subCode }})</label>
                         <textarea 
@@ -128,7 +129,7 @@
                             placeholder="Tulis bukti audit atau temuan di sini..."
                         >{{ $existingNotes[$subCode] ?? '' }}</textarea>
                     </div>
-                </div>
+                </div> {{-- End of sub-clause-container --}}
             @endforeach
 
             <div class="submit-container">
@@ -145,141 +146,115 @@
     </div>
 
     <div id="answerModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalItemText" style="margin-top:0; font-size: 1rem; color: #1e293b;"></h3>
-        <hr>
-        <div id="modalRespondersList">
+        <div class="modal-content">
+            <h3 id="modalItemText" style="margin-top:0; font-size: 1rem; color: #1e293b;"></h3>
+            <hr>
+            <div id="modalRespondersList"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" onclick="closeModal()" style="padding: 8px 20px; cursor:pointer;">Tutup & Simpan</button>
             </div>
-        <div style="margin-top: 20px; text-align: right;">
-            <button type="button" onclick="closeModal()" style="padding: 8px 20px; cursor:pointer;">Tutup & Simpan</button>
         </div>
     </div>
-</div>
+
     <script>
-      const auditorName = "{{ $auditorName }}";
-    const responders = @json($responders);
-    let sessionAnswers = {}; // Menyimpan state jawaban per item dan per orang
+        const auditorName = "{{ $auditorName }}";
+        const responders = @json($responders);
+        let sessionAnswers = {};
 
-    // FUNGSI 1: Tombol Cepat (Langsung set jawaban Auditor)
-    function submitQuickAnswer(itemId, val) {
-        // Hapus data "Jawaban Berbeda" jika sebelumnya ada
-        clearHiddenInputs(itemId);
+        function submitQuickAnswer(itemId, val) {
+            clearHiddenInputs(itemId);
+            sessionAnswers[`${itemId}_${auditorName}`] = val;
+            
+            const btnGroup = document.getElementById(`btn_group_${itemId}`);
+            btnGroup.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
+            
+            if(val === 'YES') btnGroup.querySelector('.q-btn-yes').classList.add('active-yes');
+            if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
+            if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
 
-        // Set state untuk auditor
-        sessionAnswers[`${itemId}_${auditorName}`] = val;
-        
-        // Update UI tombol utama
-        const btnGroup = document.getElementById(`btn_group_${itemId}`);
-        btnGroup.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
-        
-        if(val === 'YES') btnGroup.querySelector('.q-btn-yes').classList.add('active-yes');
-        if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
-        if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
+            updateHiddenInputs(itemId);
+            const infoBox = document.getElementById(`info_${itemId}`);
+            infoBox.innerHTML = `<span style="color: #16a34a;">Terpilih secara cepat: <strong>${val}</strong></span>`;
+        }
 
-        // Update Hidden Input & Info
-        updateHiddenInputs(itemId);
-        const infoBox = document.getElementById(`info_${itemId}`);
-        infoBox.innerHTML = `<span style="color: #16a34a;">Terpilih secara cepat: <strong>${val}</strong></span>`;
-    }
+        let currentEditingItemId = null;
 
-    // FUNGSI 2: Modal (Jawaban Berbeda)
-    let currentEditingItemId = null;
+        function openModal(itemId, itemText) {
+            currentEditingItemId = itemId;
+            document.getElementById('modalItemText').innerText = itemText;
+            const listDiv = document.getElementById('modalRespondersList');
+            listDiv.innerHTML = '';
+            listDiv.appendChild(createResponderRow(auditorName, 'Auditor', itemId));
+            responders.forEach(resp => {
+                listDiv.appendChild(createResponderRow(resp.responder_name, 'Responder', itemId));
+            });
+            document.getElementById('answerModal').style.display = 'block';
+        }
 
-    function openModal(itemId, itemText) {
-        currentEditingItemId = itemId;
-        document.getElementById('modalItemText').innerText = itemText;
-        const listDiv = document.getElementById('modalRespondersList');
-        listDiv.innerHTML = '';
+        function createResponderRow(name, role, itemId) {
+            const div = document.createElement('div');
+            div.className = 'responder-row';
+            const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
+            div.innerHTML = `
+                <div>
+                    <span style="font-weight:bold">${name}</span> <br>
+                    <small class="badge" style="background:#e2e8f0">${role}</small>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="answer-btn q-btn ${existingVal === 'YES' ? 'active-yes' : ''}" onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
+                    <button type="button" class="answer-btn q-btn ${existingVal === 'NO' ? 'active-no' : ''}" onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
+                    <button type="button" class="answer-btn q-btn ${existingVal === 'N/A' ? 'active-na' : ''}" onclick="setVal('${itemId}', '${name}', 'N/A', this)">N/A</button>
+                </div>
+            `;
+            return div;
+        }
 
-        // Tampilkan Auditor
-        listDiv.appendChild(createResponderRow(auditorName, 'Auditor', itemId));
+        function setVal(itemId, userName, val, btn) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+            if(val === 'YES') btn.classList.add('active-yes');
+            if(val === 'NO') btn.classList.add('active-no');
+            if(val === 'N/A') btn.classList.add('active-na');
+            sessionAnswers[`${itemId}_${userName}`] = val;
+            const btnGroup = document.getElementById(`btn_group_${itemId}`);
+            btnGroup.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+            updateHiddenInputs(itemId);
+            updateMainInfo(itemId);
+        }
 
-        // Tampilkan Responder
-        responders.forEach(resp => {
-            listDiv.appendChild(createResponderRow(resp.responder_name, 'Responder', itemId));
-        });
-
-        document.getElementById('answerModal').style.display = 'block';
-    }
-
-    function createResponderRow(name, role, itemId) {
-        const div = document.createElement('div');
-        div.className = 'responder-row';
-        const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
-
-        div.innerHTML = `
-            <div>
-                <span style="font-weight:bold">${name}</span> <br>
-                <small class="badge" style="background:#e2e8f0">${role}</small>
-            </div>
-            <div class="button-group">
-                <button type="button" class="answer-btn q-btn ${existingVal === 'YES' ? 'active-yes' : ''}" onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
-                <button type="button" class="answer-btn q-btn ${existingVal === 'NO' ? 'active-no' : ''}" onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
-                <button type="button" class="answer-btn q-btn ${existingVal === 'N/A' ? 'active-na' : ''}" onclick="setVal('${itemId}', '${name}', 'N/A', this)">N/A</button>
-            </div>
-        `;
-        return div;
-    }
-
-    function setVal(itemId, userName, val, btn) {
-        // Update UI di dalam modal
-        const parent = btn.parentElement;
-        parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
-        if(val === 'YES') btn.classList.add('active-yes');
-        if(val === 'NO') btn.classList.add('active-no');
-        if(val === 'N/A') btn.classList.add('active-na');
-
-        // Simpan state
-        sessionAnswers[`${itemId}_${userName}`] = val;
-        
-        // Matikan highlight tombol cepat di luar modal karena sekarang menggunakan "Jawaban Berbeda"
-        const btnGroup = document.getElementById(`btn_group_${itemId}`);
-        btnGroup.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
-
-        updateHiddenInputs(itemId);
-        updateMainInfo(itemId);
-    }
-
-    function updateHiddenInputs(itemId) {
-        const container = document.getElementById(`hidden_inputs_${itemId}`);
-        container.innerHTML = ''; 
-        
-        for (let key in sessionAnswers) {
-            if (key.startsWith(itemId + '_')) {
-                const name = key.replace(itemId + '_', '');
-                const val = sessionAnswers[key];
-                container.innerHTML += `
-                    <input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
-                    <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
-                `;
+        function updateHiddenInputs(itemId) {
+            const container = document.getElementById(`hidden_inputs_${itemId}`);
+            container.innerHTML = ''; 
+            for (let key in sessionAnswers) {
+                if (key.startsWith(itemId + '_')) {
+                    const name = key.replace(itemId + '_', '');
+                    const val = sessionAnswers[key];
+                    container.innerHTML += `
+                        <input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
+                        <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
+                    `;
+                }
             }
         }
-    }
 
-    function updateMainInfo(itemId) {
-        const infoBox = document.getElementById(`info_${itemId}`);
-        let names = [];
-        for (let key in sessionAnswers) {
-            if (key.startsWith(itemId + '_')) names.push(key.replace(itemId + '_', ''));
+        function updateMainInfo(itemId) {
+            const infoBox = document.getElementById(`info_${itemId}`);
+            let names = [];
+            for (let key in sessionAnswers) {
+                if (key.startsWith(itemId + '_')) names.push(key.replace(itemId + '_', ''));
+            }
+            infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">✓ Jawaban tersimpan untuk: ${names.join(', ')}</span>`;
         }
-        infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">✓ Jawaban tersimpan untuk: ${names.join(', ')}</span>`;
-    }
 
-    function clearHiddenInputs(itemId) {
-        for (let key in sessionAnswers) {
-            if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
+        function clearHiddenInputs(itemId) {
+            for (let key in sessionAnswers) {
+                if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
+            }
         }
-    }
 
-    function closeModal() {
-        document.getElementById('answerModal').style.display = 'none';
-    }
-
-    function setAbsoluteNA(itemId) {
-        if(confirm('Set N/A untuk semua pihak?')) {
-            submitQuickAnswer(itemId, 'N/A');
+        function closeModal() {
+            document.getElementById('answerModal').style.display = 'none';
         }
-    }
     </script>
 </body>
 </html>
