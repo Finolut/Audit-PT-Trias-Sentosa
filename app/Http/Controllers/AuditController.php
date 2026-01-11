@@ -333,10 +333,9 @@ $currentIndex = array_search($mainClause, $mainKeys);
 $nextMain = $mainKeys[$currentIndex + 1] ?? null;
 
 if ($nextMain) {
-    // Pastikan key array ('audit' dan 'mainClause') SAMA PERSIS dengan di Route
     return redirect()->route('audit.show', [
-        'audit'      => $auditId, 
-        'mainClause' => $nextMain
+        'id'     => $auditId, // Gunakan 'id' sesuai error
+        'clause' => $nextMain // Gunakan 'clause' sesuai error
     ])->with('success', "Clause {$mainClause} berhasil disimpan");
 }
 
