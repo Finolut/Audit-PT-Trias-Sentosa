@@ -219,12 +219,19 @@ public function store(Request $request, $auditId, $mainClause)
     $notes   = $request->input('audit_notes', []);
 
 DB::transaction(function () use ($answers, $notes, $auditId, $request) {
-    
-    // Fallback: If request doesn't have it, get it from the parent Audit record
-    $departmentId = $request->input('department_id') ?? 
-                    DB::table('audits')->where('id', $auditId)->value('department_id');
 
+    // 1. Ambil department_id dari tabel audits agar sinkron
+    $auditRecord = DB::table('audits')->where('id', $auditId)->first();
+    
+    // Pastikan data audit ditemukan, jika tidak pakai null (tapi ini akan error di DB)
+    $departmentId = $auditRecord ? $auditRecord->department_id : null;
+
+    /* ===============================
+       2. SIMPAN NOTES AUDIT
+    =============================== */
     foreach ($notes as $clauseCode => $text) {
+        if (empty($text)) continue; // Lewati jika catatan kosong
+
         $existing = DB::table('audit_questions')
             ->where('audit_id', $auditId)
             ->where('clause_code', $clauseCode)
@@ -239,9 +246,9 @@ DB::transaction(function () use ($answers, $notes, $auditId, $request) {
                 ]);
         } else {
             DB::table('audit_questions')->insert([
-                'id'            => (string) Str::uuid(),
+                'id'            => (string) \Illuminate\Support\Str::uuid(),
                 'audit_id'      => $auditId,
-                'department_id' => $departmentId, // Ensure this is not null
+                'department_id' => $departmentId, // Sekarang nilai ini diambil dari tabel audits
                 'clause_code'   => $clauseCode,
                 'question_text' => $text,
                 'created_at'    => now(),
