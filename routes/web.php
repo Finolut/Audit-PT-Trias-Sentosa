@@ -167,6 +167,12 @@ Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
     // 4. Detail Klausul (Sesuai update terakhir kita yang per Main Clause)
     Route::get('/audit/{id}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause');
 
+    // Route untuk Overview Audit (yang ada 2 grafik besar)
+    Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
+
+    // ROUTE YANG HILANG: Detail per Main Clause (Tabel & Stacked Bar)
+    Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])
+        ->name('audit.clause_detail');
 });
 
 // tampilkan klausul
