@@ -224,16 +224,29 @@ public function store(Request $request, $auditId, $mainClause)
            1. SIMPAN NOTES AUDIT
         =============================== */
         foreach ($notes as $clauseCode => $text) {
-            DB::table('audit_questions')->updateOrInsert(
-                [
-                    'audit_id'    => $auditId,
-                    'clause_code' => $clauseCode,
-                ],
-                [
-                    'question_text' => $text,
-                    'updated_at'    => now(),
-                ]
-            );
+           $existing = DB::table('audit_questions')
+    ->where('audit_id', $auditId)
+    ->where('clause_code', $clauseCode)
+    ->first();
+
+if ($existing) {
+    DB::table('audit_questions')
+        ->where('id', $existing->id)
+        ->update([
+            'question_text' => $text,
+            'updated_at'    => now(),
+        ]);
+} else {
+    DB::table('audit_questions')->insert([
+        'id'            => (string) Str::uuid(),
+        'audit_id'      => $auditId,
+        'clause_code'   => $clauseCode,
+        'question_text' => $text,
+        'created_at'    => now(),
+        'updated_at'    => now(),
+    ]);
+}
+
         }
 
         /* ===============================
