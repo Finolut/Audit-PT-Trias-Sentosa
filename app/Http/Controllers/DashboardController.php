@@ -44,7 +44,7 @@ class DashboardController extends Controller
 
         // Pastikan Anda memiliki view 'admin.dashboard' atau sesuaikan dengan nama view dashboard utama Anda
         // Jika sebelumnya Anda menggunakan 'layouts.admin', ganti string di bawah ini.
-        return view('admin.dashboard', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
+        return view('layouts.admin', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
     }
 
     /**
