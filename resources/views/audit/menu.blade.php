@@ -149,31 +149,22 @@
    <div class="grid-container">
     @foreach($mainClauses as $code)
         @php
-            // 1. Pastikan $code bersih dari spasi
-            $currentCode = trim((string)$code);
-            
-            // 2. Cek apakah kode ini ada di array hasil query
-            // Kita gunakan in_array dengan parameter ketiga false untuk loose comparison
-            $isDone = in_array($currentCode, $completedClauses);
+            // Pastikan perbandingan string ke string
+            $isDone = in_array((string)$code, array_map('strval', $completedClauses));
         @endphp
 
-        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $currentCode]) }}" 
+        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
            class="card {{ $isDone ? 'completed' : '' }}">
             
-            <span class="card-number">{{ $currentCode }}</span>
-            
-            <span class="card-title">
-                {{ $titles[$currentCode] ?? 'Clause ' . $currentCode }}
-            </span>
+            <span class="card-number">{{ $code }}</span>
+            <span class="card-title">{{ $titles[$code] ?? 'Clause ' . $code }}</span>
 
             @if($isDone)
                 <div class="status-badge badge-completed">
                     <span class="check-icon">✓</span> Selesai
                 </div>
             @else
-                <div class="status-badge badge-pending">
-                    Belum diisi
-                </div>
+                <div class="status-badge badge-pending">Belum diisi</div>
                 <span class="arrow-icon">→</span>
             @endif
         </a>

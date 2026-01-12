@@ -151,7 +151,7 @@ public function startAudit(Request $request)
         });
     }
 
-   public function menu($auditId)
+ public function menu($auditId)
 {
     $audit = DB::table('audits')->where('id', $auditId)->first();
     if(!$audit) abort(404);
@@ -159,16 +159,24 @@ public function startAudit(Request $request)
     $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
     $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
 
-    // MENGAMBIL AWALAN KODE KLAUSUL
-    // Jika di database "4.1", kita ambil angka "4" nya saja
-    $completedClauses = DB::table('answers')
+    // 1. Ambil semua clause_code yang sudah ada jawabannya di database
+    $answeredSubCodes = DB::table('answers')
         ->join('items', 'answers.item_id', '=', 'items.id')
         ->join('clauses', 'items.clause_id', '=', 'clauses.id')
         ->where('answers.audit_id', $auditId)
-        ->select(DB::raw('SUBSTRING_INDEX(clauses.clause_code, ".", 1) as main_code'))
         ->distinct()
-        ->pluck('main_code') 
+        ->pluck('clauses.clause_code') // Isinya misal: ['4.1', '6.1.1']
         ->toArray();
+
+    // 2. Tentukan main clause mana saja yang sudah dianggap "selesai"
+    $completedClauses = [];
+    foreach ($this->mainClauses as $mainCode => $subCodes) {
+        // Cek apakah ada salah satu sub-code dari mapping kita yang ada di database
+        // Kita gunakan array_intersect untuk melihat kecocokan
+        if (count(array_intersect($subCodes, $answeredSubCodes)) > 0) {
+            $completedClauses[] = (string)$mainCode;
+        }
+    }
 
     return view('audit.menu', [
         'auditId'          => $auditId,
