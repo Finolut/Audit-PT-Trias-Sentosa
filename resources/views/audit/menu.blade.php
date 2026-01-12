@@ -149,17 +149,21 @@
    <div class="grid-container">
     @foreach($mainClauses as $code)
         @php
-            // Cocokkan apakah kode klausul (misal: "4") ada dalam daftar yang sudah dijawab
-            $isDone = in_array((string)$code, $completedClauses);
+            // 1. Pastikan $code bersih dari spasi
+            $currentCode = trim((string)$code);
+            
+            // 2. Cek apakah kode ini ada di array hasil query
+            // Kita gunakan in_array dengan parameter ketiga false untuk loose comparison
+            $isDone = in_array($currentCode, $completedClauses);
         @endphp
 
-        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $currentCode]) }}" 
            class="card {{ $isDone ? 'completed' : '' }}">
             
-            <span class="card-number">{{ $code }}</span>
+            <span class="card-number">{{ $currentCode }}</span>
             
             <span class="card-title">
-                {{ $titles[$code] ?? 'Clause ' . $code }}
+                {{ $titles[$currentCode] ?? 'Clause ' . $currentCode }}
             </span>
 
             @if($isDone)

@@ -159,14 +159,15 @@ public function startAudit(Request $request)
     $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
     $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
 
-    // MENDAPATKAN KLAUSUL YANG SUDAH SELESAI
-    // Berdasarkan ERD Anda: answers -> items -> clauses
+    // MENGAMBIL AWALAN KODE KLAUSUL
+    // Jika di database "4.1", kita ambil angka "4" nya saja
     $completedClauses = DB::table('answers')
         ->join('items', 'answers.item_id', '=', 'items.id')
         ->join('clauses', 'items.clause_id', '=', 'clauses.id')
         ->where('answers.audit_id', $auditId)
+        ->select(DB::raw('SUBSTRING_INDEX(clauses.clause_code, ".", 1) as main_code'))
         ->distinct()
-        ->pluck('clauses.clause_code') // Mengambil clause_code (misal: 4, 5, atau 6)
+        ->pluck('main_code') 
         ->toArray();
 
     return view('audit.menu', [
