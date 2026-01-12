@@ -1,0 +1,100 @@
+/* General Layout */
+.audit-body {
+    background-color: #f1f5f9;
+    padding: 40px 20px 120px 20px;
+    font-family: sans-serif;
+}
+
+.audit-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Buttons & Interactions */
+.answer-btn { 
+    transition: all 0.2s; 
+    font-weight: bold; 
+    cursor: pointer; 
+    padding: 8px 16px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    background: white; 
+}
+
+.active-yes { background-color: #16a34a !important; color: white !important; border-color: #15803d !important; }
+.active-no { background-color: #dc2626 !important; color: white !important; border-color: #b91c1c !important; }
+.active-na { background-color: #6b7280 !important; color: white !important; border-color: #4b5563 !important; }
+
+.button-group { display: flex; gap: 8px; align-items: center; }
+.q-btn { min-width: 60px; }
+
+/* Clause Styling */
+.sub-clause-container {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 50px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.clause-header {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    padding: 15px;
+    border-bottom: 2px solid #2563eb;
+    margin: -25px -25px 20px -25px;
+    border-radius: 12px 12px 0 0;
+    z-index: 10;
+}
+
+.question-box {
+    margin-top: 25px;
+    background-color: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.question-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+/* Footer & Submit */
+.submit-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    z-index: 100;
+}
+
+.submit-audit {
+    background: #2563eb;
+    color: white;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+/* Modal */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+.modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 8px; }
+.responder-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }

@@ -103,6 +103,39 @@
         }
         .finish-btn:hover { background-color: #059669; }
 
+  /* Warna kartu jika sudah selesai */
+.card.completed {
+    border-left: 5px solid #10b981 !important; /* Hijau */
+    background-color: #f0fdf4 !important; /* Hijau sangat muda */
+}
+
+/* Badge Status di pojok kanan bawah */
+.status-badge {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-completed { color: #10b981; }
+.badge-pending { color: #94a3b8; }
+
+/* Lingkaran Ceklis */
+.check-icon {
+    background: #10b981;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
     </style>
 </head>
 <body>
@@ -113,29 +146,40 @@
         <p>Auditor: <strong>{{ $auditorName }}</strong> | Target: <strong>{{ $deptName }}</strong></p>
     </div>
 
-    <div class="grid-container">
-@foreach($mainClauses as $code)
-    <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" class="card">
-        {{-- Tampilkan Angka Besar: 4, 5, 6 --}}
-        <span class="card-number">{{ $code }}</span>
-        
-        {{-- Tampilkan Judul: Context, Leadership, dll --}}
-        <span class="card-title">
-            {{ $titles[$code] ?? 'Clause ' . $code }}
-        </span>
-        <span class="arrow-icon">→</span>
-    </a>
-@endforeach
-    </div>
+   <div class="grid-container">
+    @foreach($mainClauses as $code)
+        @php
+            // Cek apakah kode klausul saat ini ada di dalam array yang sudah selesai
+            $isDone = in_array($code, $completedClauses);
+        @endphp
 
+        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+           class="card {{ $isDone ? 'completed' : '' }}">
+            
+            <span class="card-number">{{ $code }}</span>
+            
+            <span class="card-title">
+                {{ $titles[$code] ?? 'Clause ' . $code }}
+            </span>
+
+            @if($isDone)
+                {{-- Tampilan saat Selesai --}}
+                <div class="status-badge badge-completed">
+                    <span class="check-icon">✓</span> Selesai
+                </div>
+            @else
+                {{-- Tampilan saat Belum Selesai --}}
+                <div class="status-badge badge-pending">
+                    Belum diisi
+                </div>
+                <span class="arrow-icon">→</span>
+            @endif
+        </a>
+    @endforeach
+@if(count($completedClauses) == count($mainClauses))
     <div class="finish-section">
-        <p style="color: #64748b; margin-bottom: 15px;">Sudah menyelesaikan semua klausul?</p>
-        <form action="{{ route('audit.finish') }}" method="GET">
-             {{-- Nanti bisa ditambahkan logika validasi apakah semua sudah terisi --}}
-            <button type="submit" class="finish-btn">Selesai & Submit Laporan</button>
-        </form>
+        <button type="submit" class="finish-btn">Submit Laporan Final ✓</button>
     </div>
-</div>
-
+@endif
 </body>
 </html>

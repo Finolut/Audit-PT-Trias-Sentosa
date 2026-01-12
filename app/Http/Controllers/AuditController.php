@@ -152,21 +152,30 @@ public function startAudit(Request $request)
     }
 
     public function menu($auditId)
-    {
-        $audit = DB::table('audits')->where('id', $auditId)->first();
-        if(!$audit) abort(404);
+{
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    if(!$audit) abort(404);
 
-        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-        $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
+    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
 
-        return view('audit.menu', [
-            'auditId'     => $auditId,
-            'auditorName' => $session->auditor_name,
-            'deptName'    => $deptName,
-            'mainClauses' => array_keys($this->mainClauses), 
-            'titles'      => $this->mainClauseTitles
-        ]);
-    }
+    // AMBIL DATA KLAUSUL YANG SUDAH TERISI
+    // Kita mengambil 'main_clause' yang unik dari tabel jawaban
+    $completedClauses = DB::table('audit_answers')
+        ->where('audit_id', $auditId)
+        ->distinct()
+        ->pluck('main_clause') // Contoh hasil: ["4", "5"]
+        ->toArray();
+
+    return view('audit.menu', [
+        'auditId'          => $auditId,
+        'auditorName'      => $session->auditor_name,
+        'deptName'         => $deptName,
+        'mainClauses'      => array_keys($this->mainClauses), 
+        'titles'           => $this->mainClauseTitles,
+        'completedClauses' => $completedClauses // Kirim ke view
+    ]);
+}
 
     public function show($auditId, $mainClause)
     {
