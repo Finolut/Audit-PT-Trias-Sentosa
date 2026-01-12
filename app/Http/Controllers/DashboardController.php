@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $totalAuditors = DB::table('audit_sessions')->distinct('auditor_name')->count('auditor_name');
 
         // Pastikan view ini ada (biasanya layouts.admin atau admin.dashboard)
-        return view('admin.dashboard', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
+        return view('layouts.admin', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
     }
 
     /**
