@@ -96,6 +96,27 @@
     <script>
         const auditorName = "{{ $auditorName }}";
         const responders = @json($responders);
+
+        // Mencegah klik tombol "Kembali" atau "Submit" jika antrean masih ada
+function validateBeforeLeave(e) {
+    if (typeof answerQueue !== 'undefined' && answerQueue.length > 0) {
+        e.preventDefault();
+        alert("Mohon tunggu, masih ada " + answerQueue.length + " jawaban yang sedang diunggah.");
+        return false;
+    }
+    return true;
+}
+
+// Pasang ke tombol-tombol navigasi
+document.querySelector('form').onsubmit = validateBeforeLeave;
+document.querySelector('a[href*="audit/menu"]').onclick = validateBeforeLeave;
+
+// Peringatan jika tab browser ditutup paksa
+window.onbeforeunload = function() {
+    if (answerQueue.length > 0) {
+        return "Jawaban belum tersimpan semua ke server!";
+    }
+};
     </script>
     
     <script src="{{ asset('js/audit-script.js') }}"></script>
