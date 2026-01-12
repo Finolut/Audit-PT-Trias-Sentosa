@@ -1,100 +1,167 @@
-/* General Layout */
+/* Google Font Modern */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-600: #475569;
+    --slate-800: #1e293b;
+}
+
 .audit-body {
-    background-color: #f1f5f9;
-    padding: 40px 20px 120px 20px;
-    font-family: sans-serif;
+    background-color: var(--slate-100);
+    padding: 2rem 1rem 120px 1rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--slate-800);
 }
 
 .audit-container {
-    max-width: 900px;
+    max-width: 850px;
     margin: 0 auto;
 }
 
-/* Buttons & Interactions */
-.answer-btn { 
-    transition: all 0.2s; 
-    font-weight: bold; 
-    cursor: pointer; 
-    padding: 8px 16px; 
-    border: 1px solid #ccc; 
-    border-radius: 4px; 
-    background: white; 
+/* Header & Typography */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: transform 0.2s;
 }
+.back-link:hover { transform: translateX(-5px); }
 
-.active-yes { background-color: #16a34a !important; color: white !important; border-color: #15803d !important; }
-.active-no { background-color: #dc2626 !important; color: white !important; border-color: #b91c1c !important; }
-.active-na { background-color: #6b7280 !important; color: white !important; border-color: #4b5563 !important; }
-
-.button-group { display: flex; gap: 8px; align-items: center; }
-.q-btn { min-width: 60px; }
-
-/* Clause Styling */
+/* Card Container */
 .sub-clause-container {
     background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 50px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 3rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 }
 
 .clause-header {
-    position: sticky;
-    top: 0;
-    background: #f8fafc;
-    padding: 15px;
-    border-bottom: 2px solid #2563eb;
-    margin: -25px -25px 20px -25px;
-    border-radius: 12px 12px 0 0;
-    z-index: 10;
+    background: white;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--slate-200);
 }
 
+.clause-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--slate-800);
+}
+
+/* Item List Styling */
+.level-section { padding: 0 2rem; }
+
+.level-title {
+    background: var(--slate-50);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2rem;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--slate-100);
+    gap: 1.5rem;
+}
+
+.item-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    flex: 1;
+}
+
+/* Interaction Buttons */
+.button-group { display: flex; gap: 4px; background: var(--slate-100); padding: 4px; border-radius: 8px; }
+
+.answer-btn {
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: var(--slate-600);
+    transition: all 0.2s;
+}
+
+.answer-btn:hover:not(.active-yes):not(.active-no):not(.active-na) {
+    background: rgba(255,255,255,0.5);
+}
+
+.active-yes { background: var(--success) !important; color: white !important; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.3); }
+.active-no  { background: var(--danger) !important; color: white !important; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3); }
+.active-na  { background: var(--slate-600) !important; color: white !important; }
+
+.btn-more {
+    background: none;
+    border: 1px dashed var(--slate-200);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+/* Notes Section */
 .question-box {
-    margin-top: 25px;
-    background-color: #fffbeb;
-    border: 1px solid #fcd34d;
-    border-radius: 8px;
-    padding: 20px;
+    margin: 2rem;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 12px;
+    padding: 1.5rem;
 }
 
 .question-textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    margin-top: 10px;
-    font-family: inherit;
-    resize: vertical;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
 }
 
-/* Footer & Submit */
+/* Fixed Footer */
 .submit-container {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 20px;
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 1.25rem;
+    border-top: 1px solid var(--slate-200);
     display: flex;
     justify-content: center;
     z-index: 100;
 }
 
 .submit-audit {
-    background: #2563eb;
+    background: var(--primary);
     color: white;
-    padding: 15px 40px;
+    padding: 0.75rem 2.5rem;
+    border-radius: 10px;
+    font-weight: 600;
     border: none;
-    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+    transition: background 0.2s;
 }
-
-/* Modal */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-.modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 8px; }
-.responder-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+.submit-audit:hover { background: var(--primary-dark); }

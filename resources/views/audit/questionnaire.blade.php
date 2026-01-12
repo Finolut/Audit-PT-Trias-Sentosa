@@ -6,12 +6,20 @@
     <link rel="stylesheet" href="{{ asset('css/audit-style.css') }}">
 </head>
 <body class="audit-body">
-
     <div class="audit-container">
-        <a href="{{ route('audit.menu', $auditId) }}" style="text-decoration: none; color: #2563eb; font-weight: bold;">← Kembali ke Menu</a>
+        <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Kembali ke Menu
+        </a>
         
-        <h1 style="margin-top: 20px; color: #1e293b;">Main Clause {{ $currentMain }}</h1>
-        <p style="color: #64748b; margin-bottom: 40px;">Departemen: <strong>{{ $targetDept }}</strong> | Auditor: <strong>{{ $auditorName }}</strong></p>
+        <header style="margin: 2rem 0;">
+            <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--slate-800); margin-bottom: 0.5rem;">Clause {{ $currentMain }}</h1>
+            <div style="display: flex; gap: 1rem; color: var(--slate-600); font-size: 0.9rem;">
+                <span>Dept: <strong>{{ $targetDept }}</strong></span>
+                <span>•</span>
+                <span>Auditor: <strong>{{ $auditorName }}</strong></span>
+            </div>
+        </header>
 
         <form method="POST" action="/audit/{{ $auditId }}/{{ $currentMain }}" id="form">
             @csrf
@@ -19,53 +27,33 @@
             @foreach ($subClauses as $subCode)
                 <div class="sub-clause-container">
                     <div class="clause-header">
-                        <h2 style="margin: 0; font-size: 1.25rem; color: #1e293b;">
-                            {{ $subCode }} – {{ $clauseTitles[$subCode] ?? 'Detail Klausul' }}
-                        </h2>
+                        <h2>{{ $subCode }} – {{ $clauseTitles[$subCode] ?? 'Detail Klausul' }}</h2>
                     </div>
 
                     @foreach ($maturityLevels as $level)
-                        <div class="level-section" style="margin-top: 25px;">
-                            <h4 style="color: #475569; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">
-                                Maturity Level {{ $level->level_number }}
-                            </h4>
+                        <div class="level-section">
+                            <div class="level-title">Maturity Level {{ $level->level_number }}</div>
 
                             @php $items = $itemsGrouped[$subCode] ?? collect(); @endphp
                             
                             @foreach ($items->where('maturity_level_id', $level->id) as $item)
-                                <div class="item" style="padding: 15px 0; border-bottom: 1px dashed #e2e8f0;">
-                                    <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
+                                <div class="item-row">
+                                    <div class="item-text">
+                                        {{ $item->item_text }}
+                                        <div id="info_{{ $item->id }}" style="font-size: 0.7rem; margin-top: 4px;"></div>
+                                    </div>
                                     
-                                    <div class="button-group" id="btn_group_{{ $item->id }}">
-                                        <button type="button" 
-                                            class="answer-btn q-btn q-btn-yes" 
-                                            onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'YES', this)">
-                                            YES
-                                        </button>
-
-                                        <button type="button" 
-                                            class="answer-btn q-btn q-btn-no" 
-                                            onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">
-                                            NO
-                                        </button>
-
-                                        <button type="button" 
-                                            class="answer-btn q-btn q-btn-na" 
-                                            onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">
-                                            N/A
-                                        </button>
-
-                                        <span style="margin: 0 10px; color: #cbd5e1;">|</span>
-
-                                        <button type="button" class="answer-btn" style="background: #f8fafc; border-style: dashed;" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
-                                            Jawaban Berbeda...
+                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                        <div class="button-group" id="btn_group_{{ $item->id }}">
+                                            <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'YES', this)">YES</button>
+                                            <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">NO</button>
+                                            <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">N/A</button>
+                                        </div>
+                                        <button type="button" class="btn-more" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
+                                            Respon Lain...
                                         </button>
                                     </div>
 
-                                    <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
-                                        <em>Belum ada perubahan</em>
-                                    </div>
-                                    
                                     <div id="hidden_inputs_{{ $item->id }}"></div>
                                 </div>
                             @endforeach
@@ -73,45 +61,24 @@
                     @endforeach
 
                     <div class="question-box">
-                        <label style="font-weight: bold; color: #92400e;">Catatan Temuan / Pertanyaan Auditor ({{ $subCode }})</label>
-                        <textarea 
-                            name="audit_notes[{{ $subCode }}]" 
-                            rows="3" 
-                            class="question-textarea" 
-                            placeholder="Tulis bukti audit atau temuan di sini..."
-                        >{{ $existingNotes[$subCode] ?? '' }}</textarea>
+                        <label style="font-weight: 700; color: #92400e; font-size: 0.85rem; text-transform: uppercase;">Catatan Temuan ({{ $subCode }})</label>
+                        <textarea name="audit_notes[{{ $subCode }}]" rows="3" class="question-textarea" placeholder="Tulis bukti audit atau temuan di sini...">{{ $existingNotes[$subCode] ?? '' }}</textarea>
                     </div>
                 </div>
             @endforeach
 
             <div class="submit-container">
                 <button type="submit" class="submit-audit">
-                    @if($nextMainClause)
-                        Simpan & Lanjut ke Clause {{ $nextMainClause }} →
-                    @else
-                        Simpan & Selesaikan Audit ✓
-                    @endif
+                    {{ $nextMainClause ? 'Simpan & Lanjut ke Clause ' . $nextMainClause : 'Simpan & Selesaikan Audit ✓' }}
                 </button>
             </div>
         </form>
     </div>
-
-    <div id="answerModal" class="modal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-        <div class="modal-content" style="background:white; margin:10% auto; padding:20px; width:400px; border-radius:8px;">
-            <h3 id="modalItemText" style="margin-top:0; font-size: 1rem; color: #1e293b;"></h3>
-            <hr>
-            <div id="modalRespondersList" style="max-height: 300px; overflow-y: auto;"></div>
-            <div style="margin-top: 20px; text-align: right;">
-                <button type="button" onclick="closeModal()" style="padding: 8px 20px; cursor:pointer; background:#2563eb; color:white; border:none; border-radius:4px;">Selesai</button>
-            </div>
-        </div>
-    </div>
-
 <script>
     const auditorName = "{{ $auditorName }}";
     const responders = @json($responders);
 </script>
-
 <script src="{{ asset('js/audit-script.js') }}"></script>
+</body>
 </body>
 </html>
