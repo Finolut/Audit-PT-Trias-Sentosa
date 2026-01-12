@@ -22,7 +22,7 @@
                         </option>
                     @endfor
                 </select>
-            </form>
+            </form> <br>
         {{-- Tombol bantuan atau export bisa diletakkan di sini jika perlu --}}
         <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
             <span class="text-blue-700 font-bold">{{ $audits->count() }}</span> <span class="text-blue-600 text-sm">Total Audit</span>
