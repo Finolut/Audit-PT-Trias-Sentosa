@@ -107,25 +107,11 @@
         </div>
     </div>
 
-    <script>
-        const auditorName = "{{ $auditorName }}";
-        const responders = @json($responders);
-        // State awal untuk menandai jawaban yang sudah ada (jika perlu resume)
-        let sessionAnswers = {}; 
+<script>
+    const auditorName = "{{ $auditorName }}";
+    const responders = @json($responders);
+</script>
 
-        function openModal(itemId, itemText) {
-            document.getElementById('modalItemText').innerText = itemText;
-            const list = document.getElementById('modalRespondersList');
-            list.innerHTML = '';
-            
-            responders.forEach(res => {
-                list.appendChild(createResponderRow(res.responder_name, res.responder_department, itemId));
-            });
-            
-            document.getElementById('answerModal').style.display = 'block';
-        }
-    </script>
-    
-    <script src="{{ asset('js/audit-script.js') }}"></script>
+<script src="{{ asset('js/audit-script.js') }}"></script>
 </body>
 </html>
