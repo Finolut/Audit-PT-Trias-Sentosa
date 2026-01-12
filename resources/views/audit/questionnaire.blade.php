@@ -36,27 +36,26 @@
 
                             @php $items = $itemsGrouped[$subCode] ?? collect(); @endphp
                             
-                            @foreach ($items->where('maturity_level_id', $level->id) as $item)
-                                <div class="item-row">
-                                    <div class="item-text">
-                                        {{ $item->item_text }}
-                                        <div id="info_{{ $item->id }}" style="font-size: 0.7rem; margin-top: 4px;"></div>
-                                    </div>
-                                    
-                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                        <div class="button-group" id="btn_group_{{ $item->id }}">
-                                            <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'YES', this)">YES</button>
-                                            <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">NO</button>
-                                            <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">N/A</button>
-                                        </div>
-                                        <button type="button" class="btn-more" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
-                                            Respon Lain...
-                                        </button>
-                                    </div>
+                  @foreach ($items->where('maturity_level_id', $level->id) as $item)
+    <div class="item-row" id="row_{{ $item->id }}">
+        <div class="item-text">
+            {{ $item->item_text }}
+            </div>
+        
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <div class="button-group" id="btn_group_{{ $item->id }}">
+                <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'YES', this)">YES</button>
+                <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">NO</button>
+                <button type="button" class="answer-btn q-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">N/A</button>
+            </div>
+            <button type="button" class="btn-more" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
+                Respon Lain...
+            </button>
+        </div>
 
-                                    <div id="hidden_inputs_{{ $item->id }}"></div>
-                                </div>
-                            @endforeach
+        <div id="hidden_inputs_{{ $item->id }}"></div>
+    </div>
+@endforeach
                         </div>
                     @endforeach
 
