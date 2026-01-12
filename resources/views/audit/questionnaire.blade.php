@@ -52,7 +52,24 @@
                 Respon Lain...
             </button>
         </div>
+<div id="answerModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);">
+        <div class="modal-content" style="background:white; margin:5% auto; padding:0; width:90%; max-width:500px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow:hidden;">
+            
+            <div style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+                <h3 style="margin:0; font-size: 1.1rem; color: #1e293b;">Respon Multi-Pihak</h3>
+                <p id="modalItemText" style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;"></p>
+            </div>
 
+            <div id="modalRespondersList" style="padding: 0 1.5rem; max-height: 400px; overflow-y: auto;">
+                </div>
+
+            <div style="padding: 1.5rem; background: #f8fafc; text-align: right; border-top: 1px solid #e2e8f0;">
+                <button type="button" onclick="closeModal()" style="padding: 10px 24px; cursor:pointer; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:600; font-size:0.9rem;">
+                    Simpan Respon
+                </button>
+            </div>
+        </div>
+    </div>
         <div id="hidden_inputs_{{ $item->id }}"></div>
     </div>
 @endforeach
