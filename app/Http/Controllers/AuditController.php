@@ -439,30 +439,42 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         ]);
     }
 
-   public function saveAjax(Request $request)
+  public function saveAjax(Request $request)
 {
-    try {
-        // Kembali ke logika awal: Simpan ke tabel 'answers'
-        DB::table('answers')->updateOrInsert(
-            [
-                'audit_id' => $request->audit_id,
-                'item_id'  => $request->item_id,
-            ],
-            [
-                'auditor_name' => $request->auditor_name,
-                'answer'       => $request->answer,
-                'answered_at'  => now(),
-                // Manual UUID jika data baru
-                'id' => DB::table('answers')
-                            ->where('audit_id', $request->audit_id)
-                            ->where('item_id', $request->item_id)
-                            ->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
-            ]
-        );
+    // Menggunakan Transaction agar jika salah satu gagal, semua batal (menjaga validitas data)
+    return DB::transaction(function () use ($request) {
+        try {
+            $auditId = $request->audit_id;
+            $itemId = $request->item_id;
+            $answer = $request->answer;
 
-        return response()->json(['status' => 'success']);
-    } catch (\Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-    }
+            // 1. Simpan ke tabel answers (Data Detail)
+            DB::table('answers')->updateOrInsert(
+                ['audit_id' => $auditId, 'item_id' => $itemId],
+                [
+                    'auditor_name' => $request->auditor_name,
+                    'answer'       => $answer,
+                    'answered_at'  => now(),
+                    'id'           => DB::table('answers')->where('audit_id', $auditId)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
+                ]
+            );
+
+            // 2. Simpan ke tabel answer_finals (Data Dashboard Admin)
+            DB::table('answer_finals')->updateOrInsert(
+                ['audit_id' => $auditId, 'item_id' => $itemId],
+                [
+                    'yes_count' => $answer === 'YES' ? 1 : 0,
+                    'no_count'  => $answer === 'NO' ? 1 : 0,
+                    'final_yes' => $answer === 'YES' ? 1 : 0,
+                    'final_no'  => $answer === 'NO' ? 1 : 0,
+                    'id'        => DB::table('answer_finals')->where('audit_id', $auditId)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
+                ]
+            );
+
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    });
 }
 }

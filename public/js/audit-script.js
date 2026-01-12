@@ -1,6 +1,14 @@
+// ==========================================
+// KONFIGURASI ANTREAN (QUEUE SYSTEM)
+// ==========================================
 let answerQueue = [];
 let isProcessing = false;
+let sessionAnswers = {}; // Menampung jawaban dari modal "Jawaban Berbeda"
 
+/**
+ * Fungsi Utama: YES/NO/NA Cepat
+ * Langsung memberikan feedback visual dan memasukkan ke antrean
+ */
 async function submitQuickAnswer(event, itemId, value) {
     if (!event) return;
 
@@ -8,26 +16,39 @@ async function submitQuickAnswer(event, itemId, value) {
     const infoBox = document.getElementById(`info_${itemId}`);
     const btnGroup = document.getElementById(`btn_group_${itemId}`);
     
-    // 1. Feedback Visual Instan
+    // 1. Feedback Visual Instan (Sangat Cepat)
     const allButtons = btnGroup.querySelectorAll('.answer-btn');
     allButtons.forEach(btn => {
-        btn.style.opacity = '0.4';
+        btn.style.opacity = '0.3';
         btn.style.border = '1px solid #e2e8f0';
+        btn.classList.remove('active-yes', 'active-no', 'active-na');
     });
+    
     clickedButton.style.opacity = '1';
     clickedButton.style.border = '2px solid #2563eb';
+    
+    // Bersihkan jawaban modal jika user beralih ke quick answer
+    clearHiddenInputs(itemId);
 
-    infoBox.innerHTML = `<span style="color: #64748b;">⏳ Antre...</span>`;
+    infoBox.innerHTML = `<span style="color: #64748b;">⏳ Mengantre...</span>`;
 
     // 2. Masukkan ke Antrean
     answerQueue.push({ itemId, value, infoBox });
 
-    // 3. Proses Antrean
-    processQueue();
+    // 3. Jalankan pemrosesan jika belum berjalan
+    if (!isProcessing) {
+        processQueue();
+    }
 }
 
+/**
+ * Mesin Pemroses Antrean (Tanpa Delay/SetTimeout)
+ */
 async function processQueue() {
-    if (isProcessing || answerQueue.length === 0) return;
+    if (answerQueue.length === 0) {
+        isProcessing = false;
+        return;
+    }
 
     isProcessing = true;
     const task = answerQueue[0];
@@ -49,30 +70,54 @@ async function processQueue() {
         });
 
         if (response.ok) {
-            task.infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan</b>`;
-            answerQueue.shift(); // Hapus yang sudah sukses
+            task.infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan ke Database & Admin</b>`;
+            answerQueue.shift(); // Hapus tugas yang selesai
         } else {
             throw new Error("Gagal");
         }
     } catch (error) {
-        task.infoBox.innerHTML = `<b style="color: #dc2626;">❌ Re-trying...</b>`;
-        // Pindah ke paling belakang jika gagal untuk coba lagi nanti
+        task.infoBox.innerHTML = `<b style="color: #dc2626;">❌ Gangguan, mencoba lagi...</b>`;
+        // Pindahkan ke belakang untuk dicoba lagi
         answerQueue.push(answerQueue.shift());
     }
 
-    isProcessing = false;
-    setTimeout(processQueue, 150); // Jeda 150ms antar pengiriman
+    // Panggil fungsi ini lagi secepat mungkin (tanpa delay)
+    processQueue();
+}
+
+// ==========================================
+// LOGIKA MODAL (JAWABAN BERBEDA)
+// ==========================================
+
+function openModal(itemId, itemText) {
+    const modal = document.getElementById('answerModal');
+    const list = document.getElementById('modalRespondersList');
+    document.getElementById('modalItemText').innerText = itemText;
+    list.innerHTML = '';
+
+    responders.forEach(r => {
+        list.appendChild(createResponderRow(r.name, r.role, itemId));
+    });
+
+    modal.style.display = 'block';
 }
 
 function createResponderRow(name, role, itemId) {
     const div = document.createElement('div');
     div.className = 'responder-row';
+    div.style.display = 'flex';
+    div.style.justifyContent = 'space-between';
+    div.style.marginBottom = '10px';
+    div.style.padding = '10px';
+    div.style.background = '#f8fafc';
+    div.style.borderRadius = '8px';
+
     const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
     
     div.innerHTML = `
         <div>
-            <span style="font-weight:bold">${name}</span> <br>
-            <small class="badge" style="background:#e2e8f0">${role}</small>
+            <span style="font-weight:bold; color:#1e293b;">${name}</span> <br>
+            <small style="color:#64748b;">${role}</small>
         </div>
         <div class="button-group">
             <button type="button" class="answer-btn q-btn ${existingVal === 'YES' ? 'active-yes' : ''}" onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
@@ -93,9 +138,12 @@ function setVal(itemId, userName, val, btn) {
     
     sessionAnswers[`${itemId}_${userName}`] = val;
     
-    // Reset quick buttons visually
+    // Matikan visual tombol quick answer karena sekarang menggunakan jawaban modal
     const btnGroup = document.getElementById(`btn_group_${itemId}`);
-    btnGroup.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+    btnGroup.querySelectorAll('.q-btn').forEach(b => {
+        b.style.opacity = '0.3';
+        b.style.border = '1px solid #e2e8f0';
+    });
     
     updateHiddenInputs(itemId);
     updateMainInfo(itemId);
@@ -118,17 +166,23 @@ function updateHiddenInputs(itemId) {
 
 function updateMainInfo(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
-    let names = [];
+    let entries = [];
     for (let key in sessionAnswers) {
-        if (key.startsWith(itemId + '_')) names.push(key.replace(itemId + '_', ''));
+        if (key.startsWith(itemId + '_')) {
+            const name = key.split('_')[1];
+            const val = sessionAnswers[key];
+            entries.push(`${name}: ${val}`);
+        }
     }
-    infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">✓ Jawaban tersimpan untuk: ${names.join(', ')}</span>`;
+    infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">📝 Detail: ${entries.join(', ')}</span>`;
 }
 
 function clearHiddenInputs(itemId) {
     for (let key in sessionAnswers) {
         if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
     }
+    const container = document.getElementById(`hidden_inputs_${itemId}`);
+    if(container) container.innerHTML = '';
 }
 
 function closeModal() {
