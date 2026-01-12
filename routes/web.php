@@ -183,3 +183,4 @@ Route::get('/audit/{audit}/{mainClause}', [AuditController::class, 'show'])
 Route::post('/audit/{audit}/{mainClause}', [AuditController::class, 'store'])
     ->name('audit.store');
 
+Route::post('/audit/save-ajax', [AuditController::class, 'saveAjax'])->name('audit.saveAjax');

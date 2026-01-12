@@ -1,37 +1,53 @@
 let sessionAnswers = {};
 let currentEditingItemId = null;
 
-function submitQuickAnswer(itemId, val) {
-    clearHiddenInputs(itemId);
-    sessionAnswers[`${itemId}_${auditorName}`] = val;
-    
-    const btnGroup = document.getElementById(`btn_group_${itemId}`);
-    btnGroup.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
-    
-    if(val === 'YES') btnGroup.querySelector('.q-btn-yes').classList.add('active-yes');
-    if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
-    if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
-
-    updateHiddenInputs(itemId);
+async function submitQuickAnswer(itemId, value) {
     const infoBox = document.getElementById(`info_${itemId}`);
-    infoBox.innerHTML = `<span style="color: #16a34a;">Terpilih secara cepat: <strong>${val}</strong></span>`;
-}
+    const btnGroup = document.getElementById(`btn_group_${itemId}`);
+    
+    // Simpan teks asli untuk fallback jika error
+    const originalInfo = infoBox.innerHTML;
+    
+    // Beri indikasi sedang loading
+    infoBox.innerHTML = `<span style="color: #2563eb;">⚡ Mengirim...</span>`;
+    
+    // Ambil Audit ID dari URL atau variabel global
+    const urlParams = window.location.pathname.split('/');
+    const auditId = urlParams[2]; // Sesuaikan dengan struktur URL anda
 
-function openModal(itemId, itemText) {
-    currentEditingItemId = itemId;
-    document.getElementById('modalItemText').innerText = itemText;
-    const listDiv = document.getElementById('modalRespondersList');
-    listDiv.innerHTML = '';
-    
-    // Auditor Row
-    listDiv.appendChild(createResponderRow(auditorName, 'Auditor', itemId));
-    
-    // Responders Rows
-    responders.forEach(resp => {
-        listDiv.appendChild(createResponderRow(resp.responder_name, 'Responder', itemId));
-    });
-    
-    document.getElementById('answerModal').style.display = 'block';
+    try {
+        const response = await fetch('/audit/save-ajax', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            },
+            body: JSON.stringify({
+                audit_id: auditId,
+                item_id: itemId,
+                answer: value,
+                auditor_name: auditorName // Diambil dari variabel global di blade
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Update UI jika berhasil
+            infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan: ${value}</b>`;
+            
+            // Tambahkan efek visual pada tombol yang dipilih
+            const buttons = btnGroup.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.style.opacity = '0.5');
+            event.target.style.opacity = '1';
+            event.target.style.transform = 'scale(1.05)';
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        alert("Gagal menyimpan: " + error.message);
+        infoBox.innerHTML = originalInfo;
+    }
 }
 
 function createResponderRow(name, role, itemId) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class AuditController extends Controller
 {
@@ -437,4 +438,27 @@ return redirect()->route('audit.menu', ['id' => $auditId])
             'chartData' => $chartData
         ]);
     }
+
+    public function saveAjax(Request $request)
+{
+    try {
+        // Update atau Insert ke tabel answers
+        DB::table('answers')->updateOrInsert(
+            [
+                'audit_id' => $request->audit_id,
+                'item_id'  => $request->item_id,
+            ],
+            [
+                'auditor_name' => $request->auditor_name,
+                'answer'       => $request->answer,
+                'answered_at'  => Carbon::now(),
+                'id'           => (string) \Illuminate\Support\Str::uuid(), // Jika PK anda UUID
+            ]
+        );
+
+        return response()->json(['status' => 'success', 'message' => 'Tersimpan']);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+}
 }
