@@ -37,9 +37,9 @@
                                     <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
                                     
                                     <div class="button-group" id="btn_group_{{ $item->id }}">
-                                        <button type="button" class="answer-btn q-btn q-btn-yes" onclick="submitQuickAnswer('{{ $item->id }}', 'YES')">YES</button>
-                                        <button type="button" class="answer-btn q-btn q-btn-no" onclick="submitQuickAnswer('{{ $item->id }}', 'NO')">NO</button>
-                                        <button type="button" class="answer-btn q-btn q-btn-na" onclick="submitQuickAnswer('{{ $item->id }}', 'N/A')">N/A</button>
+                                       <button type="button" class="answer-btn q-btn q-btn-yes" onclick="submitQuickAnswer(event, '{{ $item->id }}', 'YES')">YES</button>
+<button type="button" class="answer-btn q-btn q-btn-no" onclick="submitQuickAnswer(event, '{{ $item->id }}', 'NO')">NO</button>
+<button type="button" class="answer-btn q-btn q-btn-na" onclick="submitQuickAnswer(event, '{{ $item->id }}', 'N/A')">N/A</button>
 
                                         <span style="margin: 0 10px; color: #cbd5e1;">|</span>
 

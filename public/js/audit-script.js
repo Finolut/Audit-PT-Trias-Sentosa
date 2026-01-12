@@ -1,19 +1,21 @@
 let sessionAnswers = {};
 let currentEditingItemId = null;
 
-async function submitQuickAnswer(itemId, value) {
+async function submitQuickAnswer(event, itemId, value) {
+    // Cegah error jika event tidak terkirim
+    if (!event) return;
+
+    const clickedButton = event.currentTarget;
     const infoBox = document.getElementById(`info_${itemId}`);
     const btnGroup = document.getElementById(`btn_group_${itemId}`);
     
-    // Simpan teks asli untuk fallback jika error
+    // Beri indikasi loading
     const originalInfo = infoBox.innerHTML;
+    infoBox.innerHTML = `<span style="color: #2563eb;">⚡ Menyimpan...</span>`;
     
-    // Beri indikasi sedang loading
-    infoBox.innerHTML = `<span style="color: #2563eb;">⚡ Mengirim...</span>`;
-    
-    // Ambil Audit ID dari URL atau variabel global
-    const urlParams = window.location.pathname.split('/');
-    const auditId = urlParams[2]; // Sesuaikan dengan struktur URL anda
+    // Ambil Audit ID dari URL (asumsi /audit/{id}/{clause})
+    const pathParts = window.location.pathname.split('/');
+    const auditId = pathParts[2]; 
 
     try {
         const response = await fetch('/audit/save-ajax', {
@@ -26,25 +28,33 @@ async function submitQuickAnswer(itemId, value) {
                 audit_id: auditId,
                 item_id: itemId,
                 answer: value,
-                auditor_name: auditorName // Diambil dari variabel global di blade
+                auditor_name: auditorName // Pastikan variabel ini ada di script Blade
             })
         });
 
         const result = await response.json();
 
         if (response.ok) {
-            // Update UI jika berhasil
+            // 1. Update teks info
             infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan: ${value}</b>`;
             
-            // Tambahkan efek visual pada tombol yang dipilih
-            const buttons = btnGroup.querySelectorAll('.answer-btn');
-            buttons.forEach(btn => btn.style.opacity = '0.5');
-            event.target.style.opacity = '1';
-            event.target.style.transform = 'scale(1.05)';
+            // 2. Reset semua tombol di grup tersebut
+            const allButtons = btnGroup.querySelectorAll('.answer-btn');
+            allButtons.forEach(btn => {
+                btn.style.opacity = '0.4';
+                btn.style.border = '1px solid #e2e8f0';
+                btn.style.transform = 'scale(1)';
+            });
+
+            // 3. Highlight tombol yang baru saja diklik
+            clickedButton.style.opacity = '1';
+            clickedButton.style.transform = 'scale(1.1)';
+            clickedButton.style.border = '2px solid #2563eb';
         } else {
             throw new Error(result.message);
         }
     } catch (error) {
+        console.error(error);
         alert("Gagal menyimpan: " + error.message);
         infoBox.innerHTML = originalInfo;
     }
