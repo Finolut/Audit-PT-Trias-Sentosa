@@ -439,29 +439,44 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         ]);
     }
 
-    public function saveAjax(Request $request) 
+    public function saveAjax(Request $request)
 {
     DB::beginTransaction();
     try {
-        // 1. Simpan data mentah ke 'answers'
+        // 1. Simpan ke tabel answers (Data Mentah)
         DB::table('answers')->updateOrInsert(
-            ['audit_id' => $request->audit_id, 'item_id' => $request->item_id],
-            ['answer' => $request->answer, 'auditor_name' => $request->auditor_name, 'answered_at' => now()]
+            [
+                'audit_id' => $request->audit_id,
+                'item_id'  => $request->item_id,
+            ],
+            [
+                'auditor_name' => $request->auditor_name,
+                'answer'       => $request->answer,
+                'answered_at'  => now(),
+                'id'           => DB::table('answers')
+                                    ->where('audit_id', $request->audit_id)
+                                    ->where('item_id', $request->item_id)
+                                    ->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
+            ]
         );
 
-        // 2. Update 'answer_finals' (Data yang dibaca Admin)
-        // Hitung total jawaban untuk item ini di audit ini
-        $yesCount = DB::table('answers')->where('audit_id', $request->audit_id)->where('item_id', $request->item_id)->where('answer', 'YES')->count();
-        $noCount  = DB::table('answers')->where('audit_id', $request->audit_id)->where('item_id', $request->item_id)->where('answer', 'NO')->count();
-
+        // 2. Simpan ke tabel answer_finals (Data untuk Grafik Admin)
+        // Menghapus 'updated_at' karena error SQL menyatakan kolom tersebut tidak ada
         DB::table('answer_finals')->updateOrInsert(
-            ['audit_id' => $request->audit_id, 'item_id' => $request->item_id],
             [
-                'yes_count' => $yesCount,
-                'no_count'  => $noCount,
-                'final_yes' => ($yesCount > $noCount) ? 1 : 0,
-                'final_no'  => ($noCount > $yesCount) ? 1 : 0,
-                'updated_at' => now()
+                'audit_id' => $request->audit_id,
+                'item_id'  => $request->item_id,
+            ],
+            [
+                'yes_count' => $request->answer === 'YES' ? 1 : 0,
+                'no_count'  => $request->answer === 'NO' ? 1 : 0,
+                'final_yes' => $request->answer === 'YES' ? 1 : 0,
+                'final_no'  => $request->answer === 'NO' ? 1 : 0,
+                // Jangan masukkan updated_at jika tidak ada di migrasi/tabel
+                'id'        => DB::table('answer_finals')
+                                    ->where('audit_id', $request->audit_id)
+                                    ->where('item_id', $request->item_id)
+                                    ->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
             ]
         );
 
