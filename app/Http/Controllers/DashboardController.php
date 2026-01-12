@@ -211,4 +211,23 @@ class DashboardController extends Controller
             'items'
         ));
     }
+
+    public function log(Request $request, $deptId)
+{
+    $currentDept = Department::findOrFail($deptId);
+    
+    // Mulai query
+    $query = Audit::where('department_id', $deptId)
+                  ->with(['session', 'responders'])
+                  ->latest();
+
+    // Logika Filter Tahun
+    if ($request->has('year') && $request->year != '') {
+        $query->whereYear('created_at', $request->year);
+    }
+
+    $audits = $query->get();
+
+    return view('admin.audit.log', compact('audits', 'currentDept'));
+}
 }

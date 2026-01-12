@@ -6,6 +6,23 @@
             <h2 class="text-3xl font-extrabold text-gray-800">Audit Log</h2>
             <p class="text-gray-500 mt-1">Daftar riwayat audit untuk departemen: <span class="font-bold text-blue-600">{{ $currentDept->name }}</span></p>
         </div>
+
+        <div class="flex items-center gap-4">
+            <form action="{{ url()->current() }}" method="GET" class="flex items-center gap-2 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
+                <select name="year" onchange="this.form.submit()" class="text-sm border-none focus:ring-0 rounded-lg bg-transparent font-semibold text-gray-700">
+                    <option value="">Semua Tahun</option>
+                    @php
+                        $startYear = 2026;
+                        $currentYear = date('Y');
+                        $endYear = max($startYear, $currentYear) + 1; // Menampilkan sampai 1 tahun ke depan
+                    @endphp
+                    @for ($y = $startYear; $y <= $endYear; $y++)
+                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>
+                            Tahun {{ $y }}
+                        </option>
+                    @endfor
+                </select>
+            </form>
         {{-- Tombol bantuan atau export bisa diletakkan di sini jika perlu --}}
         <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
             <span class="text-blue-700 font-bold">{{ $audits->count() }}</span> <span class="text-blue-600 text-sm">Total Audit</span>
