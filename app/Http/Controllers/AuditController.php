@@ -161,7 +161,7 @@ public function startAudit(Request $request)
 
     // AMBIL DATA KLAUSUL YANG SUDAH TERISI
     // Kita mengambil 'main_clause' yang unik dari tabel jawaban
-    $completedClauses = DB::table('audit_answers')
+    $completedClauses = DB::table('answers')
         ->where('audit_id', $auditId)
         ->distinct()
         ->pluck('main_clause') // Contoh hasil: ["4", "5"]
