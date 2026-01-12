@@ -51,19 +51,29 @@ class DashboardController extends Controller
      * 2. HALAMAN DETAIL DEPARTEMEN (Menu Sidebar)
      * Route: /admin/department/{id}
      */
-    public function showDepartment($deptId)
-    {
-        $departments = Department::all();
-        $currentDept = Department::findOrFail($deptId);
-        
-        // Ambil audit milik departemen ini
-        $audits = Audit::where('department_id', $deptId)
-                    ->with(['session']) 
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+    /**
+ * 2. HALAMAN DETAIL DEPARTEMEN (Menu Sidebar)
+ * Route: /admin/department/{id}
+ */
+public function showDepartment(Request $request, $deptId) // Tambahkan Request $request
+{
+    $departments = Department::all();
+    $currentDept = Department::findOrFail($deptId);
+    
+    // Mulai query
+    $query = Audit::where('department_id', $deptId)
+                  ->with(['session', 'responders']); // Tambahkan responders agar badge nama muncul
 
-        return view('admin.department_audits', compact('departments', 'currentDept', 'audits'));
+    // LOGIKA FILTER TAHUN
+    if ($request->has('year') && $request->year != '') {
+        $query->whereYear('created_at', $request->year);
     }
+
+    // Ambil data dengan urutan terbaru
+    $audits = $query->orderBy('created_at', 'desc')->get();
+
+    return view('admin.department_audits', compact('departments', 'currentDept', 'audits'));
+}
 
     /**
      * 3. HALAMAN OVERVIEW AUDIT (GRAFIK UTAMA)
