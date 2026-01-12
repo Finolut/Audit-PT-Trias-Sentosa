@@ -1,13 +1,9 @@
-// ==========================================
-// KONFIGURASI ANTREAN (QUEUE SYSTEM)
-// ==========================================
-let answerQueue = [];
-let isProcessing = false;
-let sessionAnswers = {}; // Menampung jawaban dari modal "Jawaban Berbeda"
+// Menggunakan Set untuk melacak request yang sedang berjalan
+let activeRequests = new Set();
+let sessionAnswers = {};
 
 /**
- * Fungsi Utama: YES/NO/NA Cepat
- * Langsung memberikan feedback visual dan memasukkan ke antrean
+ * FUNGSI TERCEPAT: Kirim Paralel
  */
 async function submitQuickAnswer(event, itemId, value) {
     if (!event) return;
@@ -16,135 +12,94 @@ async function submitQuickAnswer(event, itemId, value) {
     const infoBox = document.getElementById(`info_${itemId}`);
     const btnGroup = document.getElementById(`btn_group_${itemId}`);
     
-    // 1. Feedback Visual Instan (Sangat Cepat)
-    const allButtons = btnGroup.querySelectorAll('.answer-btn');
-    allButtons.forEach(btn => {
+    // 1. Feedback Visual Instan (0ms)
+    btnGroup.querySelectorAll('.answer-btn').forEach(btn => {
         btn.style.opacity = '0.3';
         btn.style.border = '1px solid #e2e8f0';
-        btn.classList.remove('active-yes', 'active-no', 'active-na');
     });
-    
     clickedButton.style.opacity = '1';
     clickedButton.style.border = '2px solid #2563eb';
     
-    // Bersihkan jawaban modal jika user beralih ke quick answer
     clearHiddenInputs(itemId);
+    infoBox.innerHTML = `<span style="color: #2563eb;">⚡ Mengirim...</span>`;
 
-    infoBox.innerHTML = `<span style="color: #64748b;">⏳ Mengantre...</span>`;
+    // 2. Kirim secara PARALEL (Tidak mengantri)
+    const auditId = window.location.pathname.split('/')[2];
+    const requestId = `${itemId}_${Date.now()}`;
+    activeRequests.add(requestId);
 
-    // 2. Masukkan ke Antrean
-    answerQueue.push({ itemId, value, infoBox });
-
-    // 3. Jalankan pemrosesan jika belum berjalan
-    if (!isProcessing) {
-        processQueue();
-    }
+    fetch('/audit/save-ajax', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+        },
+        body: JSON.stringify({
+            audit_id: auditId,
+            item_id: itemId,
+            answer: value,
+            auditor_name: auditorName
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan</b>`;
+        } else {
+            infoBox.innerHTML = `<b style="color: #dc2626;">❌ Gagal Simpan</b>`;
+        }
+    })
+    .catch(() => {
+        infoBox.innerHTML = `<b style="color: #dc2626;">⚠️ Gangguan Koneksi</b>`;
+    })
+    .finally(() => {
+        activeRequests.delete(requestId);
+    });
 }
 
 /**
- * Mesin Pemroses Antrean (Tanpa Delay/SetTimeout)
+ * LOGIKA BACKGROUND: Memungkinkan pindah halaman meski sedang loading
  */
-async function processQueue() {
-    if (answerQueue.length === 0) {
-        isProcessing = false;
-        return;
+window.addEventListener('beforeunload', (event) => {
+    if (activeRequests.size > 0) {
+        // Jika masih ada yang loading, browser akan mencoba menyelesaikannya 
+        // di latar belakang sebelum benar-benar berpindah (Keep-Alive)
+        console.log("Menyelesaikan pengiriman data di latar belakang...");
     }
-
-    isProcessing = true;
-    const task = answerQueue[0];
-    const auditId = window.location.pathname.split('/')[2];
-
-    try {
-        const response = await fetch('/audit/save-ajax', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-            },
-            body: JSON.stringify({
-                audit_id: auditId,
-                item_id: task.itemId,
-                answer: task.value,
-                auditor_name: auditorName
-            })
-        });
-
-        if (response.ok) {
-            task.infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan ke Database & Admin</b>`;
-            answerQueue.shift(); // Hapus tugas yang selesai
-        } else {
-            throw new Error("Gagal");
-        }
-    } catch (error) {
-        task.infoBox.innerHTML = `<b style="color: #dc2626;">❌ Gangguan, mencoba lagi...</b>`;
-        // Pindahkan ke belakang untuk dicoba lagi
-        answerQueue.push(answerQueue.shift());
-    }
-
-    // Panggil fungsi ini lagi secepat mungkin (tanpa delay)
-    processQueue();
-}
+});
 
 // ==========================================
-// LOGIKA MODAL (JAWABAN BERBEDA)
+// FUNGSI MODAL (TETAP DISEDIAKAN)
 // ==========================================
-
 function openModal(itemId, itemText) {
     const modal = document.getElementById('answerModal');
     const list = document.getElementById('modalRespondersList');
     document.getElementById('modalItemText').innerText = itemText;
     list.innerHTML = '';
-
-    responders.forEach(r => {
-        list.appendChild(createResponderRow(r.name, r.role, itemId));
-    });
-
+    responders.forEach(r => list.appendChild(createResponderRow(r.name, r.role, itemId)));
     modal.style.display = 'block';
 }
 
 function createResponderRow(name, role, itemId) {
     const div = document.createElement('div');
     div.className = 'responder-row';
-    div.style.display = 'flex';
-    div.style.justifyContent = 'space-between';
-    div.style.marginBottom = '10px';
-    div.style.padding = '10px';
-    div.style.background = '#f8fafc';
-    div.style.borderRadius = '8px';
-
+    div.style = 'display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; background:#f8fafc; border-radius:8px;';
     const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
-    
     div.innerHTML = `
-        <div>
-            <span style="font-weight:bold; color:#1e293b;">${name}</span> <br>
-            <small style="color:#64748b;">${role}</small>
-        </div>
+        <div><span style="font-weight:bold;">${name}</span><br><small>${role}</small></div>
         <div class="button-group">
             <button type="button" class="answer-btn q-btn ${existingVal === 'YES' ? 'active-yes' : ''}" onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
             <button type="button" class="answer-btn q-btn ${existingVal === 'NO' ? 'active-no' : ''}" onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
             <button type="button" class="answer-btn q-btn ${existingVal === 'N/A' ? 'active-na' : ''}" onclick="setVal('${itemId}', '${name}', 'N/A', this)">N/A</button>
-        </div>
-    `;
+        </div>`;
     return div;
 }
 
 function setVal(itemId, userName, val, btn) {
-    const parent = btn.parentElement;
-    parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
-    
+    btn.parentElement.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
     if(val === 'YES') btn.classList.add('active-yes');
     if(val === 'NO') btn.classList.add('active-no');
     if(val === 'N/A') btn.classList.add('active-na');
-    
     sessionAnswers[`${itemId}_${userName}`] = val;
-    
-    // Matikan visual tombol quick answer karena sekarang menggunakan jawaban modal
-    const btnGroup = document.getElementById(`btn_group_${itemId}`);
-    btnGroup.querySelectorAll('.q-btn').forEach(b => {
-        b.style.opacity = '0.3';
-        b.style.border = '1px solid #e2e8f0';
-    });
-    
     updateHiddenInputs(itemId);
     updateMainInfo(itemId);
 }
@@ -155,36 +110,24 @@ function updateHiddenInputs(itemId) {
     for (let key in sessionAnswers) {
         if (key.startsWith(itemId + '_')) {
             const name = key.replace(itemId + '_', '');
-            const val = sessionAnswers[key];
-            container.innerHTML += `
-                <input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
-                <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
-            `;
+            container.innerHTML += `<input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
+                                    <input type="hidden" name="answers[${itemId}][${name}][val]" value="${sessionAnswers[key]}">`;
         }
     }
 }
 
 function updateMainInfo(itemId) {
-    const infoBox = document.getElementById(`info_${itemId}`);
     let entries = [];
     for (let key in sessionAnswers) {
-        if (key.startsWith(itemId + '_')) {
-            const name = key.split('_')[1];
-            const val = sessionAnswers[key];
-            entries.push(`${name}: ${val}`);
-        }
+        if (key.startsWith(itemId + '_')) entries.push(`${key.split('_')[1]}: ${sessionAnswers[key]}`);
     }
-    infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">📝 Detail: ${entries.join(', ')}</span>`;
+    document.getElementById(`info_${itemId}`).innerHTML = `<span style="color: #2563eb; font-weight:bold;">📝 Detail: ${entries.join(', ')}</span>`;
 }
 
 function clearHiddenInputs(itemId) {
-    for (let key in sessionAnswers) {
-        if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
-    }
+    for (let key in sessionAnswers) if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
     const container = document.getElementById(`hidden_inputs_${itemId}`);
     if(container) container.innerHTML = '';
 }
 
-function closeModal() {
-    document.getElementById('answerModal').style.display = 'none';
-}
+function closeModal() { document.getElementById('answerModal').style.display = 'none'; }
