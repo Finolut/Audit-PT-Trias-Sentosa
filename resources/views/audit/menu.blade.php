@@ -6,174 +6,229 @@
     <title>Audit Dashboard - {{ $deptName }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --slate-50: #f8fafc;
+            --slate-200: #e2e8f0;
+            --slate-600: #475569;
+            --slate-900: #0f172a;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Abu-abu sangat muda */
+            background-color: #f1f5f9;
             margin: 0;
-            padding: 0;
-            color: #1e293b;
+            color: var(--slate-900);
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 2rem 1rem;
         }
 
-        /* Header Styles */
+        /* Header Modern */
         .header {
-            margin-bottom: 40px;
             background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 6px solid #2563eb;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid var(--slate-200);
         }
-        .header h1 { margin: 0; font-size: 24px; color: #0f172a; }
-        .header p { margin: 8px 0 0; color: #64748b; }
 
-        /* Grid Layout */
+        .header-content h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .header-content p {
+            margin: 0.5rem 0 0;
+            color: var(--slate-600);
+            font-size: 0.9rem;
+        }
+
+        /* Grid */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsif */
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
         }
 
-        /* Card Style (Mirip Gambar) */
+        /* Card Modern */
         .card {
             background: white;
-            border-radius: 8px;
-            padding: 24px;
+            border-radius: 12px;
+            padding: 1.5rem;
             text-decoration: none;
             color: inherit;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            border-left: 5px solid #3b82f6; /* Garis biru di kiri */
-            transition: all 0.2s ease;
+            border: 1px solid var(--slate-200);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            height: 140px; /* Tinggi tetap agar rapi */
             position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--primary);
+            transition: width 0.3s;
         }
 
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-left-color: #2563eb;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .card:hover::before {
+            width: 8px;
         }
 
         .card-number {
-            font-size: 20px;
+            font-size: 0.85rem;
             font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 8px;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
         .card-title {
-            font-size: 14px;
-            color: #475569;
-            line-height: 1.5;
-            flex-grow: 1; /* Agar teks mengisi ruang */
-        }
-
-        .arrow-icon {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            color: #3b82f6;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        /* Tombol Selesai */
-        .finish-section {
-            margin-top: 40px;
-            text-align: center;
-        }
-        .finish-btn {
-            background-color: #10b981;
-            color: white;
-            padding: 14px 32px;
-            border-radius: 8px;
-            text-decoration: none;
+            font-size: 1rem;
             font-weight: 600;
-            display: inline-block;
-            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+            color: var(--slate-900);
+            margin-bottom: 2rem;
+            padding-right: 1.5rem;
         }
-        .finish-btn:hover { background-color: #059669; }
 
-  /* Warna kartu jika sudah selesai */
-.card.completed {
-    border-left: 5px solid #10b981 !important; /* Hijau */
-    background-color: #f0fdf4 !important; /* Hijau sangat muda */
-}
+        /* Status Styling */
+        .status-area {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
 
-/* Badge Status di pojok kanan bawah */
-.status-badge {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    font-weight: 600;
-}
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
 
-.badge-completed { color: #10b981; }
-.badge-pending { color: #94a3b8; }
+        .card.completed::before { background: var(--success); }
+        .card.completed { background: #f0fdf4; border-color: #bbf7d0; }
+        .card.completed .card-number { color: var(--success); }
 
-/* Lingkaran Ceklis */
-.check-icon {
-    background: #10b981;
-    color: white;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-}
+        .badge-completed { background: #dcfce7; color: var(--success); }
+        .badge-pending { background: #f1f5f9; color: var(--slate-600); }
+
+        .arrow {
+            color: var(--primary);
+            transition: transform 0.3s;
+        }
+        .card:hover .arrow { transform: translateX(5px); }
+
+        /* Button Final */
+        .finish-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px dashed var(--slate-200);
+        }
+
+        .finish-btn {
+            background: var(--success);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+
+        .finish-btn:hover {
+            background: #059669;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 640px) {
+            .header { flex-direction: column; text-align: center; gap: 1rem; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>Audit Dashboard</h1>
-        <p>Auditor: <strong>{{ $auditorName }}</strong> | Target: <strong>{{ $deptName }}</strong></p>
+        <div class="header-content">
+            <h1>Audit Dashboard</h1>
+            <p>Auditor: <strong>{{ $auditorName }}</strong> • Dept: <strong>{{ $deptName }}</strong></p>
+        </div>
+        <div class="progress-info">
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--slate-600);">
+                PROGRES: {{ count($completedClauses) }} / {{ count($mainClauses) }} Klausul
+            </span>
+        </div>
     </div>
 
-   <div class="grid-container">
-    @foreach($mainClauses as $code)
-        @php
-            // Pastikan perbandingan string ke string
-            $isDone = in_array((string)$code, array_map('strval', $completedClauses));
-        @endphp
+    <div class="grid-container">
+        @foreach($mainClauses as $code)
+            @php
+                $isDone = in_array((string)$code, array_map('strval', $completedClauses));
+            @endphp
 
-        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
-           class="card {{ $isDone ? 'completed' : '' }}">
-            
-            <span class="card-number">{{ $code }}</span>
-            <span class="card-title">{{ $titles[$code] ?? 'Clause ' . $code }}</span>
+            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+               class="card {{ $isDone ? 'completed' : '' }}">
+                
+                <span class="card-number">Klausul {{ $code }}</span>
+                <span class="card-title">{{ $titles[$code] ?? 'Detail Klausul ' . $code }}</span>
 
-            @if($isDone)
-                <div class="status-badge badge-completed">
-                    <span class="check-icon">✓</span> Selesai
+                <div class="status-area">
+                    @if($isDone)
+                        <div class="status-badge badge-completed">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
+                            Selesai
+                        </div>
+                    @else
+                        <div class="status-badge badge-pending">Belum diisi</div>
+                        <span class="arrow">→</span>
+                    @endif
                 </div>
-            @else
-                <div class="status-badge badge-pending">Belum diisi</div>
-                <span class="arrow-icon">→</span>
-            @endif
-        </a>
-    @endforeach
-</div>
-@if(count($completedClauses) == count($mainClauses))
-    <div class="finish-section">
-        <button type="submit" class="finish-btn">Submit Laporan Final ✓</button>
+            </a>
+        @endforeach
     </div>
-@endif
+
+    @if(count($completedClauses) == count($mainClauses))
+        <div class="finish-section">
+            <p style="margin-bottom: 1.5rem; font-weight: 500; color: var(--slate-600);">Semua klausul telah diaudit. Silahkan kirim laporan final.</p>
+            <form action="{{ route('audit.final_submit', $auditId) }}" method="POST">
+                @csrf
+                <button type="submit" class="finish-btn">Submit Laporan Final ✓</button>
+            </form>
+        </div>
+    @endif
+</div>
+
 </body>
 </html>
