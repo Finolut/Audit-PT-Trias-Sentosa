@@ -172,7 +172,7 @@ Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
 
     // ROUTE YANG HILANG: Detail per Main Clause (Tabel & Stacked Bar)
     Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])
-        ->name('audit.clause_detail');
+        ->name('audit.clause_detail'); 
 });
 
 // tampilkan klausul

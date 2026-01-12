@@ -1,75 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <title>Audit Klausul {{ $currentMain }}</title>
     <link rel="stylesheet" href="{{ asset('css/audit-style.css') }}">
-    <style>
-        .answer-btn { transition: all 0.2s; font-weight: bold; cursor: pointer; padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; background: white; }
-        .active-yes { background-color: #16a34a !important; color: white !important; border-color: #15803d !important; }
-        .active-no { background-color: #dc2626 !important; color: white !important; border-color: #b91c1c !important; }
-        .active-na { background-color: #6b7280 !important; color: white !important; border-color: #4b5563 !important; }
-        .button-group { display: flex; gap: 8px; align-items: center; }
-        .q-btn { min-width: 60px; }
-        
-        .sub-clause-container {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 50px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        }
-
-        .clause-header {
-            position: sticky;
-            top: 0;
-            background: #f8fafc;
-            padding: 15px;
-            border-bottom: 2px solid #2563eb;
-            margin: -25px -25px 20px -25px;
-            border-radius: 12px 12px 0 0;
-            z-index: 10;
-        }
-
-        .question-box {
-            margin-top: 25px;
-            background-color: #fffbeb;
-            border: 1px solid #fcd34d;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .question-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-family: inherit;
-            resize: vertical;
-        }
-        .submit-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 20px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 8px; }
-        .responder-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-    </style>
 </head>
-<body style="background-color: #f1f5f9; padding: 40px 20px 120px 20px; font-family: sans-serif;">
+<body class="audit-body">
 
-    <div style="max-width: 900px; margin: 0 auto;">
+    <div class="audit-container">
         <a href="{{ route('audit.menu', $auditId) }}" style="text-decoration: none; color: #2563eb; font-weight: bold;">← Kembali ke Menu</a>
         
         <h1 style="margin-top: 20px; color: #1e293b;">Main Clause {{ $currentMain }}</h1>
@@ -117,7 +55,7 @@
                                     <div id="hidden_inputs_{{ $item->id }}"></div>
                                 </div>
                             @endforeach
-                        </div> {{-- End of level-section --}}
+                        </div>
                     @endforeach
 
                     <div class="question-box">
@@ -129,12 +67,11 @@
                             placeholder="Tulis bukti audit atau temuan di sini..."
                         >{{ $existingNotes[$subCode] ?? '' }}</textarea>
                     </div>
-                </div> {{-- End of sub-clause-container --}}
+                </div>
             @endforeach
 
             <div class="submit-container">
-                <button type="submit" class="submit-audit" 
-                        style="background: #2563eb; color: white; padding: 15px 40px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);">
+                <button type="submit" class="submit-audit">
                     @if($nextMainClause)
                         Simpan & Lanjut ke Clause {{ $nextMainClause }} →
                     @else
@@ -159,102 +96,8 @@
     <script>
         const auditorName = "{{ $auditorName }}";
         const responders = @json($responders);
-        let sessionAnswers = {};
-
-        function submitQuickAnswer(itemId, val) {
-            clearHiddenInputs(itemId);
-            sessionAnswers[`${itemId}_${auditorName}`] = val;
-            
-            const btnGroup = document.getElementById(`btn_group_${itemId}`);
-            btnGroup.querySelectorAll('.q-btn').forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
-            
-            if(val === 'YES') btnGroup.querySelector('.q-btn-yes').classList.add('active-yes');
-            if(val === 'NO') btnGroup.querySelector('.q-btn-no').classList.add('active-no');
-            if(val === 'N/A') btnGroup.querySelector('.q-btn-na').classList.add('active-na');
-
-            updateHiddenInputs(itemId);
-            const infoBox = document.getElementById(`info_${itemId}`);
-            infoBox.innerHTML = `<span style="color: #16a34a;">Terpilih secara cepat: <strong>${val}</strong></span>`;
-        }
-
-        let currentEditingItemId = null;
-
-        function openModal(itemId, itemText) {
-            currentEditingItemId = itemId;
-            document.getElementById('modalItemText').innerText = itemText;
-            const listDiv = document.getElementById('modalRespondersList');
-            listDiv.innerHTML = '';
-            listDiv.appendChild(createResponderRow(auditorName, 'Auditor', itemId));
-            responders.forEach(resp => {
-                listDiv.appendChild(createResponderRow(resp.responder_name, 'Responder', itemId));
-            });
-            document.getElementById('answerModal').style.display = 'block';
-        }
-
-        function createResponderRow(name, role, itemId) {
-            const div = document.createElement('div');
-            div.className = 'responder-row';
-            const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
-            div.innerHTML = `
-                <div>
-                    <span style="font-weight:bold">${name}</span> <br>
-                    <small class="badge" style="background:#e2e8f0">${role}</small>
-                </div>
-                <div class="button-group">
-                    <button type="button" class="answer-btn q-btn ${existingVal === 'YES' ? 'active-yes' : ''}" onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
-                    <button type="button" class="answer-btn q-btn ${existingVal === 'NO' ? 'active-no' : ''}" onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
-                    <button type="button" class="answer-btn q-btn ${existingVal === 'N/A' ? 'active-na' : ''}" onclick="setVal('${itemId}', '${name}', 'N/A', this)">N/A</button>
-                </div>
-            `;
-            return div;
-        }
-
-        function setVal(itemId, userName, val, btn) {
-            const parent = btn.parentElement;
-            parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
-            if(val === 'YES') btn.classList.add('active-yes');
-            if(val === 'NO') btn.classList.add('active-no');
-            if(val === 'N/A') btn.classList.add('active-na');
-            sessionAnswers[`${itemId}_${userName}`] = val;
-            const btnGroup = document.getElementById(`btn_group_${itemId}`);
-            btnGroup.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
-            updateHiddenInputs(itemId);
-            updateMainInfo(itemId);
-        }
-
-        function updateHiddenInputs(itemId) {
-            const container = document.getElementById(`hidden_inputs_${itemId}`);
-            container.innerHTML = ''; 
-            for (let key in sessionAnswers) {
-                if (key.startsWith(itemId + '_')) {
-                    const name = key.replace(itemId + '_', '');
-                    const val = sessionAnswers[key];
-                    container.innerHTML += `
-                        <input type="hidden" name="answers[${itemId}][${name}][name]" value="${name}">
-                        <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
-                    `;
-                }
-            }
-        }
-
-        function updateMainInfo(itemId) {
-            const infoBox = document.getElementById(`info_${itemId}`);
-            let names = [];
-            for (let key in sessionAnswers) {
-                if (key.startsWith(itemId + '_')) names.push(key.replace(itemId + '_', ''));
-            }
-            infoBox.innerHTML = `<span style="color: #2563eb; font-weight:bold;">✓ Jawaban tersimpan untuk: ${names.join(', ')}</span>`;
-        }
-
-        function clearHiddenInputs(itemId) {
-            for (let key in sessionAnswers) {
-                if (key.startsWith(itemId + '_')) delete sessionAnswers[key];
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('answerModal').style.display = 'none';
-        }
     </script>
+    
+    <script src="{{ asset('js/audit-script.js') }}"></script>
 </body>
 </html>
