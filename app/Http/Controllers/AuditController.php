@@ -438,5 +438,29 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         ]);
     }
 
-    
+    public function saveAjax(Request $request)
+{
+    $request->validate([
+        'audit_id'     => 'required|uuid',
+        'item_id'      => 'required|uuid',
+        'answer'       => 'required|in:YES,NO,N/A',
+        'auditor_name' => 'required|string'
+    ]);
+
+    DB::table('answers')->updateOrInsert(
+        [
+            'audit_id'     => $request->audit_id,
+            'item_id'      => $request->item_id,
+            'auditor_name' => $request->auditor_name,
+        ],
+        [
+            'id'          => (string) \Illuminate\Support\Str::uuid(),
+            'answer'      => $request->answer,
+            'answered_at' => now(),
+        ]
+    );
+
+    return response()->json(['status' => 'ok']);
+}
+
 }
