@@ -477,4 +477,38 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         }
     });
 }
+public function saveSubClause(Request $request) {
+    DB::beginTransaction();
+    try {
+        foreach ($request->answers as $itemId => $val) {
+            // Simpan ke Answers
+            DB::table('answers')->updateOrInsert(
+                ['audit_id' => $request->audit_id, 'item_id' => $itemId],
+                [
+                    'auditor_name' => $request->auditor_name,
+                    'answer'       => $val,
+                    'answered_at'  => now(),
+                    'id'           => DB::table('answers')->where('audit_id', $request->audit_id)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
+                ]
+            );
+
+            // Simpan ke Answer Finals (Admin)
+            DB::table('answer_finals')->updateOrInsert(
+                ['audit_id' => $request->audit_id, 'item_id' => $itemId],
+                [
+                    'yes_count' => $val === 'YES' ? 1 : 0,
+                    'no_count'  => $val === 'NO' ? 1 : 0,
+                    'final_yes' => $val === 'YES' ? 1 : 0,
+                    'final_no'  => $val === 'NO' ? 1 : 0,
+                    'id'        => DB::table('answer_finals')->where('audit_id', $request->audit_id)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
+                ]
+            );
+        }
+        DB::commit();
+        return response()->json(['status' => 'success']);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+}
 }
