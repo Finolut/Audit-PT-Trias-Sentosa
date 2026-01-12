@@ -149,8 +149,8 @@
    <div class="grid-container">
     @foreach($mainClauses as $code)
         @php
-            // Cek apakah kode klausul saat ini ada di dalam array yang sudah selesai
-            $isDone = in_array($code, $completedClauses);
+            // Cocokkan apakah kode klausul (misal: "4") ada dalam daftar yang sudah dijawab
+            $isDone = in_array((string)$code, $completedClauses);
         @endphp
 
         <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
@@ -163,12 +163,10 @@
             </span>
 
             @if($isDone)
-                {{-- Tampilan saat Selesai --}}
                 <div class="status-badge badge-completed">
                     <span class="check-icon">✓</span> Selesai
                 </div>
             @else
-                {{-- Tampilan saat Belum Selesai --}}
                 <div class="status-badge badge-pending">
                     Belum diisi
                 </div>
@@ -176,6 +174,7 @@
             @endif
         </a>
     @endforeach
+</div>
 @if(count($completedClauses) == count($mainClauses))
     <div class="finish-section">
         <button type="submit" class="finish-btn">Submit Laporan Final ✓</button>
