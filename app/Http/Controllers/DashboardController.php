@@ -212,22 +212,22 @@ class DashboardController extends Controller
         ));
     }
 
-    public function log(Request $request, $deptId)
+public function log(Request $request, $deptId)
 {
     $currentDept = Department::findOrFail($deptId);
     
-    // Mulai query
+    // 1. Mulai Query
     $query = Audit::where('department_id', $deptId)
-                  ->with(['session', 'responders'])
-                  ->latest();
+                  ->with(['session', 'responders']);
 
-    // Logika Filter Tahun
+    // 2. LOGIKA FILTER (Ini yang membuat data berubah)
     if ($request->has('year') && $request->year != '') {
         $query->whereYear('created_at', $request->year);
     }
 
-    $audits = $query->get();
+    // 3. Ambil data dengan urutan terbaru
+    $audits = $query->latest()->get();
 
-    return view('admin.audit.log', compact('audits', 'currentDept'));
+    return view('admin.department_audits', compact('audits', 'currentDept'));
 }
 }
