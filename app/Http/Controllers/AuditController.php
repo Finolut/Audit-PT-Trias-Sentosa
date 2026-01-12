@@ -439,11 +439,10 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         ]);
     }
 
-    public function saveAjax(Request $request)
+   public function saveAjax(Request $request)
 {
-    DB::beginTransaction();
     try {
-        // 1. Simpan ke tabel answers (Data Mentah)
+        // Kembali ke logika awal: Simpan ke tabel 'answers'
         DB::table('answers')->updateOrInsert(
             [
                 'audit_id' => $request->audit_id,
@@ -453,37 +452,16 @@ return redirect()->route('audit.menu', ['id' => $auditId])
                 'auditor_name' => $request->auditor_name,
                 'answer'       => $request->answer,
                 'answered_at'  => now(),
-                'id'           => DB::table('answers')
-                                    ->where('audit_id', $request->audit_id)
-                                    ->where('item_id', $request->item_id)
-                                    ->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
+                // Manual UUID jika data baru
+                'id' => DB::table('answers')
+                            ->where('audit_id', $request->audit_id)
+                            ->where('item_id', $request->item_id)
+                            ->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
             ]
         );
 
-        // 2. Simpan ke tabel answer_finals (Data untuk Grafik Admin)
-        // Menghapus 'updated_at' karena error SQL menyatakan kolom tersebut tidak ada
-        DB::table('answer_finals')->updateOrInsert(
-            [
-                'audit_id' => $request->audit_id,
-                'item_id'  => $request->item_id,
-            ],
-            [
-                'yes_count' => $request->answer === 'YES' ? 1 : 0,
-                'no_count'  => $request->answer === 'NO' ? 1 : 0,
-                'final_yes' => $request->answer === 'YES' ? 1 : 0,
-                'final_no'  => $request->answer === 'NO' ? 1 : 0,
-                // Jangan masukkan updated_at jika tidak ada di migrasi/tabel
-                'id'        => DB::table('answer_finals')
-                                    ->where('audit_id', $request->audit_id)
-                                    ->where('item_id', $request->item_id)
-                                    ->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
-            ]
-        );
-
-        DB::commit();
         return response()->json(['status' => 'success']);
     } catch (\Exception $e) {
-        DB::rollBack();
         return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
     }
 }

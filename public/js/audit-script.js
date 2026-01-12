@@ -1,5 +1,4 @@
-let sessionAnswers = {};
-let currentEditingItemId = null;
+let answerQueue = [];
 let isProcessing = false;
 
 async function submitQuickAnswer(event, itemId, value) {
@@ -9,97 +8,30 @@ async function submitQuickAnswer(event, itemId, value) {
     const infoBox = document.getElementById(`info_${itemId}`);
     const btnGroup = document.getElementById(`btn_group_${itemId}`);
     
-    // 1. UI Feedback Instan (Warna berubah seketika tanpa nunggu loading)
-    updateButtonStyles(btnGroup, clickedButton);
-    infoBox.innerHTML = `<span style="color: #64748b;">⏳ Menunggu antrean...</span>`;
-
-    // 2. Masukkan data ke antrean
-    answerQueue.push({
-        itemId: itemId,
-        value: value,
-        infoBox: infoBox
-    });
-
-    // 3. Jalankan mesin pemroses antrean
-    processQueue();
-}
-
-/**
- * Mengatur tampilan tombol agar responsif (langsung berubah)
- */
-function updateButtonStyles(group, clicked) {
-    const allButtons = group.querySelectorAll('.answer-btn');
+    // 1. Feedback Visual Instan
+    const allButtons = btnGroup.querySelectorAll('.answer-btn');
     allButtons.forEach(btn => {
         btn.style.opacity = '0.4';
         btn.style.border = '1px solid #e2e8f0';
-        btn.style.transform = 'scale(1)';
     });
-    clicked.style.opacity = '1';
-    clicked.style.border = '2px solid #2563eb';
-    clicked.style.transform = 'scale(1.05)';
+    clickedButton.style.opacity = '1';
+    clickedButton.style.border = '2px solid #2563eb';
+
+    infoBox.innerHTML = `<span style="color: #64748b;">⏳ Antre...</span>`;
+
+    // 2. Masukkan ke Antrean
+    answerQueue.push({ itemId, value, infoBox });
+
+    // 3. Proses Antrean
+    processQueue();
 }
-
-/**
- * Mesin pengirim data (Satu per satu)
- */
-async function processQueue() {
-    // Jika sedang mengirim atau antrean kosong, berhenti dulu
-    if (isProcessing || answerQueue.length === 0) return;
-
-    isProcessing = true;
-    const task = answerQueue[0]; // Ambil data paling depan
-    
-    task.infoBox.innerHTML = `<span style="color: #2563eb;">⚡ Mengirim data...</span>`;
-
-    // Ambil Audit ID dari URL
-    const pathParts = window.location.pathname.split('/');
-    const auditId = pathParts[2];
-
-    try {
-        const response = await fetch('/audit/save-ajax', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-            },
-            body: JSON.stringify({
-                audit_id: auditId,
-                item_id: task.itemId,
-                answer: task.value,
-                auditor_name: auditorName // Dari Blade
-            })
-        });
-
-        if (response.ok) {
-            task.infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan (${task.value})</b>`;
-            answerQueue.shift(); // Hapus dari antrean karena sukses
-        } else {
-            throw new Error("Gagal kirim");
-        }
-    } catch (error) {
-        task.infoBox.innerHTML = `<b style="color: #dc2626;">❌ Koneksi sibuk, mencoba lagi...</b>`;
-        // Opsional: Jika gagal, geser ke paling belakang untuk dicoba lagi nanti
-        const failedTask = answerQueue.shift();
-        answerQueue.push(failedTask);
-    }
-
-    isProcessing = false;
-    
-    // Jeda sedikit (100ms) sebelum memproses antrean berikutnya agar server tidak kaget
-    setTimeout(processQueue, 100);
-}
-
 
 async function processQueue() {
     if (isProcessing || answerQueue.length === 0) return;
 
     isProcessing = true;
-    const task = answerQueue[0]; // Ambil tugas pertama
-    
-    task.infoBox.innerHTML = `<span style="color: #2563eb;">⚡ Mengirim...</span>`;
-
-    const pathParts = window.location.pathname.split('/');
-    const auditId = pathParts[2];
+    const task = answerQueue[0];
+    const auditId = window.location.pathname.split('/')[2];
 
     try {
         const response = await fetch('/audit/save-ajax', {
@@ -118,28 +50,19 @@ async function processQueue() {
 
         if (response.ok) {
             task.infoBox.innerHTML = `<b style="color: #16a34a;">✓ Tersimpan</b>`;
-            answerQueue.shift(); // Hapus dari antrean jika sukses
+            answerQueue.shift(); // Hapus yang sudah sukses
         } else {
             throw new Error("Gagal");
         }
     } catch (error) {
-        task.infoBox.innerHTML = `<b style="color: #dc2626;">❌ Gagal, mencoba lagi...</b>`;
-        // Opsional: Pindahkan ke akhir antrean untuk dicoba lagi nanti
-        const failedTask = answerQueue.shift();
-        answerQueue.push(failedTask);
+        task.infoBox.innerHTML = `<b style="color: #dc2626;">❌ Re-trying...</b>`;
+        // Pindah ke paling belakang jika gagal untuk coba lagi nanti
+        answerQueue.push(answerQueue.shift());
     }
 
     isProcessing = false;
-    // Jalankan tugas berikutnya dalam antrean
-    setTimeout(processQueue, 100); 
+    setTimeout(processQueue, 150); // Jeda 150ms antar pengiriman
 }
-
-// 4. Mencegah User pindah halaman jika antrean belum habis
-window.onbeforeunload = function() {
-    if (answerQueue.length > 0) {
-        return "Masih ada jawaban yang sedang dikirim. Tunggu sebentar?";
-    }
-};
 
 function createResponderRow(name, role, itemId) {
     const div = document.createElement('div');
