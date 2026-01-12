@@ -439,25 +439,36 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         ]);
     }
 
-    public function saveAjax(Request $request)
+    public function saveAjax(Request $request) 
 {
+    DB::beginTransaction();
     try {
-        // Update atau Insert ke tabel answers
+        // 1. Simpan data mentah ke 'answers'
         DB::table('answers')->updateOrInsert(
+            ['audit_id' => $request->audit_id, 'item_id' => $request->item_id],
+            ['answer' => $request->answer, 'auditor_name' => $request->auditor_name, 'answered_at' => now()]
+        );
+
+        // 2. Update 'answer_finals' (Data yang dibaca Admin)
+        // Hitung total jawaban untuk item ini di audit ini
+        $yesCount = DB::table('answers')->where('audit_id', $request->audit_id)->where('item_id', $request->item_id)->where('answer', 'YES')->count();
+        $noCount  = DB::table('answers')->where('audit_id', $request->audit_id)->where('item_id', $request->item_id)->where('answer', 'NO')->count();
+
+        DB::table('answer_finals')->updateOrInsert(
+            ['audit_id' => $request->audit_id, 'item_id' => $request->item_id],
             [
-                'audit_id' => $request->audit_id,
-                'item_id'  => $request->item_id,
-            ],
-            [
-                'auditor_name' => $request->auditor_name,
-                'answer'       => $request->answer,
-                'answered_at'  => Carbon::now(),
-                'id'           => (string) \Illuminate\Support\Str::uuid(), // Jika PK anda UUID
+                'yes_count' => $yesCount,
+                'no_count'  => $noCount,
+                'final_yes' => ($yesCount > $noCount) ? 1 : 0,
+                'final_no'  => ($noCount > $yesCount) ? 1 : 0,
+                'updated_at' => now()
             ]
         );
 
-        return response()->json(['status' => 'success', 'message' => 'Tersimpan']);
+        DB::commit();
+        return response()->json(['status' => 'success']);
     } catch (\Exception $e) {
+        DB::rollBack();
         return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
     }
 }
