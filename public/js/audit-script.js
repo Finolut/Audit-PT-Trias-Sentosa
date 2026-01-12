@@ -1,7 +1,10 @@
+/**
+ * Variabel Global & State
+ */
 let sessionAnswers = {}; 
 
 /**
- * Fungsi Utama: Menetapkan nilai jawaban
+ * Fungsi Utama: Menetapkan nilai jawaban (YES/NO/N/A)
  */
 function setVal(itemId, userName, val, btn) {
     // 1. Update visual tombol yang diklik
@@ -14,19 +17,24 @@ function setVal(itemId, userName, val, btn) {
     if(val === 'NO') btn.classList.add('active-no');
     if(val === 'N/A') btn.classList.add('active-na');
     
-    // 2. Simpan Jawaban
+    // 2. Simpan Jawaban ke memori
     sessionAnswers[`${itemId}_${userName}`] = val;
     
-    // 3. Update Input Hidden
+    // 3. Update Input Hidden agar data terkirim ke Laravel
     updateHiddenInputs(itemId);
 
-    // 4. Sinkronisasi & Update Ringkasan Skor
+    // 4. Sinkronisasi visual tombol utama jika yang menjawab adalah Auditor (Author)
     if (userName === auditorName) {
         syncMainButtons(itemId, val);
     }
+
+    // 5. Update info ringkasan skor di layar
     calculateScore(itemId);
 }
 
+/**
+ * Menghitung perbandingan suara Author vs Responder secara real-time
+ */
 function calculateScore(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
     if (!infoBox) return;
@@ -35,18 +43,12 @@ function calculateScore(itemId) {
     let noCount = 0;
     let details = [];
 
-    // Hitung suara dari sessionAnswers
     for (let key in sessionAnswers) {
         if (key.startsWith(itemId + '_')) {
             const val = sessionAnswers[key];
-            const name = key.replace(itemId + '_', '');
-            
             if (val === 'YES') yesCount++;
             if (val === 'NO') noCount++;
-            
-            // Tandai siapa yang jawab apa
-            const roleLabel = (name === auditorName) ? 'Auditor' : 'Responder';
-            details.push(`${roleLabel}: ${val}`);
+            details.push(val);
         }
     }
 
@@ -54,7 +56,6 @@ function calculateScore(itemId) {
         let statusText = "";
         let statusColor = "#64748b";
 
-        // Logika Perhitungan sesuai permintaan
         if (yesCount > noCount) {
             statusText = `✓ Terpenuhi (Skor: 1)`;
             statusColor = "#16a34a";
@@ -66,6 +67,7 @@ function calculateScore(itemId) {
             statusColor = "#f59e0b";
         }
 
+        infoBox.style.display = 'block';
         infoBox.innerHTML = `
             <div style="margin-top: 10px; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
                 <div style="font-size: 0.75rem; color: #475569; margin-bottom: 4px;">
@@ -78,6 +80,7 @@ function calculateScore(itemId) {
         `;
     }
 }
+
 /**
  * Menyamakan tombol di layar utama dengan pilihan Auditor di modal
  */
@@ -86,7 +89,6 @@ function syncMainButtons(itemId, val) {
     if(!mainGroup) return;
     mainGroup.querySelectorAll('.answer-btn').forEach(b => {
         b.classList.remove('active-yes', 'active-no', 'active-na');
-        // Cocokkan teks tombol dengan nilai (YES/NO/N/A)
         if(b.innerText.trim() === val) {
             if(val === 'YES') b.classList.add('active-yes');
             if(val === 'NO') b.classList.add('active-no');
@@ -96,36 +98,8 @@ function syncMainButtons(itemId, val) {
 }
 
 /**
- * Membuat baris personil di dalam modal
+ * Sinkronisasi data ke input hidden form
  */
-function createResponderRow(name, role, itemId, isAuditor = false) {
-    const div = document.createElement('div');
-    div.className = 'responder-row';
-    div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;';
-    
-    const existingVal = sessionAnswers[`${itemId}_${name}`] || '';
-    
-    // Logic: Jika Auditor, tombol N/A tetap ada di layar utama tapi di modal kita hilangkan saja 
-    // agar tampilan konsisten dengan permintaan "Hilangkan N/A di modal"
-    div.innerHTML = `
-        <div>
-            <div style="font-weight:600; font-size:0.9rem; color: #1e293b;">
-                ${name} ${isAuditor ? '<span style="color:#2563eb; font-size:0.7rem; background:#eff6ff; padding:2px 6px; border-radius:4px; margin-left:5px;">AUTHOR</span>' : ''}
-            </div>
-            <div style="font-size:0.75rem; color:#64748b;">${role}</div>
-        </div>
-        <div class="button-group" style="background:#f1f5f9; padding:4px; border-radius:8px; display:flex; gap:4px;">
-            <button type="button" class="answer-btn ${existingVal === 'YES' ? 'active-yes' : ''}" 
-                style="padding:6px 16px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;"
-                onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
-            <button type="button" class="answer-btn ${existingVal === 'NO' ? 'active-no' : ''}" 
-                style="padding:6px 16px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;"
-                onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
-        </div>
-    `;
-    return div;
-}
-
 function updateHiddenInputs(itemId) {
     const container = document.getElementById(`hidden_inputs_${itemId}`);
     if (!container) return;
@@ -143,16 +117,45 @@ function updateHiddenInputs(itemId) {
     }
 }
 
+/**
+ * Membuat baris responder di dalam modal secara dinamis
+ */
+function createResponderRow(name, role, itemId, isAuditor = false) {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;';
+    
+    const val = sessionAnswers[`${itemId}_${name}`] || '';
+    
+    div.innerHTML = `
+        <div>
+            <div style="font-weight:600; font-size:0.9rem; color: #1e293b;">
+                ${name} ${isAuditor ? '<span style="color:#2563eb; font-size:0.7rem; background:#eff6ff; padding:2px 6px; border-radius:4px; margin-left:5px;">AUTHOR</span>' : ''}
+            </div>
+            <div style="font-size:0.75rem; color:#64748b;">${role}</div>
+        </div>
+        <div class="button-group" style="background:#f1f5f9; padding:4px; border-radius:8px; display:flex; gap:4px;">
+            <button type="button" class="answer-btn ${val === 'YES' ? 'active-yes' : ''}" 
+                style="padding:6px 16px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;"
+                onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
+            <button type="button" class="answer-btn ${val === 'NO' ? 'active-no' : ''}" 
+                style="padding:6px 16px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;"
+                onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
+        </div>
+    `;
+    return div;
+}
+
+/**
+ * Kontrol Modal
+ */
 function openModal(itemId, itemText) {
     const modal = document.getElementById('answerModal');
     document.getElementById('modalItemText').innerText = itemText;
     const list = document.getElementById('modalRespondersList');
     list.innerHTML = '';
     
-    // Tambahkan baris Auditor
     list.appendChild(createResponderRow(auditorName, 'Auditor Utama', itemId, true));
     
-    // Tambahkan baris Responden
     if (typeof responders !== 'undefined') {
         responders.forEach(res => {
             list.appendChild(createResponderRow(res.responder_name, res.responder_department || 'Responden', itemId));
@@ -164,3 +167,33 @@ function openModal(itemId, itemText) {
 function closeModal() {
     document.getElementById('answerModal').style.display = 'none';
 }
+
+/**
+ * Validasi Sebelum Lanjut (Submit)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const allItems = document.querySelectorAll('.item-row');
+            let firstMissingItem = null;
+
+            allItems.forEach(item => {
+                const itemId = item.id.replace('row_', '');
+                // Cek apakah Auditor sudah mengisi jawaban untuk item ini
+                if (!sessionAnswers[`${itemId}_${auditorName}`]) {
+                    item.style.backgroundColor = '#fff1f2';
+                    if (!firstMissingItem) firstMissingItem = item;
+                } else {
+                    item.style.backgroundColor = 'transparent';
+                }
+            });
+
+            if (firstMissingItem) {
+                e.preventDefault();
+                alert('Mohon lengkapi semua jawaban Auditor sebelum melanjutkan!');
+                firstMissingItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+});
