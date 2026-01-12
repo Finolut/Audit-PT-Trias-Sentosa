@@ -34,7 +34,7 @@ function createResponderRow(name, role, itemId) {
  * Menetapkan nilai jawaban untuk satu orang per item
  */
 function setVal(itemId, userName, val, btn) {
-    // 1. Update visual button di dalam modal
+    // 1. Update visual button (Active State)
     const parent = btn.parentElement;
     parent.querySelectorAll('.answer-btn').forEach(b => {
         b.classList.remove('active-yes', 'active-no', 'active-na');
@@ -47,10 +47,10 @@ function setVal(itemId, userName, val, btn) {
     // 2. Simpan ke variabel session
     sessionAnswers[`${itemId}_${userName}`] = val;
     
-    // 3. Update input hidden agar bisa dikirim saat form submit
+    // 3. Update input hidden di dalam form (Sangat penting agar data terkirim saat submit)
     updateHiddenInputs(itemId);
     
-    // 4. Update info teks di layar utama
+    // 4. Update info teks (Langsung "Tersimpan di Form")
     updateMainInfo(itemId);
 }
 
@@ -64,10 +64,10 @@ function updateHiddenInputs(itemId) {
     container.innerHTML = ''; 
     for (let key in sessionAnswers) {
         if (key.startsWith(itemId + '_')) {
-            const name = key.replace(itemId + '_', '');
             const val = sessionAnswers[key];
+            const name = key.replace(itemId + '_', '');
             
-            // Generate input hidden untuk dikirim via POST standar
+            // Generate input hidden untuk disubmit secara massal
             container.innerHTML += `
                 <input type="hidden" name="answers[${itemId}][${name}][val]" value="${val}">
             `;
@@ -90,17 +90,26 @@ function updateMainInfo(itemId) {
     }
     
     if (names.length > 0) {
-        infoBox.innerHTML = `
-            <span style="color: #2563eb; font-size: 0.85em;">
-                <i class="fas fa-check-circle"></i> Siap simpan (${names.length} orang)
-            </span>
-        `;
+        // Feedback langsung tanpa "Antre"
+        infoBox.innerHTML = `<b style="color: #16a34a;">✓ Siap Simpan (${names.length} jawaban)</b>`;
     }
 }
 
+function openModal(itemId, itemText) {
+    document.getElementById('modalItemText').innerText = itemText;
+    const list = document.getElementById('modalRespondersList');
+    list.innerHTML = '';
+    
+    // Pastikan variabel 'responders' sudah ada dari Blade
+    responders.forEach(res => {
+        list.appendChild(createResponderRow(res.responder_name, res.responder_department, itemId));
+    });
+    
+    document.getElementById('answerModal').style.display = 'block';
+}
+
 function closeModal() {
-    const modal = document.getElementById('answerModal');
-    if (modal) modal.style.display = 'none';
+    document.getElementById('answerModal').style.display = 'none';
 }
 
 function clearHiddenInputs(itemId) {
