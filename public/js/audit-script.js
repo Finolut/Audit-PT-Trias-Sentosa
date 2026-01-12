@@ -1,30 +1,25 @@
 let answerQueue = [];
 let isProcessing = false;
 
-async function submitQuickAnswer(event, itemId, value) {
-    if (!event) return;
-
-    const clickedButton = event.currentTarget;
+async function submitQuickAnswer(button, itemId, value) {
     const infoBox = document.getElementById(`info_${itemId}`);
     const btnGroup = document.getElementById(`btn_group_${itemId}`);
-    
-    // 1. Feedback Visual Instan
-    const allButtons = btnGroup.querySelectorAll('.answer-btn');
-    allButtons.forEach(btn => {
+
+    // Visual feedback
+    btnGroup.querySelectorAll('.answer-btn').forEach(btn => {
         btn.style.opacity = '0.4';
         btn.style.border = '1px solid #e2e8f0';
     });
-    clickedButton.style.opacity = '1';
-    clickedButton.style.border = '2px solid #2563eb';
 
-    infoBox.innerHTML = `<span style="color: #64748b;">⏳ Antre...</span>`;
+    button.style.opacity = '1';
+    button.style.border = '2px solid #2563eb';
 
-    // 2. Masukkan ke Antrean
+    infoBox.innerHTML = `<span style="color:#64748b">⏳ Antre...</span>`;
+
     answerQueue.push({ itemId, value, infoBox });
-
-    // 3. Proses Antrean
     processQueue();
 }
+
 
 async function processQueue() {
     if (isProcessing || answerQueue.length === 0) return;

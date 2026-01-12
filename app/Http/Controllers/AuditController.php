@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 
 class AuditController extends Controller
 {
@@ -439,76 +438,5 @@ return redirect()->route('audit.menu', ['id' => $auditId])
         ]);
     }
 
-  public function saveAjax(Request $request)
-{
-    // Menggunakan Transaction agar jika salah satu gagal, semua batal (menjaga validitas data)
-    return DB::transaction(function () use ($request) {
-        try {
-            $auditId = $request->audit_id;
-            $itemId = $request->item_id;
-            $answer = $request->answer;
-
-            // 1. Simpan ke tabel answers (Data Detail)
-            DB::table('answers')->updateOrInsert(
-                ['audit_id' => $auditId, 'item_id' => $itemId],
-                [
-                    'auditor_name' => $request->auditor_name,
-                    'answer'       => $answer,
-                    'answered_at'  => now(),
-                    'id'           => DB::table('answers')->where('audit_id', $auditId)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
-                ]
-            );
-
-            // 2. Simpan ke tabel answer_finals (Data Dashboard Admin)
-            DB::table('answer_finals')->updateOrInsert(
-                ['audit_id' => $auditId, 'item_id' => $itemId],
-                [
-                    'yes_count' => $answer === 'YES' ? 1 : 0,
-                    'no_count'  => $answer === 'NO' ? 1 : 0,
-                    'final_yes' => $answer === 'YES' ? 1 : 0,
-                    'final_no'  => $answer === 'NO' ? 1 : 0,
-                    'id'        => DB::table('answer_finals')->where('audit_id', $auditId)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
-                ]
-            );
-
-            return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-        }
-    });
-}
-public function saveSubClause(Request $request) {
-    DB::beginTransaction();
-    try {
-        foreach ($request->answers as $itemId => $val) {
-            // Simpan ke Answers
-            DB::table('answers')->updateOrInsert(
-                ['audit_id' => $request->audit_id, 'item_id' => $itemId],
-                [
-                    'auditor_name' => $request->auditor_name,
-                    'answer'       => $val,
-                    'answered_at'  => now(),
-                    'id'           => DB::table('answers')->where('audit_id', $request->audit_id)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
-                ]
-            );
-
-            // Simpan ke Answer Finals (Admin)
-            DB::table('answer_finals')->updateOrInsert(
-                ['audit_id' => $request->audit_id, 'item_id' => $itemId],
-                [
-                    'yes_count' => $val === 'YES' ? 1 : 0,
-                    'no_count'  => $val === 'NO' ? 1 : 0,
-                    'final_yes' => $val === 'YES' ? 1 : 0,
-                    'final_no'  => $val === 'NO' ? 1 : 0,
-                    'id'        => DB::table('answer_finals')->where('audit_id', $request->audit_id)->where('item_id', $itemId)->value('id') ?? (string) \Illuminate\Support\Str::uuid(),
-                ]
-            );
-        }
-        DB::commit();
-        return response()->json(['status' => 'success']);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-    }
-}
+    
 }
