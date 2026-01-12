@@ -4,7 +4,7 @@ let sessionAnswers = {};
  * Fungsi Utama: Menetapkan nilai jawaban
  */
 function setVal(itemId, userName, val, btn) {
-    // 1. Update visual button di tempat tombol itu berada (Modal atau Layar Utama)
+    // 1. Update visual tombol yang diklik
     const parent = btn.parentElement;
     parent.querySelectorAll('.answer-btn').forEach(b => {
         b.classList.remove('active-yes', 'active-no', 'active-na');
@@ -14,18 +14,70 @@ function setVal(itemId, userName, val, btn) {
     if(val === 'NO') btn.classList.add('active-no');
     if(val === 'N/A') btn.classList.add('active-na');
     
-    // 2. Simpan ke state sementara
+    // 2. Simpan Jawaban
     sessionAnswers[`${itemId}_${userName}`] = val;
     
-    // 3. Update input hidden untuk submit form
+    // 3. Update Input Hidden
     updateHiddenInputs(itemId);
 
-    // 4. Sinkronisasi: Jika yang jawab adalah Auditor, update tombol di layar utama
+    // 4. Sinkronisasi & Update Ringkasan Skor
     if (userName === auditorName) {
         syncMainButtons(itemId, val);
     }
+    calculateScore(itemId);
 }
 
+function calculateScore(itemId) {
+    const infoBox = document.getElementById(`info_${itemId}`);
+    if (!infoBox) return;
+
+    let yesCount = 0;
+    let noCount = 0;
+    let details = [];
+
+    // Hitung suara dari sessionAnswers
+    for (let key in sessionAnswers) {
+        if (key.startsWith(itemId + '_')) {
+            const val = sessionAnswers[key];
+            const name = key.replace(itemId + '_', '');
+            
+            if (val === 'YES') yesCount++;
+            if (val === 'NO') noCount++;
+            
+            // Tandai siapa yang jawab apa
+            const roleLabel = (name === auditorName) ? 'Auditor' : 'Responder';
+            details.push(`${roleLabel}: ${val}`);
+        }
+    }
+
+    if (details.length > 0) {
+        let statusText = "";
+        let statusColor = "#64748b";
+
+        // Logika Perhitungan sesuai permintaan
+        if (yesCount > noCount) {
+            statusText = `✓ Terpenuhi (Skor: 1)`;
+            statusColor = "#16a34a";
+        } else if (noCount > yesCount) {
+            statusText = `✗ Tidak Terpenuhi (Skor: 0)`;
+            statusColor = "#dc2626";
+        } else {
+            statusText = `! Hasil Seri (${yesCount} vs ${noCount})`;
+            statusColor = "#f59e0b";
+        }
+
+        infoBox.innerHTML = `
+            <div style="margin-top: 10px; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 0.75rem; color: #475569; margin-bottom: 4px;">
+                    <strong>Hasil:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
+                </div>
+                <div style="font-size: 0.7rem; color: #94a3b8;">
+                    Detail: ${yesCount} YES, ${noCount} NO
+                </div>
+            </div>
+        `;
+    }
+}
 /**
  * Menyamakan tombol di layar utama dengan pilihan Auditor di modal
  */
