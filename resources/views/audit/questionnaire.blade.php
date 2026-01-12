@@ -37,24 +37,23 @@
                                     <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">{{ $item->item_text }}</p>
                                     
                                     <div class="button-group" id="btn_group_{{ $item->id }}">
-                                      <button type="button"
-    class="answer-btn q-btn q-btn-yes"
-    onclick="submitQuickAnswer(this, '{{ $item->id }}', 'YES')">
-    YES
-</button>
+                                        <button type="button" 
+                                            class="answer-btn q-btn q-btn-yes" 
+                                            onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'YES', this)">
+                                            YES
+                                        </button>
 
-<button type="button"
-    class="answer-btn q-btn q-btn-no"
-    onclick="submitQuickAnswer(this, '{{ $item->id }}', 'NO')">
-    NO
-</button>
+                                        <button type="button" 
+                                            class="answer-btn q-btn q-btn-no" 
+                                            onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">
+                                            NO
+                                        </button>
 
-<button type="button"
-    class="answer-btn q-btn q-btn-na"
-    onclick="submitQuickAnswer(this, '{{ $item->id }}', 'N/A')">
-    N/A
-</button>
-
+                                        <button type="button" 
+                                            class="answer-btn q-btn q-btn-na" 
+                                            onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">
+                                            N/A
+                                        </button>
 
                                         <span style="margin: 0 10px; color: #cbd5e1;">|</span>
 
@@ -64,7 +63,7 @@
                                     </div>
 
                                     <div class="answer-info" id="info_{{ $item->id }}" style="margin-top:8px; font-size:12px; color: #94a3b8;">
-                                        <em>Belum ada jawaban</em>
+                                        <em>Belum ada perubahan</em>
                                     </div>
                                     
                                     <div id="hidden_inputs_{{ $item->id }}"></div>
@@ -97,13 +96,13 @@
         </form>
     </div>
 
-    <div id="answerModal" class="modal">
-        <div class="modal-content">
+    <div id="answerModal" class="modal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background:white; margin:10% auto; padding:20px; width:400px; border-radius:8px;">
             <h3 id="modalItemText" style="margin-top:0; font-size: 1rem; color: #1e293b;"></h3>
             <hr>
-            <div id="modalRespondersList"></div>
+            <div id="modalRespondersList" style="max-height: 300px; overflow-y: auto;"></div>
             <div style="margin-top: 20px; text-align: right;">
-                <button type="button" onclick="closeModal()" style="padding: 8px 20px; cursor:pointer;">Tutup & Simpan</button>
+                <button type="button" onclick="closeModal()" style="padding: 8px 20px; cursor:pointer; background:#2563eb; color:white; border:none; border-radius:4px;">Selesai</button>
             </div>
         </div>
     </div>
@@ -111,6 +110,20 @@
     <script>
         const auditorName = "{{ $auditorName }}";
         const responders = @json($responders);
+        // State awal untuk menandai jawaban yang sudah ada (jika perlu resume)
+        let sessionAnswers = {}; 
+
+        function openModal(itemId, itemText) {
+            document.getElementById('modalItemText').innerText = itemText;
+            const list = document.getElementById('modalRespondersList');
+            list.innerHTML = '';
+            
+            responders.forEach(res => {
+                list.appendChild(createResponderRow(res.responder_name, res.responder_department, itemId));
+            });
+            
+            document.getElementById('answerModal').style.display = 'block';
+        }
     </script>
     
     <script src="{{ asset('js/audit-script.js') }}"></script>
