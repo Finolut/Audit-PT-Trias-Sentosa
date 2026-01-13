@@ -130,7 +130,7 @@ class AuditController extends Controller
 
                 // 4️⃣ Status & Tanggal
                 'status'           => 'IN_PROGRESS',
-                'started_at'       => now(),
+                'submitted_at'       => now(),
                 
                 // 5️⃣ Penutup (Disiapkan kosong dulu)
                 'conclusion'       => null,
