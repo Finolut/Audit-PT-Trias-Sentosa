@@ -197,3 +197,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function updateInfoBox(itemId) {
+    const infoBox = document.getElementById(`info_${itemId}`);
+    const inputs = document.querySelectorAll(`#hidden_inputs_${itemId} input`);
+    
+    let answers = {};
+    inputs.forEach(input => {
+        // Ambil nama (Auditor/Responder) dari atribut data atau parsing dari name
+        const name = input.name.match(/\[([^\]]+)\]$/)[1]; 
+        answers[name] = input.value;
+    });
+
+    const auditorAnswer = answers[auditorName];
+    
+    // Cek apakah ada perbedaan antara Auditor dan Responder manapun
+    let hasDifference = false;
+    let infoHtml = `<div style="margin-top:8px; padding:8px; background:#fef2f2; border-left:4px solid #ef4444; font-size:0.8rem;">`;
+    infoHtml += `<strong>Perhatian:</strong> Perbedaan jawaban dideteksi:<br/>`;
+
+    for (let person in answers) {
+        infoHtml += `<span style="display:inline-block; margin-right:10px;">• ${person}: <strong>${answers[person]}</strong></span>`;
+        if (person !== auditorName && answers[person] !== auditorAnswer) {
+            hasDifference = true;
+        }
+    }
+    infoHtml += `</div>`;
+
+    // Tampilkan hanya jika ada perbedaan, jika sama sembunyikan
+    if (hasDifference) {
+        infoBox.innerHTML = infoHtml;
+        infoBox.style.display = 'block';
+    } else {
+        infoBox.innerHTML = '';
+        infoBox.style.display = 'none';
+    }
+}

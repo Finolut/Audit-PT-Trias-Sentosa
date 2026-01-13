@@ -165,3 +165,8 @@
     transition: background 0.2s;
 }
 .submit-audit:hover { background: var(--primary-dark); }
+
+.score-info-box { 
+        display: none; 
+        margin-top: 10px;
+    }
