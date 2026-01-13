@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Models\Audit;
-use App\Models\Clause;
 use App\Models\Item;
+use App\Models\Clause;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    // --- KONFIGURASI STRUKTUR KLAUSUL ---
+    // ... (Definisi $mainClauses dan $mainClauseTitles biarkan tetap ada di atas) ...
     private $mainClauses = [
         '4'  => ['4.1', '4.2', '4.3', '4.4'],
         '5'  => ['5.1', '5.2', '5.3'],
@@ -33,54 +33,73 @@ class DashboardController extends Controller
     ];
 
     /**
-     * 1. HALAMAN DASHBOARD UTAMA
-     * Route: /admin/dashboard (atau sejenisnya)
+     * 1. DASHBOARD UTAMA (Tampilan Awal Admin)
      */
     public function index()
     {
-        $departments = Department::all();
-        $totalAudits = Audit::count();
-        $totalDepartments = Department::count();
-        $totalAuditors = DB::table('audit_sessions')->distinct('auditor_name')->count('auditor_name');
+        // Data Sidebar (List Departemen)
+        $departments = Department::orderBy('name', 'asc')->get();
 
-        // Pastikan view ini ada (biasanya layouts.admin atau admin.dashboard)
-        return view('layouts.admin', compact('departments', 'totalAudits', 'totalDepartments', 'totalAuditors'));
+        // Statistik Global
+        $stats = [
+            'total_audits' => Audit::count(),
+            'completed'    => Audit::where('status', 'COMPLETED')->count(),
+            'pending'      => Audit::where('status', 'PENDING')->count(),
+            'departments'  => Department::count(),
+        ];
+
+        // 5 Audit Terakhir (Recent Activity)
+        $recentAudits = Audit::with(['department', 'session'])
+                             ->orderBy('created_at', 'desc')
+                             ->take(5)
+                             ->get();
+
+        // Ringkasan Per Departemen (Untuk Tabel Dashboard)
+        $deptSummary = Department::withCount(['audits as total_audit', 
+            'audits as completed_count' => function ($query) {
+                $query->where('status', 'COMPLETED');
+            },
+            'audits as pending_count' => function ($query) {
+                $query->where('status', 'PENDING');
+            }
+        ])->get();
+
+        // Return ke view khusus dashboard, bukan layout langsung
+        return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary'));
     }
 
     /**
-     * 2. HALAMAN DETAIL DEPARTEMEN (Menu Sidebar)
-     * Route: /admin/department/{id}
+     * 2. HALAMAN DETAIL DEPARTEMEN
      */
-    /**
- * 2. HALAMAN DETAIL DEPARTEMEN (Menu Sidebar)
- * Route: /admin/department/{id}
- */
-public function showDepartment(Request $request, $deptId) // Tambahkan Request $request
-{
-    $departments = Department::all();
-    $currentDept = Department::findOrFail($deptId);
-    
-    // Mulai query
-    $query = Audit::where('department_id', $deptId)
-                  ->with(['session', 'responders']); // Tambahkan responders agar badge nama muncul
+    public function showDepartment(Request $request, $deptId)
+    {
+        $departments = Department::orderBy('name')->get();
+        $currentDept = Department::findOrFail($deptId);
+        
+        $query = Audit::where('department_id', $deptId)
+                      ->with(['session', 'responders']);
 
-    // LOGIKA FILTER TAHUN
-    if ($request->has('year') && $request->year != '') {
-        $query->whereYear('created_at', $request->year);
+        if ($request->has('year') && $request->year != '') {
+            $query->whereYear('created_at', $request->year);
+        }
+
+        $audits = $query->orderBy('created_at', 'desc')->get();
+
+        // Hitung statistik kecil untuk halaman ini
+        $localStats = [
+            'total' => $audits->count(),
+            'completed' => $audits->where('status', 'COMPLETED')->count(),
+            'pending' => $audits->where('status', 'PENDING')->count(),
+        ];
+
+        return view('admin.department_audits', compact('departments', 'currentDept', 'audits', 'localStats'));
     }
 
-    // Ambil data dengan urutan terbaru
-    $audits = $query->orderBy('created_at', 'desc')->get();
-
-    return view('admin.department_audits', compact('departments', 'currentDept', 'audits'));
-}
-
-    /**
-     * 3. HALAMAN OVERVIEW AUDIT (GRAFIK UTAMA)
-     * Route: /admin/audit/{id}
-     */
+    // ... (Fungsi showAuditOverview dan showClauseDetail biarkan seperti kode Anda sebelumnya) ...
     public function showAuditOverview($auditId)
     {
+        // Copy paste logic showAuditOverview Anda yang panjang di sini
+        // Pastikan return view('admin.audit_clauses', ...)
         $departments = Department::all();
         $audit = Audit::with(['session', 'department'])->findOrFail($auditId);
 
@@ -146,13 +165,11 @@ public function showDepartment(Request $request, $deptId) // Tambahkan Request $
         ]);
     }
 
-    /**
-     * 4. HALAMAN DETAIL PER KLAUSUL (TABEL & CHART BAR)
-     * Route: /admin/audit/{id}/clause/{mainClause}
-     */
     public function showClauseDetail($auditId, $mainClause)
     {
-        $departments = Department::all();
+        // Copy paste logic showClauseDetail Anda di sini
+        // Pastikan return view('admin.clause_detail', ...)
+         $departments = Department::all();
         $audit = Audit::findOrFail($auditId);
 
         if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
@@ -221,23 +238,4 @@ public function showDepartment(Request $request, $deptId) // Tambahkan Request $
             'items'
         ));
     }
-
-public function log(Request $request, $deptId)
-{
-    $currentDept = Department::findOrFail($deptId);
-    
-    // 1. Mulai Query
-    $query = Audit::where('department_id', $deptId)
-                  ->with(['session', 'responders']);
-
-    // 2. LOGIKA FILTER (Ini yang membuat data berubah)
-    if ($request->has('year') && $request->year != '') {
-        $query->whereYear('created_at', $request->year);
-    }
-
-    // 3. Ambil data dengan urutan terbaru
-    $audits = $query->latest()->get();
-
-    return view('admin.department_audits', compact('audits', 'currentDept'));
-}
 }

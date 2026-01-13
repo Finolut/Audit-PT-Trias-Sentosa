@@ -1,130 +1,143 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Http\Request;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Str;
 use App\Http\Controllers\AuditController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| LANDING & INITIAL ROUTES
 |--------------------------------------------------------------------------
-|
-| File ini mengatur seluruh routing aplikasi Anda.
-| Struktur:
-| 1. Landing Page (Public)
-| 2. Admin Dashboard (Protected/Admin)
-| 3. Proses Audit (User/Auditor)
-| 4. System/Testing
-|
 */
 
-// =========================================================================
-// 1. LANDING PAGE & PUBLIC
-// =========================================================================
-
-// Halaman Depan (Landing Page dengan tombol Admin & Survey)
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome'); 
 })->name('landing');
 
-// =========================================================================
-// 2. ADMIN DASHBOARD AREA
-// =========================================================================
+/* PROSES FORM LAMA (Tetap Dipertahankan) */
+Route::get('/test-form', function () {
+    $departments = DB::table('departments')->orderBy('name')->get();
+    return view('test-form', compact('departments'));
+});
+
+Route::post('/test-form', function (Request $request) {
+    $request->validate([
+        'auditor_name' => 'required|string',
+        'auditor_department' => 'required|string',
+        'audit_date' => 'required|date',
+        'department_id' => 'required|uuid',
+    ]);
+
+    $sessionId = Str::uuid();
+    DB::table('audit_sessions')->insert([
+        'id' => $sessionId,
+        'auditor_name' => $request->auditor_name,
+        'auditor_nik' => $request->auditor_nik,
+        'auditor_department' => $request->auditor_department,
+        'audit_date' => $request->audit_date,
+        'created_at' => now()
+    ]);
+
+    $auditId = Str::uuid();
+    DB::table('audits')->insert([
+        'id' => $auditId,
+        'audit_session_id' => $sessionId,
+        'department_id' => $request->department_id,
+        'status' => 'in_progress',
+        'created_at' => now()
+    ]);
+
+    if ($request->has('responders')) {
+        foreach ($request->responders as $responder) {
+            if (!empty($responder['name'])) {
+                DB::table('audit_responders')->insert([
+                    'id' => Str::uuid(),
+                    'audit_session_id' => $sessionId,
+                    'responder_name' => $responder['name'],
+                    'responder_department' => $responder['department'] ?? null,
+                    'responder_nik' => $responder['nik'] ?? null,
+                    'created_at' => now()
+                ]);
+            }
+        }
+    }
+    return redirect("/audit/{$auditId}/4-1");
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN AREA (DASHBOARD & LOGS)
+|--------------------------------------------------------------------------
+*/
 
 Route::prefix('admin')->group(function () {
     
-    // Dashboard Utama (Ringkasan Statistik Seluruh Departemen)
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('admin.dashboard');
+    // 1. Dashboard Utama (TAMBAHAN BARU)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
-    // Detail Log Audit per Departemen (Tabel List Audit)
-    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])
-        ->name('admin.department.show');
+    // 2. List Audit per Departemen
+    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('dept.show');
 
-    // Overview Hasil Audit Spesifik (Grafik Radar & Doughnut)
-    Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])
-        ->name('audit.overview');
+    // 3. Overview Hasil Audit (Grafik)
+    Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
 
-    // Detail Per Klausul Utama (Tabel Detail & Stacked Bar Chart)
-    // Contoh URL: /admin/audit/{uuid}/clause/4
-    Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])
-        ->name('audit.clause_detail');
+    // 4. Detail Klausul (Tabel & Stacked Bar)
+    Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause_detail');
 });
 
-// =========================================================================
-// 3. AUDIT PROCESS (SURVEY AUDITOR)
-// =========================================================================
+/*
+|--------------------------------------------------------------------------
+| AUDIT PROCESS ROUTES (SURVEY)
+|--------------------------------------------------------------------------
+*/
 
-Route::prefix('audit')->group(function () {
+// Setup & Start
+Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
+Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
+Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
 
-    // --- A. Setup & Inisiasi ---
-    
-    // Halaman Form Identitas Auditor
-    Route::get('/setup', [AuditController::class, 'setup'])
-        ->name('audit.setup');
+// Menu & Soal Dinamis
+Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.menu');
 
-    // Proses Submit Form Identitas (Membuat Sesi Audit)
-    Route::post('/start', [AuditController::class, 'startAudit'])
-        ->name('audit.start');
+// Route Show & Store (Gunakan regex UUID agar tidak bentrok)
+Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
+    ->name('audit.show')
+    ->where('id', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
 
-    // Cek apakah ada audit yang tertunda (Resume feature)
-    Route::post('/check-resume', [AuditController::class, 'checkPendingAudit'])
-        ->name('audit.check_resume');
+Route::post('/audit/{id}/{clause}', [AuditController::class, 'store'])->name('audit.store');
 
-
-    // --- B. Menu & Navigasi ---
-
-    // Halaman Menu Utama Audit (Daftar Klausul)
-    Route::get('/menu/{id}', [AuditController::class, 'menu'])
-        ->name('audit.menu');
-
-
-    // --- C. Halaman Akhir ---
-
-    // Halaman Terima Kasih / Selesai
-    Route::get('/finish', function() {
-        return view('audit.finish'); 
-        // Pastikan Anda punya file resources/views/audit/finish.blade.php
-        // Atau return string sederhana jika belum ada blade-nya:
-        // return "<div style='text-align:center; margin-top:50px;'><h1>Audit Selesai!</h1><a href='/'>Kembali</a></div>";
-    })->name('audit.finish');
-
-
-    // --- D. Simpan Jawaban (AJAX) ---
-    
-    // Simpan jawaban via AJAX (Auto-save)
-    Route::post('/save-ajax', [AuditController::class, 'saveAjax'])
-        ->name('audit.saveAjax');
-    
-    // Simpan sub-klausul (jika ada logika khusus)
-    Route::post('/save-sub-clause', [AuditController::class, 'saveSubClause']);
-
-
-    // --- E. Halaman Soal (Wildcard Routes) ---
-    // PENTING: Route ini harus diletakkan PALING BAWAH di dalam grup 'audit'
-    // agar tidak menimpa route spesifik seperti '/audit/setup' atau '/audit/finish'.
-
-    // Menampilkan Halaman Soal per Klausul (Contoh: /audit/{uuid}/4.1)
-    Route::get('/{id}/{clause}', [AuditController::class, 'show'])
-        ->where('id', '[0-9a-fA-F\-]{36}') // Validasi UUID agar lebih aman
-        ->name('audit.show');
-
-    // Menyimpan Jawaban Soal (Form Submit Biasa)
-    Route::post('/{id}/{clause}', [AuditController::class, 'store'])
-        ->name('audit.store');
+// AJAX & Submit Khusus
+Route::post('/audit/save-ajax', [AuditController::class, 'saveAjax'])->name('audit.saveAjax');
+Route::post('/audit/save-sub-clause', [AuditController::class, 'saveSubClause']);
+Route::post('/audit/{audit}/4-1/submit', function ($auditId) {
+    DB::table('audit_sessions')->where('id', $auditId)->update(['audit_41_completed_at' => now()]);
+    return response()->json(['status' => 'ok', 'message' => 'Audit 4.1 berhasil disimpan']);
 });
 
-// =========================================================================
-// 4. SYSTEM & TESTING
-// =========================================================================
+// Finish
+Route::get('/audit/finish', function() {
+    return "<div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
+            <h1 style='color:green;'>Terima Kasih!</h1>
+            <p>Audit telah selesai disimpan.</p>
+            <a href='/audit/setup'>Kembali ke Menu Awal</a>
+            </div>";
+})->name('audit.finish');
 
-// Route untuk mengetes koneksi database (Hapus saat production)
+/*
+|--------------------------------------------------------------------------
+| SYSTEM UTILITIES
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/test-db', function () {
     try {
         DB::connection()->getPdo();
-        return "Koneksi Database Berhasil ke: " . DB::connection()->getDatabaseName();
+        return "Koneksi Berhasil ke: " . DB::connection()->getDatabaseName();
     } catch (\Exception $e) {
-        return "Gagal koneksi database: " . $e->getMessage();
+        return "Gagal konek database: " . $e->getMessage();
     }
 });
