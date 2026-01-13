@@ -25,24 +25,24 @@
         </div>
 
         <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-md transition-shadow">
-            <div class="p-3 bg-green-50 text-green-600 rounded-xl mr-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Selesai</p>
-                <p class="text-3xl font-black text-gray-800">{{ $stats['completed'] }}</p>
-            </div>
-        </div>
+    <div class="p-3 bg-green-50 text-green-600 rounded-xl mr-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Selesai</p>
+        <p class="text-3xl font-black text-gray-800">{{ $stats['completed'] }}</p>
+    </div>
+</div>
 
-        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-md transition-shadow">
-            <div class="p-3 bg-amber-50 text-amber-600 rounded-xl mr-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending</p>
-                <p class="text-3xl font-black text-gray-800">{{ $stats['pending'] }}</p>
-            </div>
-        </div>
+<div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-md transition-shadow">
+    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl mr-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Berjalan</p>
+        <p class="text-3xl font-black text-gray-800">{{ $stats['pending'] }}</p>
+    </div>
+</div>
 
         <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-md transition-shadow">
             <div class="p-3 bg-purple-50 text-purple-600 rounded-xl mr-4">

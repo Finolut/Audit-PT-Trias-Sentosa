@@ -35,38 +35,37 @@ class DashboardController extends Controller
     /**
      * 1. DASHBOARD UTAMA (Tampilan Awal Admin)
      */
-    public function index()
-    {
-        // Data Sidebar (List Departemen)
-        $departments = Department::orderBy('name', 'asc')->get();
+   public function index()
+{
+    $departments = Department::orderBy('name', 'asc')->get();
 
-        // Statistik Global
-        $stats = [
-            'total_audits' => Audit::count(),
-            'completed'    => Audit::where('status', 'COMPLETED')->count(),
-            'pending'      => Audit::where('status', 'PENDING')->count(),
-            'departments'  => Department::count(),
-        ];
+    // Statistik Global - PERBAIKAN STATUS
+    $stats = [
+        'total_audits' => Audit::count(),
+        'completed'    => Audit::where('status', 'COMPLETED')->count(),
+        // Ganti PENDING menjadi IN_PROGRESS
+        'pending'      => Audit::where('status', 'IN_PROGRESS')->count(),
+        'departments'  => Department::count(),
+    ];
 
-        // 5 Audit Terakhir (Recent Activity)
-        $recentAudits = Audit::with(['department', 'session'])
-                             ->orderBy('created_at', 'desc')
-                             ->take(5)
-                             ->get();
+    $recentAudits = Audit::with(['department', 'session'])
+                         ->orderBy('created_at', 'desc')
+                         ->take(5)
+                         ->get();
 
-        // Ringkasan Per Departemen (Untuk Tabel Dashboard)
-        $deptSummary = Department::withCount(['audits as total_audit', 
-            'audits as completed_count' => function ($query) {
-                $query->where('status', 'COMPLETED');
-            },
-            'audits as pending_count' => function ($query) {
-                $query->where('status', 'PENDING');
-            }
-        ])->get();
+    // Ringkasan Per Departemen - PERBAIKAN STATUS
+    $deptSummary = Department::withCount(['audits as total_audit', 
+        'audits as completed_count' => function ($query) {
+            $query->where('status', 'COMPLETED');
+        },
+        'audits as pending_count' => function ($query) {
+            // Ganti PENDING menjadi IN_PROGRESS
+            $query->where('status', 'IN_PROGRESS');
+        }
+    ])->get();
 
-        // Return ke view khusus dashboard, bukan layout langsung
-        return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary'));
-    }
+    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary'));
+}
 
     /**
      * 2. HALAMAN DETAIL DEPARTEMEN
