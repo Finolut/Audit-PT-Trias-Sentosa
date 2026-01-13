@@ -200,35 +200,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function updateInfoBox(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
-    const inputs = document.querySelectorAll(`#hidden_inputs_${itemId} input`);
+    const hiddenContainer = document.getElementById(`hidden_inputs_${itemId}`);
+    const inputs = hiddenContainer.querySelectorAll('input');
     
-    let answers = {};
+    let answers = [];
     inputs.forEach(input => {
-        // Ambil nama (Auditor/Responder) dari atribut data atau parsing dari name
-        const name = input.name.match(/\[([^\]]+)\]$/)[1]; 
-        answers[name] = input.value;
+        answers.push(input.value);
     });
 
-    const auditorAnswer = answers[auditorName];
-    
-    // Cek apakah ada perbedaan antara Auditor dan Responder manapun
-    let hasDifference = false;
-    let infoHtml = `<div style="margin-top:8px; padding:8px; background:#fef2f2; border-left:4px solid #ef4444; font-size:0.8rem;">`;
-    infoHtml += `<strong>Perhatian:</strong> Perbedaan jawaban dideteksi:<br/>`;
+    // Cek apakah semua jawaban sama
+    // Set() akan menghapus duplikat, jika size > 1 berarti ada perbedaan
+    const uniqueAnswers = new Set(answers);
+    const hasDifference = uniqueAnswers.size > 1;
 
-    for (let person in answers) {
-        infoHtml += `<span style="display:inline-block; margin-right:10px;">• ${person}: <strong>${answers[person]}</strong></span>`;
-        if (person !== auditorName && answers[person] !== auditorAnswer) {
-            hasDifference = true;
-        }
-    }
-    infoHtml += `</div>`;
-
-    // Tampilkan hanya jika ada perbedaan, jika sama sembunyikan
     if (hasDifference) {
-        infoBox.innerHTML = infoHtml;
+        // Hitung detail untuk ditampilkan saat ada perbedaan
+        const yesCount = answers.filter(a => a === 'YES').length;
+        const noCount = answers.filter(a => a === 'NO').length;
+        const naCount = answers.filter(a => a === 'N/A').length;
+
+        infoBox.innerHTML = `
+            <div style="margin-top: 8px; padding: 8px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 0.8rem; color: #b91c1c;">
+                <strong>⚠️ Perbedaan Jawaban:</strong> ${yesCount} YES, ${noCount} NO, ${naCount} N/A
+            </div>
+        `;
         infoBox.style.display = 'block';
     } else {
+        // Sembunyikan total jika semua jawaban sama (sinkron)
         infoBox.innerHTML = '';
         infoBox.style.display = 'none';
     }
