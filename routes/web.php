@@ -80,7 +80,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // 2. List Audit per Departemen
-    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('dept.show');
+    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('admin.department.show');
 
     // 3. Overview Hasil Audit (Grafik)
     Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
