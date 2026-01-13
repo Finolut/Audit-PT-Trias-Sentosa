@@ -183,6 +183,9 @@
                         <option value="Specialist">Technical Specialist</option>
                     </select>
                 </div>
+                <div style="flex:1">
+                    <input type="text" name="audit_team[${teamIndex}][department]" placeholder="Departemen" style="margin:0;">
+                </div>
                 <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
             </div>
         `;

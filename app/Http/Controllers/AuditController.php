@@ -112,7 +112,7 @@ class AuditController extends Controller
                         'responder_name' => trim($member['name']),
                         'responder_role' => $member['role'] ?? 'Member',
                         'responder_nik' => null,
-                        'responder_department' => null,
+                        'responder_department' =>  $member['department'] ?? null,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
