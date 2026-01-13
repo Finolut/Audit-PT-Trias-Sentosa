@@ -28,12 +28,40 @@ class AuditController extends Controller
         '10' => 'Improvement',
     ];
 
-    private $auditorsList = [
-        // ... (daftar auditor tetap sama seperti sebelumnya)
-        ['name' => 'Joko Nofrianto', 'nik' => '2477', 'dept' => 'BOPET'],
-        ['name' => 'Laurentius Kelik Dwi Ananta', 'nik' => 'N/A', 'dept' => 'Q A'],
-        // ... tambahkan semua sesuai data Anda
-    ];
+private $auditorsList = [
+    ['name' => 'Joko Nofrianto', 'nik' => '2477', 'dept' => 'BOPET'],
+    ['name' => 'Laurentius Kelik Dwi Ananta', 'nik' => 'N/A', 'dept' => 'Q A'],
+    ['name' => 'Edy Setiono', 'nik' => '1631', 'dept' => 'Q A-Product Stewardship'],
+    ['name' => 'Mugi Slamet Priyanto', 'nik' => '943', 'dept' => 'Q A'],
+    ['name' => 'Satyo Ady Prihatno', 'nik' => '1522', 'dept' => 'QA'],
+    ['name' => 'Adhi Setyo Budi', 'nik' => '1074', 'dept' => 'SSSE'],
+    ['name' => 'Rizal Pratama Firyanto', 'nik' => '3077', 'dept' => 'SSSE'],
+    ['name' => 'Brahmanto Anggoro Laksono', 'nik' => '3186', 'dept' => 'SSSE'],
+    ['name' => 'Eko Susanto', 'nik' => '1421', 'dept' => 'BOPET'],
+    ['name' => 'Yusriel Yahya Wahyu Lisandi', 'nik' => '3127', 'dept' => 'F E'],
+    ['name' => 'M. Agung Wibowo', 'nik' => '2086', 'dept' => 'MANAGEMENT SYSTEM'],
+    ['name' => 'Adhek Widyo Purnama', 'nik' => '3138', 'dept' => 'I A'],
+    ['name' => 'Benediktus Wahyu Kurniawan', 'nik' => '2701', 'dept' => 'I A'],
+    ['name' => 'Nedwin Lembar Hermavian', 'nik' => '3054', 'dept' => 'I A'],
+    ['name' => 'Teguh Imam Santosa', 'nik' => '1891', 'dept' => 'G S'],
+    ['name' => 'Dodod Wahjudhi', 'nik' => '1456', 'dept' => 'G S'],
+    ['name' => 'Dhanny', 'nik' => '2135', 'dept' => 'ENGINEERING'],
+    ['name' => 'Kasiyono', 'nik' => '1240', 'dept' => 'ENGINEERING'],
+    ['name' => 'M. Nadif', 'nik' => '1002', 'dept' => 'R&D'],
+    ['name' => 'Eko Saifudin Yulianto', 'nik' => '944', 'dept' => 'LOGISTICS'],
+    ['name' => 'Lisa Santoso', 'nik' => '2319', 'dept' => 'PURCHASING'],
+    ['name' => 'Fenny Maria Veronica Lukman', 'nik' => '2910', 'dept' => 'PURCHASING'],
+    ['name' => 'Melisa', 'nik' => '2833', 'dept' => 'PURCHASING'],
+    ['name' => 'Catur Putra Prajoko', 'nik' => 'N/A', 'dept' => 'R&D'],
+    ['name' => 'Sari Dewi Cahyaning Tyas', 'nik' => '2615', 'dept' => 'R&D'],
+    ['name' => 'Ahmad Solihudin', 'nik' => '3055', 'dept' => 'TTA'],
+    ['name' => 'Fahrisal Surya Kusuma', 'nik' => '2605', 'dept' => 'MFG SUPPORT'],
+    ['name' => 'Suhadak', 'nik' => '2148', 'dept' => 'MFG SUPPORT'],
+    ['name' => 'Gunaryanto Cahyo Edi', 'nik' => '1511', 'dept' => 'PPIC'],
+    ['name' => 'Mohamad Taufik', 'nik' => '991', 'dept' => 'THERMAL'],
+    ['name' => 'Nanang Sugianto', 'nik' => '850', 'dept' => 'BOPP'],
+    ['name' => 'Solikan', 'nik' => '1207', 'dept' => 'PROJECT'],
+];
 
     public function setup()
     {
@@ -99,7 +127,6 @@ class AuditController extends Controller
                 'responder_nik' => $auditorNik,
                 'responder_department' => $auditorDept,
                 'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             // 2. Tim Audit Tambahan
@@ -114,7 +141,6 @@ class AuditController extends Controller
                         'responder_nik' => null,
                         'responder_department' =>  $member['department'] ?? null,
                         'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
                 }
             }
