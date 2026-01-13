@@ -153,17 +153,22 @@ function openModal(itemId, itemText) {
     document.getElementById('modalItemText').innerText = itemText;
     const list = document.getElementById('modalRespondersList');
     list.innerHTML = '';
-    
-    list.appendChild(createResponderRow(auditorName, 'Auditor Utama', itemId, true));
-    
-    if (typeof responders !== 'undefined') {
+
+    if (Array.isArray(responders)) {
         responders.forEach(res => {
-            list.appendChild(createResponderRow(res.responder_name, res.responder_department || 'Responden', itemId));
+            const isAuditor = (res.responder_name === auditorName);
+            list.appendChild(createResponderRow(
+                res.responder_name,
+                res.responder_department || 'Departemen Tidak Diketahui',
+                itemId,
+                isAuditor,
+                res.responder_nik // opsional, jika ingin tampilkan NIK
+            ));
         });
     }
+
     modal.style.display = 'block';
 }
-
 function closeModal() {
     document.getElementById('answerModal').style.display = 'none';
 }
