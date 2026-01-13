@@ -166,6 +166,7 @@
 }
 .submit-audit:hover { background: var(--primary-dark); }
 
-.score-info-box {
-    display: none !important;
-}
+.score-info-box { 
+        display: none; 
+        margin-top: 10px;
+    }
