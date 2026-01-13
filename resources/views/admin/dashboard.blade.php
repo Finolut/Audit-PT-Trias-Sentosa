@@ -93,7 +93,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <a href="{{ route('admin.department.show', $dept->id) }}" class="text-blue-600 hover:text-blue-800 font-bold text-xs">
+                                <a href="{{ route('dept.show', $dept->id) }}" class="text-blue-600 hover:text-blue-800 font-bold text-xs">
                                     LIHAT DETAIL &rarr;
                                 </a>
                             </td>
