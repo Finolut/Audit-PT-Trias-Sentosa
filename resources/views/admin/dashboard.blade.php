@@ -133,7 +133,7 @@
                             <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">PENDING</span>
                         @endif
                     </div>
-                    <a href="{{ route('admin.department.show', $audit->department_id) }}" class="block mt-3 text-center w-full py-1.5 text-xs font-bold text-gray-500 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+                    <a href="{{ route('dept.show', $audit->department_id) }}" class="block mt-3 text-center w-full py-1.5 text-xs font-bold text-gray-500 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
                         Lihat Log
                     </a>
                 </div>
