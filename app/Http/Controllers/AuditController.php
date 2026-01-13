@@ -76,49 +76,72 @@ class AuditController extends Controller
 
     public function startAudit(Request $request) 
     {
+        // 1. Validasi Input yang diperbarui
         $request->validate([
-            'department_id' => 'required|exists:departments,id',
-            'auditor_nik'   => 'required',
+            'department_id'   => 'required|exists:departments,id',
+            'auditor_name'    => 'required',
+            'audit_type'      => 'required', // 1️⃣ Info
+            'audit_objective' => 'required', // 1️⃣ Info
+            'pic_name'        => 'required', // 3️⃣ Auditee
+            'audit_date'      => 'required|date',
         ]);
 
         return DB::transaction(function () use ($request) {
-            $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->auditor_nik);
             
+            // Data Auditor Utama (Dari Hardcode/DB User)
+            $selectedAuditor = collect($this->auditorsList)->firstWhere('name', $request->auditor_name);
+            $auditorNik = $selectedAuditor['nik'] ?? $request->auditor_nik;
+            $auditorDept = $selectedAuditor['dept'] ?? $request->auditor_department;
+
+            // ID Unik untuk Session dan Audit
             $sessionId = (string) Str::uuid();
+            $newAuditId = (string) Str::uuid();
+
+            // A. Simpan ke AUDIT_SESSIONS (Detail Pelaku Audit)
+            // Anda mungkin perlu migrasi database untuk kolom 'audit_team' (JSON)
             DB::table('audit_sessions')->insert([
                 'id'                 => $sessionId,
-                'auditor_name'       => $selectedAuditor['name'] ?? 'Unknown',
-                'auditor_nik'        => $selectedAuditor['nik'] ?? $request->auditor_nik,
-                'auditor_department' => $selectedAuditor['dept'] ?? '-',
+                'auditor_name'       => $request->auditor_name, // 2️⃣ Auditor Utama
+                'auditor_nik'        => $auditorNik,
+                'auditor_department' => $auditorDept,
+                
+                // Simpan Tim Audit sebagai JSON agar fleksibel (Nama + Peran)
+                'audit_team'         => json_encode($request->input('audit_team', [])),
+                
                 'company_name'       => 'Indopoly',
-                'audit_date'         => now()->toDateString(),
+                'audit_date'         => $request->audit_date,
                 'created_at'         => now(),
             ]);
 
-            $responders = $request->input('responders', []);
-            foreach($responders as $resp) {
-                if(!empty($resp['name'])) {
-                    DB::table('audit_responders')->insert([
-                        'id'                   => (string) Str::uuid(),
-                        'audit_session_id'     => $sessionId,
-                        'responder_name'       => $resp['name'],
-                        'responder_department' => $resp['department'] ?? null,
-                        'responder_nik'        => $resp['nik'] ?? null,
-                        'created_at'           => now(),
-                    ]);
-                }
-            }
-
-            $newAuditId = (string) Str::uuid();
+            // B. Simpan ke AUDITS (Detail Meta Audit)
             DB::table('audits')->insert([
                 'id'               => $newAuditId,
                 'audit_session_id' => $sessionId,
-                'department_id'    => $request->department_id,
+                'department_id'    => $request->department_id, // 3️⃣ Auditee Dept
+                
+                // 1️⃣ Informasi Audit
+                'type'             => $request->audit_type, 
+                'objective'        => $request->audit_objective,
+                'scope'            => $request->audit_scope,
+                
+                // 3️⃣ PIC Auditee (Wajib)
+                'pic_auditee_name' => $request->pic_name,
+                'pic_auditee_nik'  => $request->pic_nik ?? null,
+
+                // 4️⃣ Status & Tanggal
                 'status'           => 'IN_PROGRESS',
+                'started_at'       => now(),
+                
+                // 5️⃣ Penutup (Disiapkan kosong dulu)
+                'conclusion'       => null,
+                'general_notes'    => null,
+                
                 'created_at'       => now(),
             ]);
 
-            return redirect()->route('audit.menu', ['id' => $newAuditId]);
+            // Redirect ke Menu Audit
+            return redirect()->route('audit.menu', ['id' => $newAuditId])
+                             ->with('success', 'Audit baru berhasil dibuat!');
         });
     }
 
