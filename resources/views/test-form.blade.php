@@ -12,14 +12,13 @@
         h2 { text-align: center; color: #111827; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; }
         h4 { margin: 0 0 15px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
         
-        /* Section Styling */
         .section-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 25px; background: #fff; position: relative; overflow: hidden; }
         .section-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
         
-        .card-1 { border-left-color: #3b82f6; } .card-1 h4 { color: #1d4ed8; } /* Info */
-        .card-2 { border-left-color: #8b5cf6; } .card-2 h4 { color: #6d28d9; } /* Auditor */
-        .card-3 { border-left-color: #ec4899; } .card-3 h4 { color: #be185d; } /* Auditee */
-        .card-4 { border-left-color: #10b981; } .card-4 h4 { color: #047857; } /* Pelaksanaan */
+        .card-1 { border-left-color: #3b82f6; } .card-1 h4 { color: #1d4ed8; }
+        .card-2 { border-left-color: #8b5cf6; } .card-2 h4 { color: #6d28d9; }
+        .card-3 { border-left-color: #ec4899; } .card-3 h4 { color: #be185d; }
+        .card-4 { border-left-color: #10b981; } .card-4 h4 { color: #047857; }
         
         label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; color: #4b5563; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 15px; font-size: 14px; box-sizing: border-box; }
@@ -28,13 +27,11 @@
         .row { display: flex; gap: 15px; }
         .col { flex: 1; }
 
-        /* Dynamic Rows */
         .dynamic-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; background: #f9fafb; padding: 10px; border-radius: 6px; border: 1px dashed #d1d5db; }
         .btn-add { background: white; border: 1px dashed #6b7280; color: #374151; padding: 8px; width: 100%; cursor: pointer; border-radius: 6px; font-size: 13px; }
         .btn-add:hover { background: #f3f4f6; border-color: #374151; }
         .btn-remove { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
 
-        /* Submit Button */
         .btn-primary { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: background 0.2s; }
         .btn-primary:hover { background: #1d4ed8; }
 
@@ -46,11 +43,6 @@
 
 <div class="container">
     <h2>📋 Form Setup Audit Internal</h2>
-
-    <div id="resume-alert" style="display:none; background:#fffbeb; border:1px solid #fcd34d; padding:15px; border-radius:8px; margin-bottom:20px; color:#92400e;">
-        <strong>⚠️ Audit Ditemukan:</strong> <span id="resume-msg"></span>
-        <a id="resume-btn" href="#" style="margin-left:10px; color:#b45309; text-decoration:underline; font-weight:bold;">Lanjutkan</a>
-    </div>
 
     <form method="POST" action="{{ route('audit.start') }}">
         @csrf
@@ -163,8 +155,7 @@
 <script>
     let teamIndex = 0;
 
-    // 1. Logic Auditor Utama
-    async function selectAuditor(select) {
+    function selectAuditor(select) {
         const opt = select.options[select.selectedIndex];
         const nik = opt.getAttribute('data-nik');
         const dept = opt.getAttribute('data-dept');
@@ -173,15 +164,11 @@
             document.getElementById('auditor_nik').value = nik;
             document.getElementById('auditor_department').value = dept;
             document.getElementById('audit-details').classList.remove('hidden');
-            
-            // Cek Resume (Optional - logic sama seperti sebelumnya)
-            // checkPendingAudit(nik); 
         } else {
             document.getElementById('audit-details').classList.add('hidden');
         }
     }
 
-    // 2. Logic Tambah Tim Audit (Bisa user internal atau input manual)
     function addAuditTeam() {
         const container = document.getElementById('audit-team-container');
         const html = `
@@ -190,7 +177,7 @@
                     <input type="text" name="audit_team[${teamIndex}][name]" placeholder="Nama Anggota Tim" required style="margin:0;">
                 </div>
                 <div style="flex:1">
-                     <select name="audit_team[${teamIndex}][role]" style="margin:0;">
+                    <select name="audit_team[${teamIndex}][role]" style="margin:0;">
                         <option value="Member">Member</option>
                         <option value="Observer">Observer</option>
                         <option value="Specialist">Technical Specialist</option>
