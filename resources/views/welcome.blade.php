@@ -49,7 +49,7 @@
             </div>
 
             <div class="pt-6">
-                <a href="#survey-link" 
+                <a href="{{ route('test-form') }}" 
                    class="bg-white hover:bg-gray-50 text-gray-900 font-extrabold text-xl py-4 px-14 rounded-sm shadow-md transition-all hover:shadow-lg inline-block border border-gray-100 active:scale-95">
                     Survey
                 </a>
