@@ -201,32 +201,37 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateInfoBox(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
     const hiddenContainer = document.getElementById(`hidden_inputs_${itemId}`);
+    if (!hiddenContainer) return;
+
     const inputs = hiddenContainer.querySelectorAll('input');
-    
     let answers = [];
+    
     inputs.forEach(input => {
-        answers.push(input.value);
+        if (input.value) answers.push(input.value);
     });
 
-    // Cek apakah semua jawaban sama
-    // Set() akan menghapus duplikat, jika size > 1 berarti ada perbedaan
-    const uniqueAnswers = new Set(answers);
-    const hasDifference = uniqueAnswers.size > 1;
+    // Ambil jawaban unik (misal: ['YES', 'NO'])
+    const uniqueAnswers = [...new Set(answers)];
 
-    if (hasDifference) {
-        // Hitung detail untuk ditampilkan saat ada perbedaan
+    // LOGIKA UTAMA: Hanya muncul jika ada lebih dari 1 jenis jawaban (BEDA)
+    if (uniqueAnswers.length > 1) {
         const yesCount = answers.filter(a => a === 'YES').length;
         const noCount = answers.filter(a => a === 'NO').length;
         const naCount = answers.filter(a => a === 'N/A').length;
 
+        // Tampilkan box info HANYA saat ada perbedaan
         infoBox.innerHTML = `
-            <div style="margin-top: 8px; padding: 8px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 0.8rem; color: #b91c1c;">
-                <strong>⚠️ Perbedaan Jawaban:</strong> ${yesCount} YES, ${noCount} NO, ${naCount} N/A
+            <div style="margin-top: 8px; padding: 10px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 8px; font-size: 0.85rem; color: #b91c1c; display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">⚠️</span>
+                <div>
+                    <strong>Perbedaan Jawaban Terdeteksi:</strong><br>
+                    Detail: ${yesCount} YES, ${noCount} NO, ${naCount} N/A
+                </div>
             </div>
         `;
         infoBox.style.display = 'block';
     } else {
-        // Sembunyikan total jika semua jawaban sama (sinkron)
+        // HAPUS SEMUA ISI DAN SEMBUNYIKAN jika jawaban seragam/sinkron
         infoBox.innerHTML = '';
         infoBox.style.display = 'none';
     }
