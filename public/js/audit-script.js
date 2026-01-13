@@ -29,7 +29,7 @@ function setVal(itemId, userName, val, btn) {
     }
 
     // 5. Update info ringkasan skor di layar
-    calculateScore(itemId);
+    updateInfoBox(itemId);
 }
 
 /**
@@ -205,39 +205,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function updateInfoBox(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
-    const hiddenContainer = document.getElementById(`hidden_inputs_${itemId}`);
-    if (!hiddenContainer) return;
+    if (!infoBox) return;
 
-    const inputs = hiddenContainer.querySelectorAll('input');
-    let answers = [];
+    // Ambil semua jawaban untuk item ini
+    let answers = {};
+    for (let key in sessionAnswers) {
+        if (key.startsWith(`${itemId}_`)) {
+            const user = key.replace(`${itemId}_`, '');
+            answers[user] = sessionAnswers[key];
+        }
+    }
+
+    const auditorAnswer = answers[auditorName];
     
-    inputs.forEach(input => {
-        if (input.value) answers.push(input.value);
-    });
+    // Jika Auditor belum jawab, sembunyikan info box
+    if (!auditorAnswer) {
+        infoBox.style.display = 'none';
+        infoBox.innerHTML = '';
+        return;
+    }
 
-    // Ambil jawaban unik (misal: ['YES', 'NO'])
-    const uniqueAnswers = [...new Set(answers)];
+    // Cek apakah ada responder lain yang jawabannya BERBEDA dari Auditor
+    let hasDifference = false;
+    let yesCount = 0, noCount = 0, naCount = 0;
 
-    // LOGIKA UTAMA: Hanya muncul jika ada lebih dari 1 jenis jawaban (BEDA)
-    if (uniqueAnswers.length > 1) {
-        const yesCount = answers.filter(a => a === 'YES').length;
-        const noCount = answers.filter(a => a === 'NO').length;
-        const naCount = answers.filter(a => a === 'N/A').length;
+    for (let user in answers) {
+        const ans = answers[user];
+        if (ans === 'YES') yesCount++;
+        else if (ans === 'NO') noCount++;
+        else if (ans === 'N/A') naCount++;
 
-        // Tampilkan box info HANYA saat ada perbedaan
+        if (user !== auditorName && answers[user] !== auditorAnswer) {
+            hasDifference = true;
+        }
+    }
+
+    if (hasDifference) {
         infoBox.innerHTML = `
-            <div style="margin-top: 8px; padding: 10px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 8px; font-size: 0.85rem; color: #b91c1c; display: flex; align-items: center; gap: 8px;">
+            <div style="margin-top: 8px; padding: 10px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 1.2rem;">⚠️</span>
                 <div>
-                    <strong>Perbedaan Jawaban Terdeteksi:</strong><br>
-                    Detail: ${yesCount} YES, ${noCount} NO, ${naCount} N/A
+                    <strong>Perbedaan Jawaban:</strong><br>
+                    Auditor: <strong>${auditorAnswer}</strong> | 
+                    Lainnya: ${yesCount} YES, ${noCount} NO, ${naCount} N/A
                 </div>
             </div>
         `;
         infoBox.style.display = 'block';
     } else {
-        // HAPUS SEMUA ISI DAN SEMBUNYIKAN jika jawaban seragam/sinkron
-        infoBox.innerHTML = '';
+        // Tidak ada perbedaan → sembunyikan
         infoBox.style.display = 'none';
+        infoBox.innerHTML = '';
     }
 }
