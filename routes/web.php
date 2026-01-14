@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\ItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -143,3 +144,7 @@ Route::get('/test-db', function () {
 });
 
 Route::get('/admin/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('admin.dept.status_index');
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('items', ItemController::class);
+});
