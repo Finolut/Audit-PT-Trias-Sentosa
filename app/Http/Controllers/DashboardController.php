@@ -39,11 +39,9 @@ class DashboardController extends Controller
 {
     $departments = Department::orderBy('name', 'asc')->get();
 
-    // Statistik Global - PERBAIKAN STATUS
     $stats = [
         'total_audits' => Audit::count(),
         'completed'    => Audit::where('status', 'COMPLETED')->count(),
-        // Ganti PENDING menjadi IN_PROGRESS
         'pending'      => Audit::where('status', 'IN_PROGRESS')->count(),
         'departments'  => Department::count(),
     ];
@@ -53,18 +51,26 @@ class DashboardController extends Controller
                          ->take(5)
                          ->get();
 
-    // Ringkasan Per Departemen - PERBAIKAN STATUS
+    // AMBIL DATA PERTANYAAN DARI TABEL audit_questions (Blue Card)
+    // Sesuai permintaan: tampilkan isinya tanpa filter status in-progress
+    $liveQuestions = DB::table('audit_questions')
+        ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
+        ->join('departments', 'audits.department_id', '=', 'departments.id')
+        ->select('audit_questions.*', 'departments.name as dept_name')
+        ->orderBy('audit_questions.created_at', 'desc')
+        ->take(3)
+        ->get();
+
     $deptSummary = Department::withCount(['audits as total_audit', 
         'audits as completed_count' => function ($query) {
             $query->where('status', 'COMPLETED');
         },
         'audits as pending_count' => function ($query) {
-            // Ganti PENDING menjadi IN_PROGRESS
             $query->where('status', 'IN_PROGRESS');
         }
     ])->get();
 
-    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary'));
+    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary', 'liveQuestions'));
 }
 
     /**

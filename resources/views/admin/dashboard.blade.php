@@ -106,5 +106,48 @@
         @endforelse
     </div>
 </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    {{-- Kolom Kiri: Kartu Pertanyaan Terkini --}}
+    <div class="lg:col-span-1">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="font-bold text-blue-800 mb-4 flex items-center">
+                <span class="mr-2">📝</span> Pertanyaan Audit Terkini
+            </h3>
+            
+            @if(count($liveQuestions) > 0)
+                <ul class="space-y-4">
+                    @foreach($liveQuestions as $q)
+                    <li class="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-bold text-blue-500 uppercase">{{ $q->dept_name }}</span>
+                            <span class="text-[9px] text-gray-400">{{ $q->clause_code }}</span>
+                        </div>
+                        <p class="text-xs text-gray-700 line-clamp-2 italic">"{{ $q->question_text }}"</p>
+                    </li>
+                    @endforeach
+                </ul>
+                <a href="#" class="inline-block mt-4 text-blue-600 text-xs font-bold hover:underline">
+                    LIHAT SEMUA LOG PERTANYAAN →
+                </a>
+            @else
+                <p class="text-xs text-blue-400">Belum ada catatan pertanyaan audit.</p>
+            @endif
+        </div>
+
+        {{-- Navigasi Cepat Admin --}}
+        <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+            <h3 class="font-bold text-gray-800 mb-4 text-sm">Manajemen Data</h3>
+            <a href="{{ route('admin.items.index') }}" class="flex items-center p-3 mb-2 bg-gray-50 rounded-lg hover:bg-purple-50 hover:text-purple-600 transition-all text-sm font-medium">
+                <span class="mr-3">⚙️</span> Kelola Soal Audit (Items)
+            </a>
+        </div>
+    </div>
+
+    {{-- Kolom Kanan: Aktivitas Terbaru (Kode Anda) --}}
+    <div class="lg:col-span-2">
+        {{-- Masukkan kode <div class="bg-white rounded-2xl..."> milik Anda di sini --}}
+    </div>
+</div>
     </div>
 @endsection
