@@ -32,21 +32,52 @@
                 </div>
             </div>
             
-            <nav class="p-4 space-y-1 overflow-y-auto flex-1" id="deptList">
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-4">Daftar Departemen</div>
-                
-                @foreach($departments as $dept)
-                    <a href="{{ route('dept.show', $dept->id) }}" 
-                       data-name="{{ strtolower($dept->name) }}"
-                       class="dept-item block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100 {{ request()->is('dept/'.$dept->id) ? 'active-link' : '' }}">
-                       {{ $dept->name }}
-                    </a>
-                @endforeach
+<nav class="p-4 space-y-1 overflow-y-auto flex-1" id="deptList">
+    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-4">Navigasi</div>
 
-                <div id="noResult" class="hidden px-4 py-2 text-sm text-gray-400 italic">
-                    Departemen tidak ditemukan...
-                </div>
-            </nav>
+    <!-- Dashboard Link -->
+    <a href="{{ route('admin.dashboard') }}" 
+       class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100 {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}">
+        📊 Dashboard
+    </a>
+
+    <!-- Departemen Dropdown -->
+    <div class="relative">
+        <button id="deptToggle" 
+                class="w-full flex justify-between items-center px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100 focus:outline-none">
+            🏢 Departemen
+            <svg id="deptChevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+
+        <div id="deptDropdown" class="hidden mt-1 ml-4 space-y-1 max-h-60 overflow-y-auto pl-2 border-l-2 border-gray-200">
+            @foreach($departments as $dept)
+                <a href="{{ route('dept.show', $dept->id) }}" 
+                   data-name="{{ strtolower($dept->name) }}"
+                   class="dept-item block px-3 py-1.5 text-sm text-gray-700 rounded hover:bg-gray-100 {{ request()->is('dept/'.$dept->id) ? 'active-link' : '' }}">
+                    {{ $dept->name }}
+                </a>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Pencarian tetap ada di bawah -->
+    <div class="mt-4 pt-4 border-t border-gray-200">
+        <div class="relative">
+            <input type="text" 
+                   id="deptSearch" 
+                   placeholder="Cari departemen..." 
+                   class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+        <div id="noResult" class="hidden px-3 py-1.5 text-sm text-gray-400 italic mt-2">
+            Tidak ditemukan...
+        </div>
+    </div>
+</nav>
         </div>
 
         <div class="flex-1 overflow-y-auto p-8">
@@ -103,6 +134,38 @@
                 noResult.classList.add('hidden');
             }
         });
+
+          // Toggle dropdown departemen
+    document.getElementById('deptToggle').addEventListener('click', function() {
+        const dropdown = document.getElementById('deptDropdown');
+        const chevron = document.getElementById('deptChevron');
+        dropdown.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+    });
+
+    // Pencarian tetap bekerja pada item dalam dropdown
+    document.getElementById('deptSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const deptItems = document.querySelectorAll('.dept-item');
+        const noResult = document.getElementById('noResult');
+        let foundCount = 0;
+
+        deptItems.forEach(item => {
+            const deptName = item.getAttribute('data-name');
+            if (deptName.includes(searchTerm)) {
+                item.style.display = 'block';
+                foundCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        if (foundCount === 0) {
+            noResult.classList.remove('hidden');
+        } else {
+            noResult.classList.add('hidden');
+        }
+    });
     </script>
 
 </body>
