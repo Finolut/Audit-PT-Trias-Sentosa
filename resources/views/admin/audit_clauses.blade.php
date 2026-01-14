@@ -34,40 +34,40 @@
                 <p><strong>Jenis Audit:</strong> 
                     @php
                         $typeLabels = [
-                            'Regular' => 'Rutin / Terjadwal',
-                            'Special' => 'Khusus / Insidental',
-                            'FollowUp' => 'Follow Up'
+                            'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
+                            'Special' => 'Pemeriksaan Khusus (Mendadak)',
+                            'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
                         ];
                     @endphp
-                    {{ $typeLabels[$audit->session?->audit_type] ?? '-' }}
+                    {{ $typeLabels[$audit->audit_type] ?? '-' }}
                 </p>
                 <p><strong>Tanggal Audit:</strong> 
-                    {{ $audit->session?->audit_date ? \Carbon\Carbon::parse($audit->session->audit_date)->format('d F Y') : '-' }}
+                    {{ $audit->audit_date ? \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') : '-' }}
                 </p>
-                <p><strong>Area yang Diperiksa:</strong> 
-                    <span class="font-medium">{{ $audit->session?->audit_scope ?? '-' }}</span>
+                <p><strong>Bagian yang Diperiksa:</strong> 
+                    <span class="font-medium">{{ $audit->audit_scope ?? '-' }}</span>
                 </p>
             </div>
 
             <!-- Kolom Kanan -->
             <div>
                 <p><strong>Auditor Utama:</strong> 
-                    <span class="font-medium">{{ $audit->session?->auditor_name ?? '-' }}</span>
+                    <span class="font-medium">{{ $audit->auditor_name ?? '-' }}</span>
                 </p>
-                <p><strong>PIC (Penanggung Jawab):</strong> 
-                    <span class="font-medium">{{ $audit->session?->pic_name ?? '-' }}</span>
+                <p><strong>Penanggung Jawab di Departemen:</strong> 
+                    <span class="font-medium">{{ $audit->pic_name ?? '-' }}</span>
                 </p>
-                <p><strong>NIK PIC:</strong> 
-                    {{ $audit->session?->pic_nik ?: 'Tidak ada' }}
+                <p><strong>NIK Penanggung Jawab:</strong> 
+                    {{ $audit->pic_nik ?: 'Tidak ada' }}
                 </p>
             </div>
         </div>
 
         <!-- Tujuan Audit (full width) -->
         <div class="mt-4">
-            <p><strong>Alasan Melakukan Pemeriksaan:</strong></p>
+            <p><strong>Alasan Melakukan Pemeriksaan Ini:</strong></p>
             <p class="text-gray-700 bg-white p-3 rounded mt-1 border border-gray-200">
-                {{ $audit->session?->audit_objective ?? 'Tidak diisi oleh auditor.' }}
+                {{ $audit->audit_objective ?? 'Tidak diisi oleh auditor.' }}
             </p>
         </div>
 
