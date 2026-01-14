@@ -3,14 +3,85 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     
-    {{-- HEADER --}}
-    <div class="flex justify-between items-center mb-8">
+{{-- HEADER + RINGKASAN INFORMASI AUDIT --}}
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">Audit Overview</h1>
-            <p class="text-gray-500">Department: {{ $audit->department->name ?? '-' }} | Date: {{ $audit->created_at->format('d M Y') }}</p>
+            <p class="text-gray-500">
+                Department: {{ $audit->department->name ?? '-' }} | 
+                Date: {{ $audit->created_at->format('d M Y') }}
+            </p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-bold">Back to Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" 
+           class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-bold">
+            Back to Dashboard
+        </a>
     </div>
+
+    {{-- 📋 Ringkasan Data dari Form Awal --}}
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200 shadow-sm">
+        <h3 class="font-bold text-lg text-blue-800 mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Informasi Audit
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <!-- Kolom Kiri -->
+            <div>
+                <p><strong>Jenis Audit:</strong> 
+                    @php
+                        $typeLabels = [
+                            'Regular' => 'Rutin / Terjadwal',
+                            'Special' => 'Khusus / Insidental',
+                            'FollowUp' => 'Follow Up'
+                        ];
+                    @endphp
+                    {{ $typeLabels[$audit->session?->audit_type] ?? '-' }}
+                </p>
+                <p><strong>Tanggal Audit:</strong> 
+                    {{ $audit->session?->audit_date ? \Carbon\Carbon::parse($audit->session->audit_date)->format('d F Y') : '-' }}
+                </p>
+                <p><strong>Area yang Diperiksa:</strong> 
+                    <span class="font-medium">{{ $audit->session?->audit_scope ?? '-' }}</span>
+                </p>
+            </div>
+
+            <!-- Kolom Kanan -->
+            <div>
+                <p><strong>Auditor Utama:</strong> 
+                    <span class="font-medium">{{ $audit->session?->auditor_name ?? '-' }}</span>
+                </p>
+                <p><strong>PIC (Penanggung Jawab):</strong> 
+                    <span class="font-medium">{{ $audit->session?->pic_name ?? '-' }}</span>
+                </p>
+                <p><strong>NIK PIC:</strong> 
+                    {{ $audit->session?->pic_nik ?: 'Tidak ada' }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Tujuan Audit (full width) -->
+        <div class="mt-4">
+            <p><strong>Alasan Melakukan Pemeriksaan:</strong></p>
+            <p class="text-gray-700 bg-white p-3 rounded mt-1 border border-gray-200">
+                {{ $audit->session?->audit_objective ?? 'Tidak diisi oleh auditor.' }}
+            </p>
+        </div>
+
+        <!-- Status Audit -->
+        <div class="mt-3 flex items-center">
+            <span class="text-sm font-bold mr-2">Status:</span>
+            @if($audit->status === 'COMPLETED')
+                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">SELESAI</span>
+            @else
+                <span class="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">SEDANG BERJALAN</span>
+            @endif
+        </div>
+    </div>
+</div>
 
     {{-- GRAFIK SECTION (2 VERSI) --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">

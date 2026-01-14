@@ -54,15 +54,15 @@ class DashboardController extends Controller
                          ->get();
 
     // Ringkasan Per Departemen - PERBAIKAN STATUS
-    $deptSummary = Department::withCount(['audits as total_audit', 
-        'audits as completed_count' => function ($query) {
-            $query->where('status', 'COMPLETED');
-        },
-        'audits as pending_count' => function ($query) {
-            // Ganti PENDING menjadi IN_PROGRESS
-            $query->where('status', 'IN_PROGRESS');
-        }
-    ])->get();
+   // Di DashboardController@index()
+
+$deptSummary = Department::withCount([
+        'audits as total_audit',
+        'audits as completed_count' => fn($q) => $q->where('status', 'COMPLETED'),
+        'audits as pending_count' => fn($q) => $q->where('status', 'IN_PROGRESS')
+    ])
+    ->havingRaw('total_audit > 0') // <-- TAMBAHKAN INI!
+    ->get();
 
     return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary'));
 }

@@ -25,4 +25,6 @@ class Audit extends Model {
     public function responders() {
         return $this->hasMany(AuditResponder::class, 'audit_session_id', 'audit_session_id');
     }
+
+    
 }
