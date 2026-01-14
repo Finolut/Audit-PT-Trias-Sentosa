@@ -100,7 +100,7 @@ class DashboardController extends Controller
         // Copy paste logic showAuditOverview Anda yang panjang di sini
         // Pastikan return view('admin.audit_clauses', ...)
         $departments = Department::all();
-        $audit = Audit::with(['session', 'department'])->findOrFail($auditId);
+       $audit = Audit::with('department')->findOrFail($auditId);
 
         // --- LOGIKA GRAFIK ---
         $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')

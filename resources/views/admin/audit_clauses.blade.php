@@ -31,7 +31,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <!-- Kolom Kiri -->
             <div>
-                <p><strong>Jenis Audit:</strong> 
+                <p><strong>Jenis Pemeriksaan:</strong> 
                     @php
                         $typeLabels = [
                             'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
@@ -39,13 +39,13 @@
                             'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
                         ];
                     @endphp
-                    {{ $typeLabels[$audit->audit_type] ?? '-' }}
+                    {{ $typeLabels[$audit->type] ?? '-' }}
                 </p>
-                <p><strong>Tanggal Audit:</strong> 
-                    {{ $audit->audit_date ? \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') : '-' }}
-                </p>
+          <p><strong>Tanggal Pemeriksaan:</strong> 
+    {{ $audit->created_at ? \Carbon\Carbon::parse($audit->created_at)->format('d F Y') : '-' }}
+</p>
                 <p><strong>Bagian yang Diperiksa:</strong> 
-                    <span class="font-medium">{{ $audit->audit_scope ?? '-' }}</span>
+                    <span class="font-medium">{{ $audit->scope ?? '-' }}</span>
                 </p>
             </div>
 
@@ -55,10 +55,10 @@
                     <span class="font-medium">{{ $audit->auditor_name ?? '-' }}</span>
                 </p>
                 <p><strong>Penanggung Jawab di Departemen:</strong> 
-                    <span class="font-medium">{{ $audit->pic_name ?? '-' }}</span>
+                    <span class="font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
                 </p>
                 <p><strong>NIK Penanggung Jawab:</strong> 
-                    {{ $audit->pic_nik ?: 'Tidak ada' }}
+                    {{ $audit->pic_auditee_nik ?: 'Tidak ada' }}
                 </p>
             </div>
         </div>
@@ -67,7 +67,7 @@
         <div class="mt-4">
             <p><strong>Alasan Melakukan Pemeriksaan Ini:</strong></p>
             <p class="text-gray-700 bg-white p-3 rounded mt-1 border border-gray-200">
-                {{ $audit->audit_objective ?? 'Tidak diisi oleh auditor.' }}
+                {{ $audit->objective ?? 'Tidak diisi oleh auditor.' }}
             </p>
         </div>
 
