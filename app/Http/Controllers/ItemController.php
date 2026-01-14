@@ -10,12 +10,37 @@ use App\Models\Department;
 
 class ItemController extends Controller
 {
-public function index()
+public function index(Request $request)
 {
-    $departments = Department::orderBy('name', 'asc')->get(); // Tambahkan ini
-    $items = Item::with(['clause', 'maturityLevel'])->orderBy('item_order')->get();
-    
-    return view('admin.items.index', compact('items', 'departments'));
+    $departments = Department::orderBy('name', 'asc')->get();
+    $clauses = Clause::orderBy('clause_code')->get();
+    $levels = MaturityLevel::orderBy('level_number')->get();
+
+    $query = Item::with(['clause', 'maturityLevel']);
+
+    // Filter berdasarkan Order
+    if ($request->filled('order')) {
+        $query->where('item_order', $request->order);
+    }
+
+    // Filter berdasarkan Klausul
+    if ($request->filled('clause_id')) {
+        $query->where('clause_id', $request->clause_id);
+    }
+
+    // Filter berdasarkan Maturity Level
+    if ($request->filled('maturity_level_id')) {
+        $query->where('maturity_level_id', $request->maturity_level_id);
+    }
+
+    // Pencarian Isi Soal (case-insensitive)
+    if ($request->filled('search')) {
+        $query->where('item_text', 'LIKE', '%' . $request->search . '%');
+    }
+
+    $items = $query->orderBy('item_order')->get();
+
+    return view('admin.items.index', compact('items', 'departments', 'clauses', 'levels'));
 }
 
 public function create() 
