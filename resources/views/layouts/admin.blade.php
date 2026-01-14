@@ -80,7 +80,6 @@
                                 {{ $dept->name }}
                             </a>
                         @endforeach
-                        {{-- Pesan jika tidak ada hasil --}}
                         <div id="noSidebarResult" class="hidden px-4 py-2 text-xs text-gray-400 italic">
                             Tidak ditemukan...
                         </div>
@@ -88,27 +87,14 @@
                 </div>
 
                 <!-- Manajemen Data -->
-<div class="px-3 mb-2 mt-6">
-    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manajemen Data</span>
-</div>
+                <div class="px-3 mb-2 mt-6">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manajemen Data</span>
+                </div>
 
-<a href="{{ route('admin.items.index') }}" 
-   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
-    <span class="mr-3 text-lg">📝</span> Kelola Soal Audit
-</a>
-
-<!-- Opsional: Tambahkan jika ada route untuk Klausul atau Maturity -->
-<!--
-<a href="{{ route('admin.clauses.index') }}" 
-   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.clauses.*') ? 'active-link' : '' }}">
-    <span class="mr-3 text-lg">🔖</span> Klausul ISO
-</a>
-
-<a href="{{ route('admin.maturity-levels.index') }}" 
-   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.maturity-levels.*') ? 'active-link' : '' }}">
-    <span class="mr-3 text-lg">📈</span> Maturity Levels
-</a>
--->
+                <a href="{{ route('admin.items.index') }}" 
+                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
+                    <span class="mr-3 text-lg">📝</span> Kelola Soal Audit
+                </a>
             </nav>
             
             {{-- User Profile Footer --}}
@@ -127,14 +113,12 @@
 
         {{-- MAIN CONTENT AREA --}}
         <div class="flex-1 overflow-y-auto bg-gray-50 relative">
-             {{-- Content --}}
              <main class="p-8 pb-20">
                 @yield('content')
              </main>
         </div>
     </div>
 
-    {{-- JAVASCRIPT LOGIC --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('sidebarSearch');
@@ -144,7 +128,6 @@
             const deptChevron = document.getElementById('deptChevron');
             const noResult = document.getElementById('noSidebarResult');
             
-            // Fungsi Toggle Dropdown Manual
             deptToggle.addEventListener('click', function() {
                 const isHidden = deptDropdown.classList.contains('hidden');
                 if (isHidden) {
@@ -156,27 +139,21 @@
                 }
             });
 
-            // Logic Pencarian Pintar
             searchInput.addEventListener('input', function(e) {
                 const term = e.target.value.toLowerCase().trim();
                 let foundCount = 0;
 
-                // 1. Jika ada input, OTOMATIS BUKA dropdown
                 if (term.length > 0) {
                     deptDropdown.classList.remove('hidden');
                     deptChevron.classList.add('rotate-180');
                 } else {
-                    // Jika kosong, kembalikan ke state awal (tutup atau biarkan terbuka tergantung UX, disini saya pilih tutup agar rapi)
                     deptDropdown.classList.add('hidden');
                     deptChevron.classList.remove('rotate-180');
-                    
-                    // Reset semua item agar terlihat kembali jika dibuka manual
                     deptItems.forEach(item => item.style.display = 'block');
                     noResult.classList.add('hidden');
                     return; 
                 }
 
-                // 2. Filter Item
                 deptItems.forEach(item => {
                     const deptName = item.getAttribute('data-name');
                     if (deptName.includes(term)) {
@@ -187,7 +164,6 @@
                     }
                 });
 
-                // 3. Tampilkan pesan jika kosong
                 if (foundCount === 0) {
                     noResult.classList.remove('hidden');
                 } else {
@@ -195,7 +171,6 @@
                 }
             });
             
-            // Cek jika kita sedang berada di halaman detail departemen, dropdown harus terbuka otomatis
             if (document.querySelector('.dept-item.active-link')) {
                 deptDropdown.classList.remove('hidden');
                 deptChevron.classList.add('rotate-180');
