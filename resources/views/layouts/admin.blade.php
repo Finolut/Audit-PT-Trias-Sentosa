@@ -86,6 +86,29 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Manajemen Data -->
+<div class="px-3 mb-2 mt-6">
+    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manajemen Data</span>
+</div>
+
+<a href="{{ route('admin.items.index') }}" 
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
+    <span class="mr-3 text-lg">📝</span> Kelola Soal Audit
+</a>
+
+<!-- Opsional: Tambahkan jika ada route untuk Klausul atau Maturity -->
+<!--
+<a href="{{ route('admin.clauses.index') }}" 
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.clauses.*') ? 'active-link' : '' }}">
+    <span class="mr-3 text-lg">🔖</span> Klausul ISO
+</a>
+
+<a href="{{ route('admin.maturity-levels.index') }}" 
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.maturity-levels.*') ? 'active-link' : '' }}">
+    <span class="mr-3 text-lg">📈</span> Maturity Levels
+</a>
+-->
             </nav>
             
             {{-- User Profile Footer --}}
