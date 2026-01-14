@@ -1,79 +1,140 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Audit Internal</title>
+    <title>Form Pemeriksaan Internal</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f3f4f6; padding: 20px; color: #1f2937; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        
-        h2 { text-align: center; color: #111827; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; }
-        h4 { margin: 0 0 15px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-        
-        .section-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 25px; background: #fff; position: relative; overflow: hidden; }
-        .section-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-        
-        .card-1 { border-left-color: #3b82f6; } .card-1 h4 { color: #1d4ed8; }
-        .card-2 { border-left-color: #8b5cf6; } .card-2 h4 { color: #6d28d9; }
-        .card-3 { border-left-color: #ec4899; } .card-3 h4 { color: #be185d; }
-        .card-4 { border-left-color: #10b981; } .card-4 h4 { color: #047857; }
-        
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; color: #4b5563; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 15px; font-size: 14px; box-sizing: border-box; }
-        textarea { resize: vertical; height: 80px; }
-        
-        .row { display: flex; gap: 15px; }
-        .col { flex: 1; }
-
-        .dynamic-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; background: #f9fafb; padding: 10px; border-radius: 6px; border: 1px dashed #d1d5db; }
-        .btn-add { background: white; border: 1px dashed #6b7280; color: #374151; padding: 8px; width: 100%; cursor: pointer; border-radius: 6px; font-size: 13px; }
-        .btn-add:hover { background: #f3f4f6; border-color: #374151; }
-        .btn-remove { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-
-        .btn-primary { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: background 0.2s; }
-        .btn-primary:hover { background: #1d4ed8; }
-
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            padding: 15px;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #0f172a;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+        }
+        .section {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3b82f6;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #1e40af;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 15px 0 6px 0;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            background: white;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .btn-add {
+            background: #e2e8f0;
+            color: #334155;
+            border: 1px dashed #94a3b8;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .btn-add:hover {
+            background: #cbd5e1;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .note {
+            background: #fffbeb;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #ca8a04;
+            font-size: 14px;
+            color: #92400e;
+            margin: 15px 0;
+        }
         .hidden { display: none; }
-        .readonly-field { background-color: #f3f4f6; color: #6b7280; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📋 Form Setup Audit Internal</h2>
+    <h2>📝 Form Pemeriksaan Internal</h2>
 
     <form method="POST" action="{{ route('audit.start') }}">
         @csrf
 
-        <div class="section-card card-1">
-            <h4><span>1️⃣</span> Informasi Audit</h4>
-            
-            <div class="row">
-                <div class="col">
-                    <label>Jenis Audit</label>
-                    <select name="audit_type" required>
-                        <option value="Regular">Regular / Terjadwal</option>
-                        <option value="Special">Khusus / Insidental</option>
-                        <option value="FollowUp">Follow Up</option>
-                    </select>
-                </div>
-                <div class="col">
-                    <label>Ruang Lingkup (Scope)</label>
-                    <input type="text" name="audit_scope" placeholder="Contoh: Operasional Gudang, Produksi Line 1..." required>
-                </div>
-            </div>
-            
-            <label>Tujuan Audit (Objective)</label>
-            <textarea name="audit_objective" placeholder="Jelaskan tujuan utama audit ini..." required></textarea>
+        <div class="section">
+            <h3>1️⃣ Informasi Pemeriksaan</h3>
+
+            <label>Jenis Pemeriksaan</label>
+            <select name="audit_type" required style="font-size: 16px;">
+                <option value="">-- Pilih Jenis --</option>
+                <option value="Regular">Pemeriksaan Rutin (Terjadwal)</option>
+                <option value="Special">Pemeriksaan Khusus (Mendadak)</option>
+                <option value="FollowUp">Pemeriksaan Lanjutan (Follow Up)</option>
+            </select>
+
+            <label>Bagian yang Diperiksa</label>
+            <input type="text" name="audit_scope" placeholder="Contoh: Gudang Bahan Baku, Bagian Keuangan, Produksi Lantai 2" required>
+
+            <label>Alasan Melakukan Pemeriksaan Ini</label>
+            <textarea name="audit_objective" placeholder="Contoh: Memastikan barang masuk/keluar tercatat dengan benar, atau mengecek kepatuhan SOP kebersihan" required></textarea>
         </div>
 
-        <div class="section-card card-2">
-            <h4><span>2️⃣</span> Auditor</h4>
-            
-            <label>Auditor Utama (Lead)</label>
-            <select id="auditor_select" name="auditor_name" required onchange="selectAuditor(this)">
+        <div class="section">
+            <h3>2️⃣ Tim Pemeriksa (Auditor)</h3>
+
+            <label>Nama Anda (Sebagai Ketua Tim Pemeriksa)</label>
+            <select id="auditor_select" name="auditor_name" required onchange="selectAuditor(this)" style="font-size: 16px;">
                 <option value="">-- Pilih Nama Anda --</option>
                 @foreach($auditors as $aud)
                     <option value="{{ $aud['name'] }}" data-nik="{{ $aud['nik'] }}" data-dept="{{ $aud['dept'] }}">
@@ -81,74 +142,54 @@
                     </option>
                 @endforeach
             </select>
-            
-            <div class="row">
-                <div class="col">
-                    <label>NIK</label>
-                    <input type="text" id="auditor_nik" name="auditor_nik" class="readonly-field" readonly>
-                </div>
-                <div class="col">
-                    <label>Departemen Asal</label>
-                    <input type="text" id="auditor_department" name="auditor_department" class="readonly-field" readonly>
-                </div>
+
+            <label>NIK Anda</label>
+            <input type="text" id="auditor_nik" name="auditor_nik" readonly style="background: #f1f5f9;">
+
+            <label>Departemen Anda</label>
+            <input type="text" id="auditor_department" name="auditor_department" readonly style="background: #f1f5f9;">
+
+            <div class="note">
+                ℹ️ Jika ada anggota tim tambahan (misal: pengamat atau ahli), tambahkan di bawah.
             </div>
 
-            <hr style="border: 0; border-top: 1px dashed #e5e7eb; margin: 15px 0;">
-
-            <label>Tim Audit Tambahan (Opsional)</label>
             <div id="audit-team-container"></div>
-            <button type="button" class="btn-add" onclick="addAuditTeam()">+ Tambah Anggota Tim (Observer/Member)</button>
+            <button type="button" class="btn-add" onclick="addAuditTeam()">+ Tambah Anggota Tim (Opsional)</button>
         </div>
 
         <div id="audit-details" class="hidden">
 
-            <div class="section-card card-3">
-                <h4><span>3️⃣</span> Auditee (Target)</h4>
-                
-                <label>Departemen Target</label>
-                <select name="department_id" required>
+            <div class="section">
+                <h3>3️⃣ Tim yang Diperiksa (Auditee)</h3>
+
+                <label>Departemen yang Diperiksa</label>
+                <select name="department_id" required style="font-size: 16px;">
                     <option value="">-- Pilih Departemen --</option>
                     @foreach ($departments as $d)
                         <option value="{{ $d->id }}">{{ $d->name }}</option>
                     @endforeach
                 </select>
 
-                <label>PIC Auditee (Wajib)</label>
-                <div style="background: #fdf2f8; padding: 10px; border-radius: 6px; border: 1px solid #fbcfe8;">
-                    <div class="row" style="margin-bottom: 0;">
-                        <div class="col" style="flex: 2;">
-                            <input type="text" name="pic_name" placeholder="Nama PIC" required style="margin-bottom: 5px;">
-                        </div>
-                        <div class="col" style="flex: 1;">
-                            <input type="text" name="pic_nik" placeholder="NIK PIC (Opsional)" style="margin-bottom: 5px;">
-                        </div>
-                    </div>
-                    <small style="color: #db2777;">* PIC adalah orang yang bertanggung jawab saat diaudit.</small>
-                </div>
+                <label>Penanggung Jawab di Departemen Tersebut</label>
+                <input type="text" name="pic_name" placeholder="Nama lengkap penanggung jawab" required>
+
+                <label>NIK Penanggung Jawab (Opsional)</label>
+                <input type="text" name="pic_nik" placeholder="Contoh: 123456">
             </div>
 
-            <div class="section-card card-4">
-                <h4><span>4️⃣</span> Pelaksanaan</h4>
-                
-                <div class="row">
-                    <div class="col">
-                        <label>Tanggal Audit</label>
-                        <input type="date" name="audit_date" value="{{ date('Y-m-d') }}" required>
-                    </div>
-                    <div class="col">
-                        <label>Status Awal</label>
-                        <input type="text" value="OPEN / IN PROGRESS" class="readonly-field" readonly>
-                    </div>
-                </div>
+            <div class="section">
+                <h3>4️⃣ Jadwal Pemeriksaan</h3>
+
+                <label>Tanggal Pemeriksaan</label>
+                <input type="date" name="audit_date" value="{{ date('Y-m-d') }}" required>
             </div>
 
-            <div style="text-align: center; margin-bottom: 20px; color: #6b7280; font-size: 0.9rem;">
-                ℹ️ <em>Bagian <strong>5️⃣ Penutup (Kesimpulan & Catatan)</strong> akan diisi setelah audit selesai dilakukan.</em>
+            <div class="note" style="text-align: center; margin-top: 20px;">
+                ℹ️ Catatan akhir dan kesimpulan akan diisi setelah pemeriksaan selesai.
             </div>
 
-            <button type="submit" class="btn-primary">Mulai Audit & Simpan Data</button>
+            <button type="submit" class="btn-primary">✅ Mulai Pemeriksaan & Simpan</button>
         </div>
-
     </form>
 </div>
 
@@ -172,21 +213,22 @@
     function addAuditTeam() {
         const container = document.getElementById('audit-team-container');
         const html = `
-            <div class="dynamic-row">
-                <div style="flex:2">
-                    <input type="text" name="audit_team[${teamIndex}][name]" placeholder="Nama Anggota Tim" required style="margin:0;">
-                </div>
-                <div style="flex:1">
-                    <select name="audit_team[${teamIndex}][role]" style="margin:0;">
-                        <option value="Member">Member</option>
-                        <option value="Observer">Observer</option>
-                        <option value="Specialist">Technical Specialist</option>
-                    </select>
-                </div>
-                <div style="flex:1">
-                    <input type="text" name="audit_team[${teamIndex}][department]" placeholder="Departemen" style="margin:0;">
-                </div>
-                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+            <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label>Nama Anggota</label>
+                <input type="text" name="audit_team[${teamIndex}][name]" placeholder="Contoh: Budi Santoso" required>
+                
+                <label>Perannya</label>
+                <select name="audit_team[${teamIndex}][role]" style="font-size: 15px; width: 100%; padding: 10px; margin-bottom: 10px;">
+                    <option value="Member">Anggota Tim</option>
+                    <option value="Observer">Pengamat</option>
+                    <option value="Specialist">Ahli Teknis</option>
+                </select>
+                
+                <label>Departemennya</label>
+                <input type="text" name="audit_team[${teamIndex}][department]" placeholder="Contoh: IT, HRD, Produksi">
+                
+                <button type="button" style="background: #fee2e2; color: #b91c1c; border: none; padding: 6px 10px; border-radius: 6px; margin-top: 8px;" 
+                        onclick="this.parentElement.remove()">✕ Hapus Anggota Ini</button>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', html);
