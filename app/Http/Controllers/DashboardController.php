@@ -35,8 +35,9 @@ class DashboardController extends Controller
     /**
      * 1. DASHBOARD UTAMA (Tampilan Awal Admin)
      */
-   public function index()
+public function index()
 {
+    // Ambil data departemen untuk sidebar
     $departments = Department::orderBy('name', 'asc')->get();
 
     $stats = [
@@ -51,8 +52,7 @@ class DashboardController extends Controller
                          ->take(5)
                          ->get();
 
-    // AMBIL DATA PERTANYAAN DARI TABEL audit_questions (Blue Card)
-    // Sesuai permintaan: tampilkan isinya tanpa filter status in-progress
+    // Data untuk Blue Card (Pertanyaan Audit Terkini)
     $liveQuestions = DB::table('audit_questions')
         ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
         ->join('departments', 'audits.department_id', '=', 'departments.id')
@@ -61,16 +61,8 @@ class DashboardController extends Controller
         ->take(3)
         ->get();
 
-    $deptSummary = Department::withCount(['audits as total_audit', 
-        'audits as completed_count' => function ($query) {
-            $query->where('status', 'COMPLETED');
-        },
-        'audits as pending_count' => function ($query) {
-            $query->where('status', 'IN_PROGRESS');
-        }
-    ])->get();
-
-    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'deptSummary', 'liveQuestions'));
+    // Pastikan 'departments' disertakan dalam compact
+    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'liveQuestions'));
 }
 
     /**

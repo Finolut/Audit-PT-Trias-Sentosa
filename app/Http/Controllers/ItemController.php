@@ -6,13 +6,17 @@ use App\Models\Item;
 use App\Models\Clause;
 use App\Models\MaturityLevel;
 use Illuminate\Http\Request;
+use App\Models\Department;
 
 class ItemController extends Controller
 {
-    public function index() {
-        $items = Item::with(['clause', 'maturityLevel'])->orderBy('item_order')->get();
-        return view('admin.items.index', compact('items'));
-    }
+public function index()
+{
+    $departments = Department::orderBy('name', 'asc')->get(); // Tambahkan ini
+    $items = Item::with(['clause', 'maturityLevel'])->orderBy('item_order')->get();
+    
+    return view('admin.items.index', compact('items', 'departments'));
+}
 
     public function create() {
         $clauses = Clause::all();
