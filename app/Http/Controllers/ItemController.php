@@ -36,5 +36,11 @@ public function index()
         return redirect()->route('admin.items.index')->with('success', 'Soal berhasil ditambahkan');
     }
 
+    public function destroy($id) {
+        $item = Item::findOrFail($id);
+        $item->delete();
+
+        return redirect()->route('admin.items.index')->with('success', 'Soal berhasil dihapus.');
+    }
     // Tambahkan Edit, Update, dan Delete sesuai standar Laravel
 }
