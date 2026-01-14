@@ -6,166 +6,178 @@
     <title>Admin Audit Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .active-link { background-color: #e5e7eb; font-weight: bold; border-right: 4px solid #2563eb; }
-        /* Transisi halus saat menyembunyikan elemen */
+        .active-link { background-color: #eff6ff; color: #1d4ed8; font-weight: bold; border-right: 3px solid #2563eb; }
         .dept-item { transition: all 0.2s ease; }
+        
+        /* Custom Scrollbar for sidebar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 text-gray-800 font-sans">
 
-    <div class="flex h-screen">
-        <div class="w-64 bg-white border-r border-gray-200 shrink-0 flex flex-col">
-            <div class="p-6 border-b">
-                <h1 class="text-xl font-bold text-blue-800 uppercase leading-tight">PT Trias Sentosa</h1>
-                <p class="text-xs text-gray-500 mt-1">Audit Dashboard System</p>
+    <div class="flex h-screen overflow-hidden">
+        {{-- SIDEBAR --}}
+        <div class="w-64 bg-white border-r border-gray-200 shrink-0 flex flex-col z-20">
+            {{-- Header Sidebar --}}
+            <div class="p-6 border-b border-gray-100">
+                <h1 class="text-xl font-extrabold text-blue-800 uppercase leading-none tracking-tight">PT Trias Sentosa</h1>
+                <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
             </div>
 
-            <div class="p-4 border-b bg-gray-50">
+            {{-- Search Bar (Unified) --}}
+            <div class="p-4 border-b border-gray-100 bg-gray-50/30">
                 <div class="relative">
                     <input type="text" 
-                           id="deptSearch" 
+                           id="sidebarSearch" 
                            placeholder="Cari departemen..." 
-                           class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-all shadow-sm">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
             </div>
             
-<nav class="p-4 space-y-1 overflow-y-auto flex-1" id="deptList">
-    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-4">Navigasi</div>
+            {{-- Navigation List --}}
+            <nav class="p-3 space-y-1 overflow-y-auto flex-1" id="navContainer">
+                <div class="px-3 mb-2 mt-2">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Menu Utama</span>
+                </div>
 
-    <!-- Dashboard Link -->
-    <a href="{{ route('admin.dashboard') }}" 
-       class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100 {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}">
-        📊 Dashboard
-    </a>
-
-    <!-- Departemen Dropdown -->
-    <div class="relative">
-        <button id="deptToggle" 
-                class="w-full flex justify-between items-center px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100 focus:outline-none">
-            🏢 Departemen
-            <svg id="deptChevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-        </button>
-
-        <div id="deptDropdown" class="hidden mt-1 ml-4 space-y-1 max-h-60 overflow-y-auto pl-2 border-l-2 border-gray-200">
-            @foreach($departments as $dept)
-                <a href="{{ route('dept.show', $dept->id) }}" 
-                   data-name="{{ strtolower($dept->name) }}"
-                   class="dept-item block px-3 py-1.5 text-sm text-gray-700 rounded hover:bg-gray-100 {{ request()->is('dept/'.$dept->id) ? 'active-link' : '' }}">
-                    {{ $dept->name }}
+                <a href="{{ route('admin.dashboard') }}" 
+                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}">
+                   <span class="mr-3 text-lg">📊</span> Dashboard Overview
                 </a>
-            @endforeach
-        </div>
-    </div>
 
-    <!-- Pencarian tetap ada di bawah -->
-    <div class="mt-4 pt-4 border-t border-gray-200">
-        <div class="relative">
-            <input type="text" 
-                   id="deptSearch" 
-                   placeholder="Cari departemen..." 
-                   class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-        </div>
-        <div id="noResult" class="hidden px-3 py-1.5 text-sm text-gray-400 italic mt-2">
-            Tidak ditemukan...
-        </div>
-    </div>
-</nav>
-        </div>
+                <a href="{{ route('admin.dept.status_index') }}" 
+                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dept.status_index') ? 'active-link' : '' }}">
+                   <span class="mr-3 text-lg">📋</span> Status Audit Dept.
+                </a>
 
-        <div class="flex-1 overflow-y-auto p-8">
-            @yield('content')
+                <div class="px-3 mb-2 mt-6">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Data Audit</span>
+                </div>
+
+                <div class="relative">
+                    <button id="deptToggle" 
+                            class="w-full flex justify-between items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none transition-colors group">
+                        <span class="flex items-center">
+                            <span class="mr-3 text-lg">🏢</span> Departemen
+                        </span>
+                        <svg id="deptChevron" class="w-4 h-4 text-gray-400 transition-transform group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown List --}}
+                    <div id="deptDropdown" class="hidden mt-1 space-y-0.5 pl-2">
+                        @foreach($departments as $dept)
+                            <a href="{{ route('dept.show', $dept->id) }}" 
+                               data-name="{{ strtolower($dept->name) }}"
+                               class="dept-item block px-3 py-2 text-sm text-gray-600 rounded-md hover:bg-blue-50 hover:text-blue-700 pl-9 border-l-2 border-transparent hover:border-blue-300 {{ request()->is('dept/'.$dept->id) ? 'active-link' : '' }}">
+                                {{ $dept->name }}
+                            </a>
+                        @endforeach
+                        {{-- Pesan jika tidak ada hasil --}}
+                        <div id="noSidebarResult" class="hidden px-4 py-2 text-xs text-gray-400 italic">
+                            Tidak ditemukan...
+                        </div>
+                    </div>
+                </div>
+            </nav>
             
-            {{-- Default Dashboard View (Hanya muncul jika di root dashboard) --}}
-            @if(request()->routeIs('dashboard'))
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
-                    <div class="text-gray-500 text-sm uppercase font-semibold">Total Audit</div>
-                    <div class="text-3xl font-bold text-gray-800">{{ $totalAudits }}</div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
-                    <div class="text-gray-500 text-sm uppercase font-semibold">Total User Auditor</div>
-                    <div class="text-3xl font-bold text-gray-800">{{ $totalAuditors }}</div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow border-l-4 border-purple-500">
-                    <div class="text-gray-500 text-sm uppercase font-semibold">Total Departemen</div>
-                    <div class="text-3xl font-bold text-gray-800">{{ $totalDepartments }}</div>
+            {{-- User Profile Footer --}}
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                        AD
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-gray-700">Administrator</p>
+                        <p class="text-xs text-gray-500">PT Trias Sentosa</p>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-lg flex items-center shadow-sm">
-                <svg class="w-6 h-6 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Silakan pilih <strong>Departemen</strong> di menu sebelah kiri untuk melihat hasil audit secara detail.</span>
-            </div>
-            @endif
+        {{-- MAIN CONTENT AREA --}}
+        <div class="flex-1 overflow-y-auto bg-gray-50 relative">
+             {{-- Content --}}
+             <main class="p-8 pb-20">
+                @yield('content')
+             </main>
         </div>
     </div>
 
+    {{-- JAVASCRIPT LOGIC --}}
     <script>
-        document.getElementById('deptSearch').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('sidebarSearch');
+            const deptDropdown = document.getElementById('deptDropdown');
             const deptItems = document.querySelectorAll('.dept-item');
-            const noResult = document.getElementById('noResult');
-            let foundCount = 0;
-
-            deptItems.forEach(item => {
-                const deptName = item.getAttribute('data-name');
-                if (deptName.includes(searchTerm)) {
-                    item.style.display = 'block';
-                    foundCount++;
+            const deptToggle = document.getElementById('deptToggle');
+            const deptChevron = document.getElementById('deptChevron');
+            const noResult = document.getElementById('noSidebarResult');
+            
+            // Fungsi Toggle Dropdown Manual
+            deptToggle.addEventListener('click', function() {
+                const isHidden = deptDropdown.classList.contains('hidden');
+                if (isHidden) {
+                    deptDropdown.classList.remove('hidden');
+                    deptChevron.classList.add('rotate-180');
                 } else {
-                    item.style.display = 'none';
+                    deptDropdown.classList.add('hidden');
+                    deptChevron.classList.remove('rotate-180');
                 }
             });
 
-            // Tampilkan pesan jika tidak ada yang cocok
-            if (foundCount === 0) {
-                noResult.classList.remove('hidden');
-            } else {
-                noResult.classList.add('hidden');
+            // Logic Pencarian Pintar
+            searchInput.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase().trim();
+                let foundCount = 0;
+
+                // 1. Jika ada input, OTOMATIS BUKA dropdown
+                if (term.length > 0) {
+                    deptDropdown.classList.remove('hidden');
+                    deptChevron.classList.add('rotate-180');
+                } else {
+                    // Jika kosong, kembalikan ke state awal (tutup atau biarkan terbuka tergantung UX, disini saya pilih tutup agar rapi)
+                    deptDropdown.classList.add('hidden');
+                    deptChevron.classList.remove('rotate-180');
+                    
+                    // Reset semua item agar terlihat kembali jika dibuka manual
+                    deptItems.forEach(item => item.style.display = 'block');
+                    noResult.classList.add('hidden');
+                    return; 
+                }
+
+                // 2. Filter Item
+                deptItems.forEach(item => {
+                    const deptName = item.getAttribute('data-name');
+                    if (deptName.includes(term)) {
+                        item.style.display = 'block';
+                        foundCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // 3. Tampilkan pesan jika kosong
+                if (foundCount === 0) {
+                    noResult.classList.remove('hidden');
+                } else {
+                    noResult.classList.add('hidden');
+                }
+            });
+            
+            // Cek jika kita sedang berada di halaman detail departemen, dropdown harus terbuka otomatis
+            if (document.querySelector('.dept-item.active-link')) {
+                deptDropdown.classList.remove('hidden');
+                deptChevron.classList.add('rotate-180');
             }
         });
-
-          // Toggle dropdown departemen
-    document.getElementById('deptToggle').addEventListener('click', function() {
-        const dropdown = document.getElementById('deptDropdown');
-        const chevron = document.getElementById('deptChevron');
-        dropdown.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
-    });
-
-    // Pencarian tetap bekerja pada item dalam dropdown
-    document.getElementById('deptSearch').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const deptItems = document.querySelectorAll('.dept-item');
-        const noResult = document.getElementById('noResult');
-        let foundCount = 0;
-
-        deptItems.forEach(item => {
-            const deptName = item.getAttribute('data-name');
-            if (deptName.includes(searchTerm)) {
-                item.style.display = 'block';
-                foundCount++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
-
-        if (foundCount === 0) {
-            noResult.classList.remove('hidden');
-        } else {
-            noResult.classList.add('hidden');
-        }
-    });
     </script>
 
 </body>

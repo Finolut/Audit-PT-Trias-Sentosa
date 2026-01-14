@@ -57,53 +57,6 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {{-- 2. Kolom Kiri: Tabel Performa Departemen --}}
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 class="font-bold text-gray-800">Status Audit per Departemen</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 text-gray-500 font-bold uppercase text-xs">
-                        <tr>
-                            <th class="px-6 py-4">Departemen</th>
-                            <th class="px-6 py-4 text-center">Total</th>
-                            <th class="px-6 py-4 text-center">Selesai</th>
-                            <th class="px-6 py-4 text-center">Pending</th>
-                            <th class="px-6 py-4 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach($deptSummary as $dept)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 font-bold text-gray-800">{{ $dept->name }}</td>
-                            <td class="px-6 py-4 text-center font-semibold">{{ $dept->total_audit }}</td>
-                            <td class="px-6 py-4 text-center">
-                                @if($dept->completed_count > 0)
-                                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">{{ $dept->completed_count }}</span>
-                                @else
-                                    <span class="text-gray-300">-</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($dept->pending_count > 0)
-                                    <span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-bold">{{ $dept->pending_count }}</span>
-                                @else
-                                    <span class="text-gray-300">-</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="{{ route('dept.show', $dept->id) }}" class="text-blue-600 hover:text-blue-800 font-bold text-xs">
-                                    LIHAT DETAIL &rarr;
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         {{-- 3. Kolom Kanan: Aktivitas Terbaru --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">

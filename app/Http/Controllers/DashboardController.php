@@ -237,4 +237,25 @@ class DashboardController extends Controller
             'items'
         ));
     }
+
+    // Tambahkan method ini di dalam class DashboardController
+
+public function departmentStatusIndex()
+{
+    // 1. Ambil list departemen untuk sidebar (agar tidak error di layout)
+    $departments = Department::orderBy('name', 'asc')->get();
+
+    // 2. Ambil data summary status per departemen (Logic yang sama dengan dashboard)
+    $deptSummary = Department::withCount(['audits as total_audit', 
+        'audits as completed_count' => function ($query) {
+            $query->where('status', 'COMPLETED');
+        },
+        'audits as pending_count' => function ($query) {
+            $query->where('status', 'IN_PROGRESS'); // Pastikan konsisten dengan enum database Anda
+        }
+    ])->orderBy('name', 'asc')->get();
+
+    return view('admin.department_status_index', compact('departments', 'deptSummary'));
 }
+}
+

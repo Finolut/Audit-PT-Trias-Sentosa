@@ -141,3 +141,5 @@ Route::get('/test-db', function () {
         return "Gagal konek database: " . $e->getMessage();
     }
 });
+
+Route::get('/admin/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('admin.dept.status_index');
