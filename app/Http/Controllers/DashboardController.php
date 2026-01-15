@@ -37,7 +37,6 @@ class DashboardController extends Controller
      */
 public function index()
 {
-    // Ambil data departemen untuk sidebar
     $departments = Department::orderBy('name', 'asc')->get();
 
     $stats = [
@@ -52,18 +51,20 @@ public function index()
                          ->take(5)
                          ->get();
 
-    // Data untuk Blue Card (Pertanyaan Audit Terkini)
-$liveQuestions = DB::table('audit_questions')
-    ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
-    ->join('departments', 'audit_questions.department_id', '=', 'departments.id') // Gunakan department_id dari audit_questions
-    ->select(
-        'audit_questions.*',
-        'departments.name as dept_name',
-        DB::raw("JSON_UNQUOTE(JSON_EXTRACT(audits.session, '$.auditor_name')) as auditor_name") // Ekstrak nama auditor dari JSON
-    )
-    ->orderBy('audit_questions.created_at', 'desc')
-    ->take(3)
-    ->get();
+    // PERBAIKAN QUERY: Join ke tabel sessions (sesuaikan nama tabelnya, biasanya plural 'sessions' atau 'audit_sessions')
+    $liveQuestions = DB::table('audit_questions')
+        ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
+        ->join('departments', 'audits.department_id', '=', 'departments.id')
+        // Pastikan nama tabel ini benar (cek migration Anda, apakah 'sessions' atau 'audit_sessions')
+        ->leftJoin('audit_sessions', 'audits.id', '=', 'audit_sessions.audit_id') 
+        ->select(
+            'audit_questions.*',
+            'departments.name as dept_name',
+            'audit_sessions.auditor_name as auditor_name' // Ambil langsung dari kolom di tabel session
+        )
+        ->orderBy('audit_questions.created_at', 'desc')
+        ->take(5) // Sesuai permintaan Anda sebelumnya (5 data)
+        ->get();
 
     return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'liveQuestions'));
 }
