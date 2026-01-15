@@ -8,6 +8,7 @@ use App\Models\Audit;
 use App\Models\Item;
 use App\Models\Clause;
 use Illuminate\Support\Facades\DB;
+use App\Models\AuditQuestion;
 
 class DashboardController extends Controller
 {
