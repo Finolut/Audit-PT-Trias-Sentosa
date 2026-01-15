@@ -79,7 +79,6 @@
     <div id="answerModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);">
         <div class="modal-content" style="background:white; margin:5% auto; width:90%; max-width:500px; border-radius:16px; overflow:hidden;">
             <div style="padding: 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-                <h3 style="margin:0;">Respon Multi-Pihak</h3>
                 <p id="modalItemText" style="font-size: 0.85rem; color: #64748b;"></p>
             </div>
             <div id="modalRespondersList" style="padding: 0 1.5rem; max-height: 400px; overflow-y: auto;"></div>
