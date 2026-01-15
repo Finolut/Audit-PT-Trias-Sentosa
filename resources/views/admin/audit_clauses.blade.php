@@ -103,37 +103,71 @@
         </div>
     </div>
 
-    {{-- MENU GRID (Navigasi yang sudah ada) --}}
-    <h3 class="text-xl font-bold text-gray-800 mb-4">Detail Audit per Klausul</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        @foreach($mainClauses as $key => $subClauses)
-        <a href="{{ route('audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
-           class="block bg-white hover:bg-blue-50 transition-all duration-300 p-6 rounded-xl shadow border border-gray-200 group">
-            
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-extrabold text-xl group-hover:scale-110 transition-transform">
-                    {{ $key }}
-                </div>
-                {{-- Mini Status Indicator (Contoh ambil dari data mainStats) --}}
-                @php 
-                    $mStats = $mainStats[$key] ?? ['yes'=>0, 'no'=>0];
-                    $totalM = array_sum($mStats);
-                    $perc = $totalM > 0 ? round(($mStats['yes']/$totalM)*100) : 0;
-                @endphp
-                <span class="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-600">
-                    {{ $perc }}% Compliant
-                </span>
+   {{-- MENU GRID: Detail Audit per Klausul --}}
+<h3 class="text-xl font-bold text-gray-800 mb-4">Detail Audit per Klausul</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    @foreach($mainClauses as $key => $subClauses)
+    @php 
+        // Mengambil statistik untuk klausul utama ini
+        $mStats = $mainStats[$key] ?? ['yes'=>0, 'no'=>0, 'partial'=>0, 'na'=>0, 'unanswered'=>0];
+        
+        // Total soal yang sudah dikerjakan (Yes + No + Partial + N/A)
+        $sudahDikerjakan = $mStats['yes'] + $mStats['no'] + $mStats['partial'] + $mStats['na'];
+        
+        // Total semua soal dalam klausul ini
+        $totalSoal = array_sum($mStats);
+        
+        // Hitung persentase progres pengisian
+        $persenProgres = $totalSoal > 0 ? round(($sudahDikerjakan / $totalSoal) * 100) : 0;
+        
+        // Cek apakah sudah selesai semua (tidak ada yang unanswered)
+        $isComplete = ($mStats['unanswered'] == 0);
+    @endphp
+
+    <a href="{{ route('audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
+       class="block transition-all duration-300 p-6 rounded-xl shadow border group {{ $isComplete ? 'bg-white border-gray-200 hover:bg-blue-50' : 'bg-gray-50 border-dashed border-gray-300 hover:border-blue-400' }}">
+        
+        <div class="flex justify-between items-start mb-4">
+            {{-- Lingkaran Nomor Klausul --}}
+            <div class="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-xl transition-transform group-hover:scale-110 {{ $isComplete ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500' }}">
+                {{ $key }}
             </div>
-            
-            <h4 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-700">
-                {{ $titles[$key] ?? 'Clause '.$key }}
-            </h4>
-            <p class="text-sm text-gray-500 mb-4">
-                Includes: {{ implode(', ', $subClauses) }}
-            </p>
-        </a>
-        @endforeach
-    </div>
+
+            {{-- Badge Status --}}
+            @if($isComplete)
+                <span class="text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 uppercase">
+                    100% Selesai
+                </span>
+            @else
+                <span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 uppercase">
+                    {{ $persenProgres }}% Terisi
+                </span>
+            @endif
+        </div>
+        
+        {{-- Judul & Deskripsi --}}
+        <h4 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-700">
+            {{ $titles[$key] ?? 'Klausul '.$key }}
+        </h4>
+        <p class="text-xs text-gray-500 mb-4">
+            Mencakup: {{ implode(', ', $subClauses) }}
+        </p>
+
+        {{-- Progress Bar Kecil --}}
+        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+            <div class="h-1.5 rounded-full {{ $isComplete ? 'bg-green-500' : 'bg-blue-500' }}" style="width: {{ $persenProgres }}%"></div>
+        </div>
+        
+        {{-- Info Detail (Bahasa Indonesia) --}}
+        <div class="flex justify-between items-center text-[10px] font-medium text-gray-400">
+            <span>{{ $sudahDikerjakan }} dari {{ $totalSoal }} Soal</span>
+            @if($mStats['unanswered'] > 0)
+                <span class="text-amber-600 font-bold">{{ $mStats['unanswered'] }} Belum Diisi</span>
+            @endif
+        </div>
+    </a>
+    @endforeach
+</div>
 
 </div>
 
