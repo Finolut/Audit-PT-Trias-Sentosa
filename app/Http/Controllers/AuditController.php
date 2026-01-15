@@ -250,39 +250,53 @@ private $auditorsList = [
                 );
             }
 
-            foreach ($answers as $itemId => $people) {
-                $yesCount = 0;
-                $noCount  = 0;
+        foreach ($answers as $itemId => $people) {
+    $yesCount = 0;
+    $noCount  = 0;
+    $naCount  = 0; // Tambahkan counter untuk N/A
+    $hasAnswer = false; // Penanda apakah ada jawaban masuk
 
-                foreach ($people as $personName => $data) {
-                    if (!empty($data['val'])) {
-                        DB::table('answers')->updateOrInsert(
-                            ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $personName],
-                            ['id' => (string) Str::uuid(), 'answer' => $data['val'], 'answered_at' => now()]
-                        );
+    foreach ($people as $personName => $data) {
+        if (!empty($data['val'])) {
+            $hasAnswer = true;
+            
+            // 1. Simpan history jawaban per orang (Tabel answers)
+            DB::table('answers')->updateOrInsert(
+                ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $personName],
+                ['id' => (string) Str::uuid(), 'answer' => $data['val'], 'answered_at' => now()]
+            );
 
-                        if ($data['val'] === 'YES') $yesCount++;
-                        if ($data['val'] === 'NO')  $noCount++;
-                    }
-                }
+            // 2. Hitung Voting
+            if ($data['val'] === 'YES') $yesCount++;
+            elseif ($data['val'] === 'NO') $noCount++;
+            elseif ($data['val'] === 'N/A') $naCount++; // Hitung N/A
+        }
+    }
 
-                $finalYes = ($yesCount > $noCount || ($yesCount > 0 && $yesCount == $noCount)) ? 1 : 0;
-                $finalNo  = ($noCount > $yesCount || ($yesCount > 0 && $yesCount == $noCount)) ? 1 : 0;
+    // 3. Tentukan Hasil Akhir (Final Decision)
+    // Logika: Jika Yes > No maka 1, Jika No > Yes maka 0.
+    // N/A tidak mempengaruhi skor Yes/No, tapi harus tetap tercatat.
+    
+    $finalYes = ($yesCount > $noCount || ($yesCount > 0 && $yesCount == $noCount)) ? 1 : 0;
+    $finalNo  = ($noCount > $yesCount || ($yesCount > 0 && $yesCount == $noCount)) ? 1 : 0;
 
-                if ($yesCount > 0 || $noCount > 0) {
-                    DB::table('answer_finals')->updateOrInsert(
-                        ['audit_id' => $auditId, 'item_id' => $itemId],
-                        [
-                            'id'         => (string) Str::uuid(),
-                            'yes_count'  => $yesCount,
-                            'no_count'   => $noCount,
-                            'final_yes'  => $finalYes,
-                            'final_no'   => $finalNo,
-                            'decided_at' => now(),
-                        ]
-                    );
-                }
-            }
+    // JIKA ada jawaban (Yes, No, ATAU N/A), simpan ke finals!
+    if ($hasAnswer) {
+        DB::table('answer_finals')->updateOrInsert(
+            ['audit_id' => $auditId, 'item_id' => $itemId],
+            [
+                'id'         => (string) Str::uuid(),
+                'yes_count'  => $yesCount,
+                'no_count'   => $noCount,
+                'final_yes'  => $finalYes,
+                'final_no'   => $finalNo,
+                // Opsional: Anda bisa menambah kolom 'is_na' di database jika mau lebih eksplisit
+                // 'is_na'   => ($yesCount == 0 && $noCount == 0 && $naCount > 0) ? 1 : 0, 
+                'decided_at' => now(),
+            ]
+        );
+    }
+}
         });
 
         $mainKeys = array_keys($this->mainClauses);
