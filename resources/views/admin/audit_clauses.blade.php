@@ -149,46 +149,64 @@
         plugins: { legend: { position: 'top' } }
     };
 
-    // --- CHART 1: MAIN CLAUSE ---
-    const mainStats = {!! json_encode($mainStats) !!}; // Object { '4':{yes:2...}, '5':... }
-    const mainLabels = Object.keys(mainStats);
-    
-    new Chart(document.getElementById('mainClauseChart'), {
-        type: 'bar',
-        data: {
-            labels: mainLabels.map(l => 'Clause ' + l),
-            datasets: [
-                { label: 'Yes', data: mainLabels.map(l => mainStats[l].yes), backgroundColor: '#22c55e' },
-                { label: 'Partial', data: mainLabels.map(l => mainStats[l].partial), backgroundColor: '#94a3b8' },
-                { label: 'No', data: mainLabels.map(l => mainStats[l].no), backgroundColor: '#ef4444' },
-                { label: 'N/A', data: mainLabels.map(l => mainStats[l].na), backgroundColor: '#facc15' },
-            ]
-        },
-        options: commonOptions
-    });
+// ... Cari script Chart di bagian bawah file blade ...
 
-    // --- CHART 2: DETAILED CLAUSE ---
-    const detailStats = {!! json_encode($detailedStats) !!}; // Object { '4.1':{...}, '4.2':... }
-    const detailLabels = Object.keys(detailStats);
+// --- CHART 1: MAIN CLAUSE ---
+const mainStats = {!! json_encode($mainStats) !!}; 
+const mainLabels = Object.keys(mainStats);
 
-    new Chart(document.getElementById('detailedClauseChart'), {
-        type: 'bar',
-        data: {
-            labels: detailLabels,
-            datasets: [
-                { label: 'Yes', data: detailLabels.map(l => detailStats[l].yes), backgroundColor: '#22c55e' },
-                { label: 'Partial', data: detailLabels.map(l => detailStats[l].partial), backgroundColor: '#94a3b8' },
-                { label: 'No', data: detailLabels.map(l => detailStats[l].no), backgroundColor: '#ef4444' },
-                { label: 'N/A', data: detailLabels.map(l => detailStats[l].na), backgroundColor: '#facc15' },
-            ]
-        },
-        options: {
-            ...commonOptions,
-            scales: {
-                x: { stacked: true, ticks: { autoSkip: false, maxRotation: 90, minRotation: 90, font: {size: 10} } }, // Rotate label biar muat
-                y: { stacked: true }
-            }
+new Chart(document.getElementById('mainClauseChart'), {
+    type: 'bar',
+    data: {
+        labels: mainLabels.map(l => 'Clause ' + l),
+        datasets: [
+            { label: 'Yes', data: mainLabels.map(l => mainStats[l].yes), backgroundColor: '#22c55e' }, // Green
+            { label: 'Partial', data: mainLabels.map(l => mainStats[l].partial), backgroundColor: '#94a3b8' }, // Slate
+            { label: 'No', data: mainLabels.map(l => mainStats[l].no), backgroundColor: '#ef4444' }, // Red
+            { label: 'N/A', data: mainLabels.map(l => mainStats[l].na), backgroundColor: '#facc15' }, // Yellow
+            // TAMBAHAN DATASET BARU UNTUK BELUM DIISI (WARNA ABU-ABU MUDA)
+            { 
+                label: 'Belum Diisi', 
+                data: mainLabels.map(l => mainStats[l].unanswered), 
+                backgroundColor: '#e2e8f0', // Gray-200 (Warna netral/kosong)
+                borderColor: '#cbd5e1',     // Border sedikit lebih gelap
+                borderWidth: 1
+            },
+        ]
+    },
+    options: commonOptions
+});
+
+// --- CHART 2: DETAILED CLAUSE ---
+const detailStats = {!! json_encode($detailedStats) !!}; 
+const detailLabels = Object.keys(detailStats);
+
+new Chart(document.getElementById('detailedClauseChart'), {
+    type: 'bar',
+    data: {
+        labels: detailLabels,
+        datasets: [
+            { label: 'Yes', data: detailLabels.map(l => detailStats[l].yes), backgroundColor: '#22c55e' },
+            { label: 'Partial', data: detailLabels.map(l => detailStats[l].partial), backgroundColor: '#94a3b8' },
+            { label: 'No', data: detailLabels.map(l => detailStats[l].no), backgroundColor: '#ef4444' },
+            { label: 'N/A', data: detailLabels.map(l => detailStats[l].na), backgroundColor: '#facc15' },
+            // TAMBAHAN DATASET BARU JUGA DI SINI
+            { 
+                label: 'Belum Diisi', 
+                data: detailLabels.map(l => detailStats[l].unanswered), 
+                backgroundColor: '#e2e8f0',
+                borderColor: '#cbd5e1',
+                borderWidth: 1
+            },
+        ]
+    },
+    options: {
+        ...commonOptions,
+        scales: {
+            x: { stacked: true, ticks: { autoSkip: false, maxRotation: 90, minRotation: 90, font: {size: 10} } },
+            y: { stacked: true }
         }
-    });
+    }
+});
 </script>
 @endsection

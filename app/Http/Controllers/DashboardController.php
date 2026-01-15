@@ -118,39 +118,46 @@ public function index()
         $detailedStats = []; 
         $mainStats = [];     
 
-        // Inisialisasi Array Kosong
-        foreach($this->mainClauses as $main => $subs) {
-            $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0];
-            foreach($subs as $sub) {
-                $detailedStats[$sub] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0];
-            }
+// 1. UBAH INISIALISASI ARRAY (Tambahkan key 'unanswered')
+foreach($this->mainClauses as $main => $subs) {
+    // Tambah 'unanswered' di sini
+    $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0]; 
+    foreach($subs as $sub) {
+        $detailedStats[$sub] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+    }
+}
+
+// 2. UBAH LOGIKA LOOPING STATUS
+foreach ($allItems as $item) {
+    $status = 'unanswered'; // Default status jika kosong
+    
+    // Cek logika:
+    if (is_null($item->final_yes) || ($item->yes_count == 0 && $item->no_count == 0)) {
+        // Jika tidak ada jawaban Yes/No sama sekali
+        // Jika sistem Anda punya kolom khusus N/A, cek di sini: if($item->is_na) { $status = 'na'; } else { ... }
+        
+        $status = 'unanswered'; // Kita sebut ini "Belum Diisi"
+        
+    } elseif ($item->final_yes > $item->final_no) {
+        $status = 'yes';
+    } elseif ($item->final_no > $item->final_yes) {
+        $status = 'no';
+    } else {
+        $status = 'partial'; // Seri (Yes = No)
+    }
+
+    // Masukkan ke array statistics
+    if (isset($detailedStats[$item->clause_code])) {
+        $detailedStats[$item->clause_code][$status]++;
+    }
+
+    foreach($this->mainClauses as $mainKey => $subArray) {
+        if (in_array($item->clause_code, $subArray)) {
+            $mainStats[$mainKey][$status]++;
+            break;
         }
-
-        // Hitung Data
-        foreach ($allItems as $item) {
-            $status = 'na';
-            
-            if (is_null($item->final_yes) || ($item->yes_count == 0 && $item->no_count == 0)) {
-                $status = 'na';
-            } elseif ($item->final_yes > $item->final_no) {
-                $status = 'yes';
-            } elseif ($item->final_no > $item->final_yes) {
-                $status = 'no';
-            } else {
-                $status = 'partial';
-            }
-
-            if (isset($detailedStats[$item->clause_code])) {
-                $detailedStats[$item->clause_code][$status]++;
-            }
-
-            foreach($this->mainClauses as $mainKey => $subArray) {
-                if (in_array($item->clause_code, $subArray)) {
-                    $mainStats[$mainKey][$status]++;
-                    break;
-                }
-            }
-        }
+    }
+}
 
         return view('admin.audit_clauses', [
             'departments' => $departments,
