@@ -151,10 +151,9 @@
                 </div>
 
                 <div class="p-4 bg-blue-800/50">
-                    <a href="#" class="flex items-center justify-center gap-2 w-full text-[11px] font-bold text-blue-200 hover:text-white transition-colors">
-                        LIHAT SEMUA LOG 
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
+                   <a href="{{ route('admin.question_log') }}" class="inline-block mt-4 text-blue-600 text-xs font-bold hover:underline">
+    LIHAT SEMUA LOG PERTANYAAN →
+</a>
                 </div>
             </div>
         </div>

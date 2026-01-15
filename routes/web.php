@@ -77,17 +77,23 @@ Route::post('/test-form', function (Request $request) {
 
 Route::prefix('admin')->group(function () {
     
-    // 1. Dashboard Utama (TAMBAHAN BARU)
+    // 1. Dashboard Utama
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
-    // 2. List Audit per Departemen
+    // 2. Log Pertanyaan Audit (Posisikan di sini agar rapi)
+    Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('admin.question_log');
+
+    // 3. List Audit per Departemen
     Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('dept.show');
 
-    // 3. Overview Hasil Audit (Grafik)
+    // 4. Overview Hasil Audit (Grafik)
     Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
 
-    // 4. Detail Klausul (Tabel & Stacked Bar)
+    // 5. Detail Klausul (Tabel & Stacked Bar)
     Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause_detail');
+
+    // 6. Status Departemen (Jika Anda menggunakan view status index)
+    Route::get('/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('admin.dept_status');
 });
 
 /*
