@@ -53,18 +53,17 @@ public function index()
                          ->get();
 
     // Data untuk Blue Card (Pertanyaan Audit Terkini)
-    $liveQuestions = DB::table('audit_questions')
-        ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
-        ->join('departments', 'audits.department_id', '=', 'departments.id')
-        // Kita asumsikan kolom auditor_name ada di tabel audits
-        ->select(
-            'audit_questions.*', 
-            'departments.name as dept_name', 
-            'audits.auditor_name'
-        )
-        ->orderBy('audit_questions.created_at', 'desc')
-        ->take(5) // Set menjadi 5 pertanyaan terbaru
-        ->get();
+$liveQuestions = DB::table('audit_questions')
+    ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
+    ->join('departments', 'audit_questions.department_id', '=', 'departments.id') // Gunakan department_id dari audit_questions
+    ->select(
+        'audit_questions.*',
+        'departments.name as dept_name',
+        DB::raw("JSON_UNQUOTE(JSON_EXTRACT(audits.session, '$.auditor_name')) as auditor_name") // Ekstrak nama auditor dari JSON
+    )
+    ->orderBy('audit_questions.created_at', 'desc')
+    ->take(3)
+    ->get();
 
     return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'liveQuestions'));
 }
