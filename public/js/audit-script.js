@@ -6,29 +6,30 @@ let sessionAnswers = {};
 /**
  * Fungsi Utama: Menetapkan nilai jawaban (YES/NO/N/A)
  */
-function setVal(itemId, userName, val, btn) {
-    // 1. Update visual tombol yang diklik
-    const parent = btn.parentElement;
-    parent.querySelectorAll('.answer-btn').forEach(b => {
-        b.classList.remove('active-yes', 'active-no', 'active-na');
-    });
-    
-    if(val === 'YES') btn.classList.add('active-yes');
-    if(val === 'NO') btn.classList.add('active-no');
-    if(val === 'N/A') btn.classList.add('active-na');
-    
-    // 2. Simpan Jawaban ke memori
-    sessionAnswers[`${itemId}_${userName}`] = val;
-    
-    // 3. Update Input Hidden agar data terkirim ke Laravel
-    updateHiddenInputs(itemId);
+function setVal(itemId, userName, value, btnElement) {
+    // 1. Simpan jawaban ke sessionAnswers
+    const key = `${itemId}_${userName}`;
+    sessionAnswers[key] = value;
 
-    // 4. Sinkronisasi visual tombol utama jika yang menjawab adalah Auditor (Author)
-    if (userName === auditorName) {
-        syncMainButtons(itemId, val);
+    // 2. Jika yang diklik adalah tombol Auditor (di luar modal)
+    if (userName === auditorName && btnElement) {
+        // Hapus semua class active dari tombol dalam grup yang sama
+        const group = document.getElementById(`btn_group_${itemId}`);
+        const buttons = group.querySelectorAll('.answer-btn');
+        buttons.forEach(b => {
+            b.classList.remove('active-yes', 'active-no', 'active-na');
+        });
+
+        // Tambahkan class sesuai jawaban
+        if (value === 'YES') btnElement.classList.add('active-yes');
+        else if (value === 'NO') btnElement.classList.add('active-no');
+        else if (value === 'N/A') btnElement.classList.add('active-na');
     }
 
-    // 5. Update info ringkasan skor di layar
+    // 3. Update input hidden untuk submit form
+    updateHiddenInputs(itemId);
+
+    // 4. Update kotak info (perbedaan jawaban) yang kita buat sebelumnya
     updateInfoBox(itemId);
 }
 
