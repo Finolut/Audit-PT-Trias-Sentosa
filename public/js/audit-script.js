@@ -150,51 +150,25 @@ function createResponderRow(name, role, itemId, isAuditor = false) {
  * Kontrol Modal
  */
 function openModal(itemId, itemText) {
+    const modal = document.getElementById('answerModal');
     document.getElementById('modalItemText').innerText = itemText;
-    const container = document.getElementById('modalRespondersList');
-    container.innerHTML = ''; // Kosongkan modal sebelum isi baru
+    const list = document.getElementById('modalRespondersList');
+    list.innerHTML = '';
 
-    // Fungsi pembantu warna (samakan dengan yang di luar)
-    const getColor = (val) => {
-        if (val === 'YES') return '#16a34a'; // Hijau
-        if (val === 'NO') return '#dc2626';  // Merah
-        return '#64748b';                    // Abu-abu
-    };
+    if (Array.isArray(responders)) {
+        responders.forEach(res => {
+            const isAuditor = (res.responder_name === auditorName);
+            list.appendChild(createResponderRow(
+                res.responder_name,
+                res.responder_department || 'Departemen Tidak Diketahui',
+                itemId,
+                isAuditor,
+                res.responder_nik // opsional, jika ingin tampilkan NIK
+            ));
+        });
+    }
 
-    responders.forEach(res => {
-        const key = `${itemId}_${res.name}`;
-        const currentAns = sessionAnswers[key] || ''; // Ambil jawaban dari session
-
-        const row = document.createElement('div');
-        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9;";
-        
-        row.innerHTML = `
-            <span style="font-weight: 500; color: #334155;">${res.name}</span>
-            <div class="button-group">
-                <button type="button" 
-                    class="answer-btn ${currentAns === 'YES' ? 'active-yes' : ''}" 
-                    onclick="setVal('${itemId}', '${res.name}', 'YES', this); updateModalStyles(this)">Iya</button>
-                <button type="button" 
-                    class="answer-btn ${currentAns === 'NO' ? 'active-no' : ''}" 
-                    onclick="setVal('${itemId}', '${res.name}', 'NO', this); updateModalStyles(this)">Tidak</button>
-            </div>
-        `;
-        container.appendChild(row);
-    });
-
-    document.getElementById('answerModal').style.display = 'block';
-}
-
-// Fungsi tambahan untuk update warna tombol di dalam modal saat diklik
-function updateModalStyles(clickedBtn) {
-    const group = clickedBtn.parentElement;
-    const buttons = group.querySelectorAll('.answer-btn');
-    
-    buttons.forEach(btn => btn.classList.remove('active-yes', 'active-no', 'active-na'));
-    
-    if (clickedBtn.innerText === 'Iya') clickedBtn.classList.add('active-yes');
-    if (clickedBtn.innerText === 'Tidak') clickedBtn.classList.add('active-no');
-    if (clickedBtn.innerText === 'Tidak Tersedia') clickedBtn.classList.add('active-na');
+    modal.style.display = 'block';
 }
 function closeModal() {
     document.getElementById('answerModal').style.display = 'none';
