@@ -217,16 +217,18 @@ function updateInfoBox(itemId) {
     }
 
     const auditorAnswer = answers[auditorName];
+    
     if (!auditorAnswer) {
         infoBox.style.display = 'none';
+        infoBox.innerHTML = '';
         return;
     }
 
-    // Helper warna teks
+    // Helper untuk memberi warna pada teks YES/NO/NA
     const getColor = (val) => {
         if (val === 'YES') return '#16a34a'; // Hijau
         if (val === 'NO') return '#dc2626';  // Merah
-        return '#64748b';                    // Abu-abu
+        return '#4b5563';                    // Abu-abu untuk N/A
     };
 
     let diffList = [];
@@ -235,27 +237,36 @@ function updateInfoBox(itemId) {
     for (let user in answers) {
         if (user !== auditorName && answers[user] !== auditorAnswer) {
             hasDifference = true;
-            diffList.push({ name: user, answer: answers[user] });
+            diffList.push({
+                name: user,
+                answer: answers[user]
+            });
         }
     }
 
     if (hasDifference) {
+        // MENAMBAHKAN STYLE WARNA DI SINI
         const responderListText = diffList
             .map(d => `${d.name}: <strong style="color: ${getColor(d.answer)}">${d.answer}</strong>`)
             .join(', ');
 
         infoBox.innerHTML = `
-            <div style="margin-top: 8px; padding: 10px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c;">
-                <div style="margin-bottom: 4px;">
-                    <strong>${auditorName}:</strong> <span style="color: ${getColor(auditorAnswer)}; font-weight: bold;">${auditorAnswer}</span>
-                </div>
+            <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.2rem;">⚠️</span>
                 <div>
-                    <span>${responderListText}</span>
+                    <div style="margin-bottom: 4px;">
+                        <strong>${auditorName}:</strong> 
+                        <span style="color: ${getColor(auditorAnswer)}; font-weight: bold;">${auditorAnswer}</span>
+                    </div>
+                    <div>
+                        <span>${responderListText}</span>
+                    </div>
                 </div>
             </div>
         `;
         infoBox.style.display = 'block';
     } else {
         infoBox.style.display = 'none';
+        infoBox.innerHTML = '';
     }
 }
