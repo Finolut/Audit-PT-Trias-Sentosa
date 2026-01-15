@@ -109,6 +109,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     
     {{-- Kolom Kiri: Kartu Pertanyaan Terkini --}}
+  {{-- Kolom Kiri: Kartu Pertanyaan Terkini --}}
     <div class="lg:col-span-1">
         <div class="bg-blue-50 border border-blue-200 rounded-xl shadow-sm p-6 mb-6">
             <h3 class="font-bold text-blue-800 mb-4 flex items-center">
@@ -124,6 +125,9 @@
                             <span class="text-[9px] text-gray-400">{{ $q->clause_code }}</span>
                         </div>
                         <p class="text-xs text-gray-700 line-clamp-2 italic">"{{ $q->question_text }}"</p>
+                        <div class="mt-2 text-xs text-gray-500">
+                            <strong>Auditor:</strong> {{ $q->auditor_name ?? 'N/A' }}
+                        </div>
                     </li>
                     @endforeach
                 </ul>
@@ -134,11 +138,58 @@
                 <p class="text-xs text-blue-400">Belum ada catatan pertanyaan audit.</p>
             @endif
         </div>
+    </div>
 
-    {{-- Kolom Kanan: Aktivitas Terbaru (Kode Anda) --}}
+    {{-- Kolom Kanan: Aktivitas Terbaru --}}
     <div class="lg:col-span-2">
-        {{-- Masukkan kode <div class="bg-white rounded-2xl..."> milik Anda di sini --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
+            <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+                <h3 class="font-bold text-gray-800">Audit Aktif & Terbaru</h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @forelse($recentAudits as $audit)
+                <div class="p-5 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                            {{ $audit->department->name }}
+                        </span>
+                        <span class="text-[10px] text-gray-400">
+                            {{ $audit->created_at->format('d M Y') }}
+                        </span>
+                    </div>
+
+                    <!-- Tambahkan Scope & PIC -->
+                    <p class="text-sm text-gray-700 mt-1">
+                        <strong>Area:</strong> {{ Str::limit($audit->session?->audit_scope ?? 'N/A', 40) }}
+                    </p>
+                    <p class="text-sm text-gray-700">
+                        <strong>PIC:</strong> {{ $audit->session?->pic_name ?? 'Belum ditentukan' }}
+                    </p>
+
+                    <div class="mt-2 flex items-center justify-between">
+                        <span class="text-xs text-gray-500">
+                            {{ $audit->session?->auditor_name ?? 'N/A' }}
+                        </span>
+                        @if($audit->status == 'COMPLETED')
+                            <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">SELESAI</span>
+                        @else
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">BERJALAN</span>
+                        @endif
+                    </div>
+
+                    <!-- Tombol Lihat Detail Audit -->
+                    <a href="{{ route('audit.overview', $audit->id) }}" 
+                       class="block mt-3 text-center w-full py-1.5 text-xs font-bold text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors">
+                        LIHAT DETAIL AUDIT
+                    </a>
+                </div>
+                @empty
+                <div class="p-8 text-center text-gray-400 text-sm">
+                    Belum ada audit yang dimulai.
+                </div>
+                @endforelse
+            </div>
+        </div>
     </div>
 </div>
-    </div>
 @endsection
