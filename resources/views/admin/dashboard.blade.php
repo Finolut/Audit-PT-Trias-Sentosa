@@ -59,54 +59,66 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 text-lg">Daftar Audit Terbaru</h3>
-                    <span class="text-xs text-gray-400 font-medium">Menampilkan 5 aktivitas terakhir</span>
-                </div>
-                <div class="divide-y divide-gray-100">
-                    @forelse($recentAudits as $audit)
-                    <div class="p-5 hover:bg-gray-50 transition-colors">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase">
-                                        {{ $audit->department->name }}
-                                    </span>
-                                    <span class="text-[10px] text-gray-400 italic">
-                                        {{ $audit->created_at->diffForHumans() }}
-                                    </span>
-                                </div>
-                                <h4 class="text-sm font-semibold text-gray-800">
-                                    Area: {{ Str::limit($audit->session?->audit_scope ?? 'N/A', 60) }}
-                                </h4>
-                                <div class="grid grid-cols-2 mt-2 gap-2 text-[11px] text-gray-500">
-                                    <p><strong>PIC:</strong> {{ $audit->session?->pic_name ?? 'N/A' }}</p>
-                                    <p><strong>Auditor:</strong> {{ $audit->session?->auditor_name ?? 'N/A' }}</p>
-                                </div>
+{{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
+<div class="lg:col-span-2">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800 text-lg">Daftar Audit Terbaru</h3>
+            <span class="text-xs text-gray-400 font-medium">Menampilkan 5 aktivitas terakhir</span>
+        </div>
+        <div class="divide-y divide-gray-100">
+            @forelse($recentAudits as $audit)
+            <div class="p-5 hover:bg-gray-50 transition-colors">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase">
+                                {{ $audit->department->name }}
+                            </span>
+                            <span class="text-[10px] text-gray-400 italic">
+                                {{ $audit->created_at->diffForHumans() }}
+                            </span>
+                        </div>
+                        
+                        {{-- PERBAIKAN: Menampilkan 'Bagian yang Diperiksa' (Scope) --}}
+                        <h4 class="text-sm font-semibold text-gray-800 mb-1">
+                            Bagian yang Diperiksa: <span class="text-blue-600">{{ $audit->scope ?? 'N/A' }}</span>
+                        </h4>
+
+                        <div class="grid grid-cols-2 mt-2 gap-4 text-[11px] text-gray-500 border-t border-gray-50 pt-2">
+                            {{-- PERBAIKAN: Menampilkan PIC Auditee (Penanggung Jawab) --}}
+                            <div>
+                                <p class="font-bold text-gray-400 uppercase text-[9px]">Penanggung Jawab (PIC)</p>
+                                <p class="text-gray-700 font-medium">{{ $audit->pic_auditee_name ?? 'N/A' }}</p>
                             </div>
-                            <div class="flex items-center gap-3">
-                                @if($audit->status == 'COMPLETED')
-                                    <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">SELESAI</span>
-                                @else
-                                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100">BERJALAN</span>
-                                @endif
-                                <a href="{{ route('audit.overview', $audit->id) }}" 
-                                   class="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-shadow shadow-sm">
-                                    DETAIL
-                                </a>
+                            <div>
+                                <p class="font-bold text-gray-400 uppercase text-[9px]">Auditor</p>
+                                <p class="text-gray-700 font-medium">{{ $audit->session->auditor_name ?? 'N/A' }}</p>
                             </div>
                         </div>
                     </div>
-                    @empty
-                    <div class="p-12 text-center text-gray-400">
-                        <p class="text-sm">Belum ada aktivitas audit.</p>
+
+                    <div class="flex items-center gap-3">
+                        @if($audit->status == 'COMPLETED')
+                            <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm">SELESAI</span>
+                        @else
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 shadow-sm">BERJALAN</span>
+                        @endif
+                        <a href="{{ route('audit.overview', $audit->id) }}" 
+                           class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
+                            DETAIL
+                        </a>
                     </div>
-                    @endforelse
                 </div>
             </div>
+            @empty
+            <div class="p-12 text-center text-gray-400">
+                <p class="text-sm">Belum ada aktivitas audit.</p>
+            </div>
+            @endforelse
         </div>
+    </div>
+</div>
 
         {{-- KOLOM KANAN (1/3): PERTANYAAN TERKINI --}}
         <div class="lg:col-span-1">
