@@ -248,14 +248,10 @@ function updateInfoBox(itemId) {
             .join(', ');
 
         infoBox.innerHTML = `
-            <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 1.2rem;">⚠️</span>
-                <div>
                     <div style="margin-bottom: 4px;">
-                        <strong>Auditor (${auditorName}):</strong> <span>${auditorAnswer}</span>
+                        <strong> ${auditorName}:</strong> <span>${auditorAnswer}</span>
                     </div>
                     <div>
-                        <strong>Perbedaan Jawaban:</strong><br>
                         <span>${responderListText}</span>
                     </div>
                 </div>
