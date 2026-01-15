@@ -365,4 +365,81 @@ private $auditorsList = [
             'chartData' => $chartData
         ]);
     }
+    public function showDashboard($auditId)
+{
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    if (!$audit) abort(404);
+
+    $department = DB::table('departments')->where('id', $audit->department_id)->first();
+
+    // 1. Ambil semua soal (items) dan klausulnya
+    $items = DB::table('items')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->select('items.id as item_id', 'clauses.clause_code')
+        ->get();
+
+    // 2. Ambil semua jawaban yang sudah final untuk audit ini
+    $finalAnswers = DB::table('answer_finals')
+        ->where('audit_id', $auditId)
+        ->get()
+        ->keyBy('item_id');
+
+    $mainStats = [];
+    $detailedStats = [];
+
+    // Inisialisasi awal agar semua main clause (4-10) muncul di grafik
+    foreach ($this->mainClauses as $mCode => $subs) {
+        $mainStats[$mCode] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+        foreach ($subs as $sCode) {
+            $detailedStats[$sCode] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+        }
+    }
+
+    // 3. Loop semua soal untuk menentukan status (Yes, No, N/A, atau Belum Diisi)
+    foreach ($items as $item) {
+        $mainKey = explode('.', $item->clause_code)[0];
+        $detailKey = $item->clause_code;
+
+        // Jika klausul tidak ada di daftar (misal klausul custom), skip atau masukkan ke 'other'
+        if (!isset($mainStats[$mainKey])) continue;
+
+        if (isset($finalAnswers[$item->item_id])) {
+            $ans = $finalAnswers[$item->item_id];
+
+            // Cek kondisi N/A: yes=0, no=0, tapi record ada
+            if ($ans->final_yes == 0 && $ans->final_no == 0) {
+                $mainStats[$mainKey]['na']++;
+                $detailedStats[$detailKey]['na']++;
+            } 
+            // Cek kondisi Partial/Draw: yes=1, no=1
+            elseif ($ans->final_yes == 1 && $ans->final_no == 1) {
+                $mainStats[$mainKey]['partial']++;
+                $detailedStats[$detailKey]['partial']++;
+            }
+            // Cek kondisi YES
+            elseif ($ans->final_yes == 1) {
+                $mainStats[$mainKey]['yes']++;
+                $detailedStats[$detailKey]['yes']++;
+            }
+            // Cek kondisi NO
+            else {
+                $mainStats[$mainKey]['no']++;
+                $detailedStats[$detailKey]['no']++;
+            }
+        } else {
+            // TIDAK ADA RECORD DI TABEL = BELUM DIISI (ABU-ABU)
+            $mainStats[$mainKey]['unanswered']++;
+            $detailedStats[$detailKey]['unanswered']++;
+        }
+    }
+
+    return view('audit.overview', [ // Sesuaikan nama file blade anda
+        'audit' => $audit,
+        'department' => $department,
+        'mainStats' => $mainStats,
+        'detailedStats' => $detailedStats,
+        'mainClauses' => $this->mainClauses,
+        'titles' => $this->mainClauseTitles
+    ]);
+}
 }

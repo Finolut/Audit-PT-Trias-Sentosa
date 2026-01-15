@@ -208,5 +208,34 @@ new Chart(document.getElementById('detailedClauseChart'), {
         }
     }
 });
+
+// Dataset untuk Chart (Gunakan ini untuk Main Chart dan Detailed Chart)
+datasets: [
+    { 
+        label: 'Yes', 
+        data: labels.map(l => stats[l].yes), 
+        backgroundColor: '#22c55e' // Hijau
+    },
+    { 
+        label: 'Partial', 
+        data: labels.map(l => stats[l].partial), 
+        backgroundColor: '#94a3b8' // Slate/Abu Tua
+    },
+    { 
+        label: 'No', 
+        data: labels.map(l => stats[l].no), 
+        backgroundColor: '#ef4444' // Merah
+    },
+    { 
+        label: 'N/A', 
+        data: labels.map(l => stats[l].na), 
+        backgroundColor: '#facc15' // KUNING (Wajib diisi tapi N/A)
+    },
+    { 
+        label: 'Belum Diisi', 
+        data: labels.map(l => stats[l].unanswered), 
+        backgroundColor: '#e2e8f0' // ABU-ABU MUDA (Belum disentuh)
+    }
+]
 </script>
 @endsection
