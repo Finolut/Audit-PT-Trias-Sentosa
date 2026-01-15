@@ -128,22 +128,30 @@ foreach($this->mainClauses as $main => $subs) {
 }
 
 // 2. UBAH LOGIKA LOOPING STATUS
+// ... (Bagian atas method tetap sama)
+
 foreach ($allItems as $item) {
-    $status = 'unanswered'; // Default status jika kosong
+    $status = 'unanswered'; // Default status awal
+
+    // LOGIKA PEMISAHAN:
     
-    // Cek logika:
-    if (is_null($item->final_yes) || ($item->yes_count == 0 && $item->no_count == 0)) {
-        // Jika tidak ada jawaban Yes/No sama sekali
-        // Jika sistem Anda punya kolom khusus N/A, cek di sini: if($item->is_na) { $status = 'na'; } else { ... }
-        
-        $status = 'unanswered'; // Kita sebut ini "Belum Diisi"
-        
-    } elseif ($item->final_yes > $item->final_no) {
+    // 1. Cek apakah record jawaban ADA di database (bukan null)
+    if (is_null($item->final_yes)) {
+        // Jika null, berarti baris ini dihasilkan dari LEFT JOIN karena belum ada datanya
+        $status = 'unanswered'; // Warna ABU-ABU
+    } 
+    // 2. Jika data ADA, cek apakah hasil votingnya kosong (N/A)
+    elseif ($item->yes_count == 0 && $item->no_count == 0) {
+        // Sudah dikerjakan/disubmit tapi tidak ada pilihan Yes atau No (N/A)
+        $status = 'na'; // Warna KUNING
+    } 
+    // 3. Logika Yes/No/Partial seperti biasa
+    elseif ($item->final_yes > $item->final_no) {
         $status = 'yes';
     } elseif ($item->final_no > $item->final_yes) {
         $status = 'no';
     } else {
-        $status = 'partial'; // Seri (Yes = No)
+        $status = 'partial'; // Seri
     }
 
     // Masukkan ke array statistics
@@ -158,6 +166,8 @@ foreach ($allItems as $item) {
         }
     }
 }
+
+// ... (Sisa method return view tetap sama)
 
         return view('admin.audit_clauses', [
             'departments' => $departments,
