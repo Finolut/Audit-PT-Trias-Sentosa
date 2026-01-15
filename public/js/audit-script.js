@@ -207,7 +207,6 @@ function updateInfoBox(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
     if (!infoBox) return;
 
-    // 1. Ambil semua jawaban untuk item ini
     let answers = {};
     for (let key in sessionAnswers) {
         if (key.startsWith(`${itemId}_`)) {
@@ -218,19 +217,23 @@ function updateInfoBox(itemId) {
 
     const auditorAnswer = answers[auditorName];
     
-    // Jika Auditor belum jawab, sembunyikan info box
     if (!auditorAnswer) {
         infoBox.style.display = 'none';
         infoBox.innerHTML = '';
         return;
     }
 
-    // 2. Cek perbedaan dan kumpulkan data responder yang berbeda
-    let diffList = []; // Array untuk menampung responder yang beda
+    // Helper untuk memberi warna pada teks YES/NO/NA
+    const getColor = (val) => {
+        if (val === 'YES') return '#16a34a'; // Hijau
+        if (val === 'NO') return '#dc2626';  // Merah
+        return '#4b5563';                    // Abu-abu untuk N/A
+    };
+
+    let diffList = [];
     let hasDifference = false;
 
     for (let user in answers) {
-        // Jika user bukan auditor DAN jawabannya berbeda
         if (user !== auditorName && answers[user] !== auditorAnswer) {
             hasDifference = true;
             diffList.push({
@@ -240,16 +243,19 @@ function updateInfoBox(itemId) {
         }
     }
 
-    // 3. Tampilkan jika ada perbedaan
     if (hasDifference) {
-        // Buat teks daftar responder: "Budi: NO, Siska: YES"
+        // MENAMBAHKAN STYLE WARNA DI SINI
         const responderListText = diffList
-            .map(d => `${d.name}: <strong>${d.answer}</strong>`)
+            .map(d => `${d.name}: <strong style="color: ${getColor(d.answer)}">${d.answer}</strong>`)
             .join(', ');
 
         infoBox.innerHTML = `
+            <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.2rem;">⚠️</span>
+                <div>
                     <div style="margin-bottom: 4px;">
-                        <strong> ${auditorName}:</strong> <span>${auditorAnswer}</span>
+                        <strong>${auditorName}:</strong> 
+                        <span style="color: ${getColor(auditorAnswer)}; font-weight: bold;">${auditorAnswer}</span>
                     </div>
                     <div>
                         <span>${responderListText}</span>
@@ -259,7 +265,6 @@ function updateInfoBox(itemId) {
         `;
         infoBox.style.display = 'block';
     } else {
-        // Tidak ada perbedaan → sembunyikan
         infoBox.style.display = 'none';
         infoBox.innerHTML = '';
     }
