@@ -207,7 +207,7 @@ function updateInfoBox(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
     if (!infoBox) return;
 
-    // Ambil semua jawaban untuk item ini
+    // 1. Ambil semua jawaban untuk item ini
     let answers = {};
     for (let key in sessionAnswers) {
         if (key.startsWith(`${itemId}_`)) {
@@ -225,41 +225,44 @@ function updateInfoBox(itemId) {
         return;
     }
 
-    // Cek apakah ada responder lain yang jawabannya BERBEDA dari Auditor
+    // 2. Cek perbedaan dan kumpulkan data responder yang berbeda
+    let diffList = []; // Array untuk menampung responder yang beda
     let hasDifference = false;
-    let yesCount = 0, noCount = 0, naCount = 0;
 
     for (let user in answers) {
-        const ans = answers[user];
-        if (ans === 'YES') yesCount++;
-        else if (ans === 'NO') noCount++;
-        else if (ans === 'N/A') naCount++;
-
+        // Jika user bukan auditor DAN jawabannya berbeda
         if (user !== auditorName && answers[user] !== auditorAnswer) {
             hasDifference = true;
+            diffList.push({
+                name: user,
+                answer: answers[user]
+            });
         }
     }
 
-  if (hasDifference) {
-    // Membuat daftar nama responder dan jawabannya
-    const responderList = differences.map(d => `${d.name}: <strong>${d.answer}</strong>`).join(', ');
+    // 3. Tampilkan jika ada perbedaan
+    if (hasDifference) {
+        // Buat teks daftar responder: "Budi: NO, Siska: YES"
+        const responderListText = diffList
+            .map(d => `${d.name}: <strong>${d.answer}</strong>`)
+            .join(', ');
 
-    infoBox.innerHTML = `
-        <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
-            <span style="font-size: 1.2rem;">⚠️</span>
-            <div>
-                <div style="margin-bottom: 4px;">
-                    <strong>Auditor (${auditorName}):</strong> <span>${auditorAnswer}</span>
-                </div>
+        infoBox.innerHTML = `
+            <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.2rem;">⚠️</span>
                 <div>
-                    <strong>Responder Lainnya:</strong><br>
-                    <span>${responderList}</span>
+                    <div style="margin-bottom: 4px;">
+                        <strong>Auditor (${auditorName}):</strong> <span>${auditorAnswer}</span>
+                    </div>
+                    <div>
+                        <strong>Perbedaan Jawaban:</strong><br>
+                        <span>${responderListText}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-    infoBox.style.display = 'block';
-}else {
+        `;
+        infoBox.style.display = 'block';
+    } else {
         // Tidak ada perbedaan → sembunyikan
         infoBox.style.display = 'none';
         infoBox.innerHTML = '';
