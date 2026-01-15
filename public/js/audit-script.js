@@ -240,19 +240,26 @@ function updateInfoBox(itemId) {
         }
     }
 
-    if (hasDifference) {
-        infoBox.innerHTML = `
-            <div style="margin-top: 8px; padding: 10px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 1.2rem;">⚠️</span>
+  if (hasDifference) {
+    // Membuat daftar nama responder dan jawabannya
+    const responderList = differences.map(d => `${d.name}: <strong>${d.answer}</strong>`).join(', ');
+
+    infoBox.innerHTML = `
+        <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 1.2rem;">⚠️</span>
+            <div>
+                <div style="margin-bottom: 4px;">
+                    <strong>Auditor (${auditorName}):</strong> <span>${auditorAnswer}</span>
+                </div>
                 <div>
-                    <strong>Perbedaan Jawaban:</strong><br>
-                    Auditor: <strong>${auditorAnswer}</strong> | 
-                    Lainnya: ${yesCount} YES, ${noCount} NO, ${naCount} N/A
+                    <strong>Responder Lainnya:</strong><br>
+                    <span>${responderList}</span>
                 </div>
             </div>
-        `;
-        infoBox.style.display = 'block';
-    } else {
+        </div>
+    `;
+    infoBox.style.display = 'block';
+}else {
         // Tidak ada perbedaan → sembunyikan
         infoBox.style.display = 'none';
         infoBox.innerHTML = '';
