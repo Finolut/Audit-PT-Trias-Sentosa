@@ -135,15 +135,6 @@
             @endif
         </div>
 
-        {{-- Navigasi Cepat Admin --}}
-        <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-            <h3 class="font-bold text-gray-800 mb-4 text-sm">Manajemen Data</h3>
-            <a href="{{ route('admin.items.index') }}" class="flex items-center p-3 mb-2 bg-gray-50 rounded-lg hover:bg-purple-50 hover:text-purple-600 transition-all text-sm font-medium">
-                <span class="mr-3">⚙️</span> Kelola Soal Audit (Items)
-            </a>
-        </div>
-    </div>
-
     {{-- Kolom Kanan: Aktivitas Terbaru (Kode Anda) --}}
     <div class="lg:col-span-2">
         {{-- Masukkan kode <div class="bg-white rounded-2xl..."> milik Anda di sini --}}
