@@ -35,7 +35,6 @@
                         <th class="px-6 py-4 text-center">Total Audit</th>
                         <th class="px-6 py-4 text-center">Selesai</th>
                         <th class="px-6 py-4 text-center">Berjalan (Pending)</th>
-                        <th class="px-6 py-4 text-center">Persentase</th>
                         <th class="px-6 py-4 text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -57,13 +56,6 @@
                             @else
                                 <span class="text-gray-300">-</span>
                             @endif
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            @php
-                                $percent = $dept->total_audit > 0 ? round(($dept->completed_count / $dept->total_audit) * 100) : 0;
-                                $color = $percent == 100 ? 'text-green-600' : ($percent > 50 ? 'text-blue-600' : 'text-gray-400');
-                            @endphp
-                            <span class="font-bold text-xs {{ $color }}">{{ $percent }}%</span>
                         </td>
                         <td class="px-6 py-4 text-right">
                             <a href="{{ route('dept.show', $dept->id) }}" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm">
