@@ -168,3 +168,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
     Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
 });
+
+Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('admin.auditors.destroy');

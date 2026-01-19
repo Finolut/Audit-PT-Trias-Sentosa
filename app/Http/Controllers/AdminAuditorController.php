@@ -56,4 +56,12 @@ public function show($id)
         // Kirimkan variabel 'departments' ke view
         return view('admin.auditors.show', compact('auditor', 'history', 'stats', 'departments'));
     }
+
+    public function destroy($id)
+{
+    $auditor = User::findOrFail($id);
+    $auditor->delete();
+
+    return redirect()->route('admin.auditors.index')->with('success', 'Auditor berhasil dihapus.');
+}
 }

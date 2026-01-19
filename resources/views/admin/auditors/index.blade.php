@@ -12,6 +12,14 @@
         </a>
     </div>
 
+    {{-- Search Lokal untuk Tabel --}}
+    <div class="relative w-64 mb-4">
+        <input type="text" id="tableSearch" placeholder="Cari nama auditor..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+    </div>
+
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table class="w-full text-left border-collapse">
             <thead>
@@ -23,7 +31,7 @@
                     <th class="p-4 font-semibold text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100" id="auditorTableBody">
                 @forelse($auditors as $aud)
                 <tr class="hover:bg-blue-50/50 transition-colors group">
                     <td class="p-4">
@@ -41,10 +49,17 @@
                             {{ $aud->total_audits ?? 0 }} Selesai
                         </span>
                     </td>
-                    <td class="p-4 text-right">
-                        <a href="{{ route('admin.auditors.show', $aud->id) }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center justify-end gap-1">
-                            Lihat History <span>→</span>
+                    <td class="p-4 text-right space-x-2">
+                        <a href="{{ route('admin.auditors.show', $aud->id) }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                            Lihat
                         </a>
+                        <form action="{{ route('admin.auditors.destroy', $aud->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus auditor ini? Tindakan ini tidak bisa dikembalikan.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                Hapus
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 @empty
@@ -58,4 +73,21 @@
         </table>
     </div>
 </div>
+
+{{-- Script Pencarian Lokal --}}
+<script>
+    document.getElementById('tableSearch').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#auditorTableBody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
 @endsection
