@@ -5,6 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- TomSelect CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
+    
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -149,18 +153,8 @@
         <div class="section">
             <h3>2️⃣ Tim Pemeriksa (Auditor)</h3>
 
-            <!-- Searchable Input -->
             <label>Nama Anda (Sebagai Ketua Tim Pemeriksa)</label>
-            <input type="text" id="auditor_name_input" list="auditors" name="auditor_name" placeholder="Ketik nama Anda..." required
-                   oninput="handleAuditorInput(this.value)" style="font-size: 16px;">
-
-            <datalist id="auditors">
-                @foreach($auditors as $aud)
-                    <option value="{{ $aud['name'] }}" data-nik="{{ $aud['nik'] }}" data-dept="{{ $aud['dept'] }}">
-                        {{ $aud['name'] }}
-                    </option>
-                @endforeach
-            </datalist>
+            <select id="auditor_select" name="auditor_name" placeholder="Pilih nama Anda..." required></select>
 
             <label>NIK Anda</label>
             <input type="text" id="auditor_nik" name="auditor_nik" readonly style="background: #f1f5f9;">
@@ -168,7 +162,6 @@
             <label>Departemen Anda</label>
             <input type="text" id="auditor_department" name="auditor_department" readonly style="background: #f1f5f9;">
 
-            <!-- Konfirmasi Checkbox -->
             <div class="confirmation-checkbox">
                 <input type="checkbox" id="confirmation" name="confirmation" required>
                 <label for="confirmation">
@@ -187,15 +180,10 @@
         <div id="audit-details" class="hidden">
 
             <div class="section">
-                <h3>3️⃣ Tim yang Diperiksa (Auditee)</h3>
+                <h3>3️⃣ Departemen yang Akan Di Audit</h3>
 
-                <label>Departemen yang Diperiksa</label>
-                <select name="department_id" required style="font-size: 16px;">
-                    <option value="">-- Pilih Departemen --</option>
-                    @foreach ($departments as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </select>
+                <label>Departemen yang Akan Di Audit</label>
+                <select id="department_select" name="department_id" placeholder="Pilih departemen..." required></select>
 
                 <label>Penanggung Jawab di Departemen Tersebut</label>
                 <input type="text" name="pic_name" placeholder="Nama lengkap penanggung jawab" required>
@@ -220,34 +208,63 @@
     </form>
 </div>
 
+<!-- Data untuk JS -->
 <script>
-    // Simpan data auditor dalam objek untuk pencarian cepat
-    const auditorData = {
-        @foreach($auditors as $aud)
-            "{{ addslashes($aud['name']) }}": {
-                nik: "{{ $aud['nik'] }}",
-                dept: "{{ $aud['dept'] }}"
-            },
-        @endforeach
-    };
+    const AUDITORS = @json($auditors); // [{ name, nik, dept }]
+    const DEPARTMENTS = @json($departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
+</script>
 
+<!-- TomSelect JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+<script>
     let teamIndex = 0;
 
-    function handleAuditorInput(name) {
-        const data = auditorData[name];
-        const detailsDiv = document.getElementById('audit-details');
-        
-        if (data) {
-            document.getElementById('auditor_nik').value = data.nik;
-            document.getElementById('auditor_department').value = data.dept;
-            detailsDiv.classList.remove('hidden');
-        } else {
-            document.getElementById('auditor_nik').value = '';
-            document.getElementById('auditor_department').value = '';
-            detailsDiv.classList.add('hidden');
+    // Inisialisasi Auditor Select
+    new TomSelect('#auditor_select', {
+        valueField: 'name',
+        labelField: 'name',
+        searchField: ['name'],
+        options: AUDITORS,
+        create: false,
+        placeholder: 'Ketik nama Anda...',
+        onChange: function(value) {
+            const auditor = AUDITORS.find(a => a.name === value);
+            if (auditor) {
+                document.getElementById('auditor_nik').value = auditor.nik;
+                document.getElementById('auditor_department').value = auditor.dept;
+                document.getElementById('audit-details').classList.remove('hidden');
+            } else {
+                document.getElementById('auditor_nik').value = '';
+                document.getElementById('auditor_department').value = '';
+                document.getElementById('audit-details').classList.add('hidden');
+            }
         }
-    }
+    });
 
+    // Inisialisasi Department Select
+    new TomSelect('#department_select', {
+        valueField: 'id',
+        labelField: 'name',
+        searchField: ['name'],
+        options: DEPARTMENTS,
+        create: false,
+        placeholder: 'Ketik nama departemen...'
+    });
+
+    // Validasi form
+    document.getElementById('auditForm').addEventListener('submit', function(e) {
+        const auditor = document.getElementById('auditor_select').value;
+        const dept = document.getElementById('department_select').value;
+        const confirmed = document.getElementById('confirmation').checked;
+
+        if (!auditor || !dept || !confirmed) {
+            e.preventDefault();
+            alert('Harap lengkapi semua bagian wajib, termasuk centang konfirmasi.');
+        }
+    });
+
+    // Fungsi tambah anggota tim
     function addAuditTeam() {
         const container = document.getElementById('audit-team-container');
         const html = `
@@ -272,15 +289,6 @@
         container.insertAdjacentHTML('beforeend', html);
         teamIndex++;
     }
-
-    // Validasi tambahan: pastikan input auditor valid
-    document.getElementById('auditForm').addEventListener('submit', function(e) {
-        const auditorName = document.getElementById('auditor_name_input').value;
-        if (!auditorData[auditorName]) {
-            e.preventDefault();
-            alert('Nama auditor tidak valid. Harap pilih dari daftar yang tersedia.');
-        }
-    });
 </script>
 
 </body>
