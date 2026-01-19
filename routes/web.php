@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminAuditorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -158,3 +159,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
 Route::post('/admin/users/store', [AdminUserController::class, 'store'])->name('admin.users.store');
+
+// Group Admin
+Route::prefix('admin')->name('admin.')->group(function () {
+    // ... route lain ...
+    
+    // Route Khusus Monitoring Auditor
+    Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
+    Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
+});
