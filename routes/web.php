@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\AdminUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,3 +155,6 @@ Route::get('/admin/department-status', [DashboardController::class, 'departmentS
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('items', ItemController::class);
 });
+
+Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
+Route::post('/admin/users/store', [AdminUserController::class, 'store'])->name('admin.users.store');

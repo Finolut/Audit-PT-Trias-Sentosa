@@ -87,9 +87,16 @@
                 </div>
 
                 <!-- Manajemen Data -->
-                <div class="px-3 mb-2 mt-6">
+<div class="px-3 mb-2 mt-6">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manajemen Data</span>
                 </div>
+
+                {{-- MENU BARU: KELOLA USER --}}
+                <a href="{{ route('admin.users.create') }}" 
+                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*') ? 'active-link' : '' }}">
+                    <span class="mr-3 text-lg">👥</span> Kelola User (Auditor)
+                </a>
+                {{-- END MENU BARU --}}
 
                 <a href="{{ route('admin.items.index') }}" 
                    class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
