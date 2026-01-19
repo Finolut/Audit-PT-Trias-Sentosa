@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Audit;
 use App\Models\AuditSession; // Pastikan ada Model ini
 use Illuminate\Support\Facades\DB;
+use App\Models\Department;
 
 class AdminAuditorController extends Controller
 {
@@ -26,11 +27,14 @@ class AdminAuditorController extends Controller
         return view('admin.auditors.index', compact('auditors'));
     }
 
-    public function show($id)
+public function show($id)
     {
         $auditor = User::findOrFail($id);
 
-        // PERBAIKAN: Gunakan JOIN untuk mengambil data Audit berdasarkan nama Auditor di Session
+        // Ambil data departemen agar variabel $departments tidak undefined
+        $departments = Department::orderBy('name', 'asc')->get();
+
+        // Query Join sesuai skema database Anda
         $history = Audit::join('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id')
                         ->select(
                             'audits.*', 
@@ -42,14 +46,14 @@ class AdminAuditorController extends Controller
                         ->orderBy('audit_sessions.audit_date', 'desc')
                         ->get();
 
-        // Statistik Ringkas (Ambil dari hasil query di atas)
         $stats = [
             'total' => $history->count(),
-            'regular' => $history->where('type', 'Regular')->count(), // Perhatikan nama kolom 'type' di DB (bukan audit_type)
+            'regular' => $history->where('type', 'Regular')->count(),
             'special' => $history->where('type', 'Special')->count(),
             'followup' => $history->where('type', 'FollowUp')->count(),
         ];
 
-        return view('admin.auditors.show', compact('auditor', 'history', 'stats'));
+        // Kirimkan variabel 'departments' ke view
+        return view('admin.auditors.show', compact('auditor', 'history', 'stats', 'departments'));
     }
 }
