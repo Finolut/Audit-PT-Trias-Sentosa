@@ -144,14 +144,43 @@
         }
         .card:hover .arrow { transform: translateX(5px); }
 
-        /* Button Final */
+        /* Finish Section - Enhanced */
         .finish-section {
             margin-top: 3rem;
-            padding: 2rem;
-            background: white;
+            padding: 2.5rem;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
             border-radius: 16px;
             text-align: center;
-            border: 2px dashed var(--slate-200);
+            border: 2px solid var(--success);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .finish-icon {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .finish-message {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .finish-subtext {
+            color: var(--slate-600);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
         }
 
         .finish-btn {
@@ -160,7 +189,7 @@
             padding: 1rem 2.5rem;
             border-radius: 12px;
             border: none;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -169,11 +198,16 @@
 
         .finish-btn:hover {
             background: #059669;
-            transform: scale(1.02);
+            transform: scale(1.03);
+        }
+
+        .finish-btn:active {
+            transform: scale(0.98);
         }
 
         @media (max-width: 640px) {
             .header { flex-direction: column; text-align: center; gap: 1rem; }
+            .finish-message { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -221,12 +255,28 @@
 
     @if(count($completedClauses) == count($mainClauses))
         <div class="finish-section">
-            <p style="margin-bottom: 1.5rem; font-weight: 500; color: var(--slate-600);">Semua klausul telah diaudit. Silahkan kirim laporan final.</p>
-            <form action="{{ route('audit.final_submit', $auditId) }}" method="POST">
+            <div class="finish-icon">🎉</div>
+            <h2 class="finish-message">Audit Telah Selesai!</h2>
+            <p class="finish-subtext">Semua klausul telah diisi. Silakan kirim laporan final untuk menyelesaikan proses audit.</p>
+            
+            <form id="finalSubmitForm" action="{{ route('audit.final_submit', $auditId) }}" method="POST">
                 @csrf
-                <button type="submit" class="finish-btn">Submit Laporan Final ✓</button>
+                <button type="submit" class="finish-btn">Kirim Laporan Final ✓</button>
             </form>
         </div>
+
+        {{-- Auto-redirect setelah submit sukses --}}
+        @if(session('final_success'))
+            <script>
+                // Tampilkan notifikasi sukses (opsional)
+                alert("✅ Audit berhasil dikirim! Mengalihkan ke dashboard...");
+                
+                // Redirect ke dashboard utama (sesuaikan route-nya)
+                setTimeout(() => {
+                    window.location.href = "{{ route('audit.setup') }}"; // atau route dashboard utama kamu
+                }, 1500);
+            </script>
+        @endif
     @endif
 </div>
 

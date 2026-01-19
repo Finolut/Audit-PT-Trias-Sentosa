@@ -170,3 +170,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('admin.auditors.destroy');
+
+Route::post('/audit/{id}/final-submit', [AuditController::class, 'finalSubmit'])
+    ->name('audit.final_submit');

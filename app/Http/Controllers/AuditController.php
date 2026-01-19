@@ -472,4 +472,38 @@ public function showDashboard($auditId)
         'titles' => $this->mainClauseTitles
     ]);
 }
+
+public function finalSubmit(Request $request, $auditId)
+{
+    // Validasi: pastikan semua klausul sudah diisi
+    $allClauses = array_keys($this->mainClauses);
+    $answeredSubCodes = DB::table('answers')
+        ->join('items', 'answers.item_id', '=', 'items.id')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->where('answers.audit_id', $auditId)
+        ->distinct()
+        ->pluck('clauses.clause_code')
+        ->toArray();
+
+    $completedMain = [];
+    foreach ($this->mainClauses as $main => $subs) {
+        if (count(array_intersect($subs, $answeredSubCodes)) > 0) {
+            $completedMain[] = (string)$main;
+        }
+    }
+
+    if (count($completedMain) !== count($allClauses)) {
+        return back()->withErrors(['Tidak semua klausul telah diisi.']);
+    }
+
+    // Update status audit ke "COMPLETED"
+    DB::table('audits')
+        ->where('id', $auditId)
+        ->update(['status' => 'COMPLETED', 'submitted_at' => now()]);
+
+    // Redirect kembali ke menu dengan pesan sukses
+    return redirect()->route('audit.menu', $auditId)
+                     ->with('final_success', true)
+                     ->with('success', 'Audit berhasil dikirim!');
+}
 }
