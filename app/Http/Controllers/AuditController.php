@@ -145,9 +145,13 @@ private $auditorsList = [
                 }
             }
 
-            return redirect()->route('audit.menu', ['id' => $newAuditId])
-                             ->with('success', 'Audit baru berhasil dibuat!');
-        });
+  if (!empty($responders)) {
+            DB::table('audit_responders')->insert($responders); // ✅ Batch insert!
+        }
+
+        return redirect()->route('audit.menu', ['id' => $newAuditId])
+                         ->with('success', 'Audit baru berhasil dibuat!');
+    });
     }
 
     // ... (method menu(), show(), store(), clauseDetail() tetap sama seperti sebelumnya)
@@ -227,89 +231,120 @@ private $auditorsList = [
         ]);
     }
 
-    public function store(Request $request, $auditId, $mainClause)
-    {
-        $answers = $request->input('answers', []);
-        $notes   = $request->input('audit_notes', []);
+public function store(Request $request, $auditId, $mainClause)
+{
+    $answers = $request->input('answers', []);
+    $notes   = $request->input('audit_notes', []);
 
-        DB::transaction(function () use ($answers, $notes, $auditId) {
-            $auditRecord = DB::table('audits')->where('id', $auditId)->first();
-            $departmentId = $auditRecord ? $auditRecord->department_id : null;
+    DB::transaction(function () use ($answers, $notes, $auditId) {
+        $auditRecord = DB::table('audits')->where('id', $auditId)->first();
+        $departmentId = $auditRecord?->department_id;
 
-            foreach ($notes as $clauseCode => $text) {
-                if (empty($text)) continue;
-                DB::table('audit_questions')->updateOrInsert(
-                    ['audit_id' => $auditId, 'clause_code' => $clauseCode],
-                    [
-                        'id'            => (string) Str::uuid(),
-                        'department_id' => $departmentId,
-                        'question_text' => $text,
-                        'updated_at'    => now(),
-                        'created_at'    => now()
-                    ]
-                );
-            }
+        // === 1. BATCH UPSERT NOTES ===
+        $noteRecords = [];
+        foreach ($notes as $clauseCode => $text) {
+            if (empty(trim($text))) continue;
+            $noteRecords[] = [
+                'id'             => Str::uuid()->toString(),
+                'audit_id'       => $auditId,
+                'clause_code'    => $clauseCode,
+                'department_id'  => $departmentId,
+                'question_text'  => $text,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ];
+        }
+
+        if (!empty($noteRecords)) {
+            DB::table('audit_questions')->upsert(
+                $noteRecords,
+                ['audit_id', 'clause_code'], // unique constraint columns
+                ['question_text', 'updated_at'] // columns to update on conflict
+            );
+        }
+
+        // === 2. KUMPULKAN DATA JAWABAN & FINAL ===
+        $answerRecords = [];
+        $finalRecords = [];
 
         foreach ($answers as $itemId => $people) {
-    $yesCount = 0;
-    $noCount  = 0;
-    $naCount  = 0; // Tambahkan counter untuk N/A
-    $hasAnswer = false; // Penanda apakah ada jawaban masuk
+            $yesCount = $noCount = $naCount = 0;
+            $hasAnswer = false;
 
-    foreach ($people as $personName => $data) {
-        if (!empty($data['val'])) {
-            $hasAnswer = true;
-            
-            // 1. Simpan history jawaban per orang (Tabel answers)
-            DB::table('answers')->updateOrInsert(
-                ['audit_id' => $auditId, 'item_id' => $itemId, 'auditor_name' => $personName],
-                ['id' => (string) Str::uuid(), 'answer' => $data['val'], 'answered_at' => now()]
+            foreach ($people as $personName => $data) {
+                if (!empty($data['val'])) {
+                    $hasAnswer = true;
+                    $answerRecords[] = [
+                        'id'           => Str::uuid()->toString(),
+                        'audit_id'     => $auditId,
+                        'item_id'      => $itemId,
+                        'auditor_name' => $personName,
+                        'answer'       => $data['val'],
+                        'answered_at'  => now(),
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ];
+
+                    match ($data['val']) {
+                        'YES' => $yesCount++,
+                        'NO'  => $noCount++,
+                        'N/A' => $naCount++,
+                    };
+                }
+            }
+
+            if ($hasAnswer) {
+                // Logika final: YES menang jika >= NO (termasuk seri)
+                $finalYes = ($yesCount >= $noCount && $yesCount > 0) ? 1 : 0;
+                $finalNo  = ($noCount > $yesCount) ? 1 : 0;
+
+                $finalRecords[] = [
+                    'id'         => Str::uuid()->toString(),
+                    'audit_id'   => $auditId,
+                    'item_id'    => $itemId,
+                    'yes_count'  => $yesCount,
+                    'no_count'   => $noCount,
+                    'final_yes'  => $finalYes,
+                    'final_no'   => $finalNo,
+                    'decided_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        // === 3. BATCH UPSERT ANSWERS ===
+        if (!empty($answerRecords)) {
+            DB::table('answers')->upsert(
+                $answerRecords,
+                ['audit_id', 'item_id', 'auditor_name'],
+                ['answer', 'answered_at', 'updated_at']
             );
-
-            // 2. Hitung Voting
-            if ($data['val'] === 'YES') $yesCount++;
-            elseif ($data['val'] === 'NO') $noCount++;
-            elseif ($data['val'] === 'N/A') $naCount++; // Hitung N/A
         }
+
+        // === 4. BATCH UPSERT FINAL ANSWERS ===
+        if (!empty($finalRecords)) {
+            DB::table('answer_finals')->upsert(
+                $finalRecords,
+                ['audit_id', 'item_id'],
+                ['yes_count', 'no_count', 'final_yes', 'final_no', 'decided_at', 'updated_at']
+            );
+        }
+    });
+
+    // Redirect logic tetap sama
+    $mainKeys = array_keys($this->mainClauses);
+    $currentIndex = array_search($mainClause, $mainKeys);
+    $nextMain = $mainKeys[$currentIndex + 1] ?? null;
+
+    if ($nextMain) {
+        return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $nextMain])
+                         ->with('success', "Clause {$mainClause} berhasil disimpan");
     }
 
-    // 3. Tentukan Hasil Akhir (Final Decision)
-    // Logika: Jika Yes > No maka 1, Jika No > Yes maka 0.
-    // N/A tidak mempengaruhi skor Yes/No, tapi harus tetap tercatat.
-    
-    $finalYes = ($yesCount > $noCount || ($yesCount > 0 && $yesCount == $noCount)) ? 1 : 0;
-    $finalNo  = ($noCount > $yesCount || ($yesCount > 0 && $yesCount == $noCount)) ? 1 : 0;
-
-    // JIKA ada jawaban (Yes, No, ATAU N/A), simpan ke finals!
-    if ($hasAnswer) {
-        DB::table('answer_finals')->updateOrInsert(
-            ['audit_id' => $auditId, 'item_id' => $itemId],
-            [
-                'id'         => (string) Str::uuid(),
-                'yes_count'  => $yesCount,
-                'no_count'   => $noCount,
-                'final_yes'  => $finalYes,
-                'final_no'   => $finalNo,
-                // Opsional: Anda bisa menambah kolom 'is_na' di database jika mau lebih eksplisit
-                // 'is_na'   => ($yesCount == 0 && $noCount == 0 && $naCount > 0) ? 1 : 0, 
-                'decided_at' => now(),
-            ]
-        );
-    }
+    return redirect()->route('audit.menu', ['id' => $auditId])
+                     ->with('success', 'Audit selesai 🎉');
 }
-        });
-
-        $mainKeys = array_keys($this->mainClauses);
-        $currentIndex = array_search($mainClause, $mainKeys);
-        $nextMain = $mainKeys[$currentIndex + 1] ?? null;
-
-        if ($nextMain) {
-            return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $nextMain])
-                             ->with('success', "Clause {$mainClause} berhasil disimpan");
-        }
-
-        return redirect()->route('audit.menu', ['id' => $auditId])->with('success', 'Audit selesai 🎉');
-    }
 
     public function clauseDetail($auditId, $mainClause)
     {
