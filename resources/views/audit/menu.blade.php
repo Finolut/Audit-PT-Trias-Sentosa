@@ -144,8 +144,8 @@
         }
         .card:hover .arrow { transform: translateX(5px); }
 
-        /* Finish Section - Enhanced */
-        .finish-section {
+        /* Finish Banner */
+        .finish-banner {
             margin-top: 3rem;
             padding: 2.5rem;
             background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
@@ -161,53 +161,35 @@
         }
 
         .finish-icon {
-            font-size: 3rem;
-            color: var(--success);
+            font-size: 3.5rem;
             margin-bottom: 1rem;
             display: block;
         }
 
         .finish-message {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 800;
             color: var(--slate-900);
-            margin-bottom: 1.5rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 0 1rem;
         }
 
         .finish-subtext {
             color: var(--slate-600);
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
         }
 
-        .finish-btn {
-            background: var(--success);
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: 12px;
-            border: none;
-            font-size: 1.1rem;
+        .countdown {
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
-        }
-
-        .finish-btn:hover {
-            background: #059669;
-            transform: scale(1.03);
-        }
-
-        .finish-btn:active {
-            transform: scale(0.98);
+            color: var(--success);
+            font-size: 1.1rem;
+            margin-top: 1rem;
         }
 
         @media (max-width: 640px) {
             .header { flex-direction: column; text-align: center; gap: 1rem; }
-            .finish-message { font-size: 1.1rem; }
+            .finish-message { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -254,29 +236,31 @@
     </div>
 
     @if(count($completedClauses) == count($mainClauses))
-        <div class="finish-section">
+        <div class="finish-banner">
             <div class="finish-icon">🎉</div>
             <h2 class="finish-message">Audit Telah Selesai!</h2>
-            <p class="finish-subtext">Semua klausul telah diisi. Silakan kirim laporan final untuk menyelesaikan proses audit.</p>
-            
-            <form id="finalSubmitForm" action="{{ route('audit.final_submit', $auditId) }}" method="POST">
-                @csrf
-                <button type="submit" class="finish-btn">Kirim Laporan Final ✓</button>
-            </form>
+            <p class="finish-subtext">
+                Semua klausul telah diisi. Terima kasih atas partisipasinya!
+            </p>
+            <p class="countdown" id="countdown">Mengalihkan ke halaman utama dalam <span id="seconds">3</span> detik...</p>
         </div>
 
-        {{-- Auto-redirect setelah submit sukses --}}
-        @if(session('final_success'))
-            <script>
-                // Tampilkan notifikasi sukses (opsional)
-                alert("✅ Audit berhasil dikirim! Mengalihkan ke dashboard...");
+        <script>
+            // Auto-redirect setelah 3 detik
+            let seconds = 3;
+            const countdownEl = document.getElementById('seconds');
+            
+            const timer = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
                 
-                // Redirect ke dashboard utama (sesuaikan route-nya)
-                setTimeout(() => {
-                    window.location.href = "{{ route('audit.setup') }}"; // atau route dashboard utama kamu
-                }, 1500);
-            </script>
-        @endif
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    // Ganti dengan route dashboard utama kamu
+                    window.location.href = "{{ route('audit.setup') }}";
+                }
+            }, 1000);
+        </script>
     @endif
 </div>
 
