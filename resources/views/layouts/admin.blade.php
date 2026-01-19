@@ -56,35 +56,6 @@
                    <span class="mr-3 text-lg">📋</span> Status Audit Dept.
                 </a>
 
-                <div class="px-3 mb-2 mt-6">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Data Audit</span>
-                </div>
-
-                <div class="relative">
-                    <button id="deptToggle" 
-                            class="w-full flex justify-between items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none transition-colors group">
-                        <span class="flex items-center">
-                            <span class="mr-3 text-lg">🏢</span> Departemen
-                        </span>
-                        <svg id="deptChevron" class="w-4 h-4 text-gray-400 transition-transform group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-
-                    {{-- Dropdown List --}}
-                    <div id="deptDropdown" class="hidden mt-1 space-y-0.5 pl-2">
-                        @foreach($departments as $dept)
-                            <a href="{{ route('dept.show', $dept->id) }}" 
-                               data-name="{{ strtolower($dept->name) }}"
-                               class="dept-item block px-3 py-2 text-sm text-gray-600 rounded-md hover:bg-blue-50 hover:text-blue-700 pl-9 border-l-2 border-transparent hover:border-blue-300 {{ request()->is('dept/'.$dept->id) ? 'active-link' : '' }}">
-                                {{ $dept->name }}
-                            </a>
-                        @endforeach
-                        <div id="noSidebarResult" class="hidden px-4 py-2 text-xs text-gray-400 italic">
-                            Tidak ditemukan...
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Manajemen Data -->
 <div class="px-3 mb-2 mt-6">
