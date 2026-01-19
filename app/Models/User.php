@@ -9,19 +9,24 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids; // Tambahkan ini jika pake U
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasUuids;
+    use HasUuids;
 
-    // Tambahkan ini jika Laravel bingung mencari nama tabel
-    protected $table = 'users'; 
+    // Tambahkan baris ini untuk mematikan updated_at otomatis
+    const UPDATED_AT = null; 
 
-    // PENTING: Pastikan semua kolom di gambar masuk ke fillable
+    // Atau jika kamu ingin mematikan keduanya (tapi di gambar ada created_at)
+    // public $timestamps = false; 
+
+    protected $table = 'users';
+
     protected $fillable = [
         'name',
         'nik',
         'department',
-        'password_hash', // Sesuaikan dengan nama di gambar
         'role',
+        'password_hash',
     ];
+
 
     // Jika di gambar kolom password namanya password_hash, 
     // Laravel butuh tahu ini untuk autentikasi (opsional)
