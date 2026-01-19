@@ -97,7 +97,6 @@ private $auditorsList = [
                 'auditor_name'       => $request->auditor_name,
                 'auditor_nik'        => $auditorNik,
                 'auditor_department' => $auditorDept,
-                'company_name'       => 'Indopoly',
                 'audit_date'         => $request->audit_date,
                 'created_at'         => now(),
             ]);
