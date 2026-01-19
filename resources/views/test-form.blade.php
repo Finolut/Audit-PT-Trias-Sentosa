@@ -102,6 +102,22 @@
             margin: 15px 0;
         }
         .hidden { display: none; }
+        .confirmation-checkbox {
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .confirmation-checkbox input {
+            width: auto;
+            margin-top: 4px;
+        }
+        .confirmation-checkbox label {
+            margin: 0;
+            font-weight: normal;
+            font-size: 14px;
+            color: #1e293b;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +125,7 @@
 <div class="container">
     <h2>📝 Form Pemeriksaan Internal</h2>
 
-    <form method="POST" action="{{ route('audit.start') }}">
+    <form method="POST" action="{{ route('audit.start') }}" id="auditForm">
         @csrf
 
         <div class="section">
@@ -124,30 +140,41 @@
             </select>
 
             <label>Bagian yang Diperiksa</label>
-            <input type="text" name="audit_scope" placeholder="Contoh: Gudang Bahan Baku, Bagian Keuangan, Produksi Lantai 2" required>
+            <input type="text" name="audit_scope" placeholder="Gudang Bahan Baku / Produksi / Keuangan" required>
 
             <label>Alasan Melakukan Pemeriksaan Ini</label>
-            <textarea name="audit_objective" placeholder="Contoh: Memastikan barang masuk/keluar tercatat dengan benar, atau mengecek kepatuhan SOP kebersihan" required></textarea>
+            <textarea name="audit_objective" placeholder="Memastikan barang masuk/keluar tercatat dengan benar, atau mengecek kepatuhan SOP kebersihan" required></textarea>
         </div>
 
         <div class="section">
             <h3>2️⃣ Tim Pemeriksa (Auditor)</h3>
 
+            <!-- Searchable Input -->
             <label>Nama Anda (Sebagai Ketua Tim Pemeriksa)</label>
-            <select id="auditor_select" name="auditor_name" required onchange="selectAuditor(this)" style="font-size: 16px;">
-                <option value="">-- Pilih Nama Anda --</option>
+            <input type="text" id="auditor_name_input" list="auditors" name="auditor_name" placeholder="Ketik nama Anda..." required
+                   oninput="handleAuditorInput(this.value)" style="font-size: 16px;">
+
+            <datalist id="auditors">
                 @foreach($auditors as $aud)
                     <option value="{{ $aud['name'] }}" data-nik="{{ $aud['nik'] }}" data-dept="{{ $aud['dept'] }}">
                         {{ $aud['name'] }}
                     </option>
                 @endforeach
-            </select>
+            </datalist>
 
             <label>NIK Anda</label>
             <input type="text" id="auditor_nik" name="auditor_nik" readonly style="background: #f1f5f9;">
 
             <label>Departemen Anda</label>
             <input type="text" id="auditor_department" name="auditor_department" readonly style="background: #f1f5f9;">
+
+            <!-- Konfirmasi Checkbox -->
+            <div class="confirmation-checkbox">
+                <input type="checkbox" id="confirmation" name="confirmation" required>
+                <label for="confirmation">
+                    Saya menyatakan data di atas benar dan saya bertanggung jawab atas kebenaran informasi yang saya berikan.
+                </label>
+            </div>
 
             <div class="note">
                 ℹ️ Jika ada anggota tim tambahan (misal: pengamat atau ahli), tambahkan di bawah.
@@ -194,19 +221,30 @@
 </div>
 
 <script>
+    // Simpan data auditor dalam objek untuk pencarian cepat
+    const auditorData = {
+        @foreach($auditors as $aud)
+            "{{ addslashes($aud['name']) }}": {
+                nik: "{{ $aud['nik'] }}",
+                dept: "{{ $aud['dept'] }}"
+            },
+        @endforeach
+    };
+
     let teamIndex = 0;
 
-    function selectAuditor(select) {
-        const opt = select.options[select.selectedIndex];
-        const nik = opt.getAttribute('data-nik');
-        const dept = opt.getAttribute('data-dept');
+    function handleAuditorInput(name) {
+        const data = auditorData[name];
+        const detailsDiv = document.getElementById('audit-details');
         
-        if (select.value) {
-            document.getElementById('auditor_nik').value = nik;
-            document.getElementById('auditor_department').value = dept;
-            document.getElementById('audit-details').classList.remove('hidden');
+        if (data) {
+            document.getElementById('auditor_nik').value = data.nik;
+            document.getElementById('auditor_department').value = data.dept;
+            detailsDiv.classList.remove('hidden');
         } else {
-            document.getElementById('audit-details').classList.add('hidden');
+            document.getElementById('auditor_nik').value = '';
+            document.getElementById('auditor_department').value = '';
+            detailsDiv.classList.add('hidden');
         }
     }
 
@@ -234,6 +272,15 @@
         container.insertAdjacentHTML('beforeend', html);
         teamIndex++;
     }
+
+    // Validasi tambahan: pastikan input auditor valid
+    document.getElementById('auditForm').addEventListener('submit', function(e) {
+        const auditorName = document.getElementById('auditor_name_input').value;
+        if (!auditorData[auditorName]) {
+            e.preventDefault();
+            alert('Nama auditor tidak valid. Harap pilih dari daftar yang tersedia.');
+        }
+    });
 </script>
 
 </body>
