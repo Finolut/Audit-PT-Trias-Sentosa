@@ -297,15 +297,33 @@ body {
 /* --- RESPONSIVE MOBILE --- */
 @media (max-width: 768px) {
     .item-row {
-        flex-direction: column; /* Stack vertikal di HP */
+        flex-direction: column; /* Pertanyaan di atas, tombol di bawah */
+        gap: 12px;
     }
+
     .item-action-col {
         width: 100%;
-        margin-top: 12px;
-        flex-direction: row; /* Tombol sejajar di HP */
+        margin-top: 8px;
+        /* Flex row agar tombol YES/NO dan Respon Lain sejajar (jika ada) */
+        flex-direction: row; 
+        gap: 10px;
     }
-    .button-group { width: 70%; }
-    .btn-more { width: 30%; }
+
+    /* Gunakan flex: 1 agar .button-group mengisi sisa ruang.
+       Jika tombol "Respon Lain" hilang, dia otomatis jadi 100%.
+       Jika ada, dia berbagi ruang.
+    */
+    .button-group { 
+        flex: 1; 
+        width: auto; /* Reset width statis */
+    }
+
+    .btn-more { 
+        width: auto; /* Reset width statis */
+        flex: 0 0 auto; /* Jangan menyusut/melebar berlebihan */
+        padding: 0 16px;
+    }
     
+    /* Meta info di header */
     .meta-info { flex-direction: column; gap: 5px; align-items: center; }
 }

@@ -54,9 +54,12 @@
                                             <button type="button" class="answer-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">Tidak</button>
                                             <button type="button" class="answer-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">N/A</button>
                                         </div>
-                                        <button type="button" class="btn-more" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
-                                            Respon Lain...
-                                        </button>
+                                    {{-- LOGIKA BARU: Hanya muncul jika tim audit > 1 orang --}}
+        @if(count($responders) > 1)
+            <button type="button" class="btn-more" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
+                Respon Lain...
+            </button>
+        @endif
                                         <div id="hidden_inputs_{{ $item->id }}"></div>
                                     </div>
                                 </div>
