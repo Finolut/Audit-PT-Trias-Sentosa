@@ -33,7 +33,7 @@ body {
 }
 
 .back-container {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .back-link {
@@ -42,7 +42,7 @@ body {
     color: var(--primary);
     text-decoration: none;
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1rem;
     transition: var(--transition);
 }
 
@@ -53,7 +53,7 @@ body {
 
 .back-link i {
     margin-right: 8px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .header-content {
@@ -61,7 +61,7 @@ body {
 }
 
 .main-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 800;
     color: var(--gray-900);
     margin: 0.5rem 0;
@@ -73,7 +73,7 @@ body {
     justify-content: center;
     gap: 1.5rem;
     margin-top: 0.75rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--gray-600);
 }
 
@@ -106,7 +106,7 @@ body {
 }
 
 .sub-clause-title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--gray-900);
     margin: 0;
@@ -115,10 +115,10 @@ body {
 .maturity-badge {
     background: #dbeafe;
     color: var(--primary);
-    padding: 0.5rem 1rem;
+    padding: 0.35rem 0.85rem;
     border-radius: 50px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 /* Level Section */
@@ -130,10 +130,10 @@ body {
     display: inline-block;
     background: #f0fdf4;
     color: var(--success);
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 50px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.85rem;
     margin-bottom: 1rem;
 }
 
@@ -141,8 +141,8 @@ body {
 .item-card {
     background: #f9fafb;
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
     transition: var(--transition);
     border: 1px solid var(--gray-200);
 }
@@ -153,12 +153,12 @@ body {
 }
 
 .item-content {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .item-text {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
     line-height: 1.6;
     color: var(--gray-800);
 }
@@ -167,17 +167,17 @@ body {
 .button-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 }
 
 .answer-btn {
     flex: 1;
-    min-width: 140px;
-    padding: 1rem 0.75rem;
+    min-width: 120px;
+    padding: 0.85rem 0.75rem;
     border: 2px solid var(--gray-300);
     border-radius: var(--radius-md);
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     background: white;
@@ -189,8 +189,8 @@ body {
 }
 
 .answer-btn i {
-    margin-right: 8px;
-    font-size: 1.3rem;
+    margin-right: 6px;
+    font-size: 1.1rem;
 }
 
 .answer-btn:hover:not(.active-yes):not(.active-no):not(.active-na) {
@@ -224,9 +224,9 @@ body {
     background: white;
     border: 2px dashed var(--primary);
     color: var(--primary);
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: var(--radius-md);
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -236,8 +236,8 @@ body {
 }
 
 .btn-more i {
-    margin-right: 10px;
-    font-size: 1.3rem;
+    margin-right: 8px;
+    font-size: 1.1rem;
 }
 
 .btn-more:hover {
@@ -247,16 +247,16 @@ body {
 
 /* Notes Section */
 .notes-section {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
     border-top: 1px dashed var(--gray-300);
 }
 
 .notes-label {
     display: block;
     font-weight: 600;
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
     color: var(--gray-800);
 }
 
@@ -264,11 +264,11 @@ body {
     width: 100%;
     border: 2px solid var(--gray-300);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    font-size: 1.2rem;
+    padding: 1.25rem;
+    font-size: 1rem;
     line-height: 1.6;
     resize: vertical;
-    min-height: 150px;
+    min-height: 120px;
     transition: var(--transition);
 }
 
@@ -285,7 +285,7 @@ body {
     left: 0;
     right: 0;
     background: white;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1000;
     border-top: 1px solid var(--gray-200);
@@ -298,10 +298,10 @@ body {
     display: block;
     background: var(--primary);
     color: white;
-    padding: 1.5rem;
+    padding: 1.25rem;
     border: none;
     border-radius: var(--radius-xl);
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
@@ -312,8 +312,8 @@ body {
 }
 
 .submit-button i {
-    margin-right: 12px;
-    font-size: 1.5rem;
+    margin-right: 10px;
+    font-size: 1.4rem;
 }
 
 .submit-button:hover {
@@ -369,18 +369,18 @@ body {
 .modal-header {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
-    padding: 1.5rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     position: relative;
 }
 
 .modal-title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
 }
 
 .modal-item-text {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     opacity: 0.9;
     line-height: 1.5;
 }
@@ -391,11 +391,11 @@ body {
     right: 1rem;
     background: rgba(255, 255, 255, 0.2);
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     color: white;
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -418,7 +418,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 0;
+    padding: 1.25rem 0;
     border-bottom: 1px solid var(--gray-200);
 }
 
@@ -428,37 +428,37 @@ body {
 
 .responder-name {
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 0.25rem;
     color: var(--gray-900);
 }
 
 .responder-role {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--gray-600);
 }
 
 .responder-author {
     background: #dbeafe;
     color: var(--primary);
-    font-size: 0.9rem;
-    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.5rem;
     border-radius: 4px;
     margin-left: 8px;
 }
 
 .responder-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .responder-btn {
-    width: 100px;
-    padding: 1rem 0;
+    width: 80px;
+    padding: 0.75rem 0;
     border: none;
     border-radius: var(--radius-md);
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
@@ -468,8 +468,8 @@ body {
 }
 
 .responder-btn i {
-    font-size: 1.4rem;
-    margin-bottom: 6px;
+    font-size: 1.2rem;
+    margin-bottom: 4px;
 }
 
 .responder-btn.yes {
@@ -488,7 +488,7 @@ body {
 }
 
 .modal-footer {
-    padding: 1.5rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     border-top: 1px solid var(--gray-200);
     background: var(--gray-50);
 }
@@ -497,10 +497,10 @@ body {
     width: 100%;
     background: var(--primary);
     color: white;
-    padding: 1.25rem;
+    padding: 1rem;
     border: none;
     border-radius: var(--radius-lg);
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -510,8 +510,8 @@ body {
 }
 
 .modal-close-btn i {
-    margin-right: 12px;
-    font-size: 1.4rem;
+    margin-right: 10px;
+    font-size: 1.3rem;
 }
 
 .modal-close-btn:hover {
@@ -524,19 +524,18 @@ body {
     background: #fffbeb;
     border: 1px solid #fbbf24;
     border-radius: var(--radius-md);
-    padding: 1.5rem;
-    margin-top: 1.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
 }
 
 .score-info-box .warning-icon {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: var(--warning);
-    margin-right: 12px;
+    margin-right: 10px;
 }
 
 .score-info-box .auditor-answer {
     font-weight: 600;
-    font-size: 1.2rem;
     color: var(--gray-900);
 }
 
@@ -545,45 +544,43 @@ body {
 .score-info-box .auditor-answer.na { color: var(--gray-600); }
 
 .score-info-box .responder-diff {
-    margin-top: 1rem;
-    padding-top: 1rem;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
     border-top: 1px dashed var(--gray-300);
-    font-size: 1.1rem;
 }
 
-/* Responsive Design for Mobile */
+/* Responsive Design */
 @media (max-width: 768px) {
     .main-title {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
     }
     
     .sub-clause-title {
-        font-size: 1.4rem;
+        font-size: 1.25rem;
     }
     
     .item-text {
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
     
     .answer-btn {
-        min-width: 120px;
-        padding: 1rem 0.5rem;
-        font-size: 1.1rem;
+        min-width: 90px;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
     }
     
     .btn-more {
-        font-size: 1.1rem;
-        padding: 1rem;
+        font-size: 0.95rem;
     }
     
     .notes-textarea {
-        font-size: 1.1rem;
-        padding: 1.25rem;
+        font-size: 0.95rem;
+        padding: 1rem;
     }
     
     .submit-button {
-        font-size: 1.3rem;
-        padding: 1.25rem;
+        font-size: 1.1rem;
+        padding: 1rem;
     }
     
     .modal-content {
@@ -593,38 +590,38 @@ body {
     
     .modal-header,
     .modal-footer {
-        padding: 1.25rem;
+        padding: 1rem;
     }
     
     .modal-title {
-        font-size: 1.4rem;
+        font-size: 1.25rem;
     }
     
     .responder-name {
-        font-size: 1.1rem;
-    }
-    
-    .responder-btn {
-        width: 90px;
-        padding: 0.9rem 0;
         font-size: 1rem;
     }
     
+    .responder-btn {
+        width: 70px;
+        padding: 0.65rem 0;
+        font-size: 0.9rem;
+    }
+    
     .responder-btn i {
-        font-size: 1.3rem;
+        font-size: 1.1rem;
     }
 }
 
 @media (max-width: 480px) {
     .header-meta {
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
         text-align: center;
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
     
     .main-title {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
     }
     
     .sub-clause-card {
@@ -634,7 +631,7 @@ body {
     .clause-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
+        gap: 0.75rem;
     }
     
     .maturity-badge {
@@ -642,43 +639,43 @@ body {
     }
     
     .item-card {
-        padding: 1.25rem;
+        padding: 1rem;
     }
     
     .answer-btn {
-        min-width: 100px;
-        padding: 0.9rem 0.4rem;
-        font-size: 1rem;
+        min-width: 80px;
+        padding: 0.65rem 0.4rem;
+        font-size: 0.85rem;
     }
     
     .answer-btn i {
-        margin-right: 6px;
-        font-size: 1.2rem;
+        margin-right: 4px;
+        font-size: 1rem;
     }
     
     .btn-more {
+        font-size: 0.9rem;
+        padding: 0.65rem;
+    }
+    
+    .notes-label {
+        font-size: 1rem;
+    }
+    
+    .submit-button {
         font-size: 1rem;
         padding: 0.9rem;
     }
     
-    .notes-label {
-        font-size: 1.2rem;
-    }
-    
-    .submit-button {
-        font-size: 1.2rem;
-        padding: 1.1rem;
-    }
-    
     .modal-close-btn {
-        font-size: 1.2rem;
-        padding: 1rem;
+        font-size: 1rem;
+        padding: 0.85rem;
     }
     
     .responder-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1.5rem;
+        gap: 1rem;
     }
     
     .responder-buttons {
