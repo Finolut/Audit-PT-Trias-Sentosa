@@ -99,7 +99,7 @@
 
                     <div class="notes-section">
                         <label class="notes-label">Catatan Temuan ({{ $subCode }})</label>
-                        <textarea name="audit_notes[{{ $subCode }}]" rows="3" class="notes-textarea">{{ $existingNotes[$subCode] ?? '' }}</textarea>
+                        <textarea name="audit_notes[{{ $subCode }}]" rows="4" class="notes-textarea">{{ $existingNotes[$subCode] ?? '' }}</textarea>
                     </div>
                 </div>
             @endforeach
