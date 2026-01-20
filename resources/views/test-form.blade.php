@@ -199,11 +199,7 @@
                 <input type="date" name="audit_date" value="{{ date('Y-m-d') }}" required>
             </div>
 
-            <div class="note" style="text-align: center; margin-top: 20px;">
-                ℹ️ Catatan akhir dan kesimpulan akan diisi setelah pemeriksaan selesai.
-            </div>
-
-            <button type="submit" class="btn-primary">✅ Mulai Pemeriksaan & Simpan</button>
+            <button type="submit" class="btn-primary">✅ Mulai Pemeriksaan</button>
         </div>
     </form>
 </div>

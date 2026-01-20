@@ -1,3 +1,4 @@
+// audit-script.js
 /**
  * Variabel Global & State
  */
@@ -90,7 +91,7 @@ function syncMainButtons(itemId, val) {
     if(!mainGroup) return;
     mainGroup.querySelectorAll('.answer-btn').forEach(b => {
         b.classList.remove('active-yes', 'active-no', 'active-na');
-        if(b.innerText.trim() === val) {
+        if(b.innerText.trim().includes(val)) {
             if(val === 'YES') b.classList.add('active-yes');
             if(val === 'NO') b.classList.add('active-no');
             if(val === 'N/A') b.classList.add('active-na');
@@ -122,28 +123,30 @@ function updateHiddenInputs(itemId) {
  * Membuat baris responder di dalam modal secara dinamis
  */
 function createResponderRow(name, role, itemId, isAuditor = false) {
-    const div = document.createElement('div');
-    div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;';
+    const responderDiv = document.createElement('div');
+    responderDiv.className = 'responder-item';
     
     const val = sessionAnswers[`${itemId}_${name}`] || '';
     
-    div.innerHTML = `
-        <div>
-            <div style="font-weight:600; font-size:0.9rem; color: #1e293b;">
-                ${name} ${isAuditor ? '<span style="color:#2563eb; font-size:0.7rem; background:#eff6ff; padding:2px 6px; border-radius:4px; margin-left:5px;">AUTHOR</span>' : ''}
+    responderDiv.innerHTML = `
+        <div class="responder-info">
+            <div class="responder-name">
+                ${name} ${isAuditor ? '<span class="responder-author">AUTHOR</span>' : ''}
             </div>
-            <div style="font-size:0.75rem; color:#64748b;">${role}</div>
+            <div class="responder-role">${role}</div>
         </div>
-        <div class="button-group" style="background:#f1f5f9; padding:4px; border-radius:8px; display:flex; gap:4px;">
-            <button type="button" class="answer-btn ${val === 'YES' ? 'active-yes' : ''}" 
-                style="padding:6px 16px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;"
-                onclick="setVal('${itemId}', '${name}', 'YES', this)">YES</button>
-            <button type="button" class="answer-btn ${val === 'NO' ? 'active-no' : ''}" 
-                style="padding:6px 16px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;"
-                onclick="setVal('${itemId}', '${name}', 'NO', this)">NO</button>
+        <div class="responder-buttons">
+            <button type="button" class="responder-btn yes ${val === 'YES' ? 'active' : ''}" 
+                onclick="setVal('${itemId}', '${name}', 'YES', this)">
+                <i class="fas fa-check"></i> YES
+            </button>
+            <button type="button" class="responder-btn no ${val === 'NO' ? 'active' : ''}" 
+                onclick="setVal('${itemId}', '${name}', 'NO', this)">
+                <i class="fas fa-times"></i> NO
+            </button>
         </div>
     `;
-    return div;
+    return responderDiv;
 }
 
 /**
@@ -162,17 +165,32 @@ function openModal(itemId, itemText) {
                 res.responder_name,
                 res.responder_department || 'Departemen Tidak Diketahui',
                 itemId,
-                isAuditor,
-                res.responder_nik // opsional, jika ingin tampilkan NIK
+                isAuditor
             ));
         });
     }
 
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        document.querySelector('.modal-content').classList.add('active');
+    }, 10);
 }
+
 function closeModal() {
-    document.getElementById('answerModal').style.display = 'none';
+    const modalContent = document.querySelector('.modal-content');
+    modalContent.classList.remove('active');
+    
+    setTimeout(() => {
+        document.getElementById('answerModal').style.display = 'none';
+    }, 300);
 }
+
+// Close modal when clicking outside content
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        closeModal();
+    }
+});
 
 /**
  * Validasi Sebelum Lanjut (Submit)
@@ -181,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('form');
     if (form) {
         form.addEventListener('submit', function(e) {
-            const allItems = document.querySelectorAll('.item-row');
+            const allItems = document.querySelectorAll('.item-card');
             let firstMissingItem = null;
 
             allItems.forEach(item => {
@@ -189,9 +207,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Cek apakah Auditor sudah mengisi jawaban untuk item ini
                 if (!sessionAnswers[`${itemId}_${auditorName}`]) {
                     item.style.backgroundColor = '#fff1f2';
+                    item.style.borderColor = '#fecaca';
                     if (!firstMissingItem) firstMissingItem = item;
                 } else {
-                    item.style.backgroundColor = 'transparent';
+                    item.style.backgroundColor = '#f9fafb';
+                    item.style.borderColor = '';
                 }
             });
 
@@ -199,6 +219,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 alert('Mohon lengkapi semua jawaban Auditor sebelum melanjutkan!');
                 firstMissingItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    firstMissingItem.style.backgroundColor = '';
+                    firstMissingItem.style.borderColor = '';
+                }, 3000);
             }
         });
     }
@@ -226,9 +250,15 @@ function updateInfoBox(itemId) {
 
     // Helper untuk memberi warna pada teks YES/NO/NA
     const getColor = (val) => {
-        if (val === 'YES') return '#16a34a'; // Hijau
-        if (val === 'NO') return '#dc2626';  // Merah
-        return '#4b5563';                    // Abu-abu untuk N/A
+        if (val === 'YES') return 'var(--success)'; // Hijau
+        if (val === 'NO') return 'var(--danger)';  // Merah
+        return 'var(--gray-600)';                   // Abu-abu untuk N/A
+    };
+
+    const getDisplayText = (val) => {
+        if (val === 'YES') return 'Ya';
+        if (val === 'NO') return 'Tidak';
+        return 'N/A';
     };
 
     let diffList = [];
@@ -239,28 +269,30 @@ function updateInfoBox(itemId) {
             hasDifference = true;
             diffList.push({
                 name: user,
-                answer: answers[user]
+                answer: answers[user],
+                display: getDisplayText(answers[user])
             });
         }
     }
 
     if (hasDifference) {
-        // MENAMBAHKAN STYLE WARNA DI SINI
         const responderListText = diffList
-            .map(d => `${d.name}: <strong style="color: ${getColor(d.answer)}">${d.answer}</strong>`)
-            .join(', ');
+            .map(d => `<span class="responder-name">${d.name}</span>: <strong class="answer-value" style="color: ${getColor(d.answer)}">${d.display}</strong>`)
+            .join('<br>');
 
         infoBox.innerHTML = `
-            <div style="margin-top: 8px; padding: 12px; background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; font-size: 0.85rem; color: #c2410c; display: flex; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 1.2rem;">⚠️</span>
-                <div>
-                    <div style="margin-bottom: 4px;">
-                        <strong>${auditorName}:</strong> 
-                        <span style="color: ${getColor(auditorAnswer)}; font-weight: bold;">${auditorAnswer}</span>
-                    </div>
+            <div class="score-info-content">
+                <div class="warning-header">
+                    <i class="fas fa-exclamation-triangle warning-icon"></i>
                     <div>
-                        <span>${responderListText}</span>
+                        <div class="auditor-answer ${auditorAnswer.toLowerCase()}">
+                            <strong>${auditorName}:</strong> ${getDisplayText(auditorAnswer)}
+                        </div>
                     </div>
+                </div>
+                <div class="responder-diff">
+                    <strong>Perbedaan jawaban:</strong><br>
+                    ${responderListText}
                 </div>
             </div>
         `;
