@@ -74,8 +74,6 @@
                 </div>
             @endforeach
 
-            <div style="height: 100px;"></div>
-
             <div class="submit-bar">
                 <div class="submit-wrapper">
                     <button type="submit" class="submit-audit">
