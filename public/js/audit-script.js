@@ -241,22 +241,20 @@ function updateInfoBox(itemId) {
     }
 
     const auditorAnswer = answers[auditorName];
-    
     if (!auditorAnswer) {
         infoBox.style.display = 'none';
-        infoBox.innerHTML = '';
         return;
     }
 
-    // Helper untuk memberi warna pada teks YES/NO/NA
+    // Helper warna & teks
     const getColor = (val) => {
-        if (val === 'YES') return 'var(--success)'; // Hijau
-        if (val === 'NO') return 'var(--danger)';  // Merah
-        return 'var(--gray-600)';                   // Abu-abu untuk N/A
+        if (val === 'YES') return '#16a34a'; // Hijau Sukses
+        if (val === 'NO') return '#dc2626';  // Merah Bahaya
+        return '#64748b';                    // Abu-abu N/A
     };
 
     const getDisplayText = (val) => {
-        if (val === 'YES') return 'Ya';
+        if (val === 'YES') return 'Iya';
         if (val === 'NO') return 'Tidak';
         return 'N/A';
     };
@@ -276,26 +274,32 @@ function updateInfoBox(itemId) {
     }
 
     if (hasDifference) {
-        const responderListText = diffList
-            .map(d => `<span class="responder-name">${d.name}</span>: <strong class="answer-value" style="color: ${getColor(d.answer)}">${d.display}</strong>`)
-            .join('<br>');
+        const responderListHtml = diffList
+            .map(d => `
+                <div class="diff-item">
+                    <span class="diff-user">${d.name}</span>
+                    <span class="diff-val" style="color: ${getColor(d.answer)}">${d.display}</span>
+                </div>
+            `).join('');
 
         infoBox.innerHTML = `
-            <div class="score-info-content">
-                        <div class="auditor-answer ${auditorAnswer.toLowerCase()}">
-                            <strong>${auditorName}:</strong> ${getDisplayText(auditorAnswer)}
-                        </div>
-                    </div>
+            <div class="info-box-wrapper">
+                <div class="info-box-header">
+                    <i class="fas fa-info-circle"></i> Perbedaan Jawaban
                 </div>
-                <div class="responder-diff">
-                    ${responderListText}
+                <div class="info-box-body">
+                    <div class="diff-item auditor-row">
+                        <span class="diff-user"><strong>${auditorName} (Anda)</strong></span>
+                        <span class="diff-val" style="color: ${getColor(auditorAnswer)}"><strong>${getDisplayText(auditorAnswer)}</strong></span>
+                    </div>
+                    <div class="diff-divider"></div>
+                    ${responderListHtml}
                 </div>
             </div>
         `;
         infoBox.style.display = 'block';
     } else {
         infoBox.style.display = 'none';
-        infoBox.innerHTML = '';
     }
 }
 
