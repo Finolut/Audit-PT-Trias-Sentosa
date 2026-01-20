@@ -282,16 +282,12 @@ function updateInfoBox(itemId) {
 
         infoBox.innerHTML = `
             <div class="score-info-content">
-                <div class="warning-header">
-                    <i class="fas fa-exclamation-triangle warning-icon"></i>
-                    <div>
                         <div class="auditor-answer ${auditorAnswer.toLowerCase()}">
                             <strong>${auditorName}:</strong> ${getDisplayText(auditorAnswer)}
                         </div>
                     </div>
                 </div>
                 <div class="responder-diff">
-                    <strong>Perbedaan jawaban:</strong><br>
                     ${responderListText}
                 </div>
             </div>
