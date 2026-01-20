@@ -284,9 +284,6 @@ function updateInfoBox(itemId) {
 
         infoBox.innerHTML = `
             <div class="info-box-wrapper">
-                <div class="info-box-header">
-                    <i class="fas fa-info-circle"></i> Perbedaan Jawaban
-                </div>
                 <div class="info-box-body">
                     <div class="diff-item auditor-row">
                         <span class="diff-user"><strong>${auditorName} (Anda)</strong></span>
