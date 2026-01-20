@@ -302,3 +302,65 @@ function updateInfoBox(itemId) {
         infoBox.innerHTML = '';
     }
 }
+
+/**
+ * Membuat baris responder di dalam modal secara dinamis
+ */
+function createResponderRow(name, role, itemId, isAuditor = false) {
+    const responderDiv = document.createElement('div');
+    responderDiv.className = 'responder-item';
+    
+    // Ambil jawaban spesifik user ini untuk item ini dari state
+    const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
+    
+    responderDiv.innerHTML = `
+        <div class="responder-info">
+            <div class="responder-name">
+                ${name} ${isAuditor ? '<span class="responder-author-tag">AUTHOR</span>' : ''}
+            </div>
+            <div class="responder-role">${role}</div>
+        </div>
+        <div class="responder-buttons">
+            <button type="button" 
+                class="modal-resp-btn btn-yes ${currentVal === 'YES' ? 'active' : ''}" 
+                onclick="setValFromModal('${itemId}', '${name}', 'YES', this)">
+                <i class="fas fa-check"></i>
+            </button>
+            
+            <button type="button" 
+                class="modal-resp-btn btn-no ${currentVal === 'NO' ? 'active' : ''}" 
+                onclick="setValFromModal('${itemId}', '${name}', 'NO', this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    return responderDiv;
+}
+
+/**
+ * Fungsi pembantu khusus klik dari dalam modal agar UI modal langsung update
+ */
+function setValFromModal(itemId, userName, value, btnElement) {
+    // Jalankan fungsi setVal utama untuk simpan data
+    // Kita panggil setVal tanpa parameter btnElement auditor agar tidak bentrok
+    setVal(itemId, userName, value, null);
+
+    // Update UI tombol di dalam modal secara instan
+    const parent = btnElement.parentElement;
+    parent.querySelectorAll('.modal-resp-btn').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+    
+    // Jika yang diubah di modal adalah akun Auditor, sinkronkan tombol di halaman utama
+    if (userName === auditorName) {
+        const mainGroup = document.getElementById(`btn_group_${itemId}`);
+        if (mainGroup) {
+            const mainButtons = mainGroup.querySelectorAll('.answer-btn');
+            mainButtons.forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+            
+            // Cari tombol yang teksnya sesuai (Iya/Tidak/N/A)
+            if (value === 'YES') mainButtons[0].classList.add('active-yes');
+            if (value === 'NO') mainButtons[1].classList.add('active-no');
+            if (value === 'N/A') mainButtons[2].classList.add('active-na');
+        }
+    }
+}
