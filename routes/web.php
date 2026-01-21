@@ -173,3 +173,7 @@ Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy']
 
 Route::post('/audit/{id}/final-submit', [AuditController::class, 'finalSubmit'])
     ->name('audit.final_submit');
+
+    // HANYA ROUTE PDF
+Route::get('admin/audit/{auditId}/export-pdf', [DashboardController::class, 'exportToPdf'])
+    ->name('admin.audit.export.pdf');

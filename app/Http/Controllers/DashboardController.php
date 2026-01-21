@@ -9,6 +9,7 @@ use App\Models\Item;
 use App\Models\Clause;
 use Illuminate\Support\Facades\DB;
 use App\Models\AuditQuestion;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
 {
@@ -292,5 +293,78 @@ public function questionLog()
 
     return view('admin.question_log', compact('departments', 'allQuestions'));
 }
+
+public function exportToPdf($auditId)
+    {
+        $audit = Audit::with('department')->findOrFail($auditId);
+        
+        // Ambil data klausul & jawaban
+        $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+            ->leftJoin('answer_finals', function($join) use ($auditId) {
+                $join->on('items.id', '=', 'answer_finals.item_id')
+                     ->where('answer_finals.audit_id', '=', $auditId);
+            })
+            ->select(
+                'clauses.clause_code',
+                'items.item_text',
+                'answer_finals.final_yes',
+                'answer_finals.final_no',
+                'answer_finals.yes_count',
+                'answer_finals.no_count'
+            )
+            ->get();
+
+        // Hitung statistik
+        $mainStats = [];
+        $detailedItems = [];
+        foreach($this->mainClauses as $main => $subs) {
+            $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+        }
+
+        foreach ($allItems as $item) {
+            $status = 'Unanswered';
+            $mainClause = 'Unknown';
+
+            if (is_null($item->final_yes)) {
+                $status = 'Unanswered';
+            } elseif ($item->yes_count == 0 && $item->no_count == 0) {
+                $status = 'N/A';
+            } elseif ($item->final_yes > $item->final_no) {
+                $status = 'Yes';
+            } elseif ($item->final_no > $item->final_yes) {
+                $status = 'No';
+            } else {
+                $status = 'Partial';
+            }
+
+            foreach($this->mainClauses as $mainKey => $subArray) {
+                if (in_array($item->clause_code, $subArray)) {
+                    $mainClause = $mainKey;
+                    $mainStats[$mainKey][$status]++;
+                    break;
+                }
+            }
+
+            $detailedItems[] = [
+                'main_clause' => $mainClause,
+                'sub_clause' => $item->clause_code,
+                'item_text' => $item->item_text,
+                'status' => $status,
+                'yes_count' => $item->yes_count,
+                'no_count' => $item->no_count,
+            ];
+        }
+
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.exports.audit_overview_pdf', [
+            'audit' => $audit,
+            'mainClauses' => $this->mainClauses,
+            'titles' => $this->mainClauseTitles,
+            'mainStats' => $mainStats,
+            'detailedItems' => $detailedItems
+        ]);
+
+        return $pdf->download("audit_{$audit->id}_".now()->format('Ymd').".pdf");
+    }
 }
 
