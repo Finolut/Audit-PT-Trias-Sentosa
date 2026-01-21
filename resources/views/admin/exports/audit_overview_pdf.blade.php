@@ -144,8 +144,9 @@
     <table class="header-table">
         <tr>
             <td>
-                <img src="{{ asset('images/logo.webp') }}" alt="Logo PT TRIAS SENTOSA Tbk" class="logo-img">
+                <img src="{{ asset('images/ts.jpg') }}" alt="Logo PT TRIAS SENTOSA Tbk" class="logo-img">
             </td>
+            <div class="company-name">PT TRIAS SENTOSA Tbk</div>
             <td class="cert-container">
                 <img src="https://via.placeholder.com/80x40?text=ISO+9001" class="cert-logo">
                 <img src="https://via.placeholder.com/80x40?text=ISO+14001" class="cert-logo">
