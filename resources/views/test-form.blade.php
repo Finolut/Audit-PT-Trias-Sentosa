@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="form.css">
+    <link rel="stylesheet" href="{{ asset('css/form.css') }}">
 </head>
 <body>
 
@@ -101,7 +101,7 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
 <!-- Custom JS -->
-<script src="form.js"></script>
+<script src="{{ asset('js/form.js') }}"></script>
 
 </body>
 </html>
