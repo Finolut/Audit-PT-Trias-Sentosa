@@ -164,40 +164,11 @@
     <table class="header-table">
         <tr>
             <td style="width: 60px;">
-                <img src="{{ public_path('storage/images/'.$ts) }}">
+                <img src="{{ public_path('storage/images/ts.jpg') }}">
             </td>
             <td>
                 <div class="company-name">PT TRIAS SENTOSA Tbk</div>
                 <div class="tagline">FLEXIBLE PACKAGING FILM MANUFACTURER</div>
-            </td>
-        </tr>
-    </table>
-
-    <table class="address-table">
-        <tr>
-            <td>
-                <span class="address-title">HEAD OFFICE / WARU PLANT :</span>
-                Jl. Raya Waru No.1 B, Waru, Sidoarjo 61256, Indonesia<br>
-                <span class="contact-info">Ph: +62-31-8533125, Fax: +62-31-8534116</span>
-                
-                <div style="margin-top: 10px;">
-                    <span class="address-title">KRIAN PLANT :</span>
-                    Desa Keboharan, Km 26, Krian, Sidoarjo 61262, Indonesia<br>
-                    <span class="contact-info">Ph: +62-31-8975825, Fax: +62-31-8972998</span>
-                </div>
-            </td>
-            <td>
-                <span class="address-title">JAKARTA OFFICE :</span>
-                Altira Business Park, Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor<br>
-                Sunter, Jakarta Utara 14350, Indonesia<br>
-                <span class="contact-info">Ph: +62-21-29615575, Fax: +62-21-29615565</span>
-                
-                <div style="margin-top: 10px;">
-                    <span class="address-title">SURABAYA OFFICE :</span>
-                    Spazio Tower 15th Floor, Jl. Mayjen Yono Suwoyo,<br>
-                    Surabaya 60225, Indonesia<br>
-                    <span class="contact-info">Ph: +62-31-99144888, Fax: +62-31-99148510</span>
-                </div>
             </td>
         </tr>
     </table>
