@@ -1,177 +1,192 @@
 :root {
-    --primary: #2563eb;       /* Biru standar */
-    --bg: #f8f9fa;            /* Abu sangat muda */
-    --surface: #ffffff;       /* Putih */
-    --text: #1f2937;          /* Hitam lembut */
-    --border: #e5e7eb;        /* Abu batas */
-    --input-bg: #fff;
-    --radius: 12px;
+    --primary: #2563eb;
+    --bg-color: #f3f4f6;
+    --text-dark: #1f2937;
+    --border-color: #e5e7eb;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-body {
+/* Reset Dasar */
+body.form-body {
+    background: var(--bg-color);
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
     margin: 0;
-    padding-bottom: 100px; /* Ruang untuk tombol bawah */
+    padding: 0;
+    color: var(--text-dark);
+    padding-bottom: 80px; /* Space untuk tombol sticky */
 }
 
-.mobile-container {
-    max-width: 600px;
+.form-container {
+    max-width: 600px; /* Membatasi lebar agar enak dilihat di PC juga */
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px;
 }
 
 /* Header Simple */
-.header {
-    margin-bottom: 24px;
-}
-.header h3 { font-size: 1.5rem; margin: 0 0 5px 0; font-weight: 700; }
-.header p { color: #6b7280; margin: 0; font-size: 0.95rem; }
-
-/* Section Styling */
-.section {
-    background: var(--surface);
-    padding: 20px;
-    border-radius: var(--radius);
+.form-header {
+    text-align: center;
     margin-bottom: 20px;
-    border: 1px solid var(--border);
+    padding-top: 10px;
+}
+.form-title { font-size: 1.5rem; margin: 0; font-weight: 700; }
+.form-subtitle { color: #6b7280; font-size: 0.9rem; margin-top: 5px; }
+
+/* Card Style yang Lebih Ringan */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
 }
 
-.section-title {
-    margin: 0 0 16px 0;
-    font-size: 1.1rem;
-    color: var(--primary);
+.card-header {
+    background: #f9fafb;
+    padding: 12px 16px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
 }
 
-/* Input Styles */
-.input-group { margin-bottom: 16px; }
+.step-badge {
+    background: var(--primary);
+    color: white;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+}
 
-label {
+.card-body { padding: 16px; }
+
+/* Input Styling - Mobile Friendly (min 44px height) */
+.form-group { margin-bottom: 16px; }
+.form-label {
     display: block;
-    font-size: 0.9rem;
-    font-weight: 500;
     margin-bottom: 6px;
-    color: #374151;
+    font-weight: 500;
+    font-size: 0.95rem;
 }
+.sub-label { font-size: 0.8rem; color: #6b7280; margin-bottom: 2px; }
 
-input[type="text"],
-input[type="date"],
-textarea,
-select {
+.form-input, .form-textarea, .form-select-native {
     width: 100%;
-    padding: 12px 14px;
-    font-size: 16px; /* Mencegah zoom otomatis di iOS */
+    padding: 12px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
-    background: var(--input-bg);
+    font-size: 16px; /* Mencegah zoom di iOS */
+    box-sizing: border-box;
     transition: border-color 0.2s;
-    appearance: none;
 }
 
-input:focus, textarea:focus {
+.form-input:focus, .form-textarea:focus {
     border-color: var(--primary);
     outline: none;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-textarea { min-height: 80px; resize: none; }
+.form-textarea { min-height: 80px; resize: vertical; }
 
 /* Readonly fields styling */
-.readonly-input {
-    background-color: #f3f4f6 !important;
-    border-color: #f3f4f6 !important;
+.form-input.readonly {
+    background-color: #f3f4f6;
     color: #6b7280;
+    border-color: #e5e7eb;
 }
 
-.details-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-/* Checkbox */
-.checkbox-wrapper {
+/* Layout Baris untuk Mobile */
+.form-row-mobile {
     display: flex;
-    align-items: center;
     gap: 10px;
-    padding: 12px 0;
-    border-top: 1px dashed var(--border);
-    margin-top: 10px;
 }
-input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
+.form-row-mobile .half { flex: 1; }
 
-/* TomSelect Fixes for Mobile */
+/* TomSelect Custom Fixes */
 .ts-control {
-    padding: 12px 14px !important;
     border-radius: 8px !important;
-    border: 1px solid #d1d5db !important;
+    padding: 12px !important;
+    border-color: #d1d5db !important;
     font-size: 16px !important;
 }
-.ts-dropdown { border-radius: 8px !important; margin-top: 5px !important; }
+.ts-dropdown { margin-top: 5px !important; border-radius: 8px !important; }
 
 /* Buttons */
-.btn-outline {
+.btn-dashed {
     width: 100%;
     padding: 12px;
     border: 2px dashed var(--primary);
-    background: transparent;
-    color: var(--primary);
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.bottom-action {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     background: white;
-    padding: 15px 20px;
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
-    z-index: 100;
+    color: var(--primary);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 5px;
 }
 
-.btn-submit {
+.btn-primary-block {
     width: 100%;
-    padding: 14px;
     background: var(--primary);
     color: white;
     border: none;
+    padding: 14px;
     border-radius: 10px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
-.btn-submit:active { transform: scale(0.98); }
 
-/* Dynamic Team Member Card */
-.team-member-card {
-    background: #f0f7ff;
+/* Sticky Bottom Button */
+.sticky-bottom {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
     padding: 15px;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+/* Checkbox Custom */
+.confirmation-box {
+    margin-top: 15px;
+    padding: 12px;
+    background: #eff6ff;
+    border-radius: 8px;
+    border: 1px solid #dbeafe;
+}
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.checkbox-container input { width: 18px; height: 18px; }
+.checkbox-container .text { font-size: 0.9rem; line-height: 1.3; }
+
+/* Utilities & Animations */
+.hidden-section { display: none; }
+.error-border { border-color: #ef4444 !important; }
+
+/* Team Member Card Dynamic */
+.team-member-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
     border-radius: 8px;
     margin-top: 10px;
     position: relative;
-    border: 1px solid #bfdbfe;
 }
-.remove-btn {
+.remove-team-btn {
     position: absolute;
     top: 5px; right: 5px;
     background: #fee2e2;
-    color: #ef4444;
+    color: #dc2626;
     border: none;
-    width: 30px; height: 30px;
+    width: 28px; height: 28px;
     border-radius: 50%;
-    font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
 }
-
-.hidden { display: none; }
