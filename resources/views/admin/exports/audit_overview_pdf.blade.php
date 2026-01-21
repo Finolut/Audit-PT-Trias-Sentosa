@@ -164,7 +164,7 @@
     <table class="header-table">
         <tr>
             <td style="width: 60px;">
-                <img src="{{ public_path('storage/images/ts.jpg') }}">
+                <img src="{{ public_path('storage/images/'.$ts) }}">
             </td>
             <td>
                 <div class="company-name">PT TRIAS SENTOSA Tbk</div>
