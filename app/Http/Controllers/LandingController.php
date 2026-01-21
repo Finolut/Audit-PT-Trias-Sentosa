@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Department;
 
-class DashboardController extends Controller
+class LandingController extends Controller
 {
 public function landing()
 {
