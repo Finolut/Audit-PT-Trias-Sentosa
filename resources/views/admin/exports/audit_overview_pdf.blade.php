@@ -238,9 +238,7 @@
 <td style="text-align: center;">
     <span class="maturity-text">
         Level {{ $item['maturity_level'] }} 
-        @if(isset($item['maturity_description']))
-            ({{ $item['maturity_description'] }})
-        @endif
+        ({{ $item['maturity_description'] }})
     </span>
 </td>
                 <td style="text-align: center;">

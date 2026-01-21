@@ -334,19 +334,13 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
         $join->on('items.id', '=', 'answer_finals.item_id')
              ->where('answer_finals.audit_id', '=', $auditId);
     })
-    ->leftJoin('maturity_levels', function($join) {
-        $join->on('answer_finals.yes_count', '>=', 'maturity_levels.level_number')
-             ->whereRaw('answer_finals.no_count = 0'); // Hanya jika tidak ada NO
-    })
     ->select(
         'clauses.clause_code',
         'items.item_text',
         'answer_finals.final_yes',
         'answer_finals.final_no',
         'answer_finals.yes_count',
-        'answer_finals.no_count',
-        'maturity_levels.description as maturity_description', // Ambil deskripsi
-        'maturity_levels.level_number as maturity_level'     // Ambil level number
+        'answer_finals.no_count'
     )
     ->get();
 
@@ -356,6 +350,15 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
     foreach($this->mainClauses as $main => $subs) {
         $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
     }
+
+// Buat mapping level number → description
+$maturityMap = [
+    1 => 'Initial awareness',
+    2 => 'Understanding',
+    3 => 'Defined',
+    4 => 'Implemented',
+    5 => 'Optimized',
+];
 
 foreach ($allItems as $item) {
     $status = 'unanswered';
@@ -381,16 +384,24 @@ foreach ($allItems as $item) {
         }
     }
 
-    // 🔍 LOGIKA MATURITY LEVEL
-    $maturityLevelNumber = 1; // Default Basic
-    $maturityDescription = 'Basic'; // Default description
+    // 🔍 LOGIKA MATURITY LEVEL — BERDASARKAN YES COUNT
+    $maturityLevelNumber = 1; // Default: Basic / Initial awareness
+    $maturityDescription = $maturityMap[1]; // Default description
 
     if ($status == 'yes') {
-        // Ambil dari join maturity_levels — jika tidak ada, pakai default
-        if (!empty($item->maturity_level)) {
-            $maturityLevelNumber = $item->maturity_level;
-            $maturityDescription = $item->maturity_description ?? 'Basic';
+        // Tentukan level berdasarkan jumlah YES
+        if ($item->yes_count >= 5) {
+            $maturityLevelNumber = 5;
+        } elseif ($item->yes_count >= 4) {
+            $maturityLevelNumber = 4;
+        } elseif ($item->yes_count >= 3) {
+            $maturityLevelNumber = 3;
+        } elseif ($item->yes_count >= 2) {
+            $maturityLevelNumber = 2;
         }
+        // Jika yes_count == 1 → tetap level 1
+
+        $maturityDescription = $maturityMap[$maturityLevelNumber] ?? $maturityMap[1];
     }
 
     $detailedItems[] = [
