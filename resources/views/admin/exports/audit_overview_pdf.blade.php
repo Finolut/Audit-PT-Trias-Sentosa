@@ -164,15 +164,11 @@
     <table class="header-table">
         <tr>
             <td style="width: 60px;">
-                <img src="{{ asset('https://trias-sentosa.com/images/ts.jpg  ') }}" alt="Logo" class="logo-img">
+                <img src="https://trias-sentosa.com/images/ts.jpg" alt="Logo" class="logo-img">
             </td>
             <td>
                 <div class="company-name">PT TRIAS SENTOSA Tbk</div>
                 <div class="tagline">FLEXIBLE PACKAGING FILM MANUFACTURER</div>
-            </td>
-            <td class="cert-container">
-                <img src="https://via.placeholder.com/80x40?text=ISO+9001  " class="cert-logo">
-                <img src="https://via.placeholder.com/80x40?text=ISO+14001  " class="cert-logo">
             </td>
         </tr>
     </table>
