@@ -1,121 +1,71 @@
 let teamIndex = 0;
 
-// Config dasar agar tidak perlu ulang-ulang
-const tsConfig = {
-    create: false,
-    maxItems: 1,
-    valueField: 'id',
+// Inisialisasi Auditor Select
+new TomSelect('#auditor_select', {
+    valueField: 'name',
     labelField: 'name',
     searchField: ['name'],
-    onDropdownOpen: function() { this.blur(); } // Trik Mobile: tutup keyboard virtual saat dropdown buka
-};
-
-// 1. Inisialisasi Auditor Select (Fitur Utama)
-const auditorSelect = new TomSelect('#auditor_select', {
-    ...tsConfig,
-    valueField: 'name', // Value simpan Nama
     options: AUDITORS,
-    placeholder: 'Cari nama Anda...',
-    // Render tampilan dropdown yg informatif (seperti request awal)
-    render: {
-        option: function(data, escape) {
-            return `<div class="py-2 px-1">
-                        <div class="font-bold text-gray-800">${escape(data.name)}</div>
-                        <div class="text-xs text-gray-500">NIK: ${escape(data.nik)} • ${escape(data.dept)}</div>
-                    </div>`;
-        },
-        item: function(data, escape) {
-            return `<div>${escape(data.name)}</div>`;
-        }
-    },
+    create: false,
+    placeholder: 'Ketik nama Anda...',
     onChange: function(value) {
         const auditor = AUDITORS.find(a => a.name === value);
-        const detailsSection = document.getElementById('audit-details');
-        
         if (auditor) {
-            // AUTOFILL Logic
             document.getElementById('auditor_nik').value = auditor.nik;
             document.getElementById('auditor_department').value = auditor.dept;
-            
-            // Show Next Section
-            detailsSection.classList.remove('hidden-section');
-            
-            // Smooth Scroll ke bawah sedikit
-            setTimeout(() => {
-                detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
+            document.getElementById('audit-details').classList.remove('hidden');
         } else {
-            // Reset logic
             document.getElementById('auditor_nik').value = '';
             document.getElementById('auditor_department').value = '';
-            detailsSection.classList.add('hidden-section');
+            document.getElementById('audit-details').classList.add('hidden');
         }
     }
 });
 
-// 2. Inisialisasi Department Select
+// Inisialisasi Department Select
 new TomSelect('#department_select', {
-    ...tsConfig,
+    valueField: 'id',
+    labelField: 'name',
+    searchField: ['name'],
     options: DEPARTMENTS,
-    placeholder: 'Pilih Departemen...',
+    create: false,
+    placeholder: 'Ketik nama departemen...'
 });
 
-// 3. Logic Tambah Tim (Tetap ada)
-function addAuditTeam() {
-    const container = document.getElementById('audit-team-container');
-    const div = document.createElement('div');
-    div.className = 'team-member-item'; // Class baru yg simple
-    
-    div.innerHTML = `
-        <button type="button" class="remove-team-btn" onclick="this.parentElement.remove()">×</button>
-        
-        <div class="form-group" style="margin-bottom:8px">
-            <input type="text" name="audit_team[${teamIndex}][name]" class="form-input" placeholder="Nama Anggota" required>
-        </div>
-        
-        <div class="form-row-mobile">
-            <div class="half">
-                <select name="audit_team[${teamIndex}][role]" class="form-input">
-                    <option value="Member">Anggota</option>
-                    <option value="Observer">Pengamat</option>
-                    <option value="Specialist">Ahli</option>
-                </select>
-            </div>
-            <div class="half">
-                <input type="text" name="audit_team[${teamIndex}][department]" class="form-input" placeholder="Dept. Asal">
-            </div>
-        </div>
-    `;
-    
-    container.appendChild(div);
-    teamIndex++;
-}
-
-// 4. Validasi Form (Penting agar data tidak kosong)
+// Validasi form
 document.getElementById('auditForm').addEventListener('submit', function(e) {
     const auditor = document.getElementById('auditor_select').value;
     const dept = document.getElementById('department_select').value;
     const confirmed = document.getElementById('confirmation').checked;
-    let isValid = true;
 
-    // Remove error styles first
-    document.querySelectorAll('.error-border').forEach(el => el.classList.remove('error-border'));
-
-    if (!auditor) {
-        document.querySelector('#auditor_select').nextElementSibling.classList.add('error-border');
-        isValid = false;
-    }
-    if (!dept) {
-        document.querySelector('#department_select').nextElementSibling.classList.add('error-border');
-        isValid = false;
-    }
-    if (!confirmed) {
-        document.querySelector('.confirmation-box').classList.add('error-border');
-        isValid = false;
-    }
-
-    if (!isValid) {
+    if (!auditor || !dept || !confirmed) {
         e.preventDefault();
-        alert('Mohon lengkapi data wajib dan centang konfirmasi.');
+        alert('Harap lengkapi semua bagian wajib, termasuk centang konfirmasi.');
     }
 });
+
+// Fungsi tambah anggota tim
+function addAuditTeam() {
+    const container = document.getElementById('audit-team-container');
+    const html = `
+        <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <label>Nama Anggota</label>
+            <input type="text" name="audit_team[${teamIndex}][name]" placeholder="Contoh: Budi Santoso" required>
+            
+            <label>Perannya</label>
+            <select name="audit_team[${teamIndex}][role]" style="font-size: 15px; width: 100%; padding: 10px; margin-bottom: 10px;">
+                <option value="Member">Anggota Tim</option>
+                <option value="Observer">Pengamat</option>
+                <option value="Specialist">Ahli Teknis</option>
+            </select>
+            
+            <label>Departemennya</label>
+            <input type="text" name="audit_team[${teamIndex}][department]" placeholder="Contoh: IT, HRD, Produksi">
+            
+            <button type="button" style="background: #fee2e2; color: #b91c1c; border: none; padding: 6px 10px; border-radius: 6px; margin-top: 8px;" 
+                    onclick="this.parentElement.remove()">✕ Hapus Anggota Ini</button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+    teamIndex++;
+}
