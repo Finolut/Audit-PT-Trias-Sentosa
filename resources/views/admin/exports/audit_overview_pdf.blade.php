@@ -73,7 +73,7 @@
             padding: 15px;
             background-color: #f8fafc;
             border-radius: 5px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #003366; 
         }
         .audit-title-section {
             color: #003366; 
