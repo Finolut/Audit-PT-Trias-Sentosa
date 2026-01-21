@@ -85,6 +85,8 @@ Route::prefix('admin')->group(function () {
     // 2. Log Pertanyaan Audit (Posisikan di sini agar rapi)
     Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('admin.question_log');
 
+    Route::get('/audit/search', [DashboardController::class, 'searchAudit'])->name('admin.audit.search');
+
     // 3. List Audit per Departemen
     Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('dept.show');
 
@@ -97,7 +99,6 @@ Route::prefix('admin')->group(function () {
     // 6. Status Departemen (Jika Anda menggunakan view status index)
     Route::get('/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('admin.dept_status');
 
-    Route::get('/audit/search', [App\Http\Controllers\DashboardController::class, 'searchAudit'])->name('admin.audit.search');
 });
 
 /*
