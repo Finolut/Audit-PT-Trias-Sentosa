@@ -299,20 +299,20 @@ public function exportToPdf($auditId)
         $audit = Audit::with('department')->findOrFail($auditId);
         
         // Ambil data klausul & jawaban
-        $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-            ->leftJoin('answer_finals', function($join) use ($auditId) {
-                $join->on('items.id', '=', 'answer_finals.item_id')
-                     ->where('answer_finals.audit_id', '=', $auditId);
-            })
-            ->select(
-                'clauses.clause_code',
-                'items.item_text',
-                'answer_finals.final_yes',
-                'answer_finals.final_no',
-                'answer_finals.yes_count',
-                'answer_finals.no_count'
-            )
-            ->get();
+       $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+    ->leftJoin('answer_finals', function($join) use ($auditId) {
+        $join->on('items.id', '=', 'answer_finals.item_id')
+             ->where('answer_finals.audit_id', '=', $auditId);
+    })
+    ->select(
+        'clauses.clause_code',
+        'items.item_text',
+        'answer_finals.final_yes',
+        'answer_finals.final_no',   // ✅ TAMBAHKAN INI!
+        'answer_finals.yes_count',
+        'answer_finals.no_count'
+    )
+    ->get();
 
         // Hitung statistik
         $mainStats = [];
