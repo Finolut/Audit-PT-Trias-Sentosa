@@ -3,95 +3,76 @@
 <head>
     <title>Laporan Audit #{{ $audit->id }}</title>
     <style>
-        body { 
-            font-family: DejaVu Sans, sans-serif; 
-            margin: 40px; 
-            color: #333;
-        }
+body { 
+        font-family: Arial, sans-serif; 
+        margin: 20px; 
+        color: #333;
+    }
         
-        .header {
-            background-color: #f5f5f5;
-            padding: 20px;
-            border-bottom: 3px solid #3b82f6;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .logo {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 24px;
-            border-radius: 8px;
-        }
-        
-        .company-info {
-            flex-grow: 1;
-        }
-        
-        .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1e40af;
-            margin: 0 0 5px 0;
-        }
-        
-        .tagline {
-            font-size: 14px;
-            color: #6b7280;
-            margin: 0 0 10px 0;
-        }
-        
-        .address-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 15px 0;
-        }
-        
-        .address-box {
-            background: white;
-            padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-        }
-        
-        .address-title {
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 5px;
-        }
-        
-        .certifications {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .cert-logo {
-            width: 80px;
-            height: auto;
-            border: 1px solid #d1d5db;
-            padding: 5px;
-            background: white;
-            border-radius: 4px;
-        }
+       /* Layout Header menggunakan Table agar stabil di PDF */
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-bottom: 2px solid #003366; /* Garis biru formal */
+        margin-bottom: 20px;
+    }
+
+    .header-table td {
+        vertical-align: top;
+        border: none;
+        padding: 5px;
+    }
+
+    .logo-img {
+        height: 50px; /* Ukuran logo diatur agar proporsional */
+    }
+
+    .cert-container {
+        text-align: right;
+    }
+
+    .cert-logo {
+        height: 35px;
+        margin-left: 10px;
+    }
+
+    /* Styling Alamat */
+    .address-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .address-table td {
+        width: 50%; /* Membagi 2 kolom kiri dan kanan */
+        font-size: 9px;
+        line-height: 1.2;
+        padding-bottom: 10px;
+        vertical-align: top;
+        border: none;
+    }
+
+    .address-title {
+        font-weight: bold;
+        color: #003366;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        display: block;
+    }
+
+    .contact-info {
+        color: #555;
+    }
+    
+    /* Audit Detail Styling */
+    .audit-title-section {
+        color: #1e40af; 
+        border-bottom: 2px solid #3b82f6; 
+        padding-bottom: 5px;
+        font-size: 18px;
+        text-transform: uppercase;
+    }
         
         .audit-header {
             text-align: center;
@@ -160,109 +141,51 @@
         .page-break {
             page-break-after: always;
         }
-
-        .header-container {
-        font-family: Arial, sans-serif;
-        border-bottom: 2px solid #003366; /* Garis bawah biru formal */
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-    }
-
-    .top-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .logo-container {
-        display: flex;
-        align-items: center;
-    }
-
-    .logo-img {
-        height: 60px; /* Sesuaikan ukuran logo */
-        margin-right: 15px;
-    }
-
-    .certifications img {
-        height: 40px;
-        opacity: 0.8;
-    }
-
-    /* Grid layout untuk alamat */
-    .address-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Membagi menjadi 2 kolom utama */
-        gap: 15px;
-        font-size: 9px; /* Ukuran teks kecil khas dokumen formal */
-        color: #333;
-        line-height: 1.3;
-    }
-
-    .address-box {
-        margin-bottom: 5px;
-    }
-
-    .address-title {
-        font-weight: bold;
-        color: #003366;
-        font-size: 10px;
-        margin-bottom: 2px;
-        text-transform: uppercase;
-    }
-
-    .contact-info {
-        color: #555;
-    }
     </style>
 </head>
 <body>
     <!-- HEADER SECTION -->
-  <div class="header-container">
-    <div class="top-section">
-        <div class="logo-container">
-            <img src="{{ asset('images/logo.webp') }}" alt="Logo PT TRIAS SENTOSA Tbk" class="logo-img">
-        </div>
-        
-        <div class="certifications">
-            <img src="https://via.placeholder.com/80x40?text=ISO+9001" alt="ISO 9001">
-            <img src="https://via.placeholder.com/80x40?text=ISO+14001" alt="ISO 14001">
-        </div>
-    </div>
+  <table class="header-table">
+    <tr>
+        <td>
+            <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="logo-img">
+        </td>
+        <td class="cert-container">
+            <img src="https://via.placeholder.com/80x40?text=ISO+9001" class="cert-logo">
+            <img src="https://via.placeholder.com/80x40?text=ISO+14001" class="cert-logo">
+        </td>
+    </tr>
+</table>
 
-    <div class="address-grid">
-        <div class="address-column">
-            <div class="address-box">
-                <div class="address-title">HEAD OFFICE / WARU PLANT :</div>
-                <div>Jl. Raya Waru No.1 B, Waru, Sidoarjo 61256, Indonesia</div>
-                <div class="contact-info">Ph: +62-31-8533125, Fax: +62-31-8534116</div>
-            </div>
+<table class="address-table">
+    <tr>
+        <td>
+            <span class="address-title">HEAD OFFICE / WARU PLANT :</span>
+            Jl. Raya Waru No.1 B, Waru, Sidoarjo 61256, Indonesia<br>
+            <span class="contact-info">Ph: +62-31-8533125, Fax: +62-31-8534116</span>
             
-            <div class="address-box">
-                <div class="address-title">KRIAN PLANT :</div>
-                <div>Desa Keboharan, Km 26, Krian, Sidoarjo 61262, Indonesia</div>
-                <div class="contact-info">Ph: +62-31-8975825, Fax: +62-31-8972998</div>
+            <div style="margin-top: 8px;">
+                <span class="address-title">KRIAN PLANT :</span>
+                Desa Keboharan, Km 26, Krian, Sidoarjo 61262, Indonesia<br>
+                <span class="contact-info">Ph: +62-31-8975825, Fax: +62-31-8972998</span>
             </div>
-        </div>
-
-        <div class="address-column">
-            <div class="address-box">
-                <div class="address-title">JAKARTA OFFICE :</div>
-                <div>Altira Business Park, Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor</div>
-                <div>Sunter, Jakarta Utara 14350, Indonesia</div>
-                <div class="contact-info">Ph: +62-21-29615575, Fax: +62-21-29615565</div>
+        </td>
+        
+        <td>
+            <span class="address-title">JAKARTA OFFICE :</span>
+            Altira Business Park, Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor<br>
+            Sunter, Jakarta Utara 14350, Indonesia<br>
+            <span class="contact-info">Ph: +62-21-29615575, Fax: +62-21-29615565</span>
+            
+            <div style="margin-top: 8px;">
+                <span class="address-title">SURABAYA OFFICE :</span>
+                Spazio Tower 15th Floor, Jl. Mayjen Yono Suwoyo,<br>
+                Surabaya 60225, Indonesia<br>
+                <span class="contact-info">Ph: +62-31-99144888, Fax: +62-31-99148510</span>
             </div>
-
-            <div class="address-box">
-                <div class="address-title">SURABAYA OFFICE :</div>
-                <div>Spazio Tower 15th Floor, Jl. Mayjen Yono Suwoyo,</div>
-                <div>Surabaya 60225, Indonesia</div>
-                <div class="contact-info">Ph: +62-31-99144888, Fax: +62-31-99148510</div>
-            </div>
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>
+</table>
 
     <!-- AUDIT DETAILS -->
     <div style="margin: 30px 0;">
