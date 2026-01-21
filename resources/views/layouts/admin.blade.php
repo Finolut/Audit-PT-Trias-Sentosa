@@ -32,11 +32,12 @@
                     Cari Laporan Cepat
                 </label>
                 <form action="{{ route('admin.audit.search') }}" method="GET" class="relative">
-                    <input type="number" 
-                           name="audit_id" 
-                           placeholder="Masukkan ID Audit (Cth: 15)..." 
-                           class="w-full pl-3 pr-10 py-2 text-sm bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm placeholder-gray-400"
-                           required>
+                    {{-- Ganti bagian input di sidebar --}}
+<input type="text" 
+       name="audit_id" 
+       placeholder="Tempel ID Laporan (UUID)..." 
+       class="w-full pl-3 pr-10 py-2 text-sm bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm placeholder-gray-400"
+       required>
                     <button type="submit" class="absolute right-1 top-1 bottom-1 bg-blue-600 hover:bg-blue-700 text-white rounded px-2 flex items-center justify-center transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -44,7 +45,7 @@
                     </button>
                 </form>
             </div>
-            
+
             {{-- Search Bar (Unified) --}}
             <div class="p-4 border-b border-gray-100 bg-gray-50/30">
                 <div class="relative">

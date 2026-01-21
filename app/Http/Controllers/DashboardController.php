@@ -395,24 +395,24 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
 }
 
 public function searchAudit(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'audit_id' => 'required|numeric'
-        ]);
+{
+    // Ubah validasi agar menerima format string UUID
+    $request->validate([
+        'audit_id' => 'required|string' 
+    ]);
 
-        // Cari audit berdasarkan ID
-        $audit = Audit::find($request->audit_id);
+    // Bersihkan input jika ada spasi yang tidak sengaja terikut
+    $searchId = trim($request->audit_id);
 
-        if ($audit) {
-            // Jika ketemu, redirect langsung ke halaman detail (Overview)
-            // Pastikan nama route 'admin.audit.overview' sesuai dengan route Anda untuk showAuditOverview
-            return redirect()->route('admin.audit.overview', $audit->id);
-        }
+    // Cari audit berdasarkan UUID string
+    $audit = Audit::find($searchId);
 
-        // Jika tidak ketemu, kembalikan ke halaman sebelumnya dengan pesan error
-        return back()->with('error', 'Laporan Audit dengan ID #' . $request->audit_id . ' tidak ditemukan.');
+    if ($audit) {
+        return redirect()->route('admin.audit.overview', $audit->id);
     }
+
+    return back()->with('error', 'Laporan Audit dengan ID tersebut tidak ditemukan.');
+}
 
 }
 
