@@ -13,7 +13,7 @@
             line-height: 1.4;
         }
         
-        /* Header utama dengan Logo & Sertifikat */
+        /* Header dengan Warna Biru Tua Konsisten */
         .header-table {
             width: 100%;
             border-collapse: collapse;
@@ -22,11 +22,21 @@
         }
         .header-table td {
             vertical-align: middle;
-            border: none;
             padding-bottom: 10px;
         }
         .logo-img {
             height: 55px;
+        }
+        .company-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #003366;
+            margin: 0;
+        }
+        .tagline {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
         }
         .cert-container {
             text-align: right;
@@ -36,7 +46,7 @@
             margin-left: 8px;
         }
 
-        /* Tabel Alamat 2 Kolom */
+        /* Tabel Alamat */
         .address-table {
             width: 100%;
             border-collapse: collapse;
@@ -48,7 +58,6 @@
             line-height: 1.2;
             padding: 5px;
             vertical-align: top;
-            border: none;
         }
         .address-title {
             font-weight: bold;
@@ -56,9 +65,6 @@
             text-transform: uppercase;
             display: block;
             margin-bottom: 2px;
-        }
-        .contact-info {
-            color: #555;
         }
 
         /* Section Audit Overview */
@@ -70,22 +76,23 @@
             border: 1px solid #e2e8f0;
         }
         .audit-title-section {
-            color: #1e40af; 
-            border-bottom: 2px solid #3b82f6; 
+            color: #003366; 
+            border-bottom: 2px solid #003366; 
             padding-bottom: 5px;
             font-size: 16px;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             margin-top: 0;
         }
         .audit-info-grid {
             width: 100%;
-            font-size: 12px;
+            font-size: 11px;
+            border-collapse: collapse;
         }
         .audit-info-grid td {
-            padding: 3px 0;
-            border: none;
+            padding: 4px 0;
+            vertical-align: top;
         }
 
         /* Tabel Data Audit */
@@ -95,12 +102,12 @@
             margin-top: 20px;
         }
         .data-table th {
-            background-color: #f3f4f6;
+            background-color: #003366;
             font-weight: bold;
-            color: #374151;
+            color: #ffffff;
             font-size: 11px;
             text-align: center;
-            border: 1px solid #d1d5db;
+            border: 1px solid #003366;
             padding: 10px;
         }
         .data-table td {
@@ -109,24 +116,24 @@
             font-size: 11px;
             vertical-align: top;
         }
-        .text-center { text-align: center; }
 
-        /* Status & Maturity Styling */
+        /* Status Badges - Bahasa Indonesia */
         .status-badge {
             padding: 3px 8px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
             display: inline-block;
             text-transform: uppercase;
         }
-        .status-yes { background: #dcfce7; color: #166534; }
-        .status-no { background: #fee2e2; color: #b91c1c; }
-        .status-na { background: #f3e8ff; color: #7e22ce; }
+        .status-yes { background: #dcfce7; color: #166534; } /* YA */
+        .status-no { background: #fee2e2; color: #b91c1c; }  /* TIDAK */
+        .status-na { background: #f3e8ff; color: #7e22ce; }  /* N/A */
+        .status-unanswered { background: #e2e8f0; color: #4b5563; } /* BELUM DIJAWAB */
         
         .maturity-text {
             font-weight: bold;
-            color: #4b5563;
+            color: #003366;
         }
 
         .footer {
@@ -143,10 +150,13 @@
 
     <table class="header-table">
         <tr>
-            <td>
-                <img src="{{ asset('images/ts.jpg') }}" alt="Logo PT TRIAS SENTOSA Tbk" class="logo-img">
+            <td style="width: 60px;">
+                <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="logo-img">
             </td>
-            <div class="company-name">PT TRIAS SENTOSA Tbk</div>
+            <td>
+                <div class="company-name">PT TRIAS SENTOSA Tbk</div>
+                <div class="tagline">FLEXIBLE PACKAGING FILM MANUFACTURER</div>
+            </td>
             <td class="cert-container">
                 <img src="https://via.placeholder.com/80x40?text=ISO+9001" class="cert-logo">
                 <img src="https://via.placeholder.com/80x40?text=ISO+14001" class="cert-logo">
@@ -159,44 +169,30 @@
             <td>
                 <span class="address-title">HEAD OFFICE / WARU PLANT :</span>
                 Jl. Raya Waru No.1 B, Waru, Sidoarjo 61256, Indonesia<br>
-                <span class="contact-info">Ph: +62-31-8533125, Fax: +62-31-8534116</span>
-                
-                <div style="margin-top: 10px;">
-                    <span class="address-title">KRIAN PLANT :</span>
-                    Desa Keboharan, Km 26, Krian, Sidoarjo 61262, Indonesia<br>
-                    <span class="contact-info">Ph: +62-31-8975825, Fax: +62-31-8972998</span>
-                </div>
+                Ph: +62-31-8533125, Fax: +62-31-8534116
             </td>
             <td>
                 <span class="address-title">JAKARTA OFFICE :</span>
                 Altira Business Park, Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor<br>
-                Sunter, Jakarta Utara 14350, Indonesia<br>
-                <span class="contact-info">Ph: +62-21-29615575, Fax: +62-21-29615565</span>
-                
-                <div style="margin-top: 10px;">
-                    <span class="address-title">SURABAYA OFFICE :</span>
-                    Spazio Tower 15th Floor, Jl. Mayjen Yono Suwoyo,<br>
-                    Surabaya 60225, Indonesia<br>
-                    <span class="contact-info">Ph: +62-31-99144888, Fax: +62-31-99148510</span>
-                </div>
+                Jakarta Utara 14350, Indonesia | Ph: +62-21-29615575
             </td>
         </tr>
     </table>
 
     <div class="audit-overview">
-        <h2 class="audit-title-section">AUDIT OVERVIEW</h2>
+        <h2 class="audit-title-section">INFORMASI AUDIT</h2>
         <table class="audit-info-grid">
             <tr>
-                <td style="width: 120px;"><strong>Department</strong></td>
-                <td>: {{ $audit->department->name ?? '-' }}</td>
+                <td style="width: 120px;"><strong>Departemen</strong></td>
+                <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
+                <td style="width: 100px;"><strong>Auditor Utama</strong></td>
+                <td>: {{ $audit->auditor_name ?? '-' }} (NIK: {{ $audit->auditor_nik ?? '-' }})</td>
             </tr>
             <tr>
                 <td><strong>Tanggal Audit</strong></td>
                 <td>: {{ $audit->created_at->format('d F Y') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Auditor</strong></td>
-                <td>: {{ $audit->auditor_name ?? '-' }}</td>
+                <td><strong>Anggota Tim</strong></td>
+                <td>: {{ $audit->team_members ?? '-' }}</td>
             </tr>
             <tr>
                 <td><strong>Tipe Audit</strong></td>
@@ -210,6 +206,8 @@
                     @endphp
                     {{ $typeLabels[$audit->type] ?? '-' }}
                 </td>
+                <td><strong>ID Laporan</strong></td>
+                <td>: #{{ $audit->id }}</td>
             </tr>
         </table>
     </div>
@@ -218,23 +216,33 @@
         <thead>
             <tr>
                 <th style="width: 8%;">Klausul</th>
-                <th style="width: 62%;">Item Pemeriksaan</th>
-                <th style="width: 15%;">Maturity</th>
-                <th style="width: 15%;">Status</th>
+                <th style="width: 57%;">Item Pemeriksaan</th>
+                <th style="width: 15%;">Tingkat Kematangan</th>
+                <th style="width: 20%;">Status</th>
             </tr>
         </thead>
         <tbody>
-            {{-- Mengurutkan berdasarkan klausul dari terkecil ke terbesar --}}
             @foreach(collect($detailedItems)->sortBy('sub_clause') as $item)
             <tr>
-                <td class="text-center"><strong>{{ $item['sub_clause'] }}</strong></td>
+                <td style="text-align: center;"><strong>{{ $item['sub_clause'] }}</strong></td>
                 <td>{{ $item['item_text'] }}</td>
-                <td class="text-center">
+                <td style="text-align: center;">
                     <span class="maturity-text">Level {{ $item['maturity_level'] ?? '1' }}</span>
                 </td>
-                <td class="text-center">
-                    <span class="status-badge status-{{ strtolower($item['status']) }}">
-                        {{ $item['status'] }}
+                <td style="text-align: center;">
+                    @php
+                        $statusMap = [
+                            'yes' => ['label' => 'YA', 'class' => 'status-yes'],
+                            'no' => ['label' => 'TIDAK', 'class' => 'status-no'],
+                            'na' => ['label' => 'N/A', 'class' => 'status-na'],
+                            'unanswered' => ['label' => 'BELUM DIJAWAB', 'class' => 'status-unanswered']
+                        ];
+                        $currStatus = strtolower($item['status']);
+                        $statusLabel = $statusMap[$currStatus]['label'] ?? $item['status'];
+                        $statusClass = $statusMap[$currStatus]['class'] ?? '';
+                    @endphp
+                    <span class="status-badge {{ $statusClass }}">
+                        {{ $statusLabel }}
                     </span>
                 </td>
             </tr>
@@ -243,7 +251,7 @@
     </table>
 
     <div class="footer">
-        <p>Generated on {{ now()->format('d F Y H:i') }} | PT TRIAS SENTOSA Tbk</p>
+        <p>Dicetak pada {{ now()->format('d F Y H:i') }} | PT TRIAS SENTOSA Tbk</p>
     </div>
 
 </body>
