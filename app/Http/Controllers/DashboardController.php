@@ -295,76 +295,109 @@ public function questionLog()
 }
 
 public function exportToPdf($auditId)
-    {
-        $audit = Audit::with('department')->findOrFail($auditId);
-        
-        // Ambil data klausul & jawaban
-       $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-    ->leftJoin('answer_finals', function($join) use ($auditId) {
-        $join->on('items.id', '=', 'answer_finals.item_id')
-             ->where('answer_finals.audit_id', '=', $auditId);
-    })
-    ->select(
-        'clauses.clause_code',
-        'items.item_text',
-        'answer_finals.final_yes',
-        'answer_finals.final_no',   // ✅ TAMBAHKAN INI!
-        'answer_finals.yes_count',
-        'answer_finals.no_count'
-    )
-    ->get();
+{
+    $audit = Audit::with('department')->findOrFail($auditId);
 
-        // Hitung statistik
-        $mainStats = [];
-        $detailedItems = [];
-        foreach($this->mainClauses as $main => $subs) {
-            $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
-        }
+    // Ambil session terkait audit
+    $session = DB::table('audit_sessions')
+        ->where('id', $audit->audit_session_id)
+        ->first();
 
-        foreach ($allItems as $item) {
-            $status = 'Unanswered';
-            $mainClause = 'Unknown';
-
-if (is_null($item->final_yes)) {
-    $status = 'unanswered';
-} elseif ($item->yes_count == 0 && $item->no_count == 0) {
-    $status = 'na';
-} elseif ($item->final_yes > $item->final_no) {
-    $status = 'yes';
-} elseif ($item->final_no > $item->final_yes) {
-    $status = 'no'; // ✅ HURUF KECIL!
-} else {
-    $status = 'partial';
-}
-
-            foreach($this->mainClauses as $mainKey => $subArray) {
-                if (in_array($item->clause_code, $subArray)) {
-                    $mainClause = $mainKey;
-                    $mainStats[$mainKey][$status]++;
-                    break;
-                }
-            }
-
-            $detailedItems[] = [
-                'main_clause' => $mainClause,
-                'sub_clause' => $item->clause_code,
-                'item_text' => $item->item_text,
-                'status' => $status,
-                'yes_count' => $item->yes_count,
-                'no_count' => $item->no_count,
-            ];
-        }
-
-        // Generate PDF
-        $pdf = Pdf::loadView('admin.exports.audit_overview_pdf', [
-            'audit' => $audit,
-            'mainClauses' => $this->mainClauses,
-            'titles' => $this->mainClauseTitles,
-            'mainStats' => $mainStats,
-            'detailedItems' => $detailedItems
-        ]);
-
-        return $pdf->download("audit_{$audit->id}_".now()->format('Ymd').".pdf");
+    if (!$session) {
+        abort(404, 'Audit session not found');
     }
+
+    // Ambil data auditor utama dari kolom langsung
+    $leadAuditor = [
+        'name' => $session->auditor_name,
+        'nik' => $session->auditor_nik,
+        'department' => $session->auditor_department,
+    ];
+
+    // Ambil anggota tim dari kolom JSON `audit_team`
+    $teamMembers = [];
+    if (!empty($session->audit_team)) {
+        $teamJson = json_decode($session->audit_team, true);
+        if (is_array($teamJson)) {
+            foreach ($teamJson as $member) {
+                $teamMembers[] = [
+                    'name' => $member['name'] ?? '-',
+                    'nik' => $member['nik'] ?? 'N/A',
+                    'department' => $member['department'] ?? 'N/A',
+                ];
+            }
+        }
+    }
+
+    // Ambil data klausul & jawaban (kode lama tetap dipertahankan)
+    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->leftJoin('answer_finals', function($join) use ($auditId) {
+            $join->on('items.id', '=', 'answer_finals.item_id')
+                 ->where('answer_finals.audit_id', '=', $auditId);
+        })
+        ->select(
+            'clauses.clause_code',
+            'items.item_text',
+            'answer_finals.final_yes',
+            'answer_finals.final_no',
+            'answer_finals.yes_count',
+            'answer_finals.no_count'
+        )
+        ->get();
+
+    // Hitung statistik (kode lama tetap dipertahankan)
+    $mainStats = [];
+    $detailedItems = [];
+    foreach($this->mainClauses as $main => $subs) {
+        $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+    }
+
+    foreach ($allItems as $item) {
+        $status = 'unanswered';
+        $mainClause = 'Unknown';
+
+        if (is_null($item->final_yes)) {
+            $status = 'unanswered';
+        } elseif ($item->yes_count == 0 && $item->no_count == 0) {
+            $status = 'na';
+        } elseif ($item->final_yes > $item->final_no) {
+            $status = 'yes';
+        } elseif ($item->final_no > $item->final_yes) {
+            $status = 'no';
+        } else {
+            $status = 'partial';
+        }
+
+        foreach($this->mainClauses as $mainKey => $subArray) {
+            if (in_array($item->clause_code, $subArray)) {
+                $mainClause = $mainKey;
+                $mainStats[$mainKey][$status]++;
+                break;
+            }
+        }
+
+        $detailedItems[] = [
+            'main_clause' => $mainClause,
+            'sub_clause' => $item->clause_code,
+            'item_text' => $item->item_text,
+            'status' => $status,
+            'yes_count' => $item->yes_count,
+            'no_count' => $item->no_count,
+        ];
+    }
+
+    // Generate PDF dengan data tambahan
+    $pdf = Pdf::loadView('admin.exports.audit_overview_pdf', [
+        'audit' => $audit,
+        'leadAuditor' => $leadAuditor,      // ✅ Data auditor utama
+        'teamMembers' => $teamMembers,      // ✅ Data anggota tim
+        'mainClauses' => $this->mainClauses,
+        'titles' => $this->mainClauseTitles,
+        'mainStats' => $mainStats,
+        'detailedItems' => $detailedItems
+    ]);
+
+    return $pdf->download("audit_{$audit->id}_".now()->format('Ymd').".pdf");
+}
 }
 

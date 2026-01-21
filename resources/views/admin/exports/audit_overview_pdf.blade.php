@@ -144,6 +144,19 @@
             padding-top: 10px;
             border-top: 1px solid #e5e7eb;
         }
+
+        .team-member {
+            margin-bottom: 3px;
+            line-height: 1.3;
+            font-size: 10.5px;
+        }
+        .team-member-name {
+            font-weight: bold;
+        }
+        .team-member-detail {
+            color: #555;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -151,7 +164,7 @@
     <table class="header-table">
         <tr>
             <td style="width: 60px;">
-                <img src="{{ asset('images/logo.webp') }}" alt="Logo" class="logo-img">
+                <img src="{{ asset('https://trias-sentosa.com/images/ts.jpg') }}" alt="Logo" class="logo-img">
             </td>
             <td>
                 <div class="company-name">PT TRIAS SENTOSA Tbk</div>
@@ -169,30 +182,72 @@
             <td>
                 <span class="address-title">HEAD OFFICE / WARU PLANT :</span>
                 Jl. Raya Waru No.1 B, Waru, Sidoarjo 61256, Indonesia<br>
-                Ph: +62-31-8533125, Fax: +62-31-8534116
+                <span class="contact-info">Ph: +62-31-8533125, Fax: +62-31-8534116</span>
+                
+                <div style="margin-top: 10px;">
+                    <span class="address-title">KRIAN PLANT :</span>
+                    Desa Keboharan, Km 26, Krian, Sidoarjo 61262, Indonesia<br>
+                    <span class="contact-info">Ph: +62-31-8975825, Fax: +62-31-8972998</span>
+                </div>
             </td>
             <td>
                 <span class="address-title">JAKARTA OFFICE :</span>
                 Altira Business Park, Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor<br>
-                Jakarta Utara 14350, Indonesia | Ph: +62-21-29615575
+                Sunter, Jakarta Utara 14350, Indonesia<br>
+                <span class="contact-info">Ph: +62-21-29615575, Fax: +62-21-29615565</span>
+                
+                <div style="margin-top: 10px;">
+                    <span class="address-title">SURABAYA OFFICE :</span>
+                    Spazio Tower 15th Floor, Jl. Mayjen Yono Suwoyo,<br>
+                    Surabaya 60225, Indonesia<br>
+                    <span class="contact-info">Ph: +62-31-99144888, Fax: +62-31-99148510</span>
+                </div>
             </td>
         </tr>
     </table>
 
-    <div class="audit-overview">
+<div class="audit-overview">
         <h2 class="audit-title-section">INFORMASI AUDIT</h2>
         <table class="audit-info-grid">
-            <tr>
-                <td style="width: 120px;"><strong>Departemen</strong></td>
-                <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
-                <td style="width: 100px;"><strong>Auditor Utama</strong></td>
-                <td>: {{ $audit->auditor_name ?? '-' }} (NIK: {{ $audit->auditor_nik ?? '-' }})</td>
-            </tr>
-            <tr>
+<tr>
+    <td><strong>Auditor Utama</strong></td>
+    <td>: 
+        {{ $leadAuditor['name'] ?? '-' }}
+        (NIK: {{ $leadAuditor['nik'] ?? 'N/A' }}, 
+         Dept: {{ $leadAuditor['department'] ?? 'N/A' }})
+    </td>
+</tr>
+<tr>
+    <td><strong>Anggota Tim</strong></td>
+    <td>
+        @if(count($teamMembers) > 0)
+            @foreach($teamMembers as $member)
+                <div style="margin-bottom: 3px; font-size: 10.5px;">
+                    {{ $member['name'] }}
+                    (NIK: {{ $member['nik'] }}, 
+                     Dept: {{ $member['department'] }})
+                </div>
+            @endforeach
+        @else
+            -
+        @endif
+    </td>
+</tr>
                 <td><strong>Tanggal Audit</strong></td>
                 <td>: {{ $audit->created_at->format('d F Y') }}</td>
                 <td><strong>Anggota Tim</strong></td>
-                <td>: {{ $audit->team_members ?? '-' }}</td>
+                <td>
+                    @if($teamMembers->count() > 0)
+                        @foreach($teamMembers as $member)
+                            <div class="team-member">
+                                <span class="team-member-name">{{ $member->responder_name }}</span>
+                                <span class="team-member-detail">(NIK: {{ $member->responder_nik ?? 'N/A' }}, {{ $member->responder_department ?? 'N/A' }})</span>
+                            </div>
+                        @endforeach
+                    @else
+                        -
+                    @endif
+                </td>
             </tr>
             <tr>
                 <td><strong>Tipe Audit</strong></td>
