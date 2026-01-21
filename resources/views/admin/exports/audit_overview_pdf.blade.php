@@ -164,7 +164,7 @@
     <table class="header-table">
         <tr>
             <td style="width: 60px;">
-                <img width="50px"  src="{{ public_path('images/ts.jpg') }}">
+                <img width="40px"  src="{{ public_path('images/ts.jpg') }}">
             </td>
             <td>
                 <div class="company-name">PT TRIAS SENTOSA Tbk</div>
