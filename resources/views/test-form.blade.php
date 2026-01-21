@@ -1,128 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Form Pemeriksaan Internal</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+    <title>Form Pemeriksaan Internal</title>
+
     <!-- TomSelect CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
-    
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8fafc;
-            padding: 15px;
-            color: #1e293b;
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        h2 {
-            text-align: center;
-            color: #0f172a;
-            margin-bottom: 25px;
-            font-size: 1.6rem;
-        }
-        .section {
-            background: #f1f5f9;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border-left: 4px solid #3b82f6;
-        }
-        .section h3 {
-            margin-top: 0;
-            color: #1e40af;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin: 15px 0 6px 0;
-            color: #1e293b;
-            font-size: 1rem;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 15px;
-            box-sizing: border-box;
-            background: white;
-        }
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .btn-add {
-            background: #e2e8f0;
-            color: #334155;
-            border: 1px dashed #94a3b8;
-            padding: 10px;
-            width: 100%;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .btn-add:hover {
-            background: #cbd5e1;
-        }
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-        .note {
-            background: #fffbeb;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #ca8a04;
-            font-size: 14px;
-            color: #92400e;
-            margin: 15px 0;
-        }
-        .hidden { display: none; }
-        .confirmation-checkbox {
-            margin-top: 15px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .confirmation-checkbox input {
-            width: auto;
-            margin-top: 4px;
-        }
-        .confirmation-checkbox label {
-            margin: 0;
-            font-weight: normal;
-            font-size: 14px;
-            color: #1e293b;
-        }
-    </style>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="form.css">
 </head>
 <body>
 
@@ -136,7 +24,7 @@
             <h3>1️⃣ Informasi Pemeriksaan</h3>
 
             <label>Jenis Pemeriksaan</label>
-            <select name="audit_type" required style="font-size: 16px;">
+            <select name="audit_type" required>
                 <option value="">-- Pilih Jenis --</option>
                 <option value="Regular">Pemeriksaan Rutin (Terjadwal)</option>
                 <option value="Special">Pemeriksaan Khusus (Mendadak)</option>
@@ -157,10 +45,10 @@
             <select id="auditor_select" name="auditor_name" placeholder="Pilih nama Anda..." required></select>
 
             <label>NIK Anda</label>
-            <input type="text" id="auditor_nik" name="auditor_nik" readonly style="background: #f1f5f9;">
+            <input type="text" id="auditor_nik" name="auditor_nik" readonly>
 
             <label>Departemen Anda</label>
-            <input type="text" id="auditor_department" name="auditor_department" readonly style="background: #f1f5f9;">
+            <input type="text" id="auditor_department" name="auditor_department" readonly>
 
             <div class="confirmation-checkbox">
                 <input type="checkbox" id="confirmation" name="confirmation" required>
@@ -178,7 +66,6 @@
         </div>
 
         <div id="audit-details" class="hidden">
-
             <div class="section">
                 <h3>3️⃣ Departemen yang Akan Di Audit</h3>
 
@@ -206,86 +93,15 @@
 
 <!-- Data untuk JS -->
 <script>
-    const AUDITORS = @json($auditors); // [{ name, nik, dept }]
+    const AUDITORS = @json($auditors);
     const DEPARTMENTS = @json($departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
 </script>
 
 <!-- TomSelect JS -->
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
-<script>
-    let teamIndex = 0;
-
-    // Inisialisasi Auditor Select
-    new TomSelect('#auditor_select', {
-        valueField: 'name',
-        labelField: 'name',
-        searchField: ['name'],
-        options: AUDITORS,
-        create: false,
-        placeholder: 'Ketik nama Anda...',
-        onChange: function(value) {
-            const auditor = AUDITORS.find(a => a.name === value);
-            if (auditor) {
-                document.getElementById('auditor_nik').value = auditor.nik;
-                document.getElementById('auditor_department').value = auditor.dept;
-                document.getElementById('audit-details').classList.remove('hidden');
-            } else {
-                document.getElementById('auditor_nik').value = '';
-                document.getElementById('auditor_department').value = '';
-                document.getElementById('audit-details').classList.add('hidden');
-            }
-        }
-    });
-
-    // Inisialisasi Department Select
-    new TomSelect('#department_select', {
-        valueField: 'id',
-        labelField: 'name',
-        searchField: ['name'],
-        options: DEPARTMENTS,
-        create: false,
-        placeholder: 'Ketik nama departemen...'
-    });
-
-    // Validasi form
-    document.getElementById('auditForm').addEventListener('submit', function(e) {
-        const auditor = document.getElementById('auditor_select').value;
-        const dept = document.getElementById('department_select').value;
-        const confirmed = document.getElementById('confirmation').checked;
-
-        if (!auditor || !dept || !confirmed) {
-            e.preventDefault();
-            alert('Harap lengkapi semua bagian wajib, termasuk centang konfirmasi.');
-        }
-    });
-
-    // Fungsi tambah anggota tim
-    function addAuditTeam() {
-        const container = document.getElementById('audit-team-container');
-        const html = `
-            <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <label>Nama Anggota</label>
-                <input type="text" name="audit_team[${teamIndex}][name]" placeholder="Contoh: Budi Santoso" required>
-                
-                <label>Perannya</label>
-                <select name="audit_team[${teamIndex}][role]" style="font-size: 15px; width: 100%; padding: 10px; margin-bottom: 10px;">
-                    <option value="Member">Anggota Tim</option>
-                    <option value="Observer">Pengamat</option>
-                    <option value="Specialist">Ahli Teknis</option>
-                </select>
-                
-                <label>Departemennya</label>
-                <input type="text" name="audit_team[${teamIndex}][department]" placeholder="Contoh: IT, HRD, Produksi">
-                
-                <button type="button" style="background: #fee2e2; color: #b91c1c; border: none; padding: 6px 10px; border-radius: 6px; margin-top: 8px;" 
-                        onclick="this.parentElement.remove()">✕ Hapus Anggota Ini</button>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
-        teamIndex++;
-    }
-</script>
+<!-- Custom JS -->
+<script src="form.js"></script>
 
 </body>
 </html>
