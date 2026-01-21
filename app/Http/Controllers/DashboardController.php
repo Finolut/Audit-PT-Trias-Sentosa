@@ -325,17 +325,17 @@ public function exportToPdf($auditId)
             $status = 'Unanswered';
             $mainClause = 'Unknown';
 
-            if (is_null($item->final_yes)) {
-                $status = 'Unanswered';
-            } elseif ($item->yes_count == 0 && $item->no_count == 0) {
-                $status = 'N/A';
-            } elseif ($item->final_yes > $item->final_no) {
-                $status = 'Yes';
-            } elseif ($item->final_no > $item->final_yes) {
-                $status = 'No';
-            } else {
-                $status = 'Partial';
-            }
+if (is_null($item->final_yes)) {
+    $status = 'unanswered';
+} elseif ($item->yes_count == 0 && $item->no_count == 0) {
+    $status = 'na';
+} elseif ($item->final_yes > $item->final_no) {
+    $status = 'yes';
+} elseif ($item->final_no > $item->final_yes) {
+    $status = 'no'; // ✅ HURUF KECIL!
+} else {
+    $status = 'partial';
+}
 
             foreach($this->mainClauses as $mainKey => $subArray) {
                 if (in_array($item->clause_code, $subArray)) {
