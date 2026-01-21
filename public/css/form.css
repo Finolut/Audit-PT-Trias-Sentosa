@@ -1,180 +1,105 @@
-/* form.css - Mobile Optimized */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* form.css */
 .form-body {
     background: var(--gray-50);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     color: var(--gray-800);
     line-height: 1.6;
+    padding: 20px;
     min-height: 100vh;
-    padding: 0;
-    margin: 0;
 }
 
-.mobile-container {
-    position: relative;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-/* Progress Bar for Mobile */
-.progress-container {
-    width: 100%;
-    height: 6px;
-    background: var(--gray-200);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--primary-light));
-    width: 33%;
-    transition: width 0.3s ease;
-}
-
-/* Mobile Back Button */
-.mobile-back-btn {
-    display: none;
-    position: sticky;
-    top: 8px;
-    left: 16px;
-    z-index: 100;
-    background: white;
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    border-radius: 50px;
-    padding: 8px 16px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.mobile-back-btn:hover {
-    background: #dbeafe;
-}
-
-/* Form Container */
 .form-container {
-    padding: 20px 16px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .form-header {
     text-align: center;
-    margin-bottom: 24px;
-    padding: 16px 0;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem 0;
 }
 
 .form-title {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     font-weight: 800;
     color: var(--gray-900);
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
 }
 
 .form-subtitle {
     color: var(--gray-600);
-    font-size: 1rem;
+    font-size: 1.1rem;
     max-width: 600px;
     margin: 0 auto;
-    line-height: 1.5;
 }
 
-/* Form Sections */
-.form-section {
-    display: none;
-    width: 100%;
-}
-
-.form-section.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-/* Section Card */
-.section-card {
+/* Card Component */
+.card {
     background: white;
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1.75rem;
     overflow: hidden;
-    margin-bottom: 24px;
     transition: var(--transition);
 }
 
-.section-header {
+.card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
     background: linear-gradient(135deg, var(--primary-light), var(--primary));
     color: white;
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.2);
 }
 
-.section-badge {
-    background: rgba(255, 255, 255, 0.2);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.section-title {
-    font-size: 1.3rem;
+.card-title {
+    font-size: 1.35rem;
     font-weight: 700;
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.section-content {
-    padding: 24px;
+.card-body {
+    padding: 1.75rem;
 }
 
-.section-footer {
-    padding: 0 24px 24px;
-}
-
-/* Form Groups */
+/* Form Elements */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 1.5rem;
 }
 
 .form-row {
     display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
 .form-row .form-group {
     flex: 1;
-    min-width: calc(50% - 8px);
     margin-bottom: 0;
 }
 
 .form-label {
     display: block;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 0.65rem;
     color: var(--gray-800);
     font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-/* Form Controls */
+.form-label::before {
+    content: "•";
+    color: var(--primary);
+    font-weight: bold;
+}
+
 .form-control-container {
     position: relative;
 }
@@ -183,10 +108,10 @@
 .form-textarea,
 .form-select {
     width: 100%;
-    padding: 16px;
+    padding: 1rem;
     border: 2px solid var(--gray-300);
     border-radius: var(--radius-lg);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-family: inherit;
     background: white;
     transition: var(--transition);
@@ -200,132 +125,80 @@
 .form-select:focus-visible {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .form-textarea {
-    min-height: 140px;
+    min-height: 120px;
     resize: vertical;
 }
 
-/* Toggle Buttons for Mobile */
-.btn-group-toggle {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 8px;
-}
-
-.toggle-btn {
-    flex: 1;
-    min-width: 100px;
-    padding: 14px 8px;
-    border: 2px solid var(--gray-300);
-    border-radius: var(--radius-lg);
-    font-size: 0.95rem;
-    font-weight: 600;
-    background: white;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    user-select: none;
-}
-
-.toggle-btn:hover {
-    border-color: var(--primary);
-}
-
-input[type="radio"] {
-    display: none;
-}
-
-input[type="radio"]:checked + .toggle-btn {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+.form-hint {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
 }
 
 /* Buttons */
-.btn-next,
-.btn-back,
-.btn-submit,
-.btn-add-team {
-    width: 100%;
-    padding: 16px;
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 1.1rem 2rem;
     border-radius: var(--radius-xl);
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--primary-dark), #1e40af);
+}
+
+.btn-tertiary {
+    background: white;
+    color: var(--primary);
+    border: 2px dashed var(--primary);
+    padding: 0.85rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    margin-top: 0.75rem;
     transition: var(--transition);
-    border: none;
 }
 
-.btn-next {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    box-shadow: var(--shadow-md);
-}
-
-.btn-next:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.btn-back {
-    background: var(--gray-100);
-    color: var(--gray-800);
-    margin-right: 12px;
-}
-
-.btn-back:hover {
-    background: var(--gray-200);
-}
-
-.btn-submit {
-    background: linear-gradient(135deg, var(--success), #0da271);
-    color: white;
-    box-shadow: var(--shadow-md);
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.btn-add-team {
-    background: white;
-    color: var(--primary);
-    border: 2px dashed var(--primary);
-    margin-top: 8px;
-    font-size: 1rem;
-}
-
-.btn-add-team:hover {
+.btn-tertiary:hover {
     background: #dbeafe;
+    transform: translateY(-1px);
 }
 
-.arrow-icon {
+.btn-icon {
     font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.footer-buttons {
-    display: flex;
-    gap: 12px;
 }
 
 /* Confirmation Box */
 .confirmation-box {
     background: #f0f9ff;
     border: 1px solid #bae6fd;
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    margin-top: 8px;
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-top: 0.5rem;
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -333,29 +206,27 @@ input[type="radio"]:checked + .toggle-btn {
 
 .confirmation-input {
     width: auto;
-    height: 22px;
+    height: 20px;
     margin-top: 2px;
-    min-width: 22px;
 }
 
 .confirmation-label {
     font-weight: 500;
     color: var(--gray-800);
-    font-size: 1rem;
+    font-size: 0.95rem;
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* Info Box */
 .info-box {
     background: #fef3c7;
     border: 1px solid #fde68a;
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    margin: 16px 0;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin: 1.5rem 0;
     display: flex;
     gap: 12px;
-    align-items: flex-start;
 }
 
 .info-icon {
@@ -364,20 +235,30 @@ input[type="radio"]:checked + .toggle-btn {
     min-width: 24px;
 }
 
+.info-content {
+    flex: 1;
+}
+
+.info-title {
+    font-weight: 700;
+    color: #b45309;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+}
+
 .info-text {
+    font-size: 0.9rem;
     color: #92400e;
     margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
 }
 
 /* Team Member */
 .team-member {
     background: #f8fafc;
-    border: 2px solid var(--gray-200);
+    border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-top: 16px;
+    padding: 1.25rem;
+    margin-top: 1rem;
     position: relative;
 }
 
@@ -388,53 +269,59 @@ input[type="radio"]:checked + .toggle-btn {
     background: #fee2e2;
     color: #dc2626;
     border: none;
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     font-weight: bold;
-    font-size: 1.2rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: var(--transition);
-    box-shadow: var(--shadow-sm);
 }
 
 .remove-team-btn:hover {
     background: #fecaca;
-    transform: rotate(90deg);
+    transform: scale(1.1);
 }
 
-.btn-icon {
-    font-size: 1.4rem;
+/* Form Actions */
+.form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Utilities */
+.hidden {
+    display: none;
 }
 
 /* TomSelect Customization */
 .ts-wrapper .ts-control {
     border: 2px solid var(--gray-300) !important;
     border-radius: var(--radius-lg) !important;
-    padding: 14px !important;
+    padding: 0.75rem !important;
     background: white !important;
-    font-size: 1.05rem !important;
+    font-size: 1rem !important;
     transition: var(--transition) !important;
 }
 
 .ts-wrapper.focus .ts-control {
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
 }
 
 .ts-wrapper .ts-dropdown {
     border-radius: var(--radius-lg) !important;
     box-shadow: var(--shadow-lg) !important;
     border: 1px solid var(--gray-300) !important;
-    z-index: 1000;
 }
 
 .ts-wrapper .option {
-    padding: 14px !important;
-    font-size: 1rem !important;
+    padding: 0.75rem !important;
+    font-size: 0.95rem !important;
 }
 
 .ts-wrapper .option:hover, 
@@ -443,133 +330,48 @@ input[type="radio"]:checked + .toggle-btn {
     color: var(--primary-dark) !important;
 }
 
-/* Responsive Design - Mobile First */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .form-group {
-        margin-bottom: 20px;
-    }
-    
-    .form-input,
-    .form-textarea,
-    .form-select {
-        padding: 15px;
-        font-size: 1rem;
-    }
-    
-    .btn-next,
-    .btn-back,
-    .btn-submit,
-    .btn-add-team {
-        padding: 15px;
-        font-size: 1rem;
-    }
-    
-    .section-header {
-        padding: 16px 20px;
-    }
-    
-    .section-content,
-    .section-footer {
-        padding: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .mobile-back-btn {
-        display: flex;
-    }
-    
-    .form-title {
-        font-size: 1.4rem;
-    }
-    
-    .form-subtitle {
-        font-size: 0.95rem;
-        padding: 0 8px;
-    }
-    
-    .section-title {
-        font-size: 1.2rem;
-    }
-    
-    .section-content,
-    .section-footer {
-        padding: 16px;
-    }
-    
-    .form-label {
-        font-size: 1rem;
-        margin-bottom: 10px;
-    }
-    
-    .form-input,
-    .form-textarea,
-    .form-select {
-        padding: 18px;
-        font-size: 1.1rem;
-    }
-    
-    .btn-next,
-    .btn-back,
-    .btn-submit,
-    .btn-add-team {
-        padding: 18px;
-        font-size: 1.1rem;
-    }
-    
-    .btn-group-toggle {
-        flex-direction: column;
-    }
-    
-    .toggle-btn {
-        min-width: 100%;
-        padding: 16px;
-        font-size: 1.1rem;
-    }
-    
     .form-row {
         flex-direction: column;
         gap: 0;
     }
     
-    .form-row .form-group {
-        min-width: 100%;
+    .card-body {
+        padding: 1.25rem;
     }
     
-    .footer-buttons {
-        flex-direction: column;
-        gap: 12px;
+    .form-label {
+        font-size: 1rem;
     }
     
-    .btn-back {
-        margin-right: 0;
-    }
-    
-    .info-box {
-        flex-direction: column;
-        text-align: center;
-        padding: 14px;
-    }
-    
-    .info-icon {
-        font-size: 1.8rem;
-    }
-    
-    .team-member {
-        padding: 16px;
-    }
-    
-    .progress-bar {
-        height: 8px;
+    .btn-primary {
+        font-size: 1.05rem;
+        padding: 1rem;
     }
 }
 
-/* Animation for team member addition */
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.team-member {
-    animation: slideUp 0.3s ease;
+@media (max-width: 480px) {
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-input,
+    .form-textarea,
+    .form-select {
+        padding: 0.85rem;
+        font-size: 0.95rem;
+    }
 }
