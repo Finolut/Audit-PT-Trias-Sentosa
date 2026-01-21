@@ -164,15 +164,15 @@
     <table class="header-table">
         <tr>
             <td style="width: 60px;">
-                <img src="{{ asset('https://trias-sentosa.com/images/ts.jpg') }}" alt="Logo" class="logo-img">
+                <img src="{{ asset('https://trias-sentosa.com/images/ts.jpg  ') }}" alt="Logo" class="logo-img">
             </td>
             <td>
                 <div class="company-name">PT TRIAS SENTOSA Tbk</div>
                 <div class="tagline">FLEXIBLE PACKAGING FILM MANUFACTURER</div>
             </td>
             <td class="cert-container">
-                <img src="https://via.placeholder.com/80x40?text=ISO+9001" class="cert-logo">
-                <img src="https://via.placeholder.com/80x40?text=ISO+14001" class="cert-logo">
+                <img src="https://via.placeholder.com/80x40?text=ISO+9001  " class="cert-logo">
+                <img src="https://via.placeholder.com/80x40?text=ISO+14001  " class="cert-logo">
             </td>
         </tr>
     </table>
@@ -206,42 +206,29 @@
         </tr>
     </table>
 
-<div class="audit-overview">
+    <div class="audit-overview">
         <h2 class="audit-title-section">INFORMASI AUDIT</h2>
         <table class="audit-info-grid">
-<tr>
-    <td><strong>Auditor Utama</strong></td>
-    <td>: 
-        {{ $leadAuditor['name'] ?? '-' }}
-        (NIK: {{ $leadAuditor['nik'] ?? 'N/A' }}, 
-         Dept: {{ $leadAuditor['department'] ?? 'N/A' }})
-    </td>
-</tr>
-<tr>
-    <td><strong>Anggota Tim</strong></td>
-    <td>
-        @if(count($teamMembers) > 0)
-            @foreach($teamMembers as $member)
-                <div style="margin-bottom: 3px; font-size: 10.5px;">
-                    {{ $member['name'] }}
-                    (NIK: {{ $member['nik'] }}, 
-                     Dept: {{ $member['department'] }})
-                </div>
-            @endforeach
-        @else
-            -
-        @endif
-    </td>
-</tr>
+            <tr>
+                <td style="width: 120px;"><strong>Departemen</strong></td>
+                <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
+                <td style="width: 100px;"><strong>Auditor Utama</strong></td>
+                <td>: 
+                    {{ $leadAuditor['name'] ?? '-' }}
+                    (NIK: {{ $leadAuditor['nik'] ?? 'N/A' }}, 
+                     Dept: {{ $leadAuditor['department'] ?? 'N/A' }})
+                </td>
+            </tr>
+            <tr>
                 <td><strong>Tanggal Audit</strong></td>
                 <td>: {{ $audit->created_at->format('d F Y') }}</td>
                 <td><strong>Anggota Tim</strong></td>
                 <td>
-                    @if($teamMembers->count() > 0)
+                    @if(count($teamMembers) > 0)
                         @foreach($teamMembers as $member)
                             <div class="team-member">
-                                <span class="team-member-name">{{ $member->responder_name }}</span>
-                                <span class="team-member-detail">(NIK: {{ $member->responder_nik ?? 'N/A' }}, {{ $member->responder_department ?? 'N/A' }})</span>
+                                <span class="team-member-name">{{ $member['name'] ?? '-' }}</span>
+                                <span class="team-member-detail">(NIK: {{ $member['nik'] ?? 'N/A' }}, {{ $member['department'] ?? 'N/A' }})</span>
                             </div>
                         @endforeach
                     @else
