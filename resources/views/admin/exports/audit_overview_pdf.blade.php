@@ -174,9 +174,6 @@
         </div>
         
         <div class="certifications">
-            <img src="https://via.placeholder.com/80x40?text=LRQA" alt="LRQA Certified" class="cert-logo">
-            <img src="https://via.placeholder.com/80x40?text=UKAS" alt="UKAS Certified" class="cert-logo">
-            <img src="https://via.placeholder.com/80x40?text=ISCC" alt="ISCC Certified" class="cert-logo">
             <img src="https://via.placeholder.com/80x40?text=ISO+14001" alt="ISO 14001" class="cert-logo">
         </div>
     </div>
@@ -212,12 +209,6 @@
             <div>Surabaya 60225, Indonesia</div>
             <div>Ph: +62-31-99144888, Fax: +62-31-99148510</div>
         </div>
-    </div>
-
-    <!-- AUDIT INFO -->
-    <div class="audit-header">
-        <div class="audit-title">PERJANJIAN MAGANG</div>
-        <div class="audit-meta">Nomor: 0353/HRGA/XII/2025</div>
     </div>
 
     <!-- AUDIT DETAILS -->
