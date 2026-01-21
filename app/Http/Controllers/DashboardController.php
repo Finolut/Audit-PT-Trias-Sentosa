@@ -329,21 +329,26 @@ public function exportToPdf($auditId)
         }
     }
 
-    // Ambil data klausul & jawaban (kode lama tetap dipertahankan)
-    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-        ->leftJoin('answer_finals', function($join) use ($auditId) {
-            $join->on('items.id', '=', 'answer_finals.item_id')
-                 ->where('answer_finals.audit_id', '=', $auditId);
-        })
-        ->select(
-            'clauses.clause_code',
-            'items.item_text',
-            'answer_finals.final_yes',
-            'answer_finals.final_no',
-            'answer_finals.yes_count',
-            'answer_finals.no_count'
-        )
-        ->get();
+$allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+    ->leftJoin('answer_finals', function($join) use ($auditId) {
+        $join->on('items.id', '=', 'answer_finals.item_id')
+             ->where('answer_finals.audit_id', '=', $auditId);
+    })
+    ->leftJoin('maturity_levels', function($join) {
+        $join->on('answer_finals.yes_count', '>=', 'maturity_levels.level_number')
+             ->whereRaw('answer_finals.no_count = 0'); // Hanya jika tidak ada NO
+    })
+    ->select(
+        'clauses.clause_code',
+        'items.item_text',
+        'answer_finals.final_yes',
+        'answer_finals.final_no',
+        'answer_finals.yes_count',
+        'answer_finals.no_count',
+        'maturity_levels.description as maturity_description', // Ambil deskripsi
+        'maturity_levels.level_number as maturity_level'     // Ambil level number
+    )
+    ->get();
 
     // Hitung statistik (kode lama tetap dipertahankan)
     $mainStats = [];
@@ -352,39 +357,53 @@ public function exportToPdf($auditId)
         $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
     }
 
-    foreach ($allItems as $item) {
+foreach ($allItems as $item) {
+    $status = 'unanswered';
+    $mainClause = 'Unknown';
+
+    if (is_null($item->final_yes)) {
         $status = 'unanswered';
-        $mainClause = 'Unknown';
-
-        if (is_null($item->final_yes)) {
-            $status = 'unanswered';
-        } elseif ($item->yes_count == 0 && $item->no_count == 0) {
-            $status = 'na';
-        } elseif ($item->final_yes > $item->final_no) {
-            $status = 'yes';
-        } elseif ($item->final_no > $item->final_yes) {
-            $status = 'no';
-        } else {
-            $status = 'partial';
-        }
-
-        foreach($this->mainClauses as $mainKey => $subArray) {
-            if (in_array($item->clause_code, $subArray)) {
-                $mainClause = $mainKey;
-                $mainStats[$mainKey][$status]++;
-                break;
-            }
-        }
-
-        $detailedItems[] = [
-            'main_clause' => $mainClause,
-            'sub_clause' => $item->clause_code,
-            'item_text' => $item->item_text,
-            'status' => $status,
-            'yes_count' => $item->yes_count,
-            'no_count' => $item->no_count,
-        ];
+    } elseif ($item->yes_count == 0 && $item->no_count == 0) {
+        $status = 'na';
+    } elseif ($item->final_yes > $item->final_no) {
+        $status = 'yes';
+    } elseif ($item->final_no > $item->final_yes) {
+        $status = 'no';
+    } else {
+        $status = 'partial';
     }
+
+    foreach($this->mainClauses as $mainKey => $subArray) {
+        if (in_array($item->clause_code, $subArray)) {
+            $mainClause = $mainKey;
+            $mainStats[$mainKey][$status]++;
+            break;
+        }
+    }
+
+    // 🔍 LOGIKA MATURITY LEVEL
+    $maturityLevelNumber = 1; // Default Basic
+    $maturityDescription = 'Basic'; // Default description
+
+    if ($status == 'yes') {
+        // Ambil dari join maturity_levels — jika tidak ada, pakai default
+        if (!empty($item->maturity_level)) {
+            $maturityLevelNumber = $item->maturity_level;
+            $maturityDescription = $item->maturity_description ?? 'Basic';
+        }
+    }
+
+    $detailedItems[] = [
+        'main_clause' => $mainClause,
+        'sub_clause' => $item->clause_code,
+        'item_text' => $item->item_text,
+        'status' => $status,
+        'yes_count' => $item->yes_count,
+        'no_count' => $item->no_count,
+        'maturity_level' => $maturityLevelNumber,
+        'maturity_description' => $maturityDescription,
+    ];
+}
 
     // Generate PDF dengan data tambahan
     $pdf = Pdf::loadView('admin.exports.audit_overview_pdf', [

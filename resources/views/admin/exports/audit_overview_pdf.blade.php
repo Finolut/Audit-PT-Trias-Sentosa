@@ -71,7 +71,7 @@
         .audit-overview {
             margin: 20px 0;
             padding: 15px;
-            background-color: #f8fafc;
+            background-color: #ffffff;
             border-radius: 5px;
             border: 1px solid #003366; 
         }
@@ -179,7 +179,7 @@
             <tr>
                 <td style="width: 120px;"><strong>Departemen</strong></td>
                 <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
-                <td style="width: 100px;"><strong>Auditor Utama</strong></td>
+                <td style="width: 100px;"><strong>Auditor</strong></td>
                 <td>: 
                     {{ $leadAuditor['name'] ?? '-' }}
                     (NIK: {{ $leadAuditor['nik'] ?? 'N/A' }}, 
@@ -235,9 +235,14 @@
             <tr>
                 <td style="text-align: center;"><strong>{{ $item['sub_clause'] }}</strong></td>
                 <td>{{ $item['item_text'] }}</td>
-                <td style="text-align: center;">
-                    <span class="maturity-text">Level {{ $item['maturity_level'] ?? '1' }}</span>
-                </td>
+<td style="text-align: center;">
+    <span class="maturity-text">
+        Level {{ $item['maturity_level'] }} 
+        @if(isset($item['maturity_description']))
+            ({{ $item['maturity_description'] }})
+        @endif
+    </span>
+</td>
                 <td style="text-align: center;">
                     @php
                         $statusMap = [
