@@ -160,56 +160,109 @@
         .page-break {
             page-break-after: always;
         }
+
+        .header-container {
+        font-family: Arial, sans-serif;
+        border-bottom: 2px solid #003366; /* Garis bawah biru formal */
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .top-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .logo-img {
+        height: 60px; /* Sesuaikan ukuran logo */
+        margin-right: 15px;
+    }
+
+    .certifications img {
+        height: 40px;
+        opacity: 0.8;
+    }
+
+    /* Grid layout untuk alamat */
+    .address-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Membagi menjadi 2 kolom utama */
+        gap: 15px;
+        font-size: 9px; /* Ukuran teks kecil khas dokumen formal */
+        color: #333;
+        line-height: 1.3;
+    }
+
+    .address-box {
+        margin-bottom: 5px;
+    }
+
+    .address-title {
+        font-weight: bold;
+        color: #003366;
+        font-size: 10px;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+    }
+
+    .contact-info {
+        color: #555;
+    }
     </style>
 </head>
 <body>
     <!-- HEADER SECTION -->
-    <div class="header">
-        <div class="logo-section">
-            <div class="logo">TS</div> <!-- Ganti dengan logo asli jika punya -->
-            <div class="company-info">
-                <div class="company-name">PT TRIAS SENTOSA Tbk</div>
-                <div class="tagline">FLEXIBLE PACKAGING FILM MANUFACTURER</div>
-            </div>
+  <div class="header-container">
+    <div class="top-section">
+        <div class="logo-container">
+            <img src="{{ asset('images/logo.webp') }}" alt="Logo PT TRIAS SENTOSA Tbk" class="logo-img">
         </div>
         
         <div class="certifications">
-            <img src="https://via.placeholder.com/80x40?text=ISO+14001" alt="ISO 14001" class="cert-logo">
+            <img src="https://via.placeholder.com/80x40?text=ISO+9001" alt="ISO 9001">
+            <img src="https://via.placeholder.com/80x40?text=ISO+14001" alt="ISO 14001">
         </div>
     </div>
-    
-    <!-- ADDRESS SECTION -->
-    <div class="address-section">
-        <div class="address-box">
-            <div class="address-title">HEAD OFFICE / WARU PLANT</div>
-            <div>Jl. Raya Waru No.1 B, Waru,</div>
-            <div>Sidoarjo 61256, Indonesia</div>
-            <div>Ph: +62-31-8533125, Fax: +62-31-8534116</div>
+
+    <div class="address-grid">
+        <div class="address-column">
+            <div class="address-box">
+                <div class="address-title">HEAD OFFICE / WARU PLANT :</div>
+                <div>Jl. Raya Waru No.1 B, Waru, Sidoarjo 61256, Indonesia</div>
+                <div class="contact-info">Ph: +62-31-8533125, Fax: +62-31-8534116</div>
+            </div>
+            
+            <div class="address-box">
+                <div class="address-title">KRIAN PLANT :</div>
+                <div>Desa Keboharan, Km 26, Krian, Sidoarjo 61262, Indonesia</div>
+                <div class="contact-info">Ph: +62-31-8975825, Fax: +62-31-8972998</div>
+            </div>
         </div>
-        
-        <div class="address-box">
-            <div class="address-title">JAKARTA OFFICE</div>
-            <div>Altira Business Park</div>
-            <div>Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor, Sunter</div>
-            <div>Jakarta Utara 14350, Indonesia</div>
-            <div>Ph: +62-21-29615575, Fax: +62-21-29615565</div>
-        </div>
-        
-        <div class="address-box">
-            <div class="address-title">KRIAN PLANT</div>
-            <div>Desa Keboharan, Km 26, Krian,</div>
-            <div>Sidoarjo 61262, Indonesia</div>
-            <div>Ph: +62-31-8975825, Fax: +62-31-8972998</div>
-        </div>
-        
-        <div class="address-box">
-            <div class="address-title">SURABAYA OFFICE</div>
-            <div>Spazio Tower 15th Floor</div>
-            <div>Jl. Mayjen Yono Suwoyo,</div>
-            <div>Surabaya 60225, Indonesia</div>
-            <div>Ph: +62-31-99144888, Fax: +62-31-99148510</div>
+
+        <div class="address-column">
+            <div class="address-box">
+                <div class="address-title">JAKARTA OFFICE :</div>
+                <div>Altira Business Park, Jl. Yos Sudarso Kav.85 Blok A01-07, 5th Floor</div>
+                <div>Sunter, Jakarta Utara 14350, Indonesia</div>
+                <div class="contact-info">Ph: +62-21-29615575, Fax: +62-21-29615565</div>
+            </div>
+
+            <div class="address-box">
+                <div class="address-title">SURABAYA OFFICE :</div>
+                <div>Spazio Tower 15th Floor, Jl. Mayjen Yono Suwoyo,</div>
+                <div>Surabaya 60225, Indonesia</div>
+                <div class="contact-info">Ph: +62-31-99144888, Fax: +62-31-99148510</div>
+            </div>
         </div>
     </div>
+</div>
 
     <!-- AUDIT DETAILS -->
     <div style="margin: 30px 0;">
@@ -255,7 +308,7 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        <p>Generated on {{ now()->format('d F Y H:i') }} | PT TRIAS SENTOSA Tbk - QHSE Department</p>
+        <p>Generated on {{ now()->format('d F Y H:i') }} | PT TRIAS SENTOSA Tbk</p>
     </div>
 </body>
 </html>
