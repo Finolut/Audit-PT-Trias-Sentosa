@@ -324,23 +324,25 @@ public function exportToPdf($auditId)
 
     // --- PERBAIKAN QUERY UTAMA DI SINI ---
     // Join ke maturity_levels untuk ambil definisi level per soal
-    // Join ke answers untuk ambil jawaban spesifik audit ini
-    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-        ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
-        ->leftJoin('answers', function($join) use ($auditId) {
-            $join->on('items.id', '=', 'answers.item_id')
-                 ->where('answers.audit_id', '=', $auditId);
-        })
-        ->select(
-            'clauses.clause_code',
-            'items.item_text',
-            'maturity_levels.level_number',      // Ambil angka level dari DB
-            'maturity_levels.description as maturity_desc', // Ambil deskripsi dari DB
-            'answers.answer as current_answer',  // Jawaban auditor (yes/no/etc)
-            'answers.auditor_name'               // Opsional: siapa yang jawab
-        )
-        ->orderBy('clauses.clause_code', 'asc')
-        ->get();
+// --- PERBAIKAN QUERY SORTING ---
+$allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+    ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+    ->leftJoin('answers', function($join) use ($auditId) {
+        $join->on('items.id', '=', 'answers.item_id')
+             ->where('answers.audit_id', '=', $auditId);
+    })
+    ->select(
+        'clauses.clause_code',
+        'items.item_text',
+        'maturity_levels.level_number',
+        'maturity_levels.description as maturity_desc',
+        'answers.answer as current_answer'
+    )
+    // Urutkan berdasarkan level_number (1-5) terlebih dahulu, 
+    // kemudian baru berdasarkan kode klausul jika levelnya sama
+    ->orderBy('maturity_levels.level_number', 'asc')
+    ->orderBy('clauses.clause_code', 'asc')
+    ->get();
 
     $detailedItems = [];
     
