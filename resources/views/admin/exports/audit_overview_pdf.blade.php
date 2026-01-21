@@ -236,11 +236,9 @@
                 <td style="text-align: center;"><strong>{{ $item['sub_clause'] }}</strong></td>
                 <td>{{ $item['item_text'] }}</td>
 <td style="text-align: center;">
-    <span class="maturity-text">
-        Level {{ $item['maturity_level'] }} 
-        ({{ $item['maturity_description'] }})
-    </span>
-</td>
+                    <span class="level-badge">Level {{ $item['maturity_level'] }}</span>
+                    <div class="level-desc">{{ $item['maturity_description'] }}</div>
+                </td>
                 <td style="text-align: center;">
                     @php
                         $statusMap = [

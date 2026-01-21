@@ -298,7 +298,7 @@ public function exportToPdf($auditId)
 {
     $audit = Audit::with('department')->findOrFail($auditId);
 
-    // Ambil session terkait audit
+    // Ambil session
     $session = DB::table('audit_sessions')
         ->where('id', $audit->audit_session_id)
         ->first();
@@ -307,125 +307,87 @@ public function exportToPdf($auditId)
         abort(404, 'Audit session not found');
     }
 
-    // Ambil data auditor utama dari kolom langsung
+    // Data Auditor & Tim
     $leadAuditor = [
         'name' => $session->auditor_name,
         'nik' => $session->auditor_nik,
         'department' => $session->auditor_department,
     ];
 
-    // Ambil anggota tim dari kolom JSON `audit_team`
     $teamMembers = [];
     if (!empty($session->audit_team)) {
         $teamJson = json_decode($session->audit_team, true);
         if (is_array($teamJson)) {
-            foreach ($teamJson as $member) {
-                $teamMembers[] = [
-                    'name' => $member['name'] ?? '-',
-                    'nik' => $member['nik'] ?? 'N/A',
-                    'department' => $member['department'] ?? 'N/A',
-                ];
-            }
+            $teamMembers = $teamJson;
         }
     }
 
-$allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-    ->leftJoin('answer_finals', function($join) use ($auditId) {
-        $join->on('items.id', '=', 'answer_finals.item_id')
-             ->where('answer_finals.audit_id', '=', $auditId);
-    })
-    ->select(
-        'clauses.clause_code',
-        'items.item_text',
-        'answer_finals.final_yes',
-        'answer_finals.final_no',
-        'answer_finals.yes_count',
-        'answer_finals.no_count'
-    )
-    ->get();
+    // --- PERBAIKAN QUERY UTAMA DI SINI ---
+    // Join ke maturity_levels untuk ambil definisi level per soal
+    // Join ke answers untuk ambil jawaban spesifik audit ini
+    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+        ->leftJoin('answers', function($join) use ($auditId) {
+            $join->on('items.id', '=', 'answers.item_id')
+                 ->where('answers.audit_id', '=', $auditId);
+        })
+        ->select(
+            'clauses.clause_code',
+            'items.item_text',
+            'maturity_levels.level_number',      // Ambil angka level dari DB
+            'maturity_levels.description as maturity_desc', // Ambil deskripsi dari DB
+            'answers.answer as current_answer',  // Jawaban auditor (yes/no/etc)
+            'answers.auditor_name'               // Opsional: siapa yang jawab
+        )
+        ->orderBy('clauses.clause_code', 'asc')
+        ->get();
 
-    // Hitung statistik (kode lama tetap dipertahankan)
-    $mainStats = [];
     $detailedItems = [];
-    foreach($this->mainClauses as $main => $subs) {
-        $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+    
+    // Proses data agar rapi di PDF
+    foreach ($allItems as $item) {
+        // Tentukan status berdasarkan jawaban di tabel 'answers'
+        $statusRaw = strtolower($item->current_answer ?? 'unanswered');
+        
+        // Mapping status agar seragam
+        $status = match ($statusRaw) {
+            'yes' => 'yes',
+            'no' => 'no',
+            'n/a', 'na' => 'na',
+            default => 'unanswered',
+        };
+
+        $detailedItems[] = [
+            'sub_clause' => $item->clause_code,
+            'item_text' => $item->item_text,
+            'status' => $status,
+            // Ambil Level langsung dari item tersebut, bukan dihitung
+            'maturity_level' => $item->level_number, 
+            'maturity_description' => $item->maturity_desc,
+        ];
     }
 
-// Buat mapping level number → description
-$maturityMap = [
-    1 => 'Initial awareness',
-    2 => 'Understanding',
-    3 => 'Defined',
-    4 => 'Implemented',
-    5 => 'Optimized',
-];
-
-foreach ($allItems as $item) {
-    $status = 'unanswered';
-    $mainClause = 'Unknown';
-
-    if (is_null($item->final_yes)) {
-        $status = 'unanswered';
-    } elseif ($item->yes_count == 0 && $item->no_count == 0) {
-        $status = 'na';
-    } elseif ($item->final_yes > $item->final_no) {
-        $status = 'yes';
-    } elseif ($item->final_no > $item->final_yes) {
-        $status = 'no';
-    } else {
-        $status = 'partial';
+    // --- PERBAIKAN GAMBAR PDF (BASE64) ---
+    // Mengubah gambar jadi base64 agar PDF tidak error saat loading path
+    $imagePath = public_path('images/ts.jpg');
+    $logoBase64 = '';
+    
+    if (file_exists($imagePath)) {
+        $type = pathinfo($imagePath, PATHINFO_EXTENSION);
+        $data = file_get_contents($imagePath);
+        $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
     }
 
-    foreach($this->mainClauses as $mainKey => $subArray) {
-        if (in_array($item->clause_code, $subArray)) {
-            $mainClause = $mainKey;
-            $mainStats[$mainKey][$status]++;
-            break;
-        }
-    }
-
-    // 🔍 LOGIKA MATURITY LEVEL — BERDASARKAN YES COUNT
-    $maturityLevelNumber = 1; // Default: Basic / Initial awareness
-    $maturityDescription = $maturityMap[1]; // Default description
-
-    if ($status == 'yes') {
-        // Tentukan level berdasarkan jumlah YES
-        if ($item->yes_count >= 5) {
-            $maturityLevelNumber = 5;
-        } elseif ($item->yes_count >= 4) {
-            $maturityLevelNumber = 4;
-        } elseif ($item->yes_count >= 3) {
-            $maturityLevelNumber = 3;
-        } elseif ($item->yes_count >= 2) {
-            $maturityLevelNumber = 2;
-        }
-        // Jika yes_count == 1 → tetap level 1
-
-        $maturityDescription = $maturityMap[$maturityLevelNumber] ?? $maturityMap[1];
-    }
-
-    $detailedItems[] = [
-        'main_clause' => $mainClause,
-        'sub_clause' => $item->clause_code,
-        'item_text' => $item->item_text,
-        'status' => $status,
-        'yes_count' => $item->yes_count,
-        'no_count' => $item->no_count,
-        'maturity_level' => $maturityLevelNumber,
-        'maturity_description' => $maturityDescription,
-    ];
-}
-
-    // Generate PDF dengan data tambahan
-    $pdf = Pdf::loadView('admin.exports.audit_overview_pdf', [
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.exports.audit_overview_pdf', [
         'audit' => $audit,
-        'leadAuditor' => $leadAuditor,      // ✅ Data auditor utama
-        'teamMembers' => $teamMembers,      // ✅ Data anggota tim
-        'mainClauses' => $this->mainClauses,
-        'titles' => $this->mainClauseTitles,
-        'mainStats' => $mainStats,
-        'detailedItems' => $detailedItems
+        'leadAuditor' => $leadAuditor,
+        'teamMembers' => $teamMembers,
+        'detailedItems' => $detailedItems,
+        'logoBase64' => $logoBase64 // Kirim variable gambar ke View
     ]);
+
+    // Opsional: Set paper size jika perlu
+    $pdf->setPaper('A4', 'portrait');
 
     return $pdf->download("audit_{$audit->id}_".now()->format('Ymd').".pdf");
 }
