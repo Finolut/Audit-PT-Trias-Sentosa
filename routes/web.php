@@ -99,6 +99,9 @@ Route::prefix('admin')->group(function () {
     // 6. Status Departemen (Jika Anda menggunakan view status index)
     Route::get('/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('admin.dept_status');
 
+    Route::get('/audit/{id}', [DashboardController::class, 'showAuditOverview'])
+        ->name('audit.overview');
+
 });
 
 /*
