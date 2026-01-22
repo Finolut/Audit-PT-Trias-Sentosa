@@ -3,7 +3,7 @@
 @section('content')
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Hasil Audit Detail</h2>
-        <a href="{{ route('dept.show', $audit->department_id) }}" class="text-sm text-gray-500 hover:underline">← Kembali</a>
+        <a href="{{ route('admin.dept.show', $audit->department_id) }}" class="text-sm text-gray-500 hover:underline">← Kembali</a>
     </div>
 
     <div class="bg-white p-6 rounded-lg shadow mb-6 grid grid-cols-3 gap-4">
