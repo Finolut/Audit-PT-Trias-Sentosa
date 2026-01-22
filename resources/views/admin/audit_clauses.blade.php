@@ -38,37 +38,51 @@
             Informasi Audit
         </h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <!-- Kolom Kiri -->
-            <div>
-                <p><strong>Jenis Pemeriksaan:</strong> 
-                    @php
-                        $typeLabels = [
-                            'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
-                            'Special' => 'Pemeriksaan Khusus (Mendadak)',
-                            'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
-                        ];
-                    @endphp
-                    {{ $typeLabels[$audit->type] ?? '-' }}
-                </p>
-          <p><strong>Tanggal Pemeriksaan:</strong> 
-    {{ $audit->created_at ? \Carbon\Carbon::parse($audit->created_at)->format('d F Y') : '-' }}
-</p>
-                <p><strong>Bagian yang Diperiksa:</strong> 
-                    <span class="font-medium">{{ $audit->scope ?? '-' }}</span>
-                </p>
-            </div>
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+    <div class="space-y-2">
+        <div class="flex">
+            <span class="w-40 font-bold text-gray-600">Jenis Pemeriksaan</span>
+            <span class="mr-2">:</span>
+            <span class="text-gray-800">
+                @php
+                    $typeLabels = [
+                        'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
+                        'Special' => 'Pemeriksaan Khusus (Mendadak)',
+                        'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
+                    ];
+                @endphp
+                {{ $typeLabels[$audit->type] ?? '-' }}
+            </span>
+        </div>
+        <div class="flex">
+            <span class="w-40 font-bold text-gray-600">Tanggal Pemeriksaan</span>
+            <span class="mr-2">:</span>
+            <span class="text-gray-800">{{ $audit->created_at->format('d F Y') }}</span>
+        </div>
+        <div class="flex">
+            <span class="w-40 font-bold text-gray-600">Bagian yang Diperiksa</span>
+            <span class="mr-2">:</span>
+            <span class="text-gray-800 font-medium">{{ $audit->scope ?? '-' }}</span>
+        </div>
+    </div>
 
-          <div>
-    <p><strong>Auditor Utama:</strong> 
-        <span class="font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
-    </p>
-    <p><strong>Penanggung Jawab di Departemen:</strong> 
-        <span class="font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
-    </p>
-    <p><strong>NIK Penanggung Jawab:</strong> 
-        {{ $audit->pic_auditee_nik ?: 'Tidak ada' }}
-    </p>
+    <div class="space-y-2">
+        <div class="flex">
+            <span class="w-40 font-bold text-gray-600">Auditor Utama</span>
+            <span class="mr-2">:</span>
+            <span class="text-gray-800 font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
+        </div>
+        <div class="flex">
+            <span class="w-40 font-bold text-gray-600">Penanggung Jawab</span>
+            <span class="mr-2">:</span>
+            <span class="text-gray-800 font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
+        </div>
+        <div class="flex">
+            <span class="w-40 font-bold text-gray-600">NIK Penanggung Jawab</span>
+            <span class="mr-2">:</span>
+            <span class="text-gray-800">{{ $audit->pic_auditee_nik ?: 'Tidak ada' }}</span>
+        </div>
+    </div>
 </div>
 
         <!-- Tujuan Audit (full width) -->

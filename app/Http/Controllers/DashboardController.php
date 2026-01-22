@@ -113,6 +113,16 @@ public function index()
         $departments = Department::all();
        $audit = Audit::with('department')->findOrFail($auditId);
 
+       // --- TAMBAHKAN INI AGAR NAMA AUDITOR MUNCUL ---
+    $session = DB::table('audit_sessions')
+        ->where('id', $audit->audit_session_id)
+        ->first();
+
+    $leadAuditor = [
+        'name' => $session->auditor_name ?? '-',
+        'nik' => $session->auditor_nik ?? '-',
+    ];
+       
         // --- LOGIKA GRAFIK ---
         $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->leftJoin('answer_finals', function($join) use ($auditId) {
@@ -185,6 +195,7 @@ foreach ($allItems as $item) {
         return view('admin.audit_clauses', [
             'departments' => $departments,
             'audit' => $audit,
+            'leadAuditor' => $leadAuditor,
             'mainClauses' => $this->mainClauses,
             'titles' => $this->mainClauseTitles,
             'detailedStats' => $detailedStats, 
