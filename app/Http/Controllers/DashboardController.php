@@ -396,22 +396,31 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
 
 public function searchAudit(Request $request)
 {
-    // Ubah validasi agar menerima format string UUID
+    // 1. Validasi input sebagai string karena ID menggunakan UUID
     $request->validate([
         'audit_id' => 'required|string' 
     ]);
 
-    // Bersihkan input jika ada spasi yang tidak sengaja terikut
     $searchId = trim($request->audit_id);
 
-    // Cari audit berdasarkan UUID string
-    $audit = Audit::find($searchId);
+    // 2. Cari audit beserta data session (untuk mendapatkan nama auditor)
+    $audit = Audit::with(['session'])->find($searchId);
 
-    if ($audit) {
-        return redirect()->route('admin.audit.overview', $audit->id);
+    if ($audit && $audit->session) {
+        // 3. Cari User (Auditor) berdasarkan nama yang tercatat di session
+        $auditorUser = \App\Models\User::where('name', $audit->session->auditor_name)
+                                      ->where('role', 'auditor')
+                                      ->first();
+
+        if ($auditorUser) {
+            // 4. Redirect ke halaman Profil & Riwayat Auditor
+            // Sambil mengirimkan session flash untuk highlight baris audit yang dicari
+            return redirect()->route('admin.auditors.show', $auditorUser->id)
+                             ->with('highlight_audit', $searchId);
+        }
     }
 
-    return back()->with('error', 'Laporan Audit dengan ID tersebut tidak ditemukan.');
+    return back()->with('error', 'Data auditor untuk ID Laporan tersebut tidak ditemukan.');
 }
 
 }

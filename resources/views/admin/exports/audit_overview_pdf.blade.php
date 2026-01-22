@@ -216,7 +216,7 @@
                     {{ $typeLabels[$audit->type] ?? '-' }}
                 </td>
                 <td><strong>ID Laporan</strong></td>
-                <td>: #{{ $audit->id }}</td>
+                <td>: {{ $audit->id }}</td>
             </tr>
         </table>
     </div>

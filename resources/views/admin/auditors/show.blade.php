@@ -53,23 +53,26 @@
         </div>
         
         <div class="divide-y divide-gray-100">
-            @forelse($history as $audit)
-            <div class="p-6 hover:bg-gray-50 transition-all">
-                <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
-                    
-                    <div class="flex-1">
-                        {{-- Badge Type & Tanggal --}}
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="px-2.5 py-1 rounded text-xs font-bold 
-                                {{ $audit->type == 'Special' ? 'bg-purple-100 text-purple-700' : 
-                                  ($audit->type == 'FollowUp' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
-                                {{ $audit->type ?? 'Regular' }}
-                            </span>
-                            <span class="text-sm text-gray-400">
-                                {{-- Mengambil audit_date dari hasil join --}}
-                                {{ \Carbon\Carbon::parse($audit->audit_date)->translatedFormat('d F Y') }}
-                            </span>
-                        </div>
+@forelse($history as $audit)
+    {{-- Tambahkan ID unik dan logic class untuk warna highlight --}}
+    <div id="audit-{{ $audit->id }}" 
+         class="p-6 transition-all duration-1000 {{ session('highlight_audit') == $audit->id ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'hover:bg-gray-50' }}">
+        
+        <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
+            <div class="flex-1">
+                {{-- ID Audit (Sangat membantu untuk verifikasi copas) --}}
+                <div class="text-[10px] font-mono text-gray-400 mb-1 uppercase">ID: {{ $audit->id }}</div>
+                
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="px-2.5 py-1 rounded text-xs font-bold 
+                        {{ $audit->type == 'Special' ? 'bg-purple-100 text-purple-700' : 
+                          ($audit->type == 'FollowUp' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">
+                        {{ $audit->type ?? 'Regular' }}
+                    </span>
+                    <span class="text-sm text-gray-400">
+                        {{ \Carbon\Carbon::parse($audit->audit_date)->translatedFormat('d F Y') }}
+                    </span>
+                </div>
 
                         {{-- Isi Detail --}}
                         <div class="mt-3 space-y-2">
@@ -94,8 +97,12 @@
                         @else
                             <span class="text-yellow-600 text-sm font-bold bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100">⏳ Proses</span>
                         @endif
-                    </div>
-                </div>
+<a href="{{ route('admin.audit.overview', $audit->id) }}" class="mt-2 text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                    Detail Laporan 
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+                </a>
+            </div>
+        </div>
 
                 {{-- Tim Tambahan (JSON) --}}
                 @if(!empty($audit->audit_team))
