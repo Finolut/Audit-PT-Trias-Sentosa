@@ -235,16 +235,6 @@
         @endforeach
     </div>
 
-    @if(count($completedClauses) == count($mainClauses))
-        <div class="finish-banner">
-            <div class="finish-icon">🎉</div>
-            <h2 class="finish-message">Audit Telah Selesai!</h2>
-            <p class="finish-subtext">
-                Semua klausul telah diisi. Terima kasih atas partisipasinya!
-            </p>
-            <p class="countdown" id="countdown">Mengalihkan ke halaman utama dalam <span id="seconds">3</span> detik...</p>
-        </div>
-
         <script>
             // Auto-redirect setelah 3 detik
             let seconds = 3;
