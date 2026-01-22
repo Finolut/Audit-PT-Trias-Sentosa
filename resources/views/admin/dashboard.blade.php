@@ -29,8 +29,11 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Selesai</p>
-                <p class="text-3xl font-black text-gray-800">{{ $stats['completed'] }}</p>
+              @if($audit->is_finished)
+        <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm uppercase">
+            SELESAI
+        </span>
+    @else
             </div>
         </div>
 
@@ -39,8 +42,10 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Berjalan</p>
-                <p class="text-3xl font-black text-gray-800">{{ $stats['pending'] }}</p>
+                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 shadow-sm uppercase">
+            BERJALAN
+        </span>
+    @endif
             </div>
         </div>
 
@@ -105,8 +110,7 @@
         $statusDb = strtoupper($audit->status);
     @endphp
 
-<div class="flex items-center gap-3">
-    @if($audit->is_finished)
+    @if($statusDb === 'COMPLETE' || $statusDb === 'COMPLETED')
         <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm uppercase">
             SELESAI
         </span>
