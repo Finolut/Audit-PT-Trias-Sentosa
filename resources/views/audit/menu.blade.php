@@ -251,7 +251,6 @@
                 }
             }, 1000);
         </script>
-    @endif
 </div>
 
 </body>
