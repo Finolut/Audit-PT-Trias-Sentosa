@@ -175,25 +175,22 @@
 
  <div class="audit-overview">
     <h2 class="audit-title-section">INFORMASI AUDIT</h2>
-    <table class="audit-info-grid">
+    <table class="audit-info-grid" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
         <tr>
             <td style="width: 100px; vertical-align: top;"><strong>Departemen</strong></td>
             <td style="width: 10px; vertical-align: top;">:</td>
-            <td style="width: 250px; vertical-align: top;">{{ $audit->department->name ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
-            <td style="vertical-align: top;">:</td>
-            <td style="vertical-align: top;">{{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
+            <td style="vertical-align: top;">{{ $audit->department->name ?? '-' }}</td>
             
-            <td style="vertical-align: top;"><strong>Anggota Tim</strong></td>
-            <td style="vertical-align: top;">:</td>
+            <td style="width: 100px; vertical-align: top;"><strong>Anggota Tim</strong></td>
+            <td style="width: 10px; vertical-align: top;">:</td>
             <td style="vertical-align: top;">
                 @if($teamMembers->count() > 0)
                     @foreach($teamMembers as $member)
-                        <div style="margin-bottom: 2px;">
-                            <span class="team-member-name">{{ $member->name }}</span>
-                            <span style="color: #666; font-size: 9px;">(NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})</span>
+                        <div style="margin-bottom: 4px;">
+                            <span class="team-member-name" style="display: block; font-weight: bold;">{{ $member->name }}</span>
+                            <span style="color: #666; font-size: 9px;">
+                                (NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})
+                            </span>
                         </div>
                     @endforeach
                 @else
@@ -201,6 +198,21 @@
                 @endif
             </td>
         </tr>
+
+        <tr><td colspan="6" style="height: 10px;"></td></tr>
+
+        <tr>
+            <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
+            <td style="vertical-align: top;">:</td>
+            <td style="vertical-align: top;">{{ \Carbon\Carbon::parse($audit->audit_date)->translatedFormat('d F Y') }}</td>
+            
+            <td style="vertical-align: top;"><strong>ID Laporan</strong></td>
+            <td style="vertical-align: top;">:</td>
+            <td style="vertical-align: top; font-family: monospace; font-size: 9px; word-break: break-all;">
+                {{ $audit->id }}
+            </td>
+        </tr>
+
         <tr>
             <td style="vertical-align: top;"><strong>Tipe Audit</strong></td>
             <td style="vertical-align: top;">:</td>
@@ -215,9 +227,9 @@
                 {{ $typeLabels[$audit->type] ?? $audit->type }}
             </td>
             
-            <td style="vertical-align: top;"><strong>ID Laporan</strong></td>
-            <td style="vertical-align: top;">:</td>
-            <td style="vertical-align: top; font-family: monospace; font-size: 9px;">{{ $audit->id }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
     </table>
 </div>
