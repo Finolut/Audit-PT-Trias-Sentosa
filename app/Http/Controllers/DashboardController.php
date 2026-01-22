@@ -47,8 +47,11 @@ public function index()
 
     $stats = [
         'total_audits' => Audit::count(),
-        'completed'    => Audit::where('status', 'COMPLETED')->count(),
-        'pending'      => Audit::where('status', 'IN_PROGRESS')->count(),
+// PERBAIKAN: Gunakan whereIn untuk mencakup 'COMPLETE' dan 'COMPLETED'
+    'completed' => Audit::whereIn('status', ['COMPLETE', 'COMPLETED'])->count(),
+    
+    // PERBAIKAN: Pastikan status berjalan dihitung dengan benar
+    'pending' => Audit::whereNotIn('status', ['COMPLETE', 'COMPLETED'])->count(),
         'departments'  => Department::count(),
     ];
 
