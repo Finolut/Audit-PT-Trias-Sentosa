@@ -94,12 +94,10 @@
         </div>
     </div>
 
-    <div class="mt-4 pt-3 border-t border-blue-100">
-        <p class="text-sm font-bold text-gray-600">Alasan Melakukan Pemeriksaan Ini:</p>
+        <p class="text-sm font-bold text-gray-600">Pemeriksaan Terkait :</p>
         <p class="text-gray-700 bg-white/50 p-3 rounded mt-1 border border-blue-100 italic">
             "{{ $audit->objective ?? 'Tidak diisi oleh auditor.' }}"
         </p>
-    </div>
 
     <div class="mt-3 flex items-center justify-between">
         <div class="flex items-center">
