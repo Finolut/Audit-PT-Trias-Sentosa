@@ -188,47 +188,61 @@ private $auditorsList = [
         ]);
     }
 
-    public function show($auditId, $mainClause)
-    {
-        if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
+public function show($auditId, $mainClause)
+{
+    if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
 
-        $audit = DB::table('audits')->where('id', $auditId)->first();
-        if(!$audit) abort(404);
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    if(!$audit) abort(404);
 
-        $subCodes = $this->mainClauses[$mainClause];
-        $clausesData = DB::table('clauses')->whereIn('clause_code', $subCodes)->get();
+    $subCodes = $this->mainClauses[$mainClause];
+    $clausesData = DB::table('clauses')->whereIn('clause_code', $subCodes)->get();
 
-        $itemsRaw = DB::table('items')
-            ->whereIn('clause_id', $clausesData->pluck('id'))
-            ->orderBy('item_order')
-            ->get();
+    $itemsRaw = DB::table('items')
+        ->whereIn('clause_id', $clausesData->pluck('id'))
+        ->orderBy('item_order')
+        ->get();
 
-        $idToCode = $clausesData->pluck('clause_code', 'id');
-        $itemsGrouped = $itemsRaw->groupBy(fn($item) => $idToCode[$item->clause_id]);
+    $idToCode = $clausesData->pluck('clause_code', 'id');
+    $itemsGrouped = $itemsRaw->groupBy(fn($item) => $idToCode[$item->clause_id]);
 
-        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-        $existingNotes = DB::table('audit_questions')
-            ->where('audit_id', $auditId)
-            ->whereIn('clause_code', $subCodes)
-            ->pluck('question_text', 'clause_code');
+    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    $existingNotes = DB::table('audit_questions')
+        ->where('audit_id', $auditId)
+        ->whereIn('clause_code', $subCodes)
+        ->pluck('question_text', 'clause_code');
 
-        $mainKeys = array_keys($this->mainClauses);
-        $nextMain = $mainKeys[array_search($mainClause, $mainKeys) + 1] ?? null;
+    // --- TAMBAHKAN LOGIKA INI ---
+    // Mengambil jawaban yang sudah tersimpan untuk audit ini
+    $existingAnswers = [];
+    $rawAnswers = DB::table('answers')
+        ->where('audit_id', $auditId)
+        ->get();
 
-        return view('audit.questionnaire', [
-            'auditId'        => $auditId,
-            'currentMain'    => $mainClause,
-            'subClauses'     => $subCodes,
-            'clauseTitles'   => $clausesData->pluck('title', 'clause_code'),
-            'nextMainClause' => $nextMain,
-            'auditorName'    => $session->auditor_name,
-            'targetDept'     => DB::table('departments')->where('id', $audit->department_id)->value('name'),
-            'itemsGrouped'   => $itemsGrouped,
-            'existingNotes'  => $existingNotes,
-            'maturityLevels' => DB::table('maturity_levels')->orderBy('level_number')->get(),
-            'responders'     => DB::table('audit_responders')->where('audit_session_id', $session->id)->get(),
-        ]);
+    foreach ($rawAnswers as $ans) {
+        // Format: existingAnswers[item_id][nama_auditor] = 'YES'/'NO'/'N/A'
+        $existingAnswers[$ans->item_id][$ans->auditor_name] = $ans->answer;
     }
+    // ----------------------------
+
+    $mainKeys = array_keys($this->mainClauses);
+    $nextMain = $mainKeys[array_search($mainClause, $mainKeys) + 1] ?? null;
+
+    return view('audit.questionnaire', [
+        'auditId'        => $auditId,
+        'currentMain'    => $mainClause,
+        'subClauses'     => $subCodes,
+        'clauseTitles'   => $clausesData->pluck('title', 'clause_code'),
+        'nextMainClause' => $nextMain,
+        'auditorName'    => $session->auditor_name,
+        'targetDept'     => DB::table('departments')->where('id', $audit->department_id)->value('name'),
+        'itemsGrouped'   => $itemsGrouped,
+        'existingNotes'  => $existingNotes,
+        'maturityLevels' => DB::table('maturity_levels')->orderBy('level_number')->get(),
+        'responders'     => DB::table('audit_responders')->where('audit_session_id', $session->id)->get(),
+        'existingAnswers'=> $existingAnswers, // Kirim ke Blade
+    ]);
+}
 
 public function store(Request $request, $auditId, $mainClause)
 {
