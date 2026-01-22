@@ -175,28 +175,28 @@
 
 <div class="audit-overview">
     <h2 class="audit-title-section">INFORMASI AUDIT</h2>
-    <table class="audit-info-grid">
+    <table class="audit-info-grid" style="width: 100%;">
         <tr>
-            <td style="width: 120px; vertical-align: top;"><strong>Departemen</strong></td>
-            <td style="width: 300px; vertical-align: top;">: {{ $audit->department->name ?? '-' }}</td>
+            <td style="width: 120px; vertical-align: top; padding-bottom: 5px;"><strong>Departemen</strong></td>
+            <td style="width: 300px; vertical-align: top; padding-bottom: 5px;">: {{ $audit->department->name ?? '-' }}</td>
             
-            <td style="width: 100px; vertical-align: top;"><strong>Anggota Tim</strong></td>
-            <td style="vertical-align: top;">
+            <td style="width: 100px; vertical-align: top; padding-bottom: 5px;"><strong>Anggota Tim</strong></td>
+            <td style="vertical-align: top; padding-bottom: 5px;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
                         <td style="width: 10px; vertical-align: top;">:</td>
                         <td style="vertical-align: top;">
                             @if($teamMembers->count() > 0)
                                 @foreach($teamMembers as $member)
-                                    <div class="team-member" style="margin-bottom: 5px;">
-                                        <span class="team-member-name" style="display: block;">{{ $member->name }}</span>
+                                    <div class="team-member" style="margin-bottom: 2px;">
+                                        <span class="team-member-name" style="display: block; font-weight: bold;">{{ $member->name }}</span>
                                         <span class="team-member-detail" style="font-size: 9px; color: #555;">
                                             (NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})
                                         </span>
                                     </div>
                                 @endforeach
                             @else
-                                : -
+                                -
                             @endif
                         </td>
                     </tr>
@@ -204,11 +204,11 @@
             </td>
         </tr>
         <tr>
-            <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
-            <td style="vertical-align: top;">: {{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
+            <td style="vertical-align: top; padding-bottom: 5px;"><strong>Tanggal Audit</strong></td>
+            <td style="vertical-align: top; padding-bottom: 5px;">: {{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
             
-            <td style="vertical-align: top;"><strong>ID Laporan</strong></td>
-            <td style="vertical-align: top;">: {{ $audit->id }}</td>
+            <td style="vertical-align: top; padding-bottom: 5px;"><strong>ID Laporan</strong></td>
+            <td style="vertical-align: top; padding-bottom: 5px;">: {{ $audit->id }}</td>
         </tr>
         <tr>
             <td style="vertical-align: top;"><strong>Tipe Audit</strong></td>
