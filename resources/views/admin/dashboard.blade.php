@@ -98,19 +98,28 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
-                        @if($audit->status == 'COMPLETED')
-                            <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm">SELESAI</span>
-                        @else
-                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 shadow-sm">BERJALAN</span>
-                        @endif
-                        <a href="{{ route('admin.audit.overview', $audit->id) }}" 
-                           class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
-                            DETAIL
-                        </a>
-                    </div>
-                </div>
-            </div>
+{{-- Ganti bagian pengecekan status di dashboard --}}
+<div class="flex items-center gap-3">
+    @php
+        // Normalisasi status ke Uppercase untuk menghindari case-sensitivity
+        $statusDb = strtoupper($audit->status);
+    @endphp
+
+    @if($statusDb === 'COMPLETE' || $statusDb === 'COMPLETED')
+        <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm uppercase">
+            SELESAI
+        </span>
+    @else
+        <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 shadow-sm uppercase">
+            BERJALAN
+        </span>
+    @endif
+
+    <a href="{{ route('admin.audit.overview', $audit->id) }}" 
+       class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-100">
+        DETAIL
+    </a>
+</div>
             @empty
             <div class="p-12 text-center text-gray-400">
                 <p class="text-sm">Belum ada aktivitas audit.</p>
