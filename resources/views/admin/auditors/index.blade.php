@@ -44,11 +44,17 @@
                     </td>
                     <td class="p-4 text-gray-600 text-sm">{{ $aud->nik }}</td>
                     <td class="p-4 text-gray-600 text-sm">{{ $aud->department }}</td>
-                    <td class="p-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {{ $aud->total_audits ?? 0 }} Selesai
-                        </span>
-                    </td>
+<td class="p-4 text-center">
+    @if(($aud->total_audits ?? 0) > 0)
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200 shadow-sm">
+            {{ $aud->total_audits }} Selesai
+        </span>
+    @else
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-400 border border-gray-200">
+            0 Selesai
+        </span>
+    @endif
+</td>
                     <td class="p-4 text-right space-x-2">
                         <a href="{{ route('admin.auditors.show', $aud->id) }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
                             Lihat

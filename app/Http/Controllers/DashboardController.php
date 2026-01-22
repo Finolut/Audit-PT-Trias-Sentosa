@@ -44,14 +44,17 @@ class DashboardController extends Controller
 public function index()
 {
     $departments = Department::orderBy('name', 'asc')->get();
-
-    $stats = [
+$stats = [
         'total_audits' => Audit::count(),
-// PERBAIKAN: Gunakan whereIn untuk mencakup 'COMPLETE' dan 'COMPLETED'
-    'completed' => Audit::whereIn('status', ['COMPLETE', 'COMPLETED'])->count(),
-    
-    // PERBAIKAN: Pastikan status berjalan dihitung dengan benar
-    'pending' => Audit::whereNotIn('status', ['COMPLETE', 'COMPLETED'])->count(),
+        
+        // --- PERBAIKAN DI SINI ---
+        // Menghitung audit yang statusnya 'COMPLETE' atau 'COMPLETED' (Case-Insensitive)
+        'completed' => Audit::whereIn('status', ['COMPLETE', 'COMPLETED', 'complete', 'completed'])->count(),
+        
+        // Menghitung audit yang BELUM selesai (tidak termasuk status di atas)
+        'pending' => Audit::whereNotIn('status', ['COMPLETE', 'COMPLETED', 'complete', 'completed'])->count(),
+        // -------------------------
+
         'departments'  => Department::count(),
     ];
 
@@ -294,12 +297,14 @@ public function departmentStatusIndex()
     $departments = Department::orderBy('name', 'asc')->get();
 
     // 2. Ambil data summary status per departemen (Logic yang sama dengan dashboard)
-    $deptSummary = Department::withCount(['audits as total_audit', 
+   $deptSummary = Department::withCount(['audits as total_audit', 
         'audits as completed_count' => function ($query) {
-            $query->where('status', 'COMPLETED');
+            // Gunakan whereIn agar sinkron
+            $query->whereIn('status', ['COMPLETE', 'COMPLETED', 'complete', 'completed']);
         },
         'audits as pending_count' => function ($query) {
-            $query->where('status', 'IN_PROGRESS'); // Pastikan konsisten dengan enum database Anda
+            // Gunakan whereNotIn untuk menghitung sisanya
+            $query->whereNotIn('status', ['COMPLETE', 'COMPLETED', 'complete', 'completed']);
         }
     ])->orderBy('name', 'asc')->get();
 
