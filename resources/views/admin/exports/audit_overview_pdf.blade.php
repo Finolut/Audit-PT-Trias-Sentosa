@@ -199,8 +199,6 @@
             </td>
         </tr>
 
-        <tr><td colspan="6" style="height: 10px;"></td></tr>
-
         <tr>
             <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
             <td style="vertical-align: top;">:</td>
@@ -226,10 +224,6 @@
                 @endphp
                 {{ $typeLabels[$audit->type] ?? $audit->type }}
             </td>
-            
-            <td></td>
-            <td></td>
-            <td></td>
         </tr>
     </table>
 </div>
