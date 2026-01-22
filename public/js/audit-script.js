@@ -378,3 +378,40 @@ function setValFromModal(itemId, userName, value, btnElement) {
         }
     }
 }
+
+/**
+ * Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof dbAnswers !== 'undefined' && dbAnswers !== null) {
+        // 1. Looping setiap jawaban dari database
+        Object.keys(dbAnswers).forEach(itemId => {
+            const userAnswers = dbAnswers[itemId]; // Berisi { "NamaUser": "YES", ... }
+            
+            Object.keys(userAnswers).forEach(userName => {
+                const value = userAnswers[userName];
+                
+                // 2. Masukkan ke state sessionAnswers agar logika JS tetap jalan
+                const key = `${itemId}_${userName}`;
+                sessionAnswers[key] = value;
+
+                // 3. Jika ini adalah jawaban Auditor, beri warna pada tombol utama
+                if (userName === auditorName) {
+                    const group = document.getElementById(`btn_group_${itemId}`);
+                    if (group) {
+                        const buttons = group.querySelectorAll('.answer-btn');
+                        if (value === 'YES') buttons[0].classList.add('active-yes');
+                        else if (value === 'NO') buttons[1].classList.add('active-no');
+                        else if (value === 'N/A') buttons[2].classList.add('active-na');
+                    }
+                }
+
+                // 4. Update input hidden agar jika di-save lagi data tidak hilang
+                updateHiddenInputs(itemId);
+                
+                // 5. Munculkan info perbedaan jika ada
+                updateInfoBox(itemId);
+            });
+        });
+    }
+});

@@ -103,6 +103,7 @@
     <script>
         const auditorName = "{{ $auditorName }}";
         const responders = @json($responders);
+        const dbAnswers = @json($existingAnswers);
     </script>
     <script src="{{ asset('js/audit-script.js') }}"></script>
 </body>
