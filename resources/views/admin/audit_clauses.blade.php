@@ -59,19 +59,17 @@
                 </p>
             </div>
 
-            <!-- Kolom Kanan -->
-            <div>
-                <p><strong>Auditor Utama:</strong> 
-                    <span class="font-medium">{{ $audit->auditor_name ?? '-' }}</span>
-                </p>
-                <p><strong>Penanggung Jawab di Departemen:</strong> 
-                    <span class="font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
-                </p>
-                <p><strong>NIK Penanggung Jawab:</strong> 
-                    {{ $audit->pic_auditee_nik ?: 'Tidak ada' }}
-                </p>
-            </div>
-        </div>
+          <div>
+    <p><strong>Auditor Utama:</strong> 
+        <span class="font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
+    </p>
+    <p><strong>Penanggung Jawab di Departemen:</strong> 
+        <span class="font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
+    </p>
+    <p><strong>NIK Penanggung Jawab:</strong> 
+        {{ $audit->pic_auditee_nik ?: 'Tidak ada' }}
+    </p>
+</div>
 
         <!-- Tujuan Audit (full width) -->
         <div class="mt-4">
