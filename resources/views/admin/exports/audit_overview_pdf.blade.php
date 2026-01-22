@@ -173,66 +173,51 @@
         </tr>
     </table>
 
-<div class="audit-overview">
-    <h2 class="audit-title-section">INFORMASI AUDIT</h2>
-
-    <table class="audit-info-grid">
-        <!-- ROW 1 -->
-        <tr>
-            <td style="width:100px; vertical-align:top;"><strong>Departemen</strong></td>
-            <td style="width:10px;">:</td>
-            <td style="width:250px;">
-                {{ $audit->department->name ?? '-' }}
-            </td>
-
-            <td style="width:110px; vertical-align:top;"><strong>Anggota Tim</strong></td>
-            <td style="width:10px;">:</td>
-            <td>
-                @if($teamMembers->count() > 0)
-                    @foreach($teamMembers as $member)
-                        <div style="margin-bottom:2px;">
-                            <strong>{{ $member->name }}</strong>
-                            <span style="font-size:9px; color:#666;">
-                                (NIK: {{ $member->nik ?? 'N/A' }},
-                                Dept: {{ $member->department ?? 'N/A' }})
-                            </span>
-                        </div>
-                    @endforeach
-                @else
-                    -
-                @endif
-            </td>
-        </tr>
-
-        <!-- ROW 2 -->
-        <tr>
-            <td><strong>Tanggal Audit</strong></td>
-            <td>:</td>
-            <td>{{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
-
-            <td><strong>ID Laporan</strong></td>
-            <td>:</td>
-            <td style="font-size:9px;">{{ $audit->id }}</td>
-        </tr>
-
-        <!-- ROW 3 -->
-        <tr>
-            <td><strong>Tipe Audit</strong></td>
-            <td>:</td>
-            <td>
-                @php
-                    $typeLabels = [
-                        'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
-                        'Special' => 'Pemeriksaan Khusus (Mendadak)',
-                        'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
-                    ];
-                @endphp
-                {{ $typeLabels[$audit->type] ?? $audit->type }}
-            </td>
-        </tr>
-    </table>
-</div>
-
+    <div class="audit-overview">
+        <h2 class="audit-title-section">INFORMASI AUDIT</h2>
+        <table class="audit-info-grid">
+            <tr>
+                <td style="width: 120px;"><strong>Departemen</strong></td>
+                <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Tanggal Audit</strong></td>
+                <td>: {{ $audit->created_at->format('d F Y') }}</td>
+<td><strong>Anggota Tim</strong></td>
+<td>: 
+    @if($teamMembers->count() > 0)
+        @foreach($teamMembers as $member)
+            <div class="team-member">
+                <span class="team-member-name">{{ $member->name ?? '-' }}</span>
+                <span class="team-member-detail">
+                    (NIK: {{ $member->nik ?? 'N/A' }}, 
+                    Dept: {{ $member->department ?? 'N/A' }} 
+                    @if($member->role) - {{ $member->role }} @endif)
+                </span>
+            </div>
+        @endforeach
+    @else
+        <div class="team-member">-</div>
+    @endif
+</td>
+            </tr>
+            <tr>
+                <td><strong>Tipe Audit</strong></td>
+                <td>: 
+                    @php
+                        $typeLabels = [
+                            'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
+                            'Special' => 'Pemeriksaan Khusus (Mendadak)',
+                            'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
+                        ];
+                    @endphp
+                    {{ $typeLabels[$audit->type] ?? '-' }}
+                </td>
+                <td><strong>ID Laporan</strong></td>
+                <td>: {{ $audit->id }}</td>
+            </tr>
+        </table>
+    </div>
 
     <table class="data-table">
         <thead>
