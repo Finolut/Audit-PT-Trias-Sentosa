@@ -110,5 +110,19 @@
     /* Styling tambahan untuk pagination Laravel (Tailwind) */
     .pagination svg { width: 1.5rem; display: inline; }
     .pagination nav p { margin-bottom: 0; }
+
+    /* === ANIMASI HIGHLIGHT UNTUK SOAL BELUM DIJAWAB === */
+    /* Dipakai oleh audit-script.js saat validasi form */
+    .unanswered-highlight {
+        animation: pulseHighlight 1.2s ease-in-out;
+        border-left: 4px solid #f59e0b !important;
+    }
+
+    @keyframes pulseHighlight {
+        0%   { background-color: #ffffff; }
+        30%  { background-color: #fffbeb; }
+        60%  { background-color: #fff7e6; }
+        100% { background-color: #ffffff; }
+    }
 </style>
 @endsection

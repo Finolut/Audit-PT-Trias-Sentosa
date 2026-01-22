@@ -193,39 +193,56 @@ document.addEventListener('click', function(e) {
 });
 
 /**
- * Validasi Sebelum Lanjut (Submit)
+ * Validasi Sebelum Lanjut (Submit) – Tanpa Alert, Pakai Navigasi Animasi
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const allItems = document.querySelectorAll('.item-card');
-            let firstMissingItem = null;
+    if (!form) return;
 
-            allItems.forEach(item => {
-                const itemId = item.id.replace('row_', '');
-                // Cek apakah Auditor sudah mengisi jawaban untuk item ini
-                if (!sessionAnswers[`${itemId}_${auditorName}`]) {
-                    item.style.backgroundColor = '#fff1f2';
-                    item.style.borderColor = '#fecaca';
-                    if (!firstMissingItem) firstMissingItem = item;
-                } else {
-                    item.style.backgroundColor = '#f9fafb';
-                    item.style.borderColor = '';
-                }
-            });
+    // Fungsi highlight animasi
+    function animateHighlight(element) {
+        // Reset dulu
+        element.classList.remove('unanswered-highlight');
+        void element.offsetWidth; // Trigger reflow
 
-            if (firstMissingItem) {
-                e.preventDefault();
-                alert('Mohon lengkapi semua jawaban Auditor sebelum melanjutkan!');
-                firstMissingItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => {
-                    firstMissingItem.style.backgroundColor = '';
-                    firstMissingItem.style.borderColor = '';
-                }, 3000);
+        // Tambahkan kelas animasi
+        element.classList.add('unanswered-highlight');
+
+        // Hapus setelah animasi selesai
+        setTimeout(() => {
+            element.classList.remove('unanswered-highlight');
+        }, 1500);
+    }
+
+    form.addEventListener('submit', function (e) {
+        const allRows = document.querySelectorAll('.item-row'); // <-- pastikan class ini ada di HTML
+        let firstUnansweredRow = null;
+
+        allRows.forEach(row => {
+            const itemId = row.id.replace('row_', '');
+            const hasAuditorAnswer = sessionAnswers[`${itemId}_${auditorName}`];
+            if (!hasAuditorAnswer) {
+                if (!firstUnansweredRow) firstUnansweredRow = row;
             }
         });
-    }
+
+        if (firstUnansweredRow) {
+            e.preventDefault();
+
+            // Scroll ke soal tersebut dengan smooth + center
+            firstUnansweredRow.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            // Tunggu scroll selesai, lalu highlight
+            setTimeout(() => {
+                animateHighlight(firstUnansweredRow);
+                // Fokus ke tombol pertama biar bisa langsung dijawab
+                firstUnansweredRow.querySelector('.answer-btn')?.focus();
+            }, 600);
+        }
+    });
 });
 
 function updateInfoBox(itemId) {

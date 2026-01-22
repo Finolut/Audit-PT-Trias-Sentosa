@@ -466,3 +466,16 @@ body {
 .auditor-row .diff-user {
     color: #1e293b;
 }
+
+/* Highlight animasi untuk soal yang belum dijawab */
+.unanswered-highlight {
+    animation: pulseHighlight 1.2s ease-in-out;
+    border-left: 4px solid #f59e0b !important;
+}
+
+@keyframes pulseHighlight {
+    0%   { background-color: #ffffff; }
+    30%  { background-color: #fffbeb; }
+    60%  { background-color: #fff7e6; }
+    100% { background-color: #ffffff; }
+}
