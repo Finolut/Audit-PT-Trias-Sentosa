@@ -92,11 +92,21 @@
 
                     {{-- Status --}}
                     <div class="flex flex-col items-end">
-                         @if($audit->status == 'COMPLETED')
-                            <span class="text-green-600 text-sm font-bold bg-green-50 px-3 py-1 rounded-full border border-green-100">✅ Selesai</span>
-                        @else
-                            <span class="text-yellow-600 text-sm font-bold bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100">⏳ Proses</span>
-                        @endif
+    @php
+        // Normalisasi status ke huruf besar untuk memastikan pengecekan akurat
+        $currentStatus = strtoupper($audit->status);
+    @endphp
+
+    @if($currentStatus === 'COMPLETED' || $currentStatus === 'COMPLETE')
+        <span class="text-green-600 text-sm font-bold bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm">
+            ✅ SELESAI
+        </span>
+    @else
+        <span class="text-amber-600 text-sm font-bold bg-amber-50 px-3 py-1 rounded-full border border-amber-100 shadow-sm">
+            ⏳ PROSES
+        </span>
+    @endif
+</div>
 <a href="{{ route('admin.audit.overview', $audit->id) }}" class="mt-2 text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
     Detail Laporan 
     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
