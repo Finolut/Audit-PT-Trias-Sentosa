@@ -173,37 +173,46 @@
         </tr>
     </table>
 
-   <div class="audit-overview">
+<div class="audit-overview">
     <h2 class="audit-title-section">INFORMASI AUDIT</h2>
     <table class="audit-info-grid">
         <tr>
-            <td style="width: 120px;"><strong>Departemen</strong></td>
-            <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
+            <td style="width: 120px; vertical-align: top;"><strong>Departemen</strong></td>
+            <td style="width: 300px; vertical-align: top;">: {{ $audit->department->name ?? '-' }}</td>
             
             <td style="width: 100px; vertical-align: top;"><strong>Anggota Tim</strong></td>
-            <td style="vertical-align: top;">: 
-                @if($teamMembers->count() > 0)
-                    @foreach($teamMembers as $member)
-                        <div class="team-member">
-                            <span class="team-member-name">{{ $member->name }}</span>
-                            <span class="team-member-detail">(NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})</span>
-                        </div>
-                    @endforeach
-                @else
-                    -
-                @endif
+            <td style="vertical-align: top;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 10px; vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">
+                            @if($teamMembers->count() > 0)
+                                @foreach($teamMembers as $member)
+                                    <div class="team-member" style="margin-bottom: 5px;">
+                                        <span class="team-member-name" style="display: block;">{{ $member->name }}</span>
+                                        <span class="team-member-detail" style="font-size: 9px; color: #555;">
+                                            (NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                : -
+                            @endif
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
         <tr>
-            <td><strong>Tanggal Audit</strong></td>
-            <td>: {{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
+            <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
+            <td style="vertical-align: top;">: {{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
             
-            <td><strong>ID Laporan</strong></td>
-            <td>: {{ $audit->id }}</td>
+            <td style="vertical-align: top;"><strong>ID Laporan</strong></td>
+            <td style="vertical-align: top;">: {{ $audit->id }}</td>
         </tr>
         <tr>
-            <td><strong>Tipe Audit</strong></td>
-            <td>: 
+            <td style="vertical-align: top;"><strong>Tipe Audit</strong></td>
+            <td style="vertical-align: top;">: 
                 @php
                     $typeLabels = [
                         'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
