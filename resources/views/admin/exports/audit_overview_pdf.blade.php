@@ -179,37 +179,29 @@
             <tr>
                 <td style="width: 120px;"><strong>Departemen</strong></td>
                 <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
-                <td style="width: 100px;"><strong>Anggota Tim</strong></td>
-                <td>
-                    @php
-                        $allMembers = collect();
-                        if (!empty($leadAuditor)) {
-                            $allMembers->push((object) $leadAuditor);
-                        }
-                        if ($teamMembers) {
-                            $allMembers = $allMembers->merge($teamMembers);
-                        }
-                    @endphp
-
-                    @if($allMembers->count() > 0)
-                        @foreach($allMembers as $member)
-                            <div class="team-member">
-                                <span class="team-member-name">{{ $member->name ?? '-' }}</span>
-                                <span class="team-member-detail">
-                                    (NIK: {{ $member->nik ?? 'N/A' }}, 
-                                    Dept: {{ $member->department ?? 'N/A' }}
-                                    @if(!empty($member->role)) - {{ $member->role }} @endif)
-                                </span>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="team-member">-</div>
-                    @endif
-                </td>
             </tr>
             <tr>
                 <td><strong>Tanggal Audit</strong></td>
                 <td>: {{ $audit->created_at->format('d F Y') }}</td>
+<td><strong>Anggota Tim</strong></td>
+<td>: 
+    @if($teamMembers->count() > 0)
+        @foreach($teamMembers as $member)
+            <div class="team-member">
+                <span class="team-member-name">{{ $member->name ?? '-' }}</span>
+                <span class="team-member-detail">
+                    (NIK: {{ $member->nik ?? 'N/A' }}, 
+                    Dept: {{ $member->department ?? 'N/A' }} 
+                    @if($member->role) - {{ $member->role }} @endif)
+                </span>
+            </div>
+        @endforeach
+    @else
+        <div class="team-member">-</div>
+    @endif
+</td>
+            </tr>
+            <tr>
                 <td><strong>Tipe Audit</strong></td>
                 <td>: 
                     @php
@@ -221,12 +213,8 @@
                     @endphp
                     {{ $typeLabels[$audit->type] ?? '-' }}
                 </td>
-            </tr>
-            <tr>
                 <td><strong>ID Laporan</strong></td>
                 <td>: {{ $audit->id }}</td>
-                <td></td>
-                <td></td>
             </tr>
         </table>
     </div>
@@ -245,7 +233,7 @@
             <tr>
                 <td style="text-align: center;"><strong>{{ $item['sub_clause'] }}</strong></td>
                 <td>{{ $item['item_text'] }}</td>
-                <td style="text-align: center;">
+<td style="text-align: center;">
                     <span class="level-badge">Level {{ $item['maturity_level'] }}</span>
                     <div class="level-desc">{{ $item['maturity_description'] }}</div>
                 </td>
