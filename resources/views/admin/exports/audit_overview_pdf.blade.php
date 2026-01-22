@@ -175,24 +175,18 @@
 
    <div class="audit-overview">
     <h2 class="audit-title-section">INFORMASI AUDIT</h2>
-    <table class="audit-info-grid" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+    <table class="audit-info-grid">
         <tr>
-            <td style="width: 110px; vertical-align: top;"><strong>Departemen</strong></td>
-            <td style="width: 10px; vertical-align: top;">:</td>
-            <td style="vertical-align: top; padding-right: 10px;">
-                {{ $audit->department->name ?? '-' }}
-            </td>
+            <td style="width: 120px;"><strong>Departemen</strong></td>
+            <td style="width: 300px;">: {{ $audit->department->name ?? '-' }}</td>
             
-            <td style="width: 110px; vertical-align: top;"><strong>Anggota Tim</strong></td>
-            <td style="width: 10px; vertical-align: top;">:</td>
-            <td style="vertical-align: top;">
+            <td style="width: 100px; vertical-align: top;"><strong>Anggota Tim</strong></td>
+            <td style="vertical-align: top;">: 
                 @if($teamMembers->count() > 0)
                     @foreach($teamMembers as $member)
-                        <div style="margin-bottom: 4px;">
-                            <span style="font-weight: bold; display: block;">{{ $member->name }}</span>
-                            <span style="color: #666; font-size: 9px;">
-                                (NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})
-                            </span>
+                        <div class="team-member">
+                            <span class="team-member-name">{{ $member->name }}</span>
+                            <span class="team-member-detail">(NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})</span>
                         </div>
                     @endforeach
                 @else
@@ -200,27 +194,16 @@
                 @endif
             </td>
         </tr>
-
-        <tr><td colspan="6" style="height: 8px;"></td></tr>
-
         <tr>
-            <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
-            <td style="vertical-align: top;">:</td>
-            <td style="vertical-align: top;">
-                {{ \Carbon\Carbon::parse($audit->audit_date)->translatedFormat('d F Y') }}
-            </td>
+            <td><strong>Tanggal Audit</strong></td>
+            <td>: {{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
             
-            <td style="vertical-align: top;"><strong>ID Laporan</strong></td>
-            <td style="vertical-align: top;">:</td>
-            <td style="vertical-align: top; font-family: monospace; font-size: 9px; word-break: break-all;">
-                {{ $audit->id }}
-            </td>
+            <td><strong>ID Laporan</strong></td>
+            <td>: {{ $audit->id }}</td>
         </tr>
-
         <tr>
-            <td style="vertical-align: top;"><strong>Tipe Audit</strong></td>
-            <td style="vertical-align: top;">:</td>
-            <td style="vertical-align: top;">
+            <td><strong>Tipe Audit</strong></td>
+            <td>: 
                 @php
                     $typeLabels = [
                         'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
@@ -230,8 +213,6 @@
                 @endphp
                 {{ $typeLabels[$audit->type] ?? $audit->type }}
             </td>
-            
-            <td></td>
             <td></td>
             <td></td>
         </tr>
