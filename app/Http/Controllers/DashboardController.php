@@ -28,15 +28,16 @@ class DashboardController extends Controller
         '10' => ['10.1', '10.2', '10.3'],
     ];
 
-    private $mainClauseTitles = [
-        '4'  => 'Context of the organization',
-        '5'  => 'Leadership',
-        '6'  => 'Planning',
-        '7'  => 'Support',
-        '8'  => 'Operation',
-        '9'  => 'Performance evaluation',
-        '10' => 'Improvement',
-    ];
+private $mainClauseTitles = [
+    '4'  => 'Konteks Organisasi',
+    '5'  => 'Kepemimpinan',
+    '6'  => 'Perencanaan',
+    '7'  => 'Dukungan',
+    '8'  => 'Operasional',
+    '9'  => 'Evaluasi Kinerja',
+    '10' => 'Peningkatan',
+];
+
 
     /**
      * 1. DASHBOARD UTAMA (Tampilan Awal Admin)
