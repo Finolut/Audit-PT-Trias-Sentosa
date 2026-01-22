@@ -3,139 +3,131 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     
-{{-- HEADER + RINGKASAN INFORMASI AUDIT --}}
-<div class="mb-8">
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Audit Overview</h1>
-            <p class="text-gray-500">
-                Department: {{ $audit->department->name ?? '-' }} | 
-                Date: {{ $audit->created_at->format('d M Y') }}
-            </p>
-        </div>
-<div class="flex space-x-3">
-    <!-- HANYA TOMBOL PDF -->
-    <a href="{{ route('admin.audit.export.pdf', $audit->id) }}" 
-       class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold flex items-center">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Export PDF
-    </a>
-    <a href="{{ route('admin.dashboard') }}" 
-       class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-bold">
-        Back to Dashboard
-    </a>
-</div>
-    </div>
-
- {{-- 📋 Ringkasan Data dari Form Awal --}}
-<div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200 shadow-sm">
-    <h3 class="font-bold text-lg text-blue-800 mb-3 flex items-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        Informasi Audit
-    </h3>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-        <div class="space-y-2">
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Jenis Pemeriksaan</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">
-                    @php
-                        $typeLabels = [
-                            'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
-                            'Special' => 'Pemeriksaan Khusus (Mendadak)',
-                            'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
-                        ];
-                    @endphp
-                    {{ $typeLabels[$audit->type] ?? '-' }}
-                </span>
+    {{-- HEADER --}}
+    <div class="mb-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Audit Overview</h1>
+                <p class="text-gray-500">
+                    Department: {{ $audit->department->name ?? '-' }} | 
+                    Date: {{ $audit->created_at->format('d M Y') }}
+                </p>
             </div>
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Tanggal Pemeriksaan</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">{{ $audit->created_at->format('d F Y') }}</span>
-            </div>
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Bagian yang Diperiksa</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800 font-medium">{{ $audit->scope ?? '-' }}</span>
+            <div class="flex space-x-3">
+                <a href="{{ route('admin.audit.export.pdf', $audit->id) }}" 
+                   class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-bold flex items-center shadow-sm transition">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Export PDF
+                </a>
+                <a href="{{ route('admin.dashboard') }}" 
+                   class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-bold transition">
+                    Back to Dashboard
+                </a>
             </div>
         </div>
 
-        <div class="space-y-2">
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Auditor Utama</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800 font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
-            </div>
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Penanggung Jawab</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800 font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
-            </div>
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Anggota Tim</span>
-                <span class="mr-2">:</span>
-                <div class="flex-1">
-                    @forelse($teamMembers as $member)
-                        <div class="text-gray-800 mb-1">
-                            <span class="font-medium">{{ $member->name }}</span>
-                            <span class="text-gray-500 text-xs">(NIK: {{ $member->nik }})</span>
+        {{-- 📋 RINGKASAN DATA (KOTAK BIRU) --}}
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+            <h3 class="font-bold text-lg text-blue-800 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Informasi Audit
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-sm">
+                <div class="space-y-3">
+                    <div class="flex">
+                        <span class="w-44 font-bold text-gray-600">Jenis Pemeriksaan</span>
+                        <span class="mr-2">:</span>
+                        <span class="text-gray-800">
+                            @php
+                                $typeLabels = [
+                                    'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
+                                    'Special' => 'Pemeriksaan Khusus (Mendadak)',
+                                    'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
+                                ];
+                            @endphp
+                            {{ $typeLabels[$audit->type] ?? '-' }}
+                        </span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-44 font-bold text-gray-600">Tanggal Pemeriksaan</span>
+                        <span class="mr-2">:</span>
+                        <span class="text-gray-800">{{ $audit->created_at->format('d F Y') }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-44 font-bold text-gray-600">Bagian yang Diperiksa</span>
+                        <span class="mr-2">:</span>
+                        <span class="text-gray-800 font-medium">{{ $audit->scope ?? '-' }}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex">
+                        <span class="w-44 font-bold text-gray-600">Auditor Utama</span>
+                        <span class="mr-2">:</span>
+                        <span class="text-gray-800 font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-44 font-bold text-gray-600">Penanggung Jawab</span>
+                        <span class="mr-2">:</span>
+                        <span class="text-gray-800 font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-44 font-bold text-gray-600">Anggota Tim</span>
+                        <span class="mr-2">:</span>
+                        <div class="flex-1">
+                            @forelse($teamMembers as $member)
+                                <div class="text-gray-800 mb-1">
+                                    <span class="font-medium">{{ $member->name }}</span>
+                                    <span class="text-gray-500 text-xs">(NIK: {{ $member->nik }})</span>
+                                </div>
+                            @empty
+                                <span class="text-gray-400 italic">Tidak ada anggota tim</span>
+                            @endforelse
                         </div>
-                    @empty
-                        <span class="text-gray-400 italic">Tidak ada anggota tim</span>
-                    @endforelse
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-        <p class="text-sm font-bold text-gray-600">Pemeriksaan Terkait :</p>
-        <p class="text-gray-700 bg-white/50 p-3 rounded mt-1 border border-blue-100 italic">
-            "{{ $audit->objective ?? 'Tidak diisi oleh auditor.' }}"
-        </p>
+            <div class="mt-6">
+                <p class="text-sm font-bold text-gray-600 mb-1">Pemeriksaan Terkait :</p>
+                <p class="text-gray-700 bg-white/60 p-3 rounded-lg border border-blue-100 italic text-sm">
+                    "{{ $audit->objective ?? 'Tidak diisi oleh auditor.' }}"
+                </p>
+            </div>
 
-    <div class="mt-3 flex items-center justify-between">
-       <div class="flex items-center">
-    <span class="text-sm font-bold mr-2">Status:</span>
-{{-- Kode Baru yang Diperbaiki --}}
-<div class="flex items-center">
-    <span class="text-sm font-bold mr-2">Status:</span>
-    @php
-        // Normalisasi status ke uppercase agar perbandingannya akurat
-        $currentStatus = strtoupper($audit->status);
-    @endphp
+            <div class="mt-4 pt-4 border-t border-blue-200/50 flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-sm font-bold text-gray-600 mr-3">Status:</span>
+                    @php $currentStatus = strtoupper($audit->status); @endphp
+                    @if($currentStatus === 'COMPLETE' || $currentStatus === 'COMPLETED')
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-green-200">
+                             SELESAI
+                        </span>
+                    @else
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-yellow-200">
+                             SEDANG BERJALAN
+                        </span>
+                    @endif
+                </div>
+                <span class="text-[10px] text-blue-400 font-mono">ID: {{ $audit->id }}</span>
+            </div>
+        </div> {{-- AKHIR KOTAK BIRU --}}
+    </div> {{-- AKHIR HEADER SECTION --}}
 
-    @if($currentStatus === 'COMPLETE' || $currentStatus === 'COMPLETED')
-        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-green-200">
-            <i class="fas fa-check-circle mr-1"></i> SELESAI
-        </span>
-    @else
-        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-yellow-200">
-            <i class="fas fa-spinner fa-spin mr-1"></i> SEDANG BERJALAN
-        </span>
-    @endif
-</div>
-        <span class="text-[10px] text-gray-400 font-mono">ID: {{ $audit->id }}</span>
-    </div>
-</div>
-
-    {{-- GRAFIK SECTION (2 VERSI) --}}
+    {{-- GRAFIK SECTION --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        
-        {{-- GRAFIK 1: MAIN CLAUSES ONLY (4, 5, 6...) --}}
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Overview per Main Clause (4-10)</h3>
+            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Overview per Main Clause</h3>
             <div class="h-64">
                 <canvas id="mainClauseChart"></canvas>
             </div>
         </div>
 
-        {{-- GRAFIK 2: ALL DETAILED CLAUSES (4.1, 4.2...) --}}
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
             <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Detailed Breakdown (All Clauses)</h3>
             <div class="h-64">
@@ -144,74 +136,63 @@
         </div>
     </div>
 
-   {{-- MENU GRID: Detail Audit per Klausul --}}
-<h3 class="text-xl font-bold text-gray-800 mb-4">Detail Audit per Klausul</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    @foreach($mainClauses as $key => $subClauses)
-    @php 
-        // Mengambil statistik untuk klausul utama ini
-        $mStats = $mainStats[$key] ?? ['yes'=>0, 'no'=>0, 'partial'=>0, 'na'=>0, 'unanswered'=>0];
-        
-        // Total soal yang sudah dikerjakan (Yes + No + Partial + N/A)
-        $sudahDikerjakan = $mStats['yes'] + $mStats['no'] + $mStats['partial'] + $mStats['na'];
-        
-        // Total semua soal dalam klausul ini
-        $totalSoal = array_sum($mStats);
-        
-        // Hitung persentase progres pengisian
-        $persenProgres = $totalSoal > 0 ? round(($sudahDikerjakan / $totalSoal) * 100) : 0;
-        
-        // Cek apakah sudah selesai semua (tidak ada yang unanswered)
-        $isComplete = ($mStats['unanswered'] == 0);
-    @endphp
+    {{-- MENU GRID: Detail Audit per Klausul --}}
+    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="bg-blue-600 w-2 h-6 rounded-full mr-3"></span>
+        Detail Audit per Klausul
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+        @foreach($mainClauses as $key => $subClauses)
+            @php 
+                $mStats = $mainStats[$key] ?? ['yes'=>0, 'no'=>0, 'partial'=>0, 'na'=>0, 'unanswered'=>0];
+                $sudahDikerjakan = $mStats['yes'] + $mStats['no'] + $mStats['partial'] + $mStats['na'];
+                $totalSoal = array_sum($mStats);
+                $persenProgres = $totalSoal > 0 ? round(($sudahDikerjakan / $totalSoal) * 100) : 0;
+                $isComplete = ($mStats['unanswered'] == 0);
+            @endphp
 
-    <a href="{{ route('admin.audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
-       class="block transition-all duration-300 p-6 rounded-xl shadow border group {{ $isComplete ? 'bg-white border-gray-200 hover:bg-blue-50' : 'bg-gray-50 border-dashed border-gray-300 hover:border-blue-400' }}">
-        
-        <div class="flex justify-between items-start mb-4">
-            {{-- Lingkaran Nomor Klausul --}}
-            <div class="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-xl transition-transform group-hover:scale-110 {{ $isComplete ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500' }}">
-                {{ $key }}
-            </div>
+            <a href="{{ route('admin.audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
+               class="block transition-all duration-300 p-6 rounded-xl shadow-sm border group bg-white hover:shadow-lg {{ $isComplete ? 'border-gray-200 hover:border-green-400' : 'border-dashed border-gray-300 hover:border-blue-400' }}">
+                
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-xl transition-transform group-hover:scale-110 {{ $isComplete ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600' }}">
+                        {{ $key }}
+                    </div>
 
-            {{-- Badge Status --}}
-            @if($isComplete)
-                <span class="text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 uppercase">
-                    100% Selesai
-                </span>
-            @else
-                <span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 uppercase">
-                    {{ $persenProgres }}% Terisi
-                </span>
-            @endif
-        </div>
-        
-        {{-- Judul & Deskripsi --}}
-        <h4 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-700">
-            {{ $titles[$key] ?? 'Klausul '.$key }}
-        </h4>
-        <p class="text-xs text-gray-500 mb-4">
-            Mencakup: {{ implode(', ', $subClauses) }}
-        </p>
+                    @if($isComplete)
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 uppercase">
+                            Selesai
+                        </span>
+                    @else
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 uppercase">
+                            {{ $persenProgres }}% Terisi
+                        </span>
+                    @endif
+                </div>
+                
+                <h4 class="text-lg font-bold text-gray-800 mb-1 group-hover:text-blue-700">
+                    {{ $titles[$key] ?? 'Klausul '.$key }}
+                </h4>
+                <p class="text-xs text-gray-500 mb-4 h-8 overflow-hidden">
+                    Mencakup: {{ implode(', ', $subClauses) }}
+                </p>
 
-        {{-- Progress Bar Kecil --}}
-        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
-            <div class="h-1.5 rounded-full {{ $isComplete ? 'bg-green-500' : 'bg-blue-500' }}" style="width: {{ $persenProgres }}%"></div>
-        </div>
-        
-        {{-- Info Detail (Bahasa Indonesia) --}}
-        <div class="flex justify-between items-center text-[10px] font-medium text-gray-400">
-            <span>{{ $sudahDikerjakan }} dari {{ $totalSoal }} Soal</span>
-            @if($mStats['unanswered'] > 0)
-                <span class="text-amber-600 font-bold">{{ $mStats['unanswered'] }} Belum Diisi</span>
-            @endif
-        </div>
-    </a>
-    @endforeach
+                <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+                    <div class="h-1.5 rounded-full {{ $isComplete ? 'bg-green-500' : 'bg-blue-500' }}" style="width: {{ $persenProgres }}%"></div>
+                </div>
+                
+                <div class="flex justify-between items-center text-[10px] font-medium text-gray-400">
+                    <span>{{ $sudahDikerjakan }} / {{ $totalSoal }} Soal</span>
+                    @if($mStats['unanswered'] > 0)
+                        <span class="text-amber-600 font-bold">{{ $mStats['unanswered'] }} Belum</span>
+                    @endif
+                </div>
+            </a>
+        @endforeach
+    </div>
 </div>
 
-</div>
-
+{{-- SCRIPT TETAP SAMA --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const commonOptions = {
