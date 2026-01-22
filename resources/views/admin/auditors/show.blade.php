@@ -97,10 +97,10 @@
                         @else
                             <span class="text-yellow-600 text-sm font-bold bg-yellow-50 px-3 py-1 rounded-full border border-yellow-100">⏳ Proses</span>
                         @endif
-<a href="{{ route('admin.audit.show', $audit->id) }}" class="mt-2 text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
-                    Detail Laporan 
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
-                </a>
+<a href="{{ route('audit.overview', $audit->id) }}" class="mt-2 text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+    Detail Laporan 
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</a>
             </div>
         </div>
 
