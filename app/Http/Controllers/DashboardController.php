@@ -7,9 +7,13 @@ use App\Models\Department;
 use App\Models\Audit;
 use App\Models\Item;
 use App\Models\Clause;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 use App\Models\AuditQuestion;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+use Illuminate\Database\QueryException;
 
 class DashboardController extends Controller
 {
@@ -396,31 +400,54 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
 
 public function searchAudit(Request $request)
 {
-    // 1. Validasi input sebagai string karena ID menggunakan UUID
-    $request->validate([
-        'audit_id' => 'required|string' 
+    try {
+        // Validasi UUID (gagal di sini = tidak lempar ke DB)
+        $request->validate([
+            'audit_id' => ['required', 'uuid'],
+        ]);
+
+        // Bersihkan whitespace tersembunyi
+        $searchId = preg_replace('/\s+/', '', $request->audit_id);
+
+        // Cari audit
+        $audit = Audit::with('session')->find($searchId);
+
+        if (!$audit) {
+            return back()->with('search_error', '❌ ID laporan tidak ditemukan.');
+        }
+
+        if (!$audit->session) {
+            return back()->with('search_error', '⚠️ Data sesi audit belum lengkap.');
+        }
+
+        $auditorUser = \App\Models\User::where('name', $audit->session->auditor_name)
+            ->where('role', 'auditor')
+            ->first();
+
+        if (!$auditorUser) {
+            return back()->with('search_error', '⚠️ Auditor tidak ditemukan.');
+        }
+
+        return redirect()
+            ->route('admin.auditors.show', $auditorUser->id)
+            ->with('highlight_audit', $searchId);
+
+   } catch (QueryException $e) {
+    // Just use Log:: directly since it's imported above
+    Log::error('Search audit DB error', [
+        'input' => $request->audit_id,
+        'error' => $e->getMessage()
     ]);
 
-    $searchId = trim($request->audit_id);
+    return back()->with('search_error', '❌ Terjadi kesalahan sistem.');
+} catch (Throwable $e) {
+    Log::error('Search audit fatal error', [
+        'input' => $request->audit_id,
+        'error' => $e->getMessage()
+    ]);
 
-    // 2. Cari audit beserta data session (untuk mendapatkan nama auditor)
-    $audit = Audit::with(['session'])->find($searchId);
-
-    if ($audit && $audit->session) {
-        // 3. Cari User (Auditor) berdasarkan nama yang tercatat di session
-        $auditorUser = \App\Models\User::where('name', $audit->session->auditor_name)
-                                      ->where('role', 'auditor')
-                                      ->first();
-
-        if ($auditorUser) {
-            // 4. Redirect ke halaman Profil & Riwayat Auditor
-            // Sambil mengirimkan session flash untuk highlight baris audit yang dicari
-            return redirect()->route('admin.auditors.show', $auditorUser->id)
-                             ->with('highlight_audit', $searchId);
-        }
+        return back()->with('search_error', '❌ Terjadi kesalahan tidak terduga.');
     }
-
-    return back()->with('error', 'Data auditor untuk ID Laporan tersebut tidak ditemukan.');
 }
 
 }
