@@ -134,7 +134,7 @@
         $isComplete = ($mStats['unanswered'] == 0);
     @endphp
 
-    <a href="{{ route('audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
+    <a href="{{ route('admin.audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
        class="block transition-all duration-300 p-6 rounded-xl shadow border group {{ $isComplete ? 'bg-white border-gray-200 hover:bg-blue-50' : 'bg-gray-50 border-dashed border-gray-300 hover:border-blue-400' }}">
         
         <div class="flex justify-between items-start mb-4">
