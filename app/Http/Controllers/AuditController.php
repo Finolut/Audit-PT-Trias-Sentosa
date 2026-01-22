@@ -496,15 +496,47 @@ public function finalSubmit(Request $request, $auditId)
         return back()->withErrors(['Tidak semua klausul telah diisi.']);
     }
 
-    // Update status audit ke "COMPLETED"
+// Update status audit ke "COMPLETED"
     DB::table('audits')
         ->where('id', $auditId)
-        ->update(['status' => 'COMPLETED', 'submitted_at' => now()]);
+        ->update([
+            'status' => 'COMPLETED', // Nilai ini harus sesuai dengan pengecekan di Blade
+            'submitted_at' => now(),
+            'updated_at' => now()
+        ]);
 
-    // Redirect kembali ke menu dengan pesan sukses
-    return redirect()->route('audit.menu', $auditId)
-                     ->with('final_success', true)
-                     ->with('success', 'Audit berhasil dikirim!');
+   // 1. Ambil semua ID item yang seharusnya dijawab (dari Clause 4 - 10)
+    $allRequiredItemIds = DB::table('items')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->pluck('items.id')
+        ->toArray();
+
+    // 2. Ambil ID item yang sudah benar-benar dijawab untuk audit ini
+    $answeredItemIds = DB::table('answer_finals')
+        ->where('audit_id', $auditId)
+        ->pluck('item_id')
+        ->toArray();
+
+    // 3. Cross-check: bandingkan jumlahnya
+    $missingItems = array_diff($allRequiredItemIds, $answeredItemIds);
+
+    if (count($missingItems) > 0) {
+        // Jika ada yang kosong, kembalikan ke menu dengan pesan error
+        return redirect()->route('audit.menu', $auditId)
+            ->with('error', 'Laporan tidak bisa dikirim. Masih ada pertanyaan yang belum dijawab. Silakan periksa kembali setiap Clause.');
+    }
+
+    // 4. Jika sudah lengkap, Update status menjadi COMPLETED
+    DB::table('audits')
+        ->where('id', $auditId)
+        ->update([
+            'status' => 'COMPLETED',
+            'submitted_at' => now(),
+            'updated_at' => now()
+        ]);
+
+    // 5. Redirect ke halaman "Terima Kasih"
+    return redirect()->route('audit.thanks');
 }
 
 }

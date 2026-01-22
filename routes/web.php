@@ -173,3 +173,7 @@ Route::post('/audit/{id}/final-submit', [AuditController::class, 'finalSubmit'])
     // HANYA ROUTE PDF
 Route::get('admin/audit/{auditId}/export-pdf', [DashboardController::class, 'exportToPdf'])
     ->name('admin.audit.export.pdf');
+
+    Route::get('/audit/thanks', function () {
+    return view('audit.thanks');
+})->name('audit.thanks');

@@ -100,14 +100,18 @@
         </p>
 
     <div class="mt-3 flex items-center justify-between">
-        <div class="flex items-center">
-            <span class="text-sm font-bold text-gray-600 mr-2">Status:</span>
-            @if($audit->status === 'COMPLETED')
-                <span class="px-3 py-1 bg-green-500 text-white rounded-full text-xs font-extrabold shadow-sm">SELESAI</span>
-            @else
-                <span class="px-3 py-1 bg-amber-500 text-white rounded-full text-xs font-extrabold shadow-sm">SEDANG BERJALAN</span>
-            @endif
-        </div>
+       <div class="flex items-center">
+    <span class="text-sm font-bold mr-2">Status:</span>
+    @if($audit->status == 'COMPLETED')
+        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-xs uppercase">
+            SELESAI
+        </span>
+    @else
+        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-bold text-xs uppercase">
+            SEDANG BERJALAN
+        </span>
+    @endif
+</div>
         <span class="text-[10px] text-gray-400 font-mono">ID: {{ $audit->id }}</span>
     </div>
 </div>
