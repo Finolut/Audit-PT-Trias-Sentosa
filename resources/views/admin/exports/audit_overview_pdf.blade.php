@@ -192,7 +192,6 @@
                 <span class="team-member-detail">
                     (NIK: {{ $member->nik ?? 'N/A' }}, 
                     Dept: {{ $member->department ?? 'N/A' }} 
-                    @if($member->role) - {{ $member->role }} @endif)
                 </span>
             </div>
         @endforeach
