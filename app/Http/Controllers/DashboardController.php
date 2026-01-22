@@ -318,11 +318,10 @@ public function exportToPdf($auditId)
         'department' => $session->auditor_department,
     ];
 
-// --- PERBAIKAN DI SINI: Ambil dari tabel audit_responders ---
-    $teamMembers = DB::table('audit_responders')
-        ->where('audit_session_id', $audit->audit_session_id)
-        ->select('responder_name as name', 'responder_nik as nik', 'responder_department as department', 'responder_role as role')
-        ->get();
+$teamMembers = DB::table('audit_responders')
+    ->where('audit_session_id', $audit->audit_session_id)
+    ->select('responder_name as name', 'responder_nik as nik', 'responder_department as department') // Role dihapus
+    ->get();
 
     // --- PERBAIKAN QUERY UTAMA DI SINI ---
     // Join ke maturity_levels untuk ambil definisi level per soal
