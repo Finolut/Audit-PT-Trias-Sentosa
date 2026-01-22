@@ -180,13 +180,6 @@
             <td style="width: 100px; vertical-align: top;"><strong>Departemen</strong></td>
             <td style="width: 10px; vertical-align: top;">:</td>
             <td style="width: 250px; vertical-align: top;">{{ $audit->department->name ?? '-' }}</td>
-            
-            <td style="width: 100px; vertical-align: top;"><strong>Auditor</strong></td>
-            <td style="width: 10px; vertical-align: top;">:</td>
-            <td style="vertical-align: top;">
-                {{ $leadAuditor['name'] ?? '-' }} 
-                <span style="color: #666;">(NIK: {{ $leadAuditor['nik'] ?? 'N/A' }})</span>
-            </td>
         </tr>
         <tr>
             <td style="vertical-align: top;"><strong>Tanggal Audit</strong></td>
