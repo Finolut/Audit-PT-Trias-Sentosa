@@ -105,7 +105,8 @@
         $statusDb = strtoupper($audit->status);
     @endphp
 
-    @if($statusDb === 'COMPLETE' || $statusDb === 'COMPLETED')
+<div class="flex items-center gap-3">
+    @if($audit->is_finished)
         <span class="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm uppercase">
             SELESAI
         </span>

@@ -26,5 +26,10 @@ class Audit extends Model {
         return $this->hasMany(AuditResponder::class, 'audit_session_id', 'audit_session_id');
     }
 
+    public function getIsFinishedAttribute()
+    {
+        $status = strtoupper($this->status);
+        return $status === 'COMPLETE' || $status === 'COMPLETED';
+    }
     
 }
