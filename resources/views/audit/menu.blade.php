@@ -203,7 +203,10 @@
         </div>
         <div class="progress-info">
             <span style="font-size: 0.85rem; font-weight: 700; color: var(--slate-600);">
-                PROGRES: {{ count($completedClauses) }} / {{ count($mainClauses) }} Klausul
+               @php
+    $completedCount = collect($clauseProgress)->filter(fn($p) => $p['percentage'] >= 100)->count();
+@endphp
+PROGRES: {{ $completedCount }} / {{ count($mainClauses) }} Klausul
             </span>
         </div>
     </div>
