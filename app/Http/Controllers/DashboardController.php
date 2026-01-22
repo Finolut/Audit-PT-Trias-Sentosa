@@ -439,14 +439,14 @@ public function searchAudit(Request $request)
         'error' => $e->getMessage()
     ]);
 
-    return back()->with('search_error', '❌ Terjadi kesalahan sistem.');
+    return back()->with('search_error', 'Terjadi kesalahan sistem.');
 } catch (Throwable $e) {
     Log::error('Search audit fatal error', [
         'input' => $request->audit_id,
         'error' => $e->getMessage()
     ]);
 
-        return back()->with('search_error', '❌ Terjadi kesalahan tidak terduga.');
+        return back()->with('search_error', 'ID yang anda cari tidak ada atau mungkin salah.');
     }
 }
 
