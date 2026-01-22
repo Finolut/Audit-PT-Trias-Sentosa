@@ -208,32 +208,42 @@
         </div>
     </div>
 
-    <div class="grid-container">
-        @foreach($mainClauses as $code)
-            @php
-                $isDone = in_array((string)$code, array_map('strval', $completedClauses));
-            @endphp
+<div class="grid-container">
+    @foreach($mainClauses as $code)
+        @php
+            $prog = $clauseProgress[$code] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
+            $isDone = $prog['percentage'] >= 100;
+        @endphp
 
-            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
-               class="card {{ $isDone ? 'completed' : '' }}">
-                
-                <span class="card-number">Klausul {{ $code }}</span>
-                <span class="card-title">{{ $titles[$code] ?? 'Detail Klausul ' . $code }}</span>
+        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+            class="card {{ $isDone ? 'completed' : '' }}">
+            
+            <span class="card-number">Klausul {{ $code }}</span>
+            <span class="card-title">{{ $titles[$code] ?? 'Detail Klausul ' . $code }}</span>
 
-                <div class="status-area">
-                    @if($isDone)
-                        <div class="status-badge badge-completed">
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
-                            Selesai
-                        </div>
-                    @else
-                        <div class="status-badge badge-pending">Belum diisi</div>
-                        <span class="arrow">→</span>
-                    @endif
+            <div style="margin-top: auto; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; font-weight: 700;">
+                    <span>{{ $prog['count'] }} / {{ $prog['total'] }} Soal</span>
+                    <span>{{ $prog['percentage'] }}%</span>
                 </div>
-            </a>
-        @endforeach
-    </div>
+                <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 10px; overflow: hidden;">
+                    <div style="width: {{ $prog['percentage'] }}%; background: {{ $isDone ? 'var(--success)' : 'var(--primary)' }}; height: 100%; transition: width 0.5s;"></div>
+                </div>
+            </div>
+
+            <div class="status-area">
+                @if($isDone)
+                    <div class="status-badge badge-completed">
+                        <i class="fas fa-check-circle"></i> Selesai
+                    </div>
+                @else
+                    <div class="status-badge badge-pending">Belum Lengkap</div>
+                    <span class="arrow">→</span>
+                @endif
+            </div>
+        </a>
+    @endforeach
+</div>
 
         <script>
             // Auto-redirect setelah 3 detik

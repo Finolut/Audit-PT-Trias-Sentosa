@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Klausul {{ $currentMain }}</title>
@@ -76,9 +77,9 @@
 
             <div class="submit-bar">
                 <div class="submit-wrapper">
-                    <button type="submit" class="submit-audit">
-                        <i class="fas fa-save"></i> Simpan & Lanjut
-                    </button>
+<button type="button" onclick="confirmSubmit()" class="submit-audit">
+    <i class="fas fa-save"></i> Simpan Klausul ini
+</button>
                 </div>
             </div>
         </form>
@@ -104,6 +105,45 @@
         const auditorName = "{{ $auditorName }}";
         const responders = @json($responders);
        const dbAnswers = @json($existingAnswers ?? []);
+       
+function confirmSubmit() {
+    Swal.fire({
+        title: 'Simpan Jawaban?',
+        text: "Apakah Anda sudah yakin dengan semua respon di klausul ini?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Simpan',
+        cancelButtonText: 'Cek Lagi'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Tampilkan loading sebentar
+            Swal.fire({
+                title: 'Menyimpan...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+            
+            // Submit form secara manual
+            document.getElementById('form').submit();
+        }
+    })
+}
+
+// Logika Redirect otomatis jika setelah simpan ternyata sudah 100%
+@if(session('all_complete'))
+    Swal.fire({
+        title: 'Audit Selesai!',
+        text: 'Semua klausul telah terisi 100%. Mengalihkan ke halaman laporan...',
+        icon: 'success',
+        timer: 3000,
+        showConfirmButton: false
+    }).then(() => {
+        window.location.href = "{{ route('audit.thanks') }}";
+    });
+@endif
+
     </script>
     <script src="{{ asset('js/audit-script.js') }}"></script>
 </body>
