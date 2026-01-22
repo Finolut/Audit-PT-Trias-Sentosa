@@ -122,6 +122,11 @@ public function index()
         'name' => $session->auditor_name ?? '-',
         'nik' => $session->auditor_nik ?? '-',
     ];
+
+    $teamMembers = DB::table('audit_responders')
+        ->where('audit_session_id', $audit->audit_session_id)
+        ->select('responder_name as name', 'responder_nik as nik', 'responder_department as department')
+        ->get();
        
         // --- LOGIKA GRAFIK ---
         $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
@@ -196,6 +201,7 @@ foreach ($allItems as $item) {
             'departments' => $departments,
             'audit' => $audit,
             'leadAuditor' => $leadAuditor,
+            'teamMembers' => $teamMembers,
             'mainClauses' => $this->mainClauses,
             'titles' => $this->mainClauseTitles,
             'detailedStats' => $detailedStats, 
