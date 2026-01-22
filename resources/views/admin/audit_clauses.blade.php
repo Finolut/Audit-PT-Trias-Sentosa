@@ -102,13 +102,21 @@
     <div class="mt-3 flex items-center justify-between">
        <div class="flex items-center">
     <span class="text-sm font-bold mr-2">Status:</span>
-    @if($audit->status == 'COMPLETED')
-        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-xs uppercase">
-            SELESAI
+{{-- Kode Baru yang Diperbaiki --}}
+<div class="flex items-center">
+    <span class="text-sm font-bold mr-2">Status:</span>
+    @php
+        // Normalisasi status ke uppercase agar perbandingannya akurat
+        $currentStatus = strtoupper($audit->status);
+    @endphp
+
+    @if($currentStatus === 'COMPLETE' || $currentStatus === 'COMPLETED')
+        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-green-200">
+            <i class="fas fa-check-circle mr-1"></i> SELESAI
         </span>
     @else
-        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-bold text-xs uppercase">
-            SEDANG BERJALAN
+        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-yellow-200">
+            <i class="fas fa-spinner fa-spin mr-1"></i> SEDANG BERJALAN
         </span>
     @endif
 </div>
