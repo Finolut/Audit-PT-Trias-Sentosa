@@ -189,19 +189,23 @@
             <tr>
                 <td><strong>Tanggal Audit</strong></td>
                 <td>: {{ $audit->created_at->format('d F Y') }}</td>
-                <td><strong>Anggota Tim</strong></td>
-                <td>
-                    @if(count($teamMembers) > 0)
-                        @foreach($teamMembers as $member)
-                            <div class="team-member">
-                                <span class="team-member-name">{{ $member['name'] ?? '-' }}</span>
-                                <span class="team-member-detail">(NIK: {{ $member['nik'] ?? 'N/A' }}, {{ $member['department'] ?? 'N/A' }})</span>
-                            </div>
-                        @endforeach
-                    @else
-                        -
-                    @endif
-                </td>
+<td><strong>Anggota Tim</strong></td>
+<td>
+    @if($teamMembers->count() > 0)
+        @foreach($teamMembers as $member)
+            <div class="team-member">
+                <span class="team-member-name">{{ $member->name ?? '-' }}</span>
+                <span class="team-member-detail">
+                    (NIK: {{ $member->nik ?? 'N/A' }}, 
+                    Dept: {{ $member->department ?? 'N/A' }} 
+                    @if($member->role) - {{ $member->role }} @endif)
+                </span>
+            </div>
+        @endforeach
+    @else
+        <div class="team-member">-</div>
+    @endif
+</td>
             </tr>
             <tr>
                 <td><strong>Tipe Audit</strong></td>

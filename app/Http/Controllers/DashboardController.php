@@ -318,13 +318,11 @@ public function exportToPdf($auditId)
         'department' => $session->auditor_department,
     ];
 
-    $teamMembers = [];
-    if (!empty($session->audit_team)) {
-        $teamJson = json_decode($session->audit_team, true);
-        if (is_array($teamJson)) {
-            $teamMembers = $teamJson;
-        }
-    }
+// --- PERBAIKAN DI SINI: Ambil dari tabel audit_responders ---
+    $teamMembers = DB::table('audit_responders')
+        ->where('audit_session_id', $audit->audit_session_id)
+        ->select('responder_name as name', 'responder_nik as nik', 'responder_department as department', 'responder_role as role')
+        ->get();
 
     // --- PERBAIKAN QUERY UTAMA DI SINI ---
     // Join ke maturity_levels untuk ambil definisi level per soal
