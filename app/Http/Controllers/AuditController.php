@@ -155,48 +155,54 @@ private $auditorsList = [
 
     // ... (method menu(), show(), store(), clauseDetail() tetap sama seperti sebelumnya)
     
-    public function menu($auditId)
-    {
-        $audit = DB::table('audits')->where('id', $auditId)->first();
-        if(!$audit) abort(404);
+public function menu($auditId)
+{
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    if(!$audit) abort(404);
 
-        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-        $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
+    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
 
-       // 1. Ambil data jawaban dan total soal per klausul
     $clauseProgress = [];
     $allFinished = true;
 
     foreach ($this->mainClauses as $mainCode => $subCodes) {
-        // Hitung total item soal untuk klausul utama ini
+        // 1. Hitung total item soal untuk klausul utama ini
         $totalItems = DB::table('items')
             ->join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->whereIn('clauses.clause_code', $subCodes)
             ->count();
 
-        // Hitung berapa yang sudah dijawab (auditor utama)
+        // 2. Hitung berapa yang sudah dijawab (SESUAIKAN NAMA KOLOM DI SINI)
         $answeredItems = DB::table('answers')
             ->join('items', 'answers.item_id', '=', 'items.id')
             ->join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->where('answers.audit_id', $auditId)
-            ->where('answers.responder_name', $session->auditor_name)
+            // Ganti 'responder_name' menjadi 'auditor_name' sesuai tabel Anda
+            ->where('answers.auditor_name', $session->auditor_name) 
             ->whereIn('clauses.clause_code', $subCodes)
             ->count();
 
         $percentage = ($totalItems > 0) ? round(($answeredItems / $totalItems) * 100) : 0;
         
-        if ($percentage < 100) $allFinished = false;
+        // Cek jika ada yang belum 100%
+        if ($percentage < 100) {
+            $allFinished = false;
+        }
 
         $clauseProgress[$mainCode] = [
             'percentage' => $percentage,
-            'count' => $answeredItems,
-            'total' => $totalItems
+            'count'      => $answeredItems,
+            'total'      => $totalItems
         ];
     }
 
-    // 2. Jika semua sudah 100%, update status audit
+    // 3. Update status jika benar-benar sudah selesai semua
     if ($allFinished && count($this->mainClauses) > 0) {
-        DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE']);
+        DB::table('audits')->where('id', $auditId)->update([
+            'status' => 'COMPLETE',
+            'updated_at' => now()
+        ]);
     }
 
     return view('audit.menu', [
