@@ -5,7 +5,7 @@
     <div class="sticky top-0 z-30 bg-gray-100/95 backdrop-blur py-4 mb-6 border-b border-gray-200">
         <div class="flex items-center justify-between">
             <div>
-                <a href="{{ route('audit.overview', $audit->id) }}" class="text-sm text-gray-500 hover:text-blue-600 font-bold">
+                <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-gray-500 hover:text-blue-600 font-bold">
                     ← Kembali ke Menu Utama
                 </a>
                 <h2 class="text-2xl font-extrabold text-gray-800 mt-1">
