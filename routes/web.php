@@ -10,16 +10,22 @@ use App\Http\Controllers\AuditController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminAuditorController;
+use App\Http\Controllers\Auth\LoginController;
 
 /*
 |--------------------------------------------------------------------------
-| LANDING & INITIAL ROUTES
+| PUBLIC ROUTES (Bisa diakses siapa saja)
 |--------------------------------------------------------------------------
 */
 
 Route::get('/', function () {
     return view('welcome'); 
 })->name('landing');
+
+// LOGIN/LOGOUT SYSTEM
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 /* PROSES FORM LAMA (Tetap Dipertahankan) */
 Route::get('/test-form', function () {
@@ -73,17 +79,44 @@ Route::post('/test-form', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN AREA (DASHBOARD & LOGS)
+| AUDIT PROCESS ROUTES (Public / Khusus Auditor lapangan)
 |--------------------------------------------------------------------------
 */
+Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
+Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
+Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
+Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.menu');
+
+// Dynamic Clause Routes (UUID validation)
+Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
+    ->name('audit.show')
+    ->where('id', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+
+Route::post('/audit/{id}/{clause}', [AuditController::class, 'store'])->name('audit.store');
+
+// Special Submission Routes
+Route::post('/audit/save-ajax', [AuditController::class, 'saveAjax'])->name('audit.saveAjax');
+Route::post('/audit/save-sub-clause', [AuditController::class, 'saveSubClause']);
+Route::post('/audit/{audit}/4-1/submit', function ($auditId) {
+    DB::table('audit_sessions')->where('id', $auditId)->update(['audit_41_completed_at' => now()]);
+    return response()->json(['status' => 'ok', 'message' => 'Audit 4.1 berhasil disimpan']);
+});
+
+Route::post('/audit/{id}/final-submit', [AuditController::class, 'finalSubmit'])
+    ->name('audit.final_submit');
+
+Route::get('/audit/finish', function() {
+    return view('audit.thanks');
+})->name('audit.finish');
+
 /*
 |--------------------------------------------------------------------------
-| ADMIN ROUTES (Protected by Middleware)
+| ADMIN AREA (Protected by Middleware)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
     
-    // DASHBOARD
+    // DASHBOARD & LOGS
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('question_log');
     Route::get('/audit/search', [DashboardController::class, 'searchAudit'])->name('audit.search');
@@ -95,61 +128,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // EXPORT PDF
     Route::get('/audit/{auditId}/export-pdf', [DashboardController::class, 'exportToPdf'])->name('audit.export.pdf');
 
-    // MANAJEMEN USER & AUDITOR
+    // USER & AUDITOR MANAGEMENT
     Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
     Route::post('/users/store', [AdminUserController::class, 'store'])->name('users.store');
     Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
     Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
     Route::delete('/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('auditors.destroy');
 
-    // ITEMS RESOURCE
+    // ITEMS MANAGEMENT
     Route::resource('items', ItemController::class);
 });
 
 /*
 |--------------------------------------------------------------------------
-| AUDIT PROCESS ROUTES (SURVEY)
+| SYSTEM UTILITIES (Keep existing important routes)
 |--------------------------------------------------------------------------
 */
-
-// Setup & Start
-Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
-Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
-Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
-
-// Menu & Soal Dinamis
-Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.menu');
-
-// Route Show & Store (Gunakan regex UUID agar tidak bentrok)
-Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
-    ->name('audit.show')
-    ->where('id', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
-
-Route::post('/audit/{id}/{clause}', [AuditController::class, 'store'])->name('audit.store');
-
-// AJAX & Submit Khusus
-Route::post('/audit/save-ajax', [AuditController::class, 'saveAjax'])->name('audit.saveAjax');
-Route::post('/audit/save-sub-clause', [AuditController::class, 'saveSubClause']);
-Route::post('/audit/{audit}/4-1/submit', function ($auditId) {
-    DB::table('audit_sessions')->where('id', $auditId)->update(['audit_41_completed_at' => now()]);
-    return response()->json(['status' => 'ok', 'message' => 'Audit 4.1 berhasil disimpan']);
-});
-
-// Finish
-Route::get('/audit/finish', function() {
-    return "<div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
-            <h1 style='color:green;'>Terima Kasih!</h1>
-            <p>Audit telah selesai disimpan.</p>
-            <a href='/audit/setup'>Kembali ke Menu Awal</a>
-            </div>";
-})->name('audit.finish');
-
-/*
-|--------------------------------------------------------------------------
-| SYSTEM UTILITIES
-|--------------------------------------------------------------------------
-*/
-
 Route::get('/test-db', function () {
     try {
         DB::connection()->getPdo();
@@ -159,33 +153,31 @@ Route::get('/test-db', function () {
     }
 });
 
-Route::get('/admin/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('admin.dept.status_index');
+// Preserved legacy admin routes (non-conflicting)
+Route::get('/admin/department-status', [DashboardController::class, 'departmentStatusIndex'])
+    ->name('admin.dept.status_index');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('items', ItemController::class);
 });
 
-Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
-Route::post('/admin/users/store', [AdminUserController::class, 'store'])->name('admin.users.store');
+Route::get('/admin/users/create', [AdminUserController::class, 'create'])
+    ->name('admin.users.create');
 
-// Group Admin
+Route::post('/admin/users/store', [AdminUserController::class, 'store'])
+    ->name('admin.users.store');
+
 Route::prefix('admin')->name('admin.')->group(function () {
-    // ... route lain ...
-    
-    // Route Khusus Monitoring Auditor
-    Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
-    Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
+    Route::get('/auditors', [AdminAuditorController::class, 'index'])
+        ->name('auditors.index');
+    Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])
+        ->name('auditors.show');
 });
 
-Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('admin.auditors.destroy');
+Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy'])
+    ->name('admin.auditors.destroy');
 
-Route::post('/audit/{id}/final-submit', [AuditController::class, 'finalSubmit'])
-    ->name('audit.final_submit');
-
-    // HANYA ROUTE PDF
-Route::get('admin/audit/{auditId}/export-pdf', [DashboardController::class, 'exportToPdf'])
-    ->name('admin.audit.export.pdf');
-
-    Route::get('/audit/thanks', function () {
+// Preserved special routes
+Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
