@@ -24,11 +24,11 @@ class User extends Authenticatable
         'email',
         'department',
         'role',
-        'password_hash', // Sesuai kolom database kamu
+        'password', // Sesuai kolom database kamu
     ];
 
     protected $hidden = [
-        'password_hash',
+        'password',
         'remember_token',
     ];
 
@@ -38,6 +38,6 @@ class User extends Authenticatable
      */
     public function getAuthPassword()
     {
-        return $this->password_hash;
+        return $this->password;
     }
 }
