@@ -47,12 +47,13 @@ class AdminUserController extends Controller
         // Pastikan Model User Anda fillable-nya sudah diatur atau gunakan forceCreate
         $user = new User();
         // $user->id akan otomatis jika menggunakan UUID di model (HasUuids trait)
-        $user->name = $request->name;
-        $user->nik = $request->nik;
-        $user->department = $request->department; // Simpan nama departemen (text) sesuai gambar
-        $user->role = $request->role;
-        $user->password = $passwordToSave; // Sesuai nama kolom di gambar
-        $user->save();
+$user->name = $request->name;
+$user->nik = $request->nik;
+$user->department = $request->department; 
+$user->role = $request->role;
+$user->email = $request->email; 
+$user->password = $passwordToSave; 
+$user->save();
 
         return redirect()->route('admin.users.create')
             ->with('success', 'User ' . $request->role . ' berhasil ditambahkan!');
