@@ -129,8 +129,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::get('/audit/{auditId}/export-pdf', [DashboardController::class, 'exportToPdf'])->name('audit.export.pdf');
 
     // USER & AUDITOR MANAGEMENT
-    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
-    Route::post('/users/store', [AdminUserController::class, 'store'])->name('users.store');
+    Route::resource('users', AdminUserController::class)->except(['show']);
     Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
     Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
     Route::delete('/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('auditors.destroy');

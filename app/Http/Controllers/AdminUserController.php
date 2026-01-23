@@ -7,9 +7,16 @@ use App\Models\User; // Pastikan Model User Anda sesuai
 use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class AdminUserController extends Controller
 {
+
+    public function index()
+{
+    $users = User::orderBy('name')->get();
+    return view('admin.users.index', compact('users'));
+}
     public function create()
     {
         // Ambil data departemen untuk dropdown
@@ -55,7 +62,58 @@ $user->email = $request->email;
 $user->password = $passwordToSave; 
 $user->save();
 
-        return redirect()->route('admin.users.create')
-            ->with('success', 'User ' . $request->role . ' berhasil ditambahkan!');
+       return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
     }
+
+     public function edit(User $user)
+    {
+        $departments = Department::orderBy('name', 'asc')->get();
+        return view('admin.users.edit', compact('user', 'departments'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'nik' => 'required|string|unique:users,nik,' . $user->id, // exclude current user
+            'department' => 'required|string',
+            'role' => 'required|in:admin,auditor',
+            'email' => 'required_if:role,admin|email|unique:users,email,' . $user->id . '|nullable',
+            'password' => 'nullable|required_if:role,admin|min:6',
+        ]);
+
+        // Update data dasar
+        $user->name = $request->name;
+        $user->nik = $request->nik;
+        $user->department = $request->department;
+        $user->role = $request->role;
+        $user->email = $request->role === 'admin' ? $request->email : null;
+
+        // Hanya update password jika diisi
+        if ($request->role === 'admin' && $request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        // Jika role berubah dari admin ke auditor → hapus email & reset password
+        if ($request->role === 'auditor') {
+            $user->email = null;
+            // Opsional: reset password ke default
+            // $user->password = Hash::make('default123');
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui!');
+    }
+
+public function destroy(User $user)
+{
+    if ($user->id === Auth::id()) {
+        return redirect()->back()->withErrors(['Tidak bisa menghapus akun sendiri.']);
+    }
+
+    $user->delete();
+
+    return redirect()->route('admin.users.index')
+        ->with('success', 'User berhasil dihapus.');
+}
 }
