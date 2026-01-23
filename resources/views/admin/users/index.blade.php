@@ -1,34 +1,38 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <div class="mb-8 flex justify-between items-center">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">Manajemen User & Auditor</h2>
-            <p class="text-sm text-gray-500 mt-1">Kelola semua akun admin dan auditor dalam satu tampilan.</p>
+<div class="flex flex-col items-center w-full px-4 sm:px-6 lg:px-8"> {{-- Pusatkan semua konten --}}
+    <div class="max-w-6xl w-full"> {{-- Batasi lebar maks, tapi tetap penuh di bawahnya --}}
+        
+        {{-- Header & Tombol Tambah --}}
+        <div class="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div class="text-center sm:text-left">
+                <h2 class="text-2xl font-bold text-gray-800">Manajemen User & Auditor</h2>
+                <p class="text-sm text-gray-500 mt-1">Kelola semua akun admin dan auditor dalam satu tampilan.</p>
+            </div>
+            <a href="{{ route('admin.users.create') }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors justify-center">
+                <span>➕</span> Tambah User Baru
+            </a>
         </div>
-        <a href="{{ route('admin.users.create') }}" 
-           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-colors">
-            <span>➕</span> Tambah User Baru
-        </a>
-    </div>
 
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
-            {{ session('success') }}
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded max-w-2xl mx-auto">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <!-- Search Bar Lokal (dipusatkan) -->
+        <div class="relative w-full max-w-xs mb-4 mx-auto">
+            <input type="text" id="tableSearch" placeholder="Cari nama user..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
         </div>
-    @endif
 
-    <!-- Search Bar Lokal -->
-    <div class="relative w-64 mb-4">
-        <input type="text" id="tableSearch" placeholder="Cari nama user..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
+        {{-- Tabel (tetap lebar penuh di dalam max-w-6xl) --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
