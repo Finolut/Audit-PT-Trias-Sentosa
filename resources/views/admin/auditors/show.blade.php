@@ -3,13 +3,15 @@
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
     
-    {{-- Header --}}
-    <div class="flex items-center gap-4 mb-2">
-        <a href="{{ route('admin.auditors.index') }}" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </a>
-        <h2 class="text-2xl font-bold text-gray-800">Profil & Riwayat Auditor</h2>
-    </div>
+{{-- Header --}}
+<div class="flex items-center gap-4 mb-2">
+    <a href="{{ route('admin.users.index') }}" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+    </a>
+    <h2 class="text-2xl font-bold text-gray-800">Profil & Riwayat Auditor</h2>
+</div>
 
     {{-- KARTU PROFIL (Sama seperti sebelumnya) --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
