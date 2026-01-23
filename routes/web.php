@@ -181,3 +181,5 @@ Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy']
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
+
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

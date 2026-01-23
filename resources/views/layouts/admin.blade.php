@@ -110,19 +110,39 @@
                 </a>
             </nav>
             
-            {{-- User Profile Footer --}}
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                        AD
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-bold text-gray-700">Administrator</p>
-                        <p class="text-xs text-gray-500">PT Trias Sentosa</p>
-                    </div>
-                </div>
+          {{-- User Profile Footer --}}
+<div class="p-4 border-t border-gray-200">
+    <div class="flex items-center justify-between group">
+        <div class="flex items-center">
+            {{-- Avatar Inisial Dinamis --}}
+            <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
+            </div>
+            <div class="ml-3 overflow-hidden">
+                {{-- Nama User dari Database --}}
+                <p class="text-sm font-bold text-gray-700 truncate capitalize">
+                    {{ auth()->user()->name ?? 'Administrator' }}
+                </p>
+                {{-- Role User dari Database --}}
+                <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
+                    {{ auth()->user()->role ?? 'Admin' }}
+                </p>
             </div>
         </div>
+
+        {{-- Tombol Logout --}}
+        <form method="POST" action="{{ route('logout') }}" class="inline">
+            @csrf
+            <button type="submit" 
+                    title="Logout"
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
 
         {{-- MAIN CONTENT AREA --}}
         <div class="flex-1 overflow-y-auto bg-gray-50 relative">
