@@ -51,7 +51,7 @@ class AdminUserController extends Controller
         $user->nik = $request->nik;
         $user->department = $request->department; // Simpan nama departemen (text) sesuai gambar
         $user->role = $request->role;
-        $user->password_hash = $passwordToSave; // Sesuai nama kolom di gambar
+        $user->password = $passwordToSave; // Sesuai nama kolom di gambar
         $user->save();
 
         return redirect()->route('admin.users.create')
