@@ -8,6 +8,7 @@ use App\Models\Department;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminUserController extends Controller
 {
@@ -15,6 +16,18 @@ class AdminUserController extends Controller
     public function index()
 {
     $users = User::orderBy('name')->get();
+
+    foreach ($users as $user) {
+        if ($user->role === 'auditor') {
+            // Hitung total audit dari tabel audit_sessions
+            $user->total_audits = DB::table('audit_sessions')
+                ->where('auditor_name', $user->name)
+                ->count();
+        } else {
+            $user->total_audits = null;
+        }
+    }
+
     return view('admin.users.index', compact('users'));
 }
     public function create()

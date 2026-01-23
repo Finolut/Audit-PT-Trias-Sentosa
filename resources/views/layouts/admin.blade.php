@@ -90,19 +90,13 @@
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manajemen Data</span>
                 </div>
 
-                {{-- MENU BARU: KELOLA USER --}}
-                <a href="{{ route('admin.users.index') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*') ? 'active-link' : '' }}">
-                    <span class="mr-3 text-lg">👥</span> Kelola User (Auditor)
-                </a>
-                {{-- END MENU BARU --}}
+{{-- MENU BARU: KELOLA USER --}}
+<a href="{{ route('admin.users.index') }}"
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*', 'admin.auditors.*') ? 'active-link' : '' }}">
+    <span class="mr-3 text-lg">👥</span> Manajemen User & Auditor
+</a>
+{{-- END MENU BARU --}}
 
-                {{-- MENU BARU: MONITORING AUDITOR --}}
-                <a href="{{ route('admin.auditors.index') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.auditors.*') ? 'active-link' : '' }}">
-                    <span class="mr-3 text-lg">🕵️‍♂️</span> Monitoring Auditor
-                </a>
-                {{-- END MENU BARU --}}
 
                 <a href="{{ route('admin.items.index') }}"
                    class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">

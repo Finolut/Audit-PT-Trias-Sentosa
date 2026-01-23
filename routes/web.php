@@ -130,7 +130,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 
     // USER & AUDITOR MANAGEMENT
     Route::resource('users', AdminUserController::class)->except(['show']);
-    Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
     Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
     Route::delete('/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('auditors.destroy');
 
