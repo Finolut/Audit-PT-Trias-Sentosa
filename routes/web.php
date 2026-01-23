@@ -139,47 +139,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::resource('items', ItemController::class);
 });
 
-/*
-|--------------------------------------------------------------------------
-| SYSTEM UTILITIES (Keep existing important routes)
-|--------------------------------------------------------------------------
-*/
-Route::get('/test-db', function () {
-    try {
-        DB::connection()->getPdo();
-        return "Koneksi Berhasil ke: " . DB::connection()->getDatabaseName();
-    } catch (\Exception $e) {
-        return "Gagal konek database: " . $e->getMessage();
-    }
-});
-
-// Preserved legacy admin routes (non-conflicting)
-Route::get('/admin/department-status', [DashboardController::class, 'departmentStatusIndex'])
-    ->name('admin.dept.status_index');
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('items', ItemController::class);
-});
-
-Route::get('/admin/users/create', [AdminUserController::class, 'create'])
-    ->name('admin.users.create');
-
-Route::post('/admin/users/store', [AdminUserController::class, 'store'])
-    ->name('admin.users.store');
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/auditors', [AdminAuditorController::class, 'index'])
-        ->name('auditors.index');
-    Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])
-        ->name('auditors.show');
-});
-
-Route::delete('/admin/auditors/{id}', [AdminAuditorController::class, 'destroy'])
-    ->name('admin.auditors.destroy');
-
-// Preserved special routes
+// Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
-
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
