@@ -27,34 +27,6 @@
                 <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
             </div>
 
-            <div class="p-4 bg-blue-50 border-b border-blue-100">
-                <label class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 block">
-                    Cari Laporan Cepat
-                </label>
-                <form action="{{ route('admin.audit.search') }}" method="GET" class="relative">
-                    @if(session('search_error'))
-                        <div class="mb-3 px-3 py-2 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
-                            </svg>
-                            {{ session('search_error') }}
-                        </div>
-                    @endif
-                    {{-- Ganti bagian input di sidebar --}}
-                    <input type="text"
-                           name="audit_id"
-                           placeholder="Tempel ID Laporan (UUID)..."
-                           class="w-full pl-3 pr-10 py-2 text-sm bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm placeholder-gray-400"
-                           required>
-                    <button type="submit" class="absolute right-1 top-1 bottom-1 bg-blue-600 hover:bg-blue-700 text-white rounded px-2 flex items-center justify-center transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </button>
-                </form>
-            </div>
-
             {{-- Search Bar (Unified) --}}
             <div class="p-4 border-b border-gray-100 bg-gray-50/30">
                 <div class="relative">
@@ -137,6 +109,12 @@
                     </form>
                 </div>
             </div>
+
+<!-- Di dalam sidebar navigation -->
+<a href="{{ route('admin.search.report') }}"
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.search.report') ? 'active-link' : '' }}">
+    <span class="mr-3 text-lg">🔍</span> Cari Laporan
+</a>
 
         </div> {{-- END SIDEBAR --}}
 
