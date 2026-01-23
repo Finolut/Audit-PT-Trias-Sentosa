@@ -59,15 +59,24 @@
                         <option value="auditor" selected>Auditor</option>
                         <option value="admin">Admin</option>
                     </select>
-                    <p class="text-xs text-gray-400 mt-1">*Auditor tidak memerlukan password login.</p>
+                    <p class="text-xs text-gray-400 mt-1">*Auditor tidak memerlukan email & password login.</p>
                 </div>
             </div>
 
-            {{-- Password Field (Hidden by default for Auditor) --}}
-            <div id="passwordContainer" class="hidden border-t border-gray-100 pt-6 mt-2">
-                <div class="max-w-md">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Password Admin <span class="text-red-500">*</span></label>
-                    <input type="password" name="password" id="passwordInput" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Masukkan password aman">
+            {{-- Email & Password Container (Hanya untuk Admin) --}}
+            <div id="adminFieldsContainer" class="hidden border-t border-gray-100 pt-6 mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-md">
+                    {{-- Email --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Admin <span class="text-red-500">*</span></label>
+                        <input type="email" name="email" id="emailInput" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="contoh@email.com">
+                    </div>
+
+                    {{-- Password --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password Admin <span class="text-red-500">*</span></label>
+                        <input type="password" name="password" id="passwordInput" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Masukkan password aman">
+                    </div>
                 </div>
             </div>
 
@@ -83,25 +92,31 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const roleSelect = document.getElementById('roleSelect');
-        const passwordContainer = document.getElementById('passwordContainer');
+        const adminFieldsContainer = document.getElementById('adminFieldsContainer');
+        const emailInput = document.getElementById('emailInput');
         const passwordInput = document.getElementById('passwordInput');
 
-        function togglePassword() {
+        function toggleAdminFields() {
             if (roleSelect.value === 'admin') {
-                passwordContainer.classList.remove('hidden');
+                adminFieldsContainer.classList.remove('hidden');
+                // Tambahkan required
+                emailInput.setAttribute('required', 'required');
                 passwordInput.setAttribute('required', 'required');
             } else {
-                passwordContainer.classList.add('hidden');
+                adminFieldsContainer.classList.add('hidden');
+                // Hapus required dan reset nilai
+                emailInput.removeAttribute('required');
                 passwordInput.removeAttribute('required');
-                passwordInput.value = ''; // Reset value jika ganti ke auditor
+                emailInput.value = '';
+                passwordInput.value = '';
             }
         }
 
-        // Jalankan saat load awal (jika browser menyimpan cache input)
-        togglePassword();
+        // Jalankan saat load awal
+        toggleAdminFields();
 
         // Jalankan saat user mengubah pilihan
-        roleSelect.addEventListener('change', togglePassword);
+        roleSelect.addEventListener('change', toggleAdminFields);
     });
 </script>
 @endsection

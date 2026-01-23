@@ -25,7 +25,7 @@ class AdminUserController extends Controller
             'nik' => 'required|string|unique:users,nik', // Pastikan NIK unik
             'department' => 'required|string',
             'role' => 'required|in:admin,auditor',
-            // Password wajib hanya jika role = admin
+            'email' => 'required_if:role,admin|email|unique:users,email|nullable',
             'password' => 'nullable|required_if:role,admin|min:6',
         ]);
 
