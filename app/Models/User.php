@@ -4,22 +4,22 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// Hapus baris HasUuids di atas ini jika masih ada
+use Illuminate\Database\Eloquent\Concerns\HasUuids; // Pastikan ini di-import!
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, HasUuids; // Aktifkan HasUuids di sini
 
     protected $table = 'users';
-    
-    // TAMBAHKAN DUA BARIS INI:
-    // Ini memberitahu Laravel bahwa ID kamu adalah angka, bukan UUID
-    public $incrementing = true;
-    protected $keyType = 'int';
+
+    // PENTING UNTUK UUID:
+    protected $keyType = 'string';    // Beritahu Laravel ID-nya adalah string
+    public $incrementing = false;     // Beritahu Laravel ID tidak bertambah otomatis (+1)
 
     const UPDATED_AT = null; 
 
     protected $fillable = [
+        'id', // Masukkan ID ke fillable karena kamu pakai UUID manual/khusus
         'name',
         'nik',
         'email',
@@ -35,8 +35,6 @@ class User extends Authenticatable
 
     public function getAuthPassword()
     {
-        // Pastikan nama kolom di database kamu memang 'password'
-        // Jika di database namanya 'password_hash', ganti jadi $this->password_hash
         return $this->password;
     }
 }
