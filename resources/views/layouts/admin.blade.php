@@ -17,16 +17,39 @@
         }
         .sidebar {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 50;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
-        .sidebar-collapsed {
+        .sidebar-hidden {
             transform: translateX(-100%);
         }
         .overlay {
             transition: opacity 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 40;
+            display: none;
+        }
+        .overlay-visible {
+            display: block;
         }
         @media (min-width: 1024px) {
-            .sidebar-collapsed {
+            .sidebar {
                 transform: translateX(0);
+            }
+            .sidebar-hidden {
+                transform: translateX(0);
+            }
+            .overlay {
+                display: none !important;
             }
         }
         ::-webkit-scrollbar { width: 6px; }
@@ -38,11 +61,11 @@
 <body class="bg-gray-50 text-gray-800 font-sans">
 
     <!-- Mobile Overlay -->
-    <div id="overlay" class="overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+    <div id="overlay" class="overlay"></div>
 
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <div id="sidebar" class="sidebar fixed lg:static w-64 bg-white border-r border-gray-200 flex flex-col z-50 h-full lg:h-auto">
+        <div id="sidebar" class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col h-full">
             <!-- Header Sidebar -->
             <div class="p-6 border-b border-gray-100">
                 <h1 class="text-xl font-extrabold text-blue-800 uppercase leading-none tracking-tight">PT Trias Sentosa</h1>
@@ -72,7 +95,7 @@
 
                 <a href="{{ route('admin.users.index') }}"
                    class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*', 'admin.auditors.*') ? 'active-link' : '' }}">
-                    <span class="mr-3 text-lg">👥</span> Manajemen User
+                    <span class="mr-3 text-lg">👥</span> Manajemen User & Auditor
                 </a>
 
                 <a href="{{ route('admin.items.index') }}"
@@ -145,16 +168,16 @@
             // Toggle sidebar on mobile
             if (menuToggle) {
                 menuToggle.addEventListener('click', () => {
-                    sidebar.classList.remove('sidebar-collapsed');
-                    overlay.classList.remove('hidden');
+                    sidebar.classList.remove('sidebar-hidden');
+                    overlay.classList.add('overlay-visible');
                 });
             }
             
             // Close sidebar when clicking overlay
             if (overlay) {
                 overlay.addEventListener('click', () => {
-                    sidebar.classList.add('sidebar-collapsed');
-                    overlay.classList.add('hidden');
+                    sidebar.classList.add('sidebar-hidden');
+                    overlay.classList.remove('overlay-visible');
                 });
             }
             
@@ -163,10 +186,21 @@
             navLinks.forEach(link => {
                 link.addEventListener('click', () => {
                     if (window.innerWidth < 1024) {
-                        sidebar.classList.add('sidebar-collapsed');
-                        overlay.classList.add('hidden');
+                        sidebar.classList.add('sidebar-hidden');
+                        overlay.classList.remove('overlay-visible');
                     }
                 });
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.remove('sidebar-hidden');
+                    overlay.classList.remove('overlay-visible');
+                } else {
+                    sidebar.classList.add('sidebar-hidden');
+                    overlay.classList.remove('overlay-visible');
+                }
             });
         });
     </script>
