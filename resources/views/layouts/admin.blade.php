@@ -79,10 +79,10 @@
                     <span class="mr-3 text-lg">📊</span> Dashboard Overview
                 </a>
 
-                <a href="{{ route('admin.dept_status') }}">
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dept_status') ? 'active-link' : '' }}">
-                    <span class="mr-3 text-lg">📋</span> Status Audit Dept.
-                </a>
+<a href="{{ route('admin.dept_status') }}"
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dept_status') ? 'active-link' : '' }}">
+    <span class="mr-3 text-lg">📋</span> Status Audit Dept.
+</a>
 
 
                 <!-- Manajemen Data -->
