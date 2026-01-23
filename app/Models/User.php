@@ -4,18 +4,19 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+// Hapus baris HasUuids di atas ini jika masih ada
 
 class User extends Authenticatable
 {
     use Notifiable;
 
-    // Matikan ini jika ID di database kamu angka biasa (1, 2, 3)
-    // Jika ID kamu benar-benar UUID (string panjang), baru aktifkan lagi.
-    // use HasUuids; 
-
     protected $table = 'users';
     
-    // Matikan updated_at karena di tabel kamu sepertinya tidak ada
+    // TAMBAHKAN DUA BARIS INI:
+    // Ini memberitahu Laravel bahwa ID kamu adalah angka, bukan UUID
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     const UPDATED_AT = null; 
 
     protected $fillable = [
@@ -24,7 +25,7 @@ class User extends Authenticatable
         'email',
         'department',
         'role',
-        'password', // Sesuai kolom database kamu
+        'password', 
     ];
 
     protected $hidden = [
@@ -32,12 +33,10 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * PENTING: Karena nama kolom di database kamu 'password_hash',
-     * bukan 'password', kita harus kasih tahu Laravel di sini.
-     */
     public function getAuthPassword()
     {
+        // Pastikan nama kolom di database kamu memang 'password'
+        // Jika di database namanya 'password_hash', ganti jadi $this->password_hash
         return $this->password;
     }
 }
