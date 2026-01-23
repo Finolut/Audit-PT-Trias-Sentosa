@@ -2,34 +2,40 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Concerns\HasUuids; // Tambahkan ini jika pake UUID
 
 class User extends Authenticatable
 {
-    use HasUuids;
+    use Notifiable;
 
-    // Tambahkan baris ini untuk mematikan updated_at otomatis
-    const UPDATED_AT = null; 
-
-    // Atau jika kamu ingin mematikan keduanya (tapi di gambar ada created_at)
-    // public $timestamps = false; 
+    // Matikan ini jika ID di database kamu angka biasa (1, 2, 3)
+    // Jika ID kamu benar-benar UUID (string panjang), baru aktifkan lagi.
+    // use HasUuids; 
 
     protected $table = 'users';
+    
+    // Matikan updated_at karena di tabel kamu sepertinya tidak ada
+    const UPDATED_AT = null; 
 
     protected $fillable = [
         'name',
         'nik',
+        'email',
         'department',
         'role',
-        'password_hash',
+        'password_hash', // Sesuai kolom database kamu
     ];
 
+    protected $hidden = [
+        'password_hash',
+        'remember_token',
+    ];
 
-    // Jika di gambar kolom password namanya password_hash, 
-    // Laravel butuh tahu ini untuk autentikasi (opsional)
+    /**
+     * PENTING: Karena nama kolom di database kamu 'password_hash',
+     * bukan 'password', kita harus kasih tahu Laravel di sini.
+     */
     public function getAuthPassword()
     {
         return $this->password_hash;

@@ -76,22 +76,34 @@ Route::post('/test-form', function (Request $request) {
 | ADMIN AREA (DASHBOARD & LOGS)
 |--------------------------------------------------------------------------
 */
-
-// Gunakan as('admin.') agar semua rute di dalam otomatis punya awalan nama 'admin.'
-Route::prefix('admin')->as('admin.')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES (Protected by Middleware)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
     
+    // DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('question_log');
     Route::get('/audit/search', [DashboardController::class, 'searchAudit'])->name('audit.search');
-
-    // Route Detail Audit (Gunakan satu saja)
     Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
-
     Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause_detail');
     Route::get('/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('dept_status');
-    
-    // Route untuk Department (Tetap gunakan dept.show jika sudah terlanjur banyak dipakai)
-    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->withoutMiddleware([])->name('dept.show');
+    Route::get('/department/{deptId}', [DashboardController::class, 'showDepartment'])->name('dept.show');
+
+    // EXPORT PDF
+    Route::get('/audit/{auditId}/export-pdf', [DashboardController::class, 'exportToPdf'])->name('audit.export.pdf');
+
+    // MANAJEMEN USER & AUDITOR
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::post('/users/store', [AdminUserController::class, 'store'])->name('users.store');
+    Route::get('/auditors', [AdminAuditorController::class, 'index'])->name('auditors.index');
+    Route::get('/auditors/{id}', [AdminAuditorController::class, 'show'])->name('auditors.show');
+    Route::delete('/auditors/{id}', [AdminAuditorController::class, 'destroy'])->name('auditors.destroy');
+
+    // ITEMS RESOURCE
+    Route::resource('items', ItemController::class);
 });
 
 /*
