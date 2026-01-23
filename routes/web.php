@@ -136,14 +136,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // ITEMS MANAGEMENT
     Route::resource('items', ItemController::class);
 
-       Route::get('/admin/cari-laporan', function () {
+      Route::get('/cari-laporan', function () {
         return view('admin.search-report');
-    })->name('admin.search.report');
+    })->name('search.report');
 
     // Pastikan route search tetap ada
     Route::get('/admin/audit/search', [AuditController::class, 'search'])
          ->name('admin.audit.search');
-         
+
 });
 
 // Preserved special routes (public)
