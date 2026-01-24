@@ -129,7 +129,6 @@
 
                 {{-- Legend di bawah kotak grafik --}}
                 <div class="mt-4 flex justify-between items-center border-t border-gray-50 pt-3">
-                    <span class="text-xs text-gray-400">Learn how we count contributions</span>
                     <div class="flex items-center gap-1 text-[10px] text-gray-400">
                         <span>Less</span>
                         <div class="w-2.5 h-2.5 bg-gray-100 rounded-[1px]"></div>
@@ -223,52 +222,53 @@
             </div>
         </div>
 
-        {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
-        <div class="lg:col-span-1">
-            <div class="bg-blue-600 rounded-2xl shadow-lg shadow-blue-100 overflow-hidden border border-blue-700">
-                <div class="px-6 py-5 border-b border-blue-500/30 flex items-center justify-between">
-                    <h3 class="font-bold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
-                        Log Pertanyaan
-                    </h3>
-                    <span class="bg-blue-400/30 text-blue-100 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Live</span>
-                </div>
+       {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
+<div class="lg:col-span-1">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+                </svg>
+                Pertanyaan
+            </h3>
+            <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Live</span>
+        </div>
 
-                <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
-                    @forelse($liveQuestions as $q)
-                    <div class="bg-blue-700/40 p-4 rounded-xl border border-blue-400/20 backdrop-blur-sm group hover:bg-blue-700/60 transition-all">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-black text-blue-200 uppercase tracking-tighter">{{ $q->dept_name }}</span>
-                                <span class="text-[11px] font-bold text-white">Clause {{ $q->clause_code }}</span>
-                            </div>
-                            <span class="text-[9px] text-blue-300 font-medium">{{ \Carbon\Carbon::parse($q->created_at)->diffForHumans() }}</span>
-                        </div>
-                        <p class="text-xs text-blue-50 leading-relaxed mb-3 italic">
-                            "{{ Str::limit($q->question_text, 100) }}"
-                        </p>
-                        <div class="flex items-center gap-2 pt-2 border-t border-blue-400/20">
-                            <div class="w-5 h-5 rounded-full bg-blue-400 flex items-center justify-center text-[8px] font-bold text-white">
-                                {{ strtoupper(substr($q->auditor_name ?? 'A', 0, 1)) }}
-                            </div>
-                            <span class="text-[10px] font-medium text-blue-200">
-                                Auditor: <span class="text-white">{{ $q->auditor_name ?? 'N/A' }}</span>
-                            </span>
-                        </div>
+        <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
+            @forelse($liveQuestions as $q)
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 group hover:bg-gray-100 transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-black text-gray-500 uppercase tracking-tighter">{{ $q->dept_name }}</span>
+                        <span class="text-[11px] font-bold text-gray-800">Clause {{ $q->clause_code }}</span>
                     </div>
-                    @empty
-                    <div class="py-8 text-center text-blue-200">
-                        <p class="text-sm">Belum ada catatan pertanyaan.</p>
-                    </div>
-                    @endforelse
+                    <span class="text-[9px] text-gray-400 font-medium">{{ \Carbon\Carbon::parse($q->created_at)->diffForHumans() }}</span>
                 </div>
-
-                <div class="p-4 bg-blue-800/50 text-center">
-                    <a href="{{ route('admin.question_log') }}" class="text-white text-xs font-bold hover:underline uppercase tracking-wider">
-                        Lihat Semua Log →
-                    </a>
+                <p class="text-xs text-gray-700 leading-relaxed mb-3 italic">
+                    "{{ Str::limit($q->question_text, 100) }}"
+                </p>
+                <div class="flex items-center gap-2 pt-2 border-t border-gray-200">
+                    <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white">
+                        {{ strtoupper(substr($q->auditor_name ?? 'A', 0, 1)) }}
+                    </div>
+                    <span class="text-[10px] font-medium text-gray-600">
+                        Auditor: <span class="text-gray-800 font-semibold">{{ $q->auditor_name ?? 'N/A' }}</span>
+                    </span>
                 </div>
             </div>
+            @empty
+            <div class="py-8 text-center text-gray-400">
+                <p class="text-sm">Belum ada catatan pertanyaan.</p>
+            </div>
+            @endforelse
+        </div>
+
+        <div class="p-4 bg-gray-50/60 text-center border-t border-gray-100">
+            <a href="{{ route('admin.question_log') }}" class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
+                Lihat Semua Pertanyaan →
+            </a>
         </div>
     </div>
+</div>
 @endsection
