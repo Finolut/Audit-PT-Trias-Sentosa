@@ -118,21 +118,26 @@
 
 <div class="mt-auto pt-4 border-t border-gray-100">
     <div class="px-4 py-2"> 
-        <div class="flex items-center justify-between">
-                
-                <div class="ml-3 overflow-hidden">
-                    <p class="text-sm font-bold text-gray-700 truncate capitalize leading-tight">
-                        {{ auth()->user()->name ?? 'Administrator' }}
-                    </p>
-                    <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
-                        {{ auth()->user()->role ?? 'Admin' }}
-                    </p>
-                </div>
+        <!-- Full sidebar -->
+        <div class="flex items-center justify-between hidden group-[.mini-sidebar]/sidebar:block">
+            <div class="ml-3 overflow-hidden">
+                <p class="text-sm font-bold text-gray-700 truncate capitalize leading-tight">
+                    {{ auth()->user()->name ?? 'Administrator' }}
+                </p>
+                <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
+                    {{ auth()->user()->role ?? 'Admin' }}
+                </p>
+            </div>
+            <button id="logout-btn" type="button" title="Logout" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </div>
 
-
-            <button id="logout-btn" type="button"
-                    title="Logout"
-                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+        <!-- Mini sidebar (centered) -->
+        <div class="flex justify-center group-[.mini-sidebar]/sidebar:hidden">
+            <button id="logout-btn" type="button" title="Logout" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
