@@ -119,10 +119,6 @@
 <div class="mt-auto pt-4 border-t border-gray-100">
     <div class="px-4 py-2"> 
         <div class="flex items-center justify-between">
-            <div class="flex items-center min-w-0">
-                <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
-                </div>
                 
                 <div class="ml-3 overflow-hidden">
                     <p class="text-sm font-bold text-gray-700 truncate capitalize leading-tight">
@@ -132,7 +128,7 @@
                         {{ auth()->user()->role ?? 'Admin' }}
                     </p>
                 </div>
-            </div>
+
 
             <button id="logout-btn" type="button"
                     title="Logout"
