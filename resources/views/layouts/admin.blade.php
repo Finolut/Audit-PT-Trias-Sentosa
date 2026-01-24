@@ -69,7 +69,7 @@
     </div>
     <div class="logo-collapsed text-center hidden">
         <a href="https://trias-sentosa.com" class="block">
-            <img src="https://trias-sentosa.com/images/logo.webp" alt="TS Logo" class="h-8 object-contain">
+            <img src="https://trias-sentosa.com/images/ts.jpg " alt="TS Logo" class="h-8 object-contain">
         </a>
     </div>
 </div>
