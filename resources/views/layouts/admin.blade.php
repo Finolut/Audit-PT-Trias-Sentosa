@@ -78,46 +78,43 @@
                 </div>
             </div>
 
-            <!-- Navigation List -->
-            <nav class="flex-1 overflow-y-auto py-4 no-scrollbar flex flex-col gap-1 px-3">
-                
-                <div class="px-3 mb-2 mt-2 hide-on-mini transition-opacity duration-200">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Menu Utama</span>
-                </div>
+ <!-- Navigation List -->
+<nav class="flex-1 overflow-y-auto py-4 no-scrollbar flex flex-col gap-1 px-3">
 
-                <a href="{{ route('admin.dashboard') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}">
-                    <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📊</span> 
-                    <span class="hide-on-mini whitespace-nowrap">Dashboard Overview</span>
-                </a>
+    <!-- Dashboard -->
+    <a href="{{ route('admin.dashboard') }}"
+       class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}">
+        <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📊</span> 
+        <span class="lg:hidden whitespace-nowrap">Dashboard Overview</span>
+    </a>
 
-                <a href="{{ route('admin.dept_status') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dept_status') ? 'active-link' : '' }}">
-                    <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📋</span> 
-                    <span class="hide-on-mini whitespace-nowrap">Status Audit Dept.</span>
-                </a>
+    <!-- Status Audit Dept. -->
+    <a href="{{ route('admin.dept_status') }}"
+       class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dept_status') ? 'active-link' : '' }}">
+        <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📋</span> 
+        <span class="lg:hidden whitespace-nowrap">Status Audit Dept.</span>
+    </a>
 
-                <div class="px-3 mb-2 mt-6 hide-on-mini transition-opacity duration-200">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Manajemen Data</span>
-                </div>
+    <!-- Manajemen User & Auditor -->
+    <a href="{{ route('admin.users.index') }}"
+       class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*', 'admin.auditors.*') ? 'active-link' : '' }}">
+        <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">👥</span> 
+        <span class="lg:hidden whitespace-nowrap">Manajemen User & Auditor</span>
+    </a>
 
-                <a href="{{ route('admin.users.index') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*', 'admin.auditors.*') ? 'active-link' : '' }}">
-                    <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">👥</span> 
-                    <span class="hide-on-mini whitespace-nowrap">Manajemen User & Auditor</span>
-                </a>
+    <!-- Kelola Soal Audit -->
+    <a href="{{ route('admin.items.index') }}"
+       class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
+        <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📝</span> 
+        <span class="lg:hidden whitespace-nowrap">Kelola Soal Audit</span>
+    </a>
 
-                <a href="{{ route('admin.items.index') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
-                    <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📝</span> 
-                    <span class="hide-on-mini whitespace-nowrap">Kelola Soal Audit</span>
-                </a>
-
-                <a href="{{ route('admin.search.report') }}"
-                   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.search.report') ? 'active-link' : '' }}">
-                    <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">🔍</span> 
-                    <span class="hide-on-mini whitespace-nowrap">Cari Laporan</span>
-                </a>
+    <!-- Cari Laporan -->
+    <a href="{{ route('admin.search.report') }}"
+       class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.search.report') ? 'active-link' : '' }}">
+        <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">🔍</span> 
+        <span class="lg:hidden whitespace-nowrap">Cari Laporan</span>
+    </a>
 
 <!-- User Profile Footer -->
 <div class="mt-auto pt-4 border-t border-gray-100">
@@ -127,7 +124,7 @@
                 <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                     {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                 </div>
-                <div class="ml-3 overflow-hidden hide-on-mini">
+                <div class="ml-3 overflow-hidden lg:hidden">
                     <p class="text-sm font-bold text-gray-700 truncate capitalize">
                         {{ auth()->user()->name ?? 'Administrator' }}
                     </p>
@@ -140,7 +137,7 @@
             <!-- Hanya tampilkan logout jika BUKAN mode mini -->
             <button id="logout-btn" type="button"
                     title="Logout"
-                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hide-on-mini">
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 lg:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
@@ -162,11 +159,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
             </svg>
         </div>
-        <span class="hide-on-mini whitespace-nowrap">Minimize Menu</span>
+        <span class="lg:hidden whitespace-nowrap">Minimize Menu</span>
     </button>
 </div>
-            </nav>
-
+</nav>
         </div>
 
         <!-- MAIN CONTENT AREA -->
