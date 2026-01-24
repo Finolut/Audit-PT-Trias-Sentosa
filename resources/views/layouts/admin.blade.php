@@ -73,7 +73,7 @@
                 </div>
                 <div class="logo-collapsed text-center hidden">
                     <a href="https://trias-sentosa.com" class="block">
-                        <img src="https://trias-sentosa.com/images/logo.webp" alt="PT Trias Sentosa" class="h-8 object-contain">
+                        <img src="https://trias-sentosa.com/images/ts.jpg" alt="PT Trias Sentosa" class="h-8 object-contain">
                     </a>
                 </div>
             </div>
@@ -119,44 +119,35 @@
                     <span class="hide-on-mini whitespace-nowrap">Cari Laporan</span>
                 </a>
 
-                <!-- User Profile Footer -->
-                <div class="mt-auto pt-4 border-t border-gray-100">
-                    <div class="p-4">
-                        <div class="flex items-center group justify-between sidebar-mini:justify-center">
-                            <div class="flex items-center justify-center-on-mini w-full">
-                                <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                                    {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
-                                </div>
-                                <div class="ml-3 overflow-hidden hide-on-mini">
-                                    <p class="text-sm font-bold text-gray-700 truncate capitalize">
-                                        {{ auth()->user()->name ?? 'Administrator' }}
-                                    </p>
-                                    <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
-                                        {{ auth()->user()->role ?? 'Admin' }}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Logout Button Normal -->
-                            <button id="logout-btn" type="button"
-                                    title="Logout"
-                                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 sidebar-mini:hidden">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                            </button>
-                            
-                            <!-- Logout Button Mini (for sidebar-mini) -->
-                            <button id="logout-btn-mini" type="button"
-                                    title="Logout"
-                                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hidden sidebar-mini:block mx-auto">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+<!-- User Profile Footer -->
+<div class="mt-auto pt-4 border-t border-gray-100">
+    <div class="p-4">
+        <div class="flex items-center group justify-between">
+            <div class="flex items-center w-full">
+                <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                 </div>
+                <div class="ml-3 overflow-hidden hide-on-mini">
+                    <p class="text-sm font-bold text-gray-700 truncate capitalize">
+                        {{ auth()->user()->name ?? 'Administrator' }}
+                    </p>
+                    <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
+                        {{ auth()->user()->role ?? 'Admin' }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hanya tampilkan logout jika BUKAN mode mini -->
+            <button id="logout-btn" type="button"
+                    title="Logout"
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hide-on-mini">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
 
                 <!-- Minimize Button (Desktop Only) -->
                 <div class="mt-auto pt-4 border-t border-gray-100 hidden lg:block">
