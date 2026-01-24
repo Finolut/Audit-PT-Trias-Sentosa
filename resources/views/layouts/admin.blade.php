@@ -147,22 +147,23 @@
 
 <!-- Minimize Button (Desktop Only) -->
 <div class="pt-4 border-t border-gray-100 hidden lg:block">
-    <button id="btn-minimize" class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none">
+    <button id="btn-minimize" class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all focus:outline-none">
         
-        <div id="icon-collapse" class="min-w-[24px] mr-3 no-margin-on-mini flex justify-center">
+        <div id="icon-collapse" class="min-w-[24px] mr-3 flex justify-center group-[.is-mini]:mr-0">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
         </div>
 
-        <div id="icon-expand" class="min-w-[24px] mr-3 no-margin-on-mini hidden justify-center">
+        <div id="icon-expand" class="min-w-[24px] mr-3 hidden justify-center group-[.is-mini]:mr-0">
              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
             </svg>
         </div>
 
-        <span class="whitespace-nowrap menu-text">Kecilkan Side Bar</span>
-        
+        <span class="whitespace-nowrap transition-opacity duration-200 group-[.is-mini]:hidden">
+            Kecilkan Side Bar
+        </span>
     </button>
 </div>
 </nav>
