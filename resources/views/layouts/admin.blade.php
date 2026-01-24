@@ -63,6 +63,7 @@
             <div class="h-16 flex items-center justify-center border-b border-gray-100 px-4">
 <div class="logo-expanded text-left w-full">
     <a href="https://trias-sentosa.com" class="block">
+        <h1 class="text-xl font-extrabold text-blue-800 uppercase leading-none tracking-tight">PT Trias Sentosa</h1>
     </a>
     <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
 </div>
