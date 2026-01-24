@@ -56,84 +56,89 @@
     </div>
 
     {{-- CONTRIBUTION GRAPH SECTION --}}
-    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8 overflow-hidden">
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <h3 class="font-bold text-gray-800 text-lg">Aktivitas Audit</h3>
-                <p class="text-xs text-gray-400">Frekuensi audit dalam 1 tahun terakhir</p>
-            </div>
-            
-            {{-- Legend --}}
-            <div class="flex items-center gap-2 text-xs text-gray-400">
-                <span>Less</span>
-                <div class="w-3 h-3 bg-gray-100 rounded-sm"></div>
-                <div class="w-3 h-3 bg-green-200 rounded-sm"></div>
-                <div class="w-3 h-3 bg-green-400 rounded-sm"></div>
-                <div class="w-3 h-3 bg-green-600 rounded-sm"></div>
-                <div class="w-3 h-3 bg-green-800 rounded-sm"></div>
-                <span>More</span>
-            </div>
+<div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
+    <div class="flex justify-between items-end mb-4">
+        <div>
+            <h3 class="font-bold text-gray-800 text-lg">Aktivitas Audit</h3>
+            <p class="text-xs text-gray-400">Frekuensi audit 1 tahun terakhir</p>
         </div>
+        
+        {{-- Legend --}}
+        <div class="flex items-center gap-1 text-[10px] text-gray-400">
+            <span>Jarang</span>
+            <div class="w-2.5 h-2.5 bg-gray-100 rounded-[1px]"></div>
+            <div class="w-2.5 h-2.5 bg-green-200 rounded-[1px]"></div>
+            <div class="w-2.5 h-2.5 bg-green-400 rounded-[1px]"></div>
+            <div class="w-2.5 h-2.5 bg-green-600 rounded-[1px]"></div>
+            <div class="w-2.5 h-2.5 bg-green-800 rounded-[1px]"></div>
+            <span>Sering</span>
+        </div>
+    </div>
 
-        {{-- Scrollable Container --}}
-        <div class="w-full overflow-x-auto custom-scrollbar pb-2">
-            <div class="min-w-max">
-                {{-- Month Labels --}}
-                <div class="flex mb-2 pl-8">
-                    @foreach($contributionData as $weekIndex => $week)
-                        @if($week[0]['is_first_day_of_month'])
-                            <span class="text-[10px] text-gray-400 font-medium w-3" style="margin-right: {{ 14 * 3 }}px">
-                                {{ $week[0]['month'] }}
-                            </span>
+    {{-- Container Scrollable --}}
+    <div class="w-full overflow-x-auto custom-scrollbar pb-2">
+        {{-- Wrapper Flex agar Label dan Grid sejajar --}}
+        <div class="flex flex-col min-w-max">
+            
+            {{-- 1. Baris Label Bulan --}}
+            {{-- Kita beri padding-left agar sejajar dengan kotak (skip label hari Mon/Wed/Fri) --}}
+            <div class="flex gap-1 mb-1 pl-8"> 
+                @foreach($contributionData as $week)
+                    {{-- Lebar element ini HARUS sama dengan lebar kolom kotak (w-3 = 12px) --}}
+                    <div class="w-3 text-[10px] text-gray-400 text-left overflow-visible whitespace-nowrap">
+                        {{-- Tampilkan label hanya jika controller bilang ini awal bulan --}}
+                        @if(!empty($week['month_label']))
+                            {{ $week['month_label'] }}
                         @endif
-                    @endforeach
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- 2. Area Grid Utama --}}
+            <div class="flex gap-1">
+                {{-- Label Hari (Senin, Rabu, Jumat) --}}
+                <div class="flex flex-col gap-1 mr-1 pt-[1px]">
+                    <span class="text-[9px] text-gray-300 h-3 leading-3">Mon</span>
+                    <span class="text-[9px] text-transparent h-3 leading-3">Tue</span>
+                    <span class="text-[9px] text-gray-300 h-3 leading-3">Wed</span>
+                    <span class="text-[9px] text-transparent h-3 leading-3">Thu</span>
+                    <span class="text-[9px] text-gray-300 h-3 leading-3">Fri</span>
+                    <span class="text-[9px] text-transparent h-3 leading-3">Sat</span>
+                    <span class="text-[9px] text-transparent h-3 leading-3">Sun</span>
                 </div>
 
-                <div class="flex gap-1">
-                    {{-- Day Labels (Mon, Wed, Fri) --}}
-                    <div class="flex flex-col gap-1 mr-2 mt-0.5">
-                        <span class="text-[9px] text-gray-300 h-3 leading-3">Mon</span>
-                        <span class="text-[9px] text-transparent h-3 leading-3">Tue</span>
-                        <span class="text-[9px] text-gray-300 h-3 leading-3">Wed</span>
-                        <span class="text-[9px] text-transparent h-3 leading-3">Thu</span>
-                        <span class="text-[9px] text-gray-300 h-3 leading-3">Fri</span>
-                        <span class="text-[9px] text-transparent h-3 leading-3">Sat</span>
-                        <span class="text-[9px] text-transparent h-3 leading-3">Sun</span>
-                    </div>
-
-                    {{-- The Grid --}}
-                    @foreach($contributionData as $week)
-                        <div class="flex flex-col gap-1">
-                            @foreach($week as $day)
-                                @php
-                                    // Mapping Level ke Tailwind Classes
-                                    $colorClass = match($day['level']) {
-                                        0 => 'bg-gray-100',
-                                        1 => 'bg-green-200',
-                                        2 => 'bg-green-400',
-                                        3 => 'bg-green-600',
-                                        4 => 'bg-green-800',
-                                        default => 'bg-gray-100',
-                                    };
-                                @endphp
-                                
-                                <div class="{{ $colorClass }} w-3 h-3 rounded-[2px] cursor-pointer transition-all hover:ring-2 hover:ring-gray-300 relative group">
-                                    {{-- Simple Tooltip --}}
-                                    <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 w-max">
-                                        <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap">
-                                            <span class="font-bold">{{ $day['count'] }} audits</span> on {{ $day['date'] }}
-                                        </div>
-                                        {{-- Arrow tooltip --}}
-                                        <div class="w-2 h-2 bg-gray-800 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1"></div>
+                {{-- Kolom Kotak-Kotak --}}
+                @foreach($contributionData as $week)
+                    <div class="flex flex-col gap-1">
+                        @foreach($week['days'] as $day)
+                            @php
+                                $colorClass = match($day['level']) {
+                                    0 => 'bg-gray-100',
+                                    1 => 'bg-green-200',
+                                    2 => 'bg-green-400',
+                                    3 => 'bg-green-600',
+                                    4 => 'bg-green-800',
+                                    default => 'bg-gray-100',
+                                };
+                            @endphp
+                            
+                            {{-- Kotak --}}
+                            <div class="{{ $colorClass }} w-3 h-3 rounded-[2px] relative group cursor-pointer hover:ring-1 hover:ring-gray-400">
+                                {{-- Tooltip --}}
+                                <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
+                                    <div class="bg-gray-900/90 backdrop-blur text-white text-[10px] py-1 px-2 rounded-md shadow-xl border border-gray-700">
+                                        <span class="font-bold text-green-300">{{ $day['count'] }} Audit</span>
+                                        <div class="text-gray-300 text-[9px]">{{ $day['date'] }}</div>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    @endforeach
-                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
+</div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
