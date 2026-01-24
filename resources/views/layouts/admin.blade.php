@@ -59,18 +59,20 @@
         <!-- SIDEBAR -->
         <div id="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 h-full transform -translate-x-full lg:translate-x-0 lg:static w-64">
             
-            <!-- Header Sidebar -->
-            <div class="h-16 flex items-center justify-center border-b border-gray-100 px-4">
-<div class="logo-expanded text-left w-full">
-    <a href="https://trias-sentosa.com" class="block">
-        <h1 class="text-xl font-extrabold text-blue-800 uppercase leading-none tracking-tight">PT Trias Sentosa</h1>
-    </a>
-    <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
+<!-- Header Sidebar -->
+<div class="h-16 flex items-center justify-center border-b border-gray-100 px-4">
+    <div class="logo-expanded text-left w-full">
+        <a href="https://trias-sentosa.com" class="block">
+            <img src="https://trias-sentosa.com/images/logo.webp" alt="PT Trias Sentosa" class="h-8 object-contain">
+        </a>
+        <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
+    </div>
+    <div class="logo-collapsed text-center hidden">
+        <a href="https://trias-sentosa.com" class="block">
+            <img src="https://trias-sentosa.com/images/logo.webp" alt="TS Logo" class="h-8 object-contain">
+        </a>
+    </div>
 </div>
-<div class="logo-collapsed text-center hidden">
-    <img src="https://trias-sentosa.com/images/ts.jpg" alt="TS Logo" class="w-8 h-8 object-contain">
-</div>
-            </div>
 
             <!-- Navigation List -->
             <nav class="flex-1 overflow-y-auto py-4 no-scrollbar flex flex-col gap-1 px-3">
