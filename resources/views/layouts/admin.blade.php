@@ -150,7 +150,7 @@
 </div>
 
 <!-- Minimize Button (Desktop Only) -->
-<div class="mt-auto pt-4 border-t border-gray-100 hidden lg:block">
+<div class="pt-4 border-t border-gray-100 hidden lg:block">
     <button id="btn-minimize" class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none">
         <div id="icon-collapse" class="min-w-[24px] mr-3 no-margin-on-mini flex justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
