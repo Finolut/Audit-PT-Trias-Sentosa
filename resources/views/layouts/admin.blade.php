@@ -66,7 +66,7 @@
                     <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
                 </div>
 <div class="logo-collapsed text-center hidden">
-    <img src="{{ asset('images/ts.jpg') }}" alt="TS Logo" class="w-8 h-8 object-contain">
+   <img src="/images/ts.jpg" alt="TS Logo" class="w-8 h-8 object-contain">
 </div>
             </div>
 
