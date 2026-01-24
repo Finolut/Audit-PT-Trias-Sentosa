@@ -14,6 +14,7 @@ use App\Models\AuditQuestion;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -82,7 +83,50 @@ $stats = [
     ->take(5)
     ->get();
 
-    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'liveQuestions'));
+    // 1. Ambil data setahun terakhir
+    $endDate = Carbon::now();
+    $startDate = $endDate->copy()->subDays(365);
+    
+    // 2. Query grouping by date
+    $auditCounts = Audit::whereBetween('created_at', [$startDate, $endDate])
+        ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+        ->groupBy('date')
+        ->pluck('count', 'date') // Hasil: ['2023-01-01' => 5, '2023-01-02' => 2]
+        ->toArray();
+
+    // 3. Generate Calendar Grid (53 Minggu x 7 Hari)
+    $contributionData = [];
+    $currentDate = $startDate->copy()->startOfWeek(); // Mulai dari Senin
+    
+    // Loop 53 minggu
+    for ($w = 0; $w < 53; $w++) {
+        $weekData = [];
+        // Loop 7 hari (Senin - Minggu)
+        for ($d = 0; $d < 7; $d++) {
+            $dateString = $currentDate->format('Y-m-d');
+            $count = $auditCounts[$dateString] ?? 0;
+            
+            // Tentukan Level Warna (0-4) ala GitHub
+            $level = 0;
+            if ($count > 0) $level = 1;
+            if ($count > 2) $level = 2;
+            if ($count > 5) $level = 3;
+            if ($count > 8) $level = 4;
+
+            $weekData[] = [
+                'date' => $currentDate->format('d M Y'),
+                'count' => $count,
+                'level' => $level,
+                'month' => $currentDate->format('M'),
+                'is_first_day_of_month' => $currentDate->day <= 7 // Untuk label bulan
+            ];
+            
+            $currentDate->addDay();
+        }
+        $contributionData[] = $weekData;
+    }
+
+    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'liveQuestions','contributionData'));
 }
 
     /**
