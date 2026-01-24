@@ -118,13 +118,14 @@
 
 <div class="mt-auto pt-4 border-t border-gray-100">
     <div class="p-4">
-        <div class="flex items-center justify-between group/profile">
+        <div class="flex items-center justify-between overflow-hidden">
+            
             <div class="flex items-center min-w-0">
                 <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm ring-2 ring-white">
                     {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                 </div>
                 
-                <div class="ml-3 overflow-hidden transition-all duration-300 group-[.is-mini]:w-0 group-[.is-mini]:opacity-0">
+                <div class="ml-3 transition-opacity duration-300 lg:hidden">
                     <p class="text-sm font-bold text-gray-700 truncate capitalize leading-tight">
                         {{ auth()->user()->name ?? 'Administrator' }}
                     </p>
@@ -136,12 +137,12 @@
 
             <button id="logout-btn" type="button"
                     title="Logout"
-                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 
-                           group-[.is-mini]:hidden"> 
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 lg:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
             </button>
+
         </div>
     </div>
 </div>
