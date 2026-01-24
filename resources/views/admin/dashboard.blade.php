@@ -55,90 +55,107 @@
         </div>
     </div>
 
-    {{-- CONTRIBUTION GRAPH SECTION --}}
-<div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
-    <div class="flex justify-between items-end mb-4">
-        <div>
-            <h3 class="font-bold text-gray-800 text-lg">Aktivitas Audit</h3>
-            <p class="text-xs text-gray-400">Frekuensi audit 1 tahun terakhir</p>
-        </div>
+{{-- 2. CONTRIBUTION GRAPH SECTION --}}
+    <div class="mb-8">
+        <h3 class="font-bold text-gray-800 text-xl mb-4">Aktivitas Audit {{ $selectedYear }}</h3>
         
-        {{-- Legend --}}
-        <div class="flex items-center gap-1 text-[10px] text-gray-400">
-            <span>Jarang</span>
-            <div class="w-2.5 h-2.5 bg-gray-100 rounded-[1px]"></div>
-            <div class="w-2.5 h-2.5 bg-green-200 rounded-[1px]"></div>
-            <div class="w-2.5 h-2.5 bg-green-400 rounded-[1px]"></div>
-            <div class="w-2.5 h-2.5 bg-green-600 rounded-[1px]"></div>
-            <div class="w-2.5 h-2.5 bg-green-800 rounded-[1px]"></div>
-            <span>Sering</span>
-        </div>
-    </div>
-
-    {{-- Container Scrollable --}}
-    <div class="w-full overflow-x-auto custom-scrollbar pb-2">
-        {{-- Wrapper Flex agar Label dan Grid sejajar --}}
-        <div class="flex flex-col min-w-max">
+        <div class="flex flex-col lg:flex-row gap-6 items-start">
             
-            {{-- 1. Baris Label Bulan --}}
-            {{-- Kita beri padding-left agar sejajar dengan kotak (skip label hari Mon/Wed/Fri) --}}
-            <div class="flex gap-1 mb-1 pl-8"> 
-                @foreach($contributionData as $week)
-                    {{-- Lebar element ini HARUS sama dengan lebar kolom kotak (w-3 = 12px) --}}
-                    <div class="w-3 text-[10px] text-gray-400 text-left overflow-visible whitespace-nowrap">
-                        {{-- Tampilkan label hanya jika controller bilang ini awal bulan --}}
-                        @if(!empty($week['month_label']))
-                            {{ $week['month_label'] }}
-                        @endif
+            {{-- A. Kiri: Grafik (White Box) --}}
+            <div class="flex-1 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm w-full overflow-hidden">
+                <div class="w-full overflow-x-auto custom-scrollbar pb-2">
+                    <div class="flex flex-col min-w-max">
+                        {{-- Baris Label Bulan --}}
+                        <div class="flex gap-1 mb-1 pl-8"> 
+                            @foreach($contributionData as $week)
+                                <div class="w-3 text-[10px] text-gray-400 text-left overflow-visible whitespace-nowrap">
+                                    {{-- Tampilkan label bulan --}}
+                                    @if(!empty($week['month_label']))
+                                        {{ $week['month_label'] }}
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+            
+                        {{-- Grid Utama --}}
+                        <div class="flex gap-1">
+                            {{-- Label Hari --}}
+                            <div class="flex flex-col gap-1 mr-2 pt-[1px]">
+                                <span class="text-[9px] text-gray-300 h-3 leading-3">Mon</span>
+                                <span class="text-[9px] text-transparent h-3 leading-3">Tue</span>
+                                <span class="text-[9px] text-gray-300 h-3 leading-3">Wed</span>
+                                <span class="text-[9px] text-transparent h-3 leading-3">Thu</span>
+                                <span class="text-[9px] text-gray-300 h-3 leading-3">Fri</span>
+                                <span class="text-[9px] text-transparent h-3 leading-3">Sat</span>
+                                <span class="text-[9px] text-transparent h-3 leading-3">Sun</span>
+                            </div>
+            
+                            {{-- Kolom Kotak --}}
+                            @foreach($contributionData as $week)
+                                <div class="flex flex-col gap-1">
+                                    @foreach($week['days'] as $day)
+                                        @php
+                                            // Tentukan Warna (Hanya 3 Level + Kosong)
+                                            if(!$day['in_year']) {
+                                                $colorClass = 'bg-transparent border border-gray-100/50'; // Luar tahun
+                                            } else {
+                                                $colorClass = match($day['level']) {
+                                                    0 => 'bg-gray-100',      // Kosong
+                                                    1 => 'bg-green-300',     // Sedikit
+                                                    2 => 'bg-green-500',     // Sedang
+                                                    3 => 'bg-green-800',     // Banyak
+                                                    default => 'bg-gray-100',
+                                                };
+                                            }
+                                        @endphp
+                                        
+                                        <div class="{{ $colorClass }} w-3 h-3 rounded-[2px] relative group cursor-pointer transition-colors duration-200">
+                                            @if($day['in_year'])
+                                                {{-- Tooltip --}}
+                                                <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
+                                                    <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg">
+                                                        <span class="font-bold">{{ $day['count'] }} Audit</span>
+                                                        <div class="text-gray-400 text-[9px]">{{ $day['date'] }}</div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                @endforeach
-            </div>
-
-            {{-- 2. Area Grid Utama --}}
-            <div class="flex gap-1">
-                {{-- Label Hari (Senin, Rabu, Jumat) --}}
-                <div class="flex flex-col gap-1 mr-1 pt-[1px]">
-                    <span class="text-[9px] text-gray-300 h-3 leading-3">Mon</span>
-                    <span class="text-[9px] text-transparent h-3 leading-3">Tue</span>
-                    <span class="text-[9px] text-gray-300 h-3 leading-3">Wed</span>
-                    <span class="text-[9px] text-transparent h-3 leading-3">Thu</span>
-                    <span class="text-[9px] text-gray-300 h-3 leading-3">Fri</span>
-                    <span class="text-[9px] text-transparent h-3 leading-3">Sat</span>
-                    <span class="text-[9px] text-transparent h-3 leading-3">Sun</span>
                 </div>
 
-                {{-- Kolom Kotak-Kotak --}}
-                @foreach($contributionData as $week)
-                    <div class="flex flex-col gap-1">
-                        @foreach($week['days'] as $day)
-                            @php
-                                $colorClass = match($day['level']) {
-                                    0 => 'bg-gray-100',
-                                    1 => 'bg-green-200',
-                                    2 => 'bg-green-400',
-                                    3 => 'bg-green-600',
-                                    4 => 'bg-green-800',
-                                    default => 'bg-gray-100',
-                                };
-                            @endphp
-                            
-                            {{-- Kotak --}}
-                            <div class="{{ $colorClass }} w-3 h-3 rounded-[2px] relative group cursor-pointer hover:ring-1 hover:ring-gray-400">
-                                {{-- Tooltip --}}
-                                <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
-                                    <div class="bg-gray-900/90 backdrop-blur text-white text-[10px] py-1 px-2 rounded-md shadow-xl border border-gray-700">
-                                        <span class="font-bold text-green-300">{{ $day['count'] }} Audit</span>
-                                        <div class="text-gray-300 text-[9px]">{{ $day['date'] }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                {{-- Legend di bawah kotak grafik --}}
+                <div class="mt-4 flex justify-between items-center border-t border-gray-50 pt-3">
+                    <span class="text-xs text-gray-400">Learn how we count contributions</span>
+                    <div class="flex items-center gap-1 text-[10px] text-gray-400">
+                        <span>Less</span>
+                        <div class="w-2.5 h-2.5 bg-gray-100 rounded-[1px]"></div>
+                        <div class="w-2.5 h-2.5 bg-green-300 rounded-[1px]"></div>
+                        <div class="w-2.5 h-2.5 bg-green-500 rounded-[1px]"></div>
+                        <div class="w-2.5 h-2.5 bg-green-800 rounded-[1px]"></div>
+                        <span>More</span>
                     </div>
+                </div>
+            </div>
+
+            {{-- B. Kanan: Year Selector (Pill Style) --}}
+            <div class="flex flex-row lg:flex-col gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
+                @foreach($availableYears as $year)
+                    <a href="{{ request()->fullUrlWithQuery(['year' => $year]) }}" 
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+                       {{ $selectedYear == $year 
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
+                          : 'bg-white text-gray-500 hover:bg-gray-50 border border-transparent hover:border-gray-200' }}">
+                        {{ $year }}
+                    </a>
                 @endforeach
             </div>
+
         </div>
     </div>
-</div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}

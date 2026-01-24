@@ -43,7 +43,7 @@ private $mainClauseTitles = [
     /**
      * 1. DASHBOARD UTAMA (Tampilan Awal Admin)
      */
-public function index()
+public function index($request)
 {
     $departments = Department::orderBy('name', 'asc')->get();
 $stats = [
@@ -83,60 +83,90 @@ $stats = [
     ->take(5)
     ->get();
 
-  // 1. Setup Tanggal: Tepat 52 minggu ke belakang, dimulai dari Senin
-    $endDate = Carbon::now()->endOfWeek(); // Sampai akhir minggu ini
-    $startDate = Carbon::now()->subWeeks(52)->startOfWeek(); // Mulai dari Senin, 52 minggu lalu
+  // 1. Tentukan Tahun yang dipilih (Default tahun sekarang)
+    $selectedYear = $request->input('year', Carbon::now()->year);
     
-    // 2. Query Data
-    $auditCounts = Audit::whereBetween('created_at', [$startDate, $endDate])
+    // 2. Siapkan array tahun untuk sidebar (3 tahun ke belakang + 1 tahun depan/sekarang)
+    $availableYears = [
+        $selectedYear,
+        $selectedYear - 1,
+        $selectedYear - 2,
+        $selectedYear - 3
+    ];
+
+    // 3. Tentukan Start & End date tahun tersebut
+    // Kita mulai dari hari Senin pertama di tahun itu atau sebelumnya agar gridnya rapi
+    $startOfYear = Carbon::createFromDate($selectedYear, 1, 1);
+    $endOfYear   = Carbon::createFromDate($selectedYear, 12, 31);
+    
+    // Adjust start date ke hari Senin terdekat (bisa mundur ke tahun sebelumnya dikit)
+    $startDate = $startOfYear->copy()->startOfWeek(); 
+    // Adjust end date ke akhir minggu
+    $endDate   = $endOfYear->copy()->endOfWeek();
+
+    // 4. Query Data
+    $auditCounts = Audit::whereBetween('created_at', [$startOfYear, $endOfYear]) // Filter data stricly tahun ini
         ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
         ->groupBy('date')
         ->pluck('count', 'date')
         ->toArray();
 
-    // 3. Generate Grid
+    // 5. Generate Grid
     $contributionData = [];
     $currentDate = $startDate->copy();
     $lastMonth = null;
-    
-    // Loop tepat 53 minggu (agar cover setahun penuh termasuk sisa hari)
-    for ($w = 0; $w <= 52; $w++) {
-        $weekData = [];
-        $weekStartMonth = $currentDate->format('M');
-        
-        // Cek apakah minggu ini adalah awal bulan baru dibandingkan minggu lalu?
-        $showMonthLabel = ($weekStartMonth !== $lastMonth);
-        $lastMonth = $weekStartMonth;
 
-        // Loop 7 hari (Senin - Minggu)
+    // Loop mingguan sampai melewati akhir tahun
+    while ($currentDate <= $endDate) {
+        $weekData = [];
+        // Cek bulan dari hari pertama minggu ini (atau hari ke-4 untuk akurasi label bulan)
+        $monthCheckDate = $currentDate->copy()->addDays(6); // Cek akhir minggu untuk label bulan
+        $weekMonth = $monthCheckDate->format('M');
+        
+        // Logika Label Bulan: Tampilkan jika bulan berubah dari minggu sebelumnya
+        // DAN pastikan labelnya masuk di tahun yang dipilih (kosmetik)
+        $showMonthLabel = ($weekMonth !== $lastMonth) && ($monthCheckDate->year == $selectedYear);
+        $lastMonth = $weekMonth;
+
         for ($d = 0; $d < 7; $d++) {
             $dateString = $currentDate->format('Y-m-d');
+            
+            // Cek apakah tanggal ini masih dalam range tahun yang dipilih (untuk memutihkan tanggal luar range)
+            $isInYear = $currentDate->year == $selectedYear;
+            
             $count = $auditCounts[$dateString] ?? 0;
             
-            // Level Warna (0-4)
+            // Level Warna (0 = Kosong, 1 = Sedikit, 2 = Sedang, 3 = Banyak)
             $level = 0;
             if ($count > 0) $level = 1;
-            if ($count > 2) $level = 2;
-            if ($count > 5) $level = 3;
-            if ($count > 8) $level = 4;
+            if ($count > 3) $level = 2;
+            if ($count > 7) $level = 3;
 
             $weekData['days'][] = [
                 'date' => $currentDate->format('d M Y'),
                 'count' => $count,
                 'level' => $level,
-                'day_name' => $currentDate->format('D'), // Mon, Tue, etc
+                'in_year' => $isInYear // Flag untuk visual
             ];
             
             $currentDate->addDay();
         }
         
-        // Simpan info bulan di level Minggu, bukan Hari
-        $weekData['month_label'] = $showMonthLabel ? $weekStartMonth : '';
-        
+        $weekData['month_label'] = $showMonthLabel ? $weekMonth : '';
         $contributionData[] = $weekData;
+        
+        // Safety break agar tidak infinite loop
+        if($currentDate->year > $selectedYear && $currentDate->month > 1) break; 
     }
 
-    return view('admin.dashboard', compact('departments', 'stats', 'recentAudits', 'liveQuestions','contributionData'));
+    return view('admin.dashboard', compact(
+        'stats', 
+        'recentAudits', 
+        'liveQuestions', 
+        'contributionData', 
+        'selectedYear', 
+        'availableYears'
+    ));
 }
 
     /**
