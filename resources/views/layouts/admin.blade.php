@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Audit Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com  "></script>
     <style>
         .active-link { 
             background-color: #eff6ff; 
@@ -65,9 +65,9 @@
                     <h1 class="text-xl font-extrabold text-blue-800 uppercase leading-none tracking-tight">PT Trias Sentosa</h1>
                     <p class="text-[10px] font-semibold text-gray-400 mt-1.5 uppercase tracking-wider">Audit System Admin</p>
                 </div>
-                <div class="logo-collapsed text-center hidden">
-                    <div class="w-8 h-8 rounded bg-blue-800 text-white flex items-center justify-center font-bold">TS</div>
-                </div>
+<div class="logo-collapsed text-center hidden">
+    <img src="{{ asset('images/ts.jpg') }}" alt="TS Logo" class="w-8 h-8 object-contain">
+</div>
             </div>
 
             <!-- Navigation List -->
