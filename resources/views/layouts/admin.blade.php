@@ -120,11 +120,6 @@
     <div class="p-4">
         <div class="flex items-center group/profile justify-between relative">
             
-            <div class="flex items-center min-w-0">
-                <div class="w-10 h-10 min-w-[2.5rem] rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-100 ring-2 ring-white">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
-                </div>
-                
                 <div class="ml-3 overflow-hidden transition-all duration-300 max-w-[150px] group-data-[collapsed=true]:max-w-0 group-data-[collapsed=true]:ml-0 group-data-[collapsed=true]:opacity-0">
                     <p class="text-sm font-bold text-gray-800 truncate capitalize leading-tight">
                         {{ auth()->user()->name ?? 'Administrator' }}
