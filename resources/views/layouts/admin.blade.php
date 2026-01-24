@@ -85,35 +85,35 @@
     <a href="{{ route('admin.dashboard') }}"
        class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dashboard') ? 'active-link' : '' }}">
         <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📊</span> 
-        <span class="lg:hidden whitespace-nowrap">Dashboard Overview</span>
+        <span class="hide-on-mini whitespace-nowrap">Landing Page Dashboard</span>
     </a>
 
     <!-- Status Audit Dept. -->
     <a href="{{ route('admin.dept_status') }}"
        class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.dept_status') ? 'active-link' : '' }}">
         <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📋</span> 
-        <span class="lg:hidden whitespace-nowrap">Status Audit Dept.</span>
+        <span class="hide-on-mini whitespace-nowrap">Status Departemem</span>
     </a>
 
     <!-- Manajemen User & Auditor -->
     <a href="{{ route('admin.users.index') }}"
        class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.users.*', 'admin.auditors.*') ? 'active-link' : '' }}">
         <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">👥</span> 
-        <span class="lg:hidden whitespace-nowrap">Manajemen User & Auditor</span>
+        <span class="hide-on-mini whitespace-nowrap">Manajemen User</span>
     </a>
 
     <!-- Kelola Soal Audit -->
     <a href="{{ route('admin.items.index') }}"
        class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.items.*') ? 'active-link' : '' }}">
         <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">📝</span> 
-        <span class="lg:hidden whitespace-nowrap">Kelola Soal Audit</span>
+        <span class="hide-on-mini whitespace-nowrap">Kelola Pertanyaan Audit</span>
     </a>
 
     <!-- Cari Laporan -->
     <a href="{{ route('admin.search.report') }}"
        class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.search.report') ? 'active-link' : '' }}">
         <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">🔍</span> 
-        <span class="lg:hidden whitespace-nowrap">Cari Laporan</span>
+        <span class="hide-on-mini whitespace-nowrap">Cari Laporan Audit</span>
     </a>
 
 <!-- User Profile Footer -->
