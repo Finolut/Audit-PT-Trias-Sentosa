@@ -120,7 +120,7 @@
     <div class="px-4 py-2"> 
         <div class="flex items-center justify-between">
             <div class="flex items-center min-w-0">
-                <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-white-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                     {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                 </div>
                 
