@@ -124,7 +124,8 @@
                 <div class="w-9 h-9 min-w-[2.25rem] rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                     {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                 </div>
-                <div class="ml-3 overflow-hidden lg:hidden">
+                
+                <div class="ml-3 overflow-hidden">
                     <p class="text-sm font-bold text-gray-700 truncate capitalize">
                         {{ auth()->user()->name ?? 'Administrator' }}
                     </p>
@@ -134,10 +135,9 @@
                 </div>
             </div>
 
-            <!-- Hanya tampilkan logout jika BUKAN mode mini -->
             <button id="logout-btn" type="button"
                     title="Logout"
-                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 lg:hidden">
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
