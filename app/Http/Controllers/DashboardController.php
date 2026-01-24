@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Carbon\Carbon;
 
+
 class DashboardController extends Controller
 {
     // ... (Definisi $mainClauses dan $mainClauseTitles biarkan tetap ada di atas) ...
@@ -43,7 +44,7 @@ private $mainClauseTitles = [
     /**
      * 1. DASHBOARD UTAMA (Tampilan Awal Admin)
      */
-public function index($request)
+public function index(Request $request)
 {
     $departments = Department::orderBy('name', 'asc')->get();
 $stats = [
