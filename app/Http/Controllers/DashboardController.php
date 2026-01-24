@@ -90,9 +90,9 @@ $stats = [
     // 2. Siapkan array tahun untuk sidebar (3 tahun ke belakang + 1 tahun depan/sekarang)
     $availableYears = [
         $selectedYear,
-        $selectedYear - 1,
-        $selectedYear - 2,
-        $selectedYear - 3
+        $selectedYear + 1,
+        $selectedYear + 2,
+        $selectedYear + 3
     ];
 
     // 3. Tentukan Start & End date tahun tersebut
