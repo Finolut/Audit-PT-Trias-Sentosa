@@ -116,28 +116,36 @@
         <span class="hide-on-mini whitespace-nowrap">Cari Laporan Audit</span>
     </a>
 
-<div class="mt-auto pt-4 border-t border-gray-100">
+<div class="mt-auto pt-4 border-t border-gray-100 relative">
     <div class="px-4 py-2"> 
         <div class="flex items-center justify-between">
-                
-                <div class="ml-3 overflow-hidden">
-                    <p class="text-sm font-bold text-gray-700 truncate capitalize leading-tight">
-                        {{ auth()->user()->name ?? 'Administrator' }}
-                    </p>
-                    <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
-                        {{ auth()->user()->role ?? 'Admin' }}
-                    </p>
-                </div>
+            <div class="ml-3 overflow-hidden">
+                <p class="text-sm font-bold text-gray-700 truncate capitalize leading-tight">
+                    {{ auth()->user()->name ?? 'Administrator' }}
+                </p>
+                <p class="text-[10px] font-medium text-blue-600 uppercase tracking-tight">
+                    {{ auth()->user()->role ?? 'Admin' }}
+                </p>
+            </div>
 
-
-   <!-- Mini sidebar (centered) -->
-        <div class="flex justify-center group-[.mini-sidebar]/sidebar:hidden">
-            <button id="logout-btn" type="button" title="Logout" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+            <!-- Logout button: normal position -->
+            <button id="logout-btn" type="button"
+                    title="Logout"
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 mini-sidebar:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
             </button>
         </div>
+
+        <!-- Centered logout button for mini sidebar -->
+        <button id="logout-btn-mini" type="button"
+                title="Logout"
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hidden mini-sidebar:block">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+        </button>
     </div>
 </div>
 
