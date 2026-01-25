@@ -107,16 +107,20 @@
                                         }
                                     @endphp
                                     
-                                    <div class="{{ $colorClass }} w-3 h-3 rounded-[2px] relative group cursor-pointer transition-colors duration-200">
-                                        @if($day['in_year'])
-                                            <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
-                                                <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg">
-                                                    <span class="font-bold">{{ $day['count'] }} Audit</span>
-                                                    <div class="text-gray-400 text-[9px]">{{ $day['date'] }}</div>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
+<div class="{{ $colorClass }} w-3 h-3 rounded-[2px] cursor-pointer transition-colors duration-200 hover:opacity-80"
+     onclick="showAuditDetails('{{ $day['date'] }}', {{ $day['count'] }})"
+     data-date="{{ $day['date'] }}"
+     data-count="{{ $day['count'] }}"
+     data-in-year="{{ $day['in_year'] }}">
+    @if($day['in_year'] && $day['count'] > 0)
+        <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
+            <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg">
+                <span class="font-bold">{{ $day['count'] }} Audit</span>
+                <div class="text-gray-400 text-[9px]">{{ $day['date'] }}</div>
+            </div>
+        </div>
+    @endif
+</div>
                                 @endforeach
                             </div>
                         @endforeach
@@ -137,18 +141,33 @@
             </div>
         </div>
 
-        {{-- B. Kanan: Year Selector (Dropdown) --}}
-        <div class="w-full lg:w-auto">
-            <select onchange="window.location.href = this.value;" 
-                    class="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                @foreach($availableYears as $year)
-                    <option value="{{ request()->fullUrlWithQuery(['year' => $year]) }}" 
-                            {{ $selectedYear == $year ? 'selected' : '' }}>
-                        {{ $year }}
-                    </option>
-                @endforeach
-            </select>
+{{-- B. Kanan: Year Selector + Detail Panel --}}
+<div class="w-full lg:w-auto flex flex-col gap-4">
+
+    {{-- Dropdown Tahun --}}
+    <select onchange="window.location.href = this.value;" 
+            class="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+        @foreach($availableYears as $year)
+            <option value="{{ request()->fullUrlWithQuery(['year' => $year]) }}" 
+                    {{ $selectedYear == $year ? 'selected' : '' }}>
+                {{ $year }}
+            </option>
+        @endforeach
+    </select>
+
+    {{-- Panel Detail Audit (Default Hidden) --}}
+    <div id="auditDetailPanel" class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hidden lg:block min-w-[280px] max-w-[320px]">
+        <h4 class="font-bold text-gray-800 text-sm mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 14h.01M18 14h.01M15 11h3M12 11h.01M9 11h.01M7 21h10v-2a3 3 0 005.356-2.678M7 11H5v8h2V11z"/></svg>
+            Detail Aktivitas Audit
+        </h4>
+
+        <div id="detailContent" class="text-xs text-gray-600 space-y-2">
+            <p class="italic text-gray-400">Klik kotak di kalender untuk melihat detail.</p>
         </div>
+    </div>
+
+</div>
 
     </div>
 </div>
@@ -268,4 +287,83 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function showAuditDetails(dateString, count) {
+    const panel = document.getElementById('auditDetailPanel');
+    const content = document.getElementById('detailContent');
+
+    // Tampilkan panel
+    panel.classList.remove('hidden');
+
+    // Tampilkan loading
+    content.innerHTML = `
+        <div class="flex items-center gap-2 text-gray-500">
+            <svg class="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 00-15.356-2m15.356 2H15"></path>
+            </svg>
+            Memuat data...
+        </div>
+    `;
+
+    // Fetch data via AJAX
+    fetch(`{{ route('admin.audit.day-details') }}?date=${encodeURIComponent(dateString)}&year={{ $selectedYear }}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.audits.length > 0) {
+                let html = `
+                    <div class="mb-3">
+                        <span class="font-bold text-gray-800 text-sm">${dateString}</span>
+                        <span class="ml-2 text-xs text-blue-600">(${count} audit)</span>
+                    </div>
+                    <div class="space-y-3">
+                `;
+                
+                data.audits.forEach(audit => {
+                    html += `
+                        <div class="p-2 bg-gray-50 rounded border border-gray-200">
+                            <div class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded mb-1">
+                                ${audit.department_name}
+                            </div>
+                            <div class="text-xs text-gray-700 mb-1">
+                                <strong>PIC:</strong> ${audit.pic_auditee_name || 'N/A'}
+                            </div>
+                            <div class="text-xs text-gray-700 mb-1">
+                                <strong>Auditor:</strong> ${audit.auditor_name || 'N/A'}
+                            </div>
+                            <div class="text-xs text-gray-700 mb-1">
+                                <strong>Scope:</strong> ${audit.scope || 'N/A'}
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ route('admin.audit.overview', '') }}/${audit.id}" 
+                                   class="text-xs text-blue-600 hover:underline font-medium">
+                                    Lihat Detail →
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                content.innerHTML = html;
+            } else {
+                content.innerHTML = `
+                    <div class="text-xs text-gray-500 italic">
+                        Tidak ada aktivitas audit pada tanggal ini.
+                    </div>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching audit details:', err);
+            content.innerHTML = `
+                <div class="text-xs text-red-500">
+                    Gagal memuat data. Coba lagi nanti.
+                </div>
+            `;
+        });
+}
+</script>
+@endpush
 @endsection

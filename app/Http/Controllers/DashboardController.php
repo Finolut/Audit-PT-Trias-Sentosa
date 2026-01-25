@@ -558,6 +558,45 @@ public function searchAudit(Request $request)
     }
 }
 
+public function getDayDetails(Request $request)
+{
+    $date = $request->query('date'); // Format: "22 Jan 2026"
+    $year = $request->query('year', Carbon::now()->year);
+
+    // Konversi string date ke format Y-m-d
+    try {
+        $carbonDate = Carbon::createFromFormat('d M Y', $date);
+        $startDate = $carbonDate->startOfDay();
+        $endDate   = $carbonDate->endOfDay();
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid date format'
+        ], 400);
+    }
+
+    // Ambil audit berdasarkan tanggal
+    $audits = Audit::with(['department', 'session'])
+                   ->whereBetween('created_at', [$startDate, $endDate])
+                   ->orderBy('created_at', 'desc')
+                   ->get()
+                   ->map(function ($audit) {
+                       return [
+                           'id' => $audit->id,
+                           'department_name' => $audit->department->name ?? 'N/A',
+                           'pic_auditee_name' => $audit->pic_auditee_name ?? 'N/A',
+                           'auditor_name' => $audit->session->auditor_name ?? 'N/A',
+                           'scope' => $audit->scope ?? 'N/A',
+                       ];
+                   });
+
+    return response()->json([
+        'success' => true,
+        'audits' => $audits->toArray(),
+        'count' => $audits->count()
+    ]);
+}
+
 }
 
 

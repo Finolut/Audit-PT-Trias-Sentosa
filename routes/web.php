@@ -143,7 +143,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // Pastikan route search tetap ada
     Route::get('/admin/audit/search', [AuditController::class, 'search'])
          ->name('admin.audit.search');
-
+Route::get('/admin/audit/day-details', [DashboardController::class, 'getDayDetails'])->name('admin.audit.day-details');
 });
 
 // Preserved special routes (public)
