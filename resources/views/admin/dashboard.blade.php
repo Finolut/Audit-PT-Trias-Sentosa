@@ -93,35 +93,37 @@
                         @foreach($contributionData as $week)
                             <div class="flex flex-col gap-1">
                                 @foreach($week['days'] as $day)
-                                    @php
-                                        if(!$day['in_year']) {
-                                            $colorClass = 'bg-transparent border border-gray-100/50';
-                                        } else {
-                                            $colorClass = match($day['level']) {
-                                                0 => 'bg-gray-100',
-                                                1 => 'bg-green-300',
-                                                2 => 'bg-green-500',
-                                                3 => 'bg-green-800',
-                                                default => 'bg-gray-100',
-                                            };
-                                        }
-                                    @endphp
-                                    
-<div class="{{ $colorClass }} w-3 h-3 rounded-[2px] cursor-pointer transition-colors duration-200 hover:opacity-80"
-     onclick="showAuditDetails('{{ $day['date'] }}', {{ $day['count'] }})"
-     data-date="{{ $day['date'] }}"
-     data-count="{{ $day['count'] }}"
-     data-in-year="{{ $day['in_year'] }}">
-    @if($day['in_year'] && $day['count'] > 0)
-        <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
-            <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg">
-                <span class="font-bold">{{ $day['count'] }} Audit</span>
-                <div class="text-gray-400 text-[9px]">{{ $day['date'] }}</div>
-            </div>
+    @php
+        if(!$day['in_year']) {
+            $colorClass = 'bg-transparent border border-gray-100/50';
+        } else {
+            $colorClass = match($day['level']) {
+                0 => 'bg-gray-100',
+                1 => 'bg-green-300',
+                2 => 'bg-green-500',
+                3 => 'bg-green-800',
+                default => 'bg-gray-100',
+            };
+        }
+    @endphp
+    
+    {{-- Wrapper dengan group dan relative --}}
+    <div class="group relative w-3 h-3">
+        <div class="{{ $colorClass }} w-full h-full rounded-[2px] cursor-pointer transition-colors duration-200 hover:opacity-80"
+             onclick="showAuditDetails('{{ $day['date'] }}', {{ $day['count'] }})">
         </div>
-    @endif
-</div>
-                                @endforeach
+
+        {{-- Tooltip: dipindah ke luar kotak kecil --}}
+        @if($day['in_year'] && $day['count'] > 0)
+            <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
+                <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap">
+                    <span class="font-bold">{{ $day['count'] }} Audit</span>
+                    <div class="text-gray-400 text-[9px]">{{ $day['date'] }}</div>
+                </div>
+            </div>
+        @endif
+    </div>
+@endforeach
                             </div>
                         @endforeach
                     </div>
@@ -366,4 +368,5 @@ function showAuditDetails(dateString, count) {
 }
 </script>
 @endpush
+
 @endsection
