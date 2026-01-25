@@ -120,6 +120,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('question_log');
     Route::get('/audit/search', [DashboardController::class, 'searchAudit'])->name('audit.search');
+    Route::get('audit/day-details', [DashboardController::class, 'getDayDetails'])
+    ->name('audit.day-details'); // tetap seperti ini
     Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
     Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause_detail');
     Route::get('/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('dept_status');
@@ -143,8 +145,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // Pastikan route search tetap ada
     Route::get('/admin/audit/search', [AuditController::class, 'search'])
          ->name('admin.audit.search');
-Route::get('audit/day-details', [DashboardController::class, 'getDayDetails'])
-    ->name('audit.day-details'); // tetap seperti ini
+
 });
 
 // Preserved special routes (public)
