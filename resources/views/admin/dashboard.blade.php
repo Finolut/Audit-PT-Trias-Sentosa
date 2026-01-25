@@ -336,7 +336,7 @@ function showAuditDetails(dateString, count) {
                                 <strong>Scope:</strong> ${audit.scope || 'N/A'}
                             </div>
                             <div class="mt-2">
-                                <a href="{{ route('admin.audit.overview', '') }}/${audit.id}" 
+                                <a href="/admin/audit/${audit.id}" 
                                    class="text-xs text-blue-600 hover:underline font-medium">
                                     Lihat Detail →
                                 </a>
