@@ -295,76 +295,58 @@
 function showAuditDetails(dateString, count) {
     const panel = document.getElementById('auditDetailPanel');
     const content = document.getElementById('detailContent');
-
-    // Tampilkan panel
     panel.classList.remove('hidden');
 
-    // Tampilkan loading
     content.innerHTML = `
-        <div class="flex items-center gap-2 text-gray-500">
-            <svg class="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 00-15.356-2m15.356 2H15"></path>
-            </svg>
-            Memuat data...
-        </div>
+        <div class="text-xs text-gray-500">Memuat data untuk ${dateString}...</div>
     `;
 
-    // Fetch data via AJAX
-   fetch(`/admin/audit/day-details?date=${encodeURIComponent(dateString)}&year={{ $selectedYear }}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.audits.length > 0) {
-                let html = `
-                    <div class="mb-3">
-                        <span class="font-bold text-gray-800 text-sm">${dateString}</span>
-                        <span class="ml-2 text-xs text-blue-600">(${count} audit)</span>
-                    </div>
-                    <div class="space-y-3">
-                `;
-                
-                data.audits.forEach(audit => {
-                    html += `
-                        <div class="p-2 bg-gray-50 rounded border border-gray-200">
-                            <div class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded mb-1">
-                                ${audit.department_name}
-                            </div>
-                            <div class="text-xs text-gray-700 mb-1">
-                                <strong>PIC:</strong> ${audit.pic_auditee_name || 'N/A'}
-                            </div>
-                            <div class="text-xs text-gray-700 mb-1">
-                                <strong>Auditor:</strong> ${audit.auditor_name || 'N/A'}
-                            </div>
-                            <div class="text-xs text-gray-700 mb-1">
-                                <strong>Scope:</strong> ${audit.scope || 'N/A'}
-                            </div>
-                            <div class="mt-2">
-                                <a href="/admin/audit/${audit.id}" 
-                                   class="text-xs text-blue-600 hover:underline font-medium">
-                                    Lihat Detail →
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                });
+    // Gunakan path absolut
+    const url = `/admin/audit/day-details?date=${encodeURIComponent(dateString)}&year={{ $selectedYear }}`;
 
-                html += `</div>`;
-                content.innerHTML = html;
-            } else {
-                content.innerHTML = `
-                    <div class="text-xs text-gray-500 italic">
-                        Tidak ada aktivitas audit pada tanggal ini.
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.audits.length > 0) {
+            let html = `<div class="mb-3"><span class="font-bold text-gray-800">${dateString}</span> <span class="text-blue-600 text-xs">(${count} audit)</span></div><div class="space-y-3">`;
+            data.audits.forEach(audit => {
+                html += `
+                    <div class="p-2 bg-gray-50 rounded border">
+                        <div class="text-xs font-bold text-blue-700 bg-blue-100 inline-block px-2 py-0.5 rounded mb-1">
+                            ${audit.department_name}
+                        </div>
+                        <div class="text-xs text-gray-700"><strong>PIC:</strong> ${audit.pic_auditee_name}</div>
+                        <div class="text-xs text-gray-700"><strong>Auditor:</strong> ${audit.auditor_name}</div>
+                        <div class="text-xs text-gray-700"><strong>Scope:</strong> ${audit.scope}</div>
+                        <a href="/admin/audit/${audit.id}" class="text-xs text-blue-600 hover:underline mt-1 inline-block">Lihat Detail →</a>
                     </div>
                 `;
-            }
-        })
-        .catch(err => {
-            console.error('Error fetching audit details:', err);
-            content.innerHTML = `
-                <div class="text-xs text-red-500">
-                    Gagal memuat data. Coba lagi nanti.
-                </div>
-            `;
-        });
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        } else {
+            content.innerHTML = `<div class="text-xs text-gray-500 italic">Tidak ada audit pada tanggal ini.</div>`;
+        }
+    })
+    .catch(err => {
+        console.error('AJAX Error:', err);
+        content.innerHTML = `
+            <div class="text-xs text-red-600">
+                ❌ Gagal: ${err.message || 'Cek konsol browser'}
+            </div>
+        `;
+    });
 }
 </script>
 @endpush

@@ -560,33 +560,29 @@ public function searchAudit(Request $request)
 
 public function getDayDetails(Request $request)
 {
-    $date = $request->query('date'); // Format: "22 Jan 2026"
-    $year = $request->query('year', Carbon::now()->year);
-
-    // Konversi string date ke format Y-m-d
-    try {
-        $carbonDate = Carbon::createFromFormat('d M Y', $date);
-        $startDate = $carbonDate->startOfDay();
-        $endDate   = $carbonDate->endOfDay();
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid date format'
-        ], 400);
+    $date = $request->query('date');
+    if (!$date) {
+        return response()->json(['success' => false, 'message' => 'Date required'], 400);
     }
 
-    // Ambil audit berdasarkan tanggal
+    try {
+        $carbonDate = Carbon::createFromFormat('d M Y', $date);
+        $start = $carbonDate->copy()->startOfDay();
+        $end = $carbonDate->copy()->endOfDay();
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Invalid date'], 400);
+    }
+
     $audits = Audit::with(['department', 'session'])
-                   ->whereBetween('created_at', [$startDate, $endDate])
-                   ->orderBy('created_at', 'desc')
-                   ->get()
-                   ->map(function ($audit) {
-                       return [
-                           'id' => $audit->id,
-                           'department_name' => $audit->department->name ?? 'N/A',
-                           'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
-                       ];
-                   });
+        ->whereBetween('created_at', [$start, $end])
+        ->get()
+        ->map(function ($audit) {
+            return [
+                'id' => $audit->id,
+                'department_name' => optional($audit->department)->name ?? 'N/A',
+                'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
+            ];
+        });
 
     return response()->json([
         'success' => true,
