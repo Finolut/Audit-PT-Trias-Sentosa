@@ -3,10 +3,10 @@
 @section('content')
 {{-- HEADER & NAVIGATION --}}
 {{-- Kita gunakan 'fixed' agar dia tidak peduli dengan padding container layout --}}
-<div class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm md:left-64"> 
+<<div class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-all duration-300 ltr:ml-0 group-[.sidebar-active]/body:md:left-64 group-[.sidebar-mini]/body:md:left-20">
     {{-- md:left-64 di atas gunanya agar topbar tidak menutupi sidebar kiri (sesuaikan lebar sidebar kamu) --}}
     
-    <div class="w-full flex items-center justify-between px-6 lg:px-10 py-4">
+<div class="w-full flex items-center justify-between px-6 lg:px-10 py-4">
         <div>
             <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
