@@ -7,7 +7,7 @@
   2. !-mt-10 : Menarik header ke atas agar mentok ke browser (menabrak padding top layout)
   3. sticky top-0 : Membuatnya tetap melayang di atas saat di-scroll
 --}}
-<div class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-10 mb-8 transition-all">
+<div class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-18 mb-8 transition-all">
     <div class="w-full flex items-center justify-between px-8 lg:px-12 py-4">
         <div>
             <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
