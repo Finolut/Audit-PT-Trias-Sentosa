@@ -2,10 +2,11 @@
 
 @section('content')
 {{-- HEADER & NAVIGATION --}}
-{{-- 1. Kita pakai !-mt-10 untuk menarik navigasi melewati padding container --}}
-{{-- 2. sticky top-0 memastikan dia tetap di atas saat di-scroll --}}
-<div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-6 sm:!-mt-10 mb-8">
-    <div class="w-full flex items-center justify-between px-6 lg:px-30 py-4">
+{{-- Kita gunakan 'fixed' agar dia tidak peduli dengan padding container layout --}}
+<div class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm md:left-64"> 
+    {{-- md:left-64 di atas gunanya agar topbar tidak menutupi sidebar kiri (sesuaikan lebar sidebar kamu) --}}
+    
+    <div class="w-full flex items-center justify-between px-6 lg:px-10 py-4">
         <div>
             <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -16,23 +17,26 @@
             <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
         </div>
         
-        {{-- Mini Stats --}}
+        {{-- Mini Stats Summary --}}
         <div class="flex gap-3">
-             <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1">
+            <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1">
                 <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                <div>SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
+                SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span>
             </div>
             <div class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-semibold flex items-center gap-1">
                 <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
-                <div>PARTIAL<br><span class="text-lg font-bold">{{ $totalDraw }}</span></div>
+                PARTIAL<br><span class="text-lg font-bold">{{ $totalDraw }}</span>
             </div>
             <div class="px-3 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold flex items-center gap-1">
                 <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                <div>TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span></div>
+                TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span>
             </div>
         </div>
     </div>
 </div>
+
+{{-- PENTING: Tambahkan spacer ini agar konten di bawahnya tidak "balapan" naik ke atas ketutup header --}}
+<div class="h-28"></div>
 
     {{-- CHART SECTION --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
