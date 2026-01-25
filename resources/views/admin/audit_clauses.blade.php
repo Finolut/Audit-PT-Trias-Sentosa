@@ -182,120 +182,68 @@
     </div>
 </div>
 
-{{-- SCRIPT TETAP SAMA --}}
+{{-- SCRIPT --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+    // 1. Inisialisasi Chart (Pastikan data PHP tersedia)
+    const mainStats = {!! json_encode($mainStats) !!};
+    const detailedStats = {!! json_encode($detailedStats) !!};
+
     const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-            x: { stacked: true },
-            y: { stacked: true, beginAtZero: true }
-        },
-        plugins: { legend: { position: 'top' } }
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
     };
 
-// ... Cari script Chart di bagian bawah file blade ...
-
-// --- CHART 1: MAIN CLAUSE ---
-const mainStats = {!! json_encode($mainStats) !!}; 
-const mainLabels = Object.keys(mainStats);
-
-new Chart(document.getElementById('mainClauseChart'), {
-    type: 'bar',
-    data: {
-        labels: mainLabels.map(l => 'Clause ' + l),
-        datasets: [
-            { label: 'Yes', data: mainLabels.map(l => mainStats[l].yes), backgroundColor: '#22c55e' }, // Green
-            { label: 'No', data: mainLabels.map(l => mainStats[l].no), backgroundColor: '#ef4444' }, // Red
-            { label: 'N/A', data: mainLabels.map(l => mainStats[l].na), backgroundColor: '#facc15' }, // Yellow
-            // TAMBAHAN DATASET BARU UNTUK BELUM DIISI (WARNA ABU-ABU MUDA)
-            { 
-                label: 'Belum Diisi', 
-                data: mainLabels.map(l => mainStats[l].unanswered), 
-                backgroundColor: '#e2e8f0', // Gray-200 (Warna netral/kosong)
-                borderColor: '#cbd5e1',     // Border sedikit lebih gelap
-                borderWidth: 1
-            },
-        ]
-    },
-    options: commonOptions
-});
-
-// --- CHART 2: DETAILED CLAUSE ---
-const detailStats = {!! json_encode($detailedStats) !!}; 
-const detailLabels = Object.keys(detailStats);
-
-new Chart(document.getElementById('detailedClauseChart'), {
-    type: 'bar',
-    data: {
-        labels: detailLabels,
-        datasets: [
-            { label: 'Yes', data: detailLabels.map(l => detailStats[l].yes), backgroundColor: '#22c55e' },
-            { label: 'No', data: detailLabels.map(l => detailStats[l].no), backgroundColor: '#ef4444' },
-            { label: 'N/A', data: detailLabels.map(l => detailStats[l].na), backgroundColor: '#facc15' },
-            // TAMBAHAN DATASET BARU JUGA DI SINI
-            { 
-                label: 'Belum Diisi', 
-                data: detailLabels.map(l => detailStats[l].unanswered), 
-                backgroundColor: '#e2e8f0',
-                borderColor: '#cbd5e1',
-                borderWidth: 1
-            },
-        ]
-    },
-    options: {
-        ...commonOptions,
-        scales: {
-            x: { stacked: true, ticks: { autoSkip: false, maxRotation: 90, minRotation: 90, font: {size: 10} } },
-            y: { stacked: true }
-        }
+    // Fungsi pembantu untuk buat dataset
+    function createDatasets(statsObj, labels) {
+        return [
+            { label: 'Yes', data: labels.map(l => statsObj[l].yes), backgroundColor: '#22c55e' },
+            { label: 'No', data: labels.map(l => statsObj[l].no), backgroundColor: '#ef4444' },
+            { label: 'N/A', data: labels.map(l => statsObj[l].na), backgroundColor: '#facc15' },
+            { label: 'Belum', data: labels.map(l => statsObj[l].unanswered), backgroundColor: '#e2e8f0' }
+        ];
     }
-});
 
-// Dataset untuk Chart (Gunakan ini untuk Main Chart dan Detailed Chart)
-datasets: [
-    { 
-        label: 'Yes', 
-        data: labels.map(l => stats[l].yes), 
-        backgroundColor: '#22c55e' // Hijau
-    },
-    { 
-        label: 'No', 
-        data: labels.map(l => stats[l].no), 
-        backgroundColor: '#ef4444' // Merah
-    },
-    { 
-        label: 'N/A', 
-        data: labels.map(l => stats[l].na), 
-        backgroundColor: '#facc15' // KUNING (Wajib diisi tapi N/A)
-    },
-    { 
-        label: 'Belum Diisi', 
-        data: labels.map(l => stats[l].unanswered), 
-        backgroundColor: '#e2e8f0' // ABU-ABU MUDA (Belum disentuh)
-    }
-]
-document.addEventListener('DOMContentLoaded', function() {
-        // Hanya jalankan loading untuk klik pada Card Klausul
-        document.querySelectorAll('.btn-clause').forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Pastikan bukan klik kanan atau tombol tengah
-                if (e.button === 0) { 
-                    Swal.fire({
-                        title: 'Memuat Klausul...',
-                        text: 'Mengambil detail pertanyaan',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                }
+    // Render Chart 1
+    const mainLabels = Object.keys(mainStats);
+    new Chart(document.getElementById('mainClauseChart'), {
+        type: 'bar',
+        data: { labels: mainLabels.map(l => 'Clause ' + l), datasets: createDatasets(mainStats, mainLabels) },
+        options: commonOptions
+    });
+
+    // Render Chart 2
+    const detailedLabels = Object.keys(detailedStats);
+    new Chart(document.getElementById('detailedClauseChart'), {
+        type: 'bar',
+        data: { labels: detailedLabels, datasets: createDatasets(detailedStats, detailedLabels) },
+        options: commonOptions
+    });
+
+    // 2. LOGIC LOADING (SweetAlert)
+    document.addEventListener('DOMContentLoaded', function() {
+        const clauseButtons = document.querySelectorAll('.btn-clause');
+        
+        clauseButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Jangan jalankan jika user klik kanan atau ctrl+klik
+                if (e.ctrlKey || e.metaKey || e.button !== 0) return;
+
+                Swal.fire({
+                    title: 'Memuat Klausul...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
             });
         });
     });
 </script>
-@endpush
 @endsection
