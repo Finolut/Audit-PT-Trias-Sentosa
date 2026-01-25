@@ -559,31 +559,30 @@ public function searchAudit(Request $request)
 }
 
 public function getDayDetails(Request $request)
-    {
+{
+    try {
         $date = $request->query('date');
+        
         if (!$date) {
-            return response()->json(['success' => false, 'message' => 'Date required'], 400);
+            return response()->json(['success' => false, 'message' => 'Tanggal tidak disertakan'], 400);
         }
 
-        try {
-            // Pastikan format 'd M Y' sesuai dengan yang dikirim JS (contoh: 25 Jan 2026)
-            $carbonDate = Carbon::createFromFormat('d M Y', $date);
-            $start = $carbonDate->copy()->startOfDay();
-            $end = $carbonDate->copy()->endOfDay();
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Invalid date format: ' . $e->getMessage()], 400);
-        }
+        // Gunakan format standar agar tidak salah interpretasi bulan/hari
+        $carbonDate = \Illuminate\Support\Carbon::parse($date);
+        $start = $carbonDate->copy()->startOfDay();
+        $end = $carbonDate->copy()->endOfDay();
 
-        $audits = Audit::with(['department', 'session'])
+        // Eager load session dan department
+        $audits = \App\Models\Audit::with(['session', 'department'])
             ->whereBetween('created_at', [$start, $end])
             ->get()
             ->map(function ($audit) {
                 return [
                     'id' => $audit->id,
-                    'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
-                    'department_name' => optional($audit->department)->name ?? 'N/A',
-                    'pic_auditee_name' => $audit->pic_auditee_name ?? 'N/A', // Tambahkan ini
-                    'scope' => $audit->scope ?? 'N/A', // Tambahkan ini
+                    // Cek jika session ada, jika tidak beri N/A
+                    'auditor' => $audit->session ? $audit->session->auditor_name : 'Auditor Tidak Ada',
+                    // Cek jika department ada, ambil kolom 'name'
+                    'dept' => $audit->department ? $audit->department->name : 'Tanpa Departemen',
                 ];
             });
 
@@ -592,7 +591,15 @@ public function getDayDetails(Request $request)
             'audits' => $audits,
             'count' => $audits->count()
         ]);
+
+    } catch (\Exception $e) {
+        // Jika error 500 lagi, pesan aslinya akan muncul di panel untuk kita debug
+        return response()->json([
+            'success' => false, 
+            'message' => 'Pesan Error: ' . $e->getMessage()
+        ], 500);
     }
+}
 
 }
 
