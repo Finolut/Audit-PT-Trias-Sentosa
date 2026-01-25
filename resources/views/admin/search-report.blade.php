@@ -16,7 +16,8 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.audit.search') }}" method="GET" class="relative">
+        {{-- Tambahkan id="searchForm" di sini --}}
+        <form id="searchForm" action="{{ route('admin.audit.search') }}" method="GET" class="relative">
             <input type="text"
                    name="audit_id"
                    placeholder="Tempel ID Laporan (UUID)..."
@@ -28,4 +29,24 @@
         </form>
     </div>
 </div>
+
+{{-- Script SweetAlert --}}
+@push('scripts')
+<script>
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        // Tampilkan loading SweetAlert
+        Swal.fire({
+            title: 'Mencari Data...',
+            text: 'Harap tunggu sebentar',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Form akan otomatis berlanjut ke server setelah ini
+    });
+</script>
+@endpush
 @endsection
