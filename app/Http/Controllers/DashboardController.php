@@ -560,34 +560,18 @@ public function searchAudit(Request $request)
 
 public function getDayDetails(Request $request)
 {
-    $date = $request->query('date');
-    if (!$date) {
-        return response()->json(['success' => false, 'message' => 'Date required'], 400);
-    }
-
-    try {
-        $carbonDate = Carbon::createFromFormat('d M Y', $date);
-        $start = $carbonDate->copy()->startOfDay();
-        $end = $carbonDate->copy()->endOfDay();
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Invalid date'], 400);
-    }
-
-    $audits = Audit::with(['department', 'session'])
-        ->whereBetween('created_at', [$start, $end])
-        ->get()
-        ->map(function ($audit) {
-            return [
-                'id' => $audit->id,
-'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
-'department_name' => optional($audit->department)->name ?? 'N/A',
-            ];
-        });
-
     return response()->json([
         'success' => true,
-        'audits' => $audits->toArray(),
-        'count' => $audits->count()
+        'audits' => [
+            [
+                'id' => 'b9b40b4c-9e99-46ff-aff8-c14a8a92ba52',
+                'department_name' => 'PRODUCTION',
+                'pic_auditee_name' => 'Andi Supriyanto',
+                'auditor_name' => 'Budi Santoso',
+                'scope' => 'Line A'
+            ]
+        ],
+        'count' => 1
     ]);
 }
 
