@@ -142,7 +142,7 @@
             @endphp
 
             <a href="{{ route('admin.audit.clause_detail', ['auditId' => $audit->id, 'mainClause' => $key]) }}" 
-               class="block transition-all duration-300 p-6 rounded-xl shadow-sm border group bg-white hover:shadow-lg {{ $isComplete ? 'border-gray-200 hover:border-green-400' : 'border-dashed border-gray-300 hover:border-blue-400' }}">
+               class="btn-clause block transition-all duration-300 p-6 rounded-xl shadow-sm border group bg-white hover:shadow-lg {{ $isComplete ? 'border-gray-200 hover:border-green-400' : 'border-dashed border-gray-300 hover:border-blue-400' }}">
                 
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-xl transition-transform group-hover:scale-110 {{ $isComplete ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600' }}">
@@ -184,6 +184,7 @@
 
 {{-- SCRIPT TETAP SAMA --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@push('scripts')
 <script>
     const commonOptions = {
         responsive: true,
@@ -276,5 +277,25 @@ datasets: [
         backgroundColor: '#e2e8f0' // ABU-ABU MUDA (Belum disentuh)
     }
 ]
+document.addEventListener('DOMContentLoaded', function() {
+        // Hanya jalankan loading untuk klik pada Card Klausul
+        document.querySelectorAll('.btn-clause').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Pastikan bukan klik kanan atau tombol tengah
+                if (e.button === 0) { 
+                    Swal.fire({
+                        title: 'Memuat Klausul...',
+                        text: 'Mengambil detail pertanyaan',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                }
+            });
+        });
+    });
 </script>
+@endpush
 @endsection
