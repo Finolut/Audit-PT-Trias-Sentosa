@@ -579,8 +579,8 @@ public function getDayDetails(Request $request)
         ->map(function ($audit) {
             return [
                 'id' => $audit->id,
-                'department_name' => optional($audit->department)->name ?? 'N/A',
-                'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
+'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
+'department_name' => optional($audit->department)->name ?? 'N/A',
             ];
         });
 
