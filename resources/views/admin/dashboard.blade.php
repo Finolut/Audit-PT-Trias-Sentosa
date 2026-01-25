@@ -322,11 +322,11 @@ function showAuditDetails(dateString, count) {
                              Auditor: ${audit.auditor}
                         </div>
                         <div class="text-[9px] text-gray-400 font-mono mb-2">
-                            ID: ${audit.id.substring(0, 8)}...
+                            ID: ${audit.id.substring(0, 50)}...
                         </div>
-                        <a href="{{ url('/admin/audit/overview') }}/${audit.id}" 
-                           class="text-[10px] text-blue-600 font-bold hover:underline block text-right">
-                           DETAIL AUDIT →
+<a href="{{ route('admin.audit.overview', $audit->id) }}" 
+                           class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-sm">
+                            DETAIL
                         </a>
                     </div>
                 `;
