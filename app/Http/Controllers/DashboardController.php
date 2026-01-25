@@ -584,9 +584,7 @@ public function getDayDetails(Request $request)
                        return [
                            'id' => $audit->id,
                            'department_name' => $audit->department->name ?? 'N/A',
-                           'pic_auditee_name' => $audit->pic_auditee_name ?? 'N/A',
-                           'auditor_name' => $audit->session->auditor_name ?? 'N/A',
-                           'scope' => $audit->scope ?? 'N/A',
+                           'auditor_name' => optional($audit->session)->auditor_name ?? 'N/A',
                        ];
                    });
 
