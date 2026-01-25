@@ -1,38 +1,38 @@
 @extends('layouts.admin')
 
 @section('content')
-    {{-- HEADER & NAVIGATION --}}
-    {{-- Tambahkan -mx-4 atau -mx-6 tergantung padding pembungkus di layouts.admin --}}
-    {{-- -mt-6 atau -mt-8 digunakan untuk menariknya ke atas agar benar-benar menempel --}}
-   <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-6 sm:!-mt-8 mb-8">
+{{-- HEADER & NAVIGATION --}}
+{{-- 1. Kita pakai !-mt-10 untuk menarik navigasi melewati padding container --}}
+{{-- 2. sticky top-0 memastikan dia tetap di atas saat di-scroll --}}
+<div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-6 sm:!-mt-10 mb-8">
     <div class="w-full flex items-center justify-between px-6 lg:px-30 py-4">
-            <div>
-                <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Kembali ke Menu Utama
-                </a>
-                <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
+        <div>
+            <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Kembali ke Menu Utama
+            </a>
+            <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
+        </div>
+        
+        {{-- Mini Stats --}}
+        <div class="flex gap-3">
+             <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1">
+                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                <div>SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
             </div>
-            
-            {{-- Mini Stats Summary --}}
-            <div class="flex gap-3">
-                <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1">
-                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                    <div>SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
-                </div>
-                <div class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-semibold flex items-center gap-1">
-                    <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
-                    <div>PARTIAL<br><span class="text-lg font-bold">{{ $totalDraw }}</span></div>
-                </div>
-                <div class="px-3 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold flex items-center gap-1">
-                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                    <div>TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span></div>
-                </div>
+            <div class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-semibold flex items-center gap-1">
+                <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
+                <div>PARTIAL<br><span class="text-lg font-bold">{{ $totalDraw }}</span></div>
+            </div>
+            <div class="px-3 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold flex items-center gap-1">
+                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                <div>TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span></div>
             </div>
         </div>
     </div>
+</div>
 
     {{-- CHART SECTION --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
