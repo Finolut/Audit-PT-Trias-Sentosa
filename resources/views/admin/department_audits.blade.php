@@ -4,11 +4,8 @@
     {{-- Header Section --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h2 class="text-3xl font-extrabold text-gray-800">Audit Log</h2>
-            <p class="text-gray-500 mt-1">
-                Daftar riwayat audit untuk departemen: 
-                <span class="font-bold text-blue-600">{{ $currentDept->name }}</span>
-            </p>
+            <h2 class="text-3xl font-extrabold text-gray-800">Status Audit Departemen</h2>
+            <p class="text-gray-500 mt-1">Rekapitulasi progres audit seluruh departemen.</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -17,114 +14,122 @@
                 <label for="year" class="text-xs font-bold text-gray-400 uppercase mr-2">Tahun:</label>
                 <select name="year" id="year" onchange="this.form.submit()" class="text-sm border-none focus:ring-0 rounded-lg bg-transparent font-bold text-gray-700 cursor-pointer">
                     <option value="">Semua</option>
-                    @php
-                        $startYear = 2026;
-                        $currentYear = date('Y');
-                        $endYear = max($startYear, $currentYear) + 1;
-                    @endphp
-                    @for ($y = $startYear; $y <= $endYear; $y++)
+                    @for ($y = 2026; $y <= 2030; $y++)
                         <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>
                             {{ $y }}
                         </option>
                     @endfor
                 </select>
             </form>
+        </div>
+    </div>
 
-            {{-- Total Audit Badge --}}
-            <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2">
-                <span class="text-blue-700 font-black text-lg">{{ $audits->count() }}</span>
-                <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">Total Audit</span>
+    {{-- Tabel Full Width dengan Gaya Dashboard --}}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <h3 class="font-bold text-gray-800">Daftar Semua Departemen</h3>
+
+            {{-- Search Lokal untuk Tabel --}}
+            <div class="relative w-64">
+                <input type="text" id="tableSearch" placeholder="Cari nama departemen..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+
+        {{-- Loading Skeleton --}} 
+        <div id="loadingSkeleton" class="hidden p-8">
+            <div class="animate-pulse">
+                <div class="h-4 bg-gray-200 rounded mb-4 w-3/4"></div>
+                <div class="space-y-3">
+                    @for ($i = 0; $i < 5; $i++)
+                        <div class="h-10 bg-gray-200 rounded"></div>
+                    @endfor
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto" id="tableContainer">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-500 font-bold uppercase text-xs">
+                    <tr>
+                        <th class="px-6 py-4 text-center">Departemen</th>
+                        <th class="px-6 py-4 text-center">Total Audit</th>
+                        <th class="px-6 py-4 text-center">Selesai</th>
+                        <th class="px-6 py-4 text-center">Berjalan (Pending)</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100" id="tableBody">
+                    @foreach($deptSummary as $dept)
+                    <tr class="hover:bg-gray-50 transition-colors dept-row">
+                        <td class="px-6 py-4 text-center font-bold text-gray-800 dept-name">{{ $dept->name }}</td>
+                        <td class="px-6 py-4 text-center font-semibold">{{ $dept->total_audit }}</td>
+                        <td class="px-6 py-4 text-center">
+                            @if($dept->completed_count > 0)
+                                <span class="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full bg-green-100 text-green-700 border border-green-200 uppercase">
+                                    ● SELESAI
+                                </span>
+                            @else
+                                <span class="text-gray-300">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @if($dept->pending_count > 0)
+                                <span class="inline-flex items-center px-3 py-1 text-[10px] font-black rounded-full bg-amber-100 text-amber-700 border border-amber-200 uppercase">
+                                    ● BERJALAN
+                                </span>
+                            @else
+                                <span class="text-gray-300">-</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{{ route('admin.dept.show', $dept->id) }}" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm inline-block">
+                                DETAIL
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div id="tableNoResult" class="hidden p-8 text-center text-gray-400 text-sm italic">
+                Departemen tidak ditemukan.
             </div>
         </div>
     </div>
 
-    {{-- Table Section --}}
-    <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Tanggal</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Auditor</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Responders</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Aksi</th> <!-- ✅ CENTER -->
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                    @forelse($audits as $audit)
-                        <tr class="hover:bg-blue-50/30 transition-colors group">
-                            <td class="px-6 py-4 whitespace-nowrap text-center"> <!-- ✅ CENTER -->
-                                <div class="text-sm font-bold text-gray-700">{{ $audit->created_at->format('d M Y') }}</div>
-                                <div class="text-xs text-gray-400">{{ $audit->created_at->format('H:i') }} WIB</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center"> <!-- ✅ CENTER -->
-                                <div class="flex items-center justify-center"> <!-- ✅ CENTER ICON & NAMA -->
-                                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs mr-3">
-                                        {{ substr($audit->session->auditor_name ?? 'A', 0, 1) }}
-                                    </div>
-                                    <div class="text-sm font-semibold text-gray-800">
-                                        {{ $audit->session->auditor_name ?? '-' }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-center"> <!-- ✅ CENTER -->
-                                <div class="flex flex-wrap justify-center gap-1"> <!-- ✅ CENTER BADGE -->
-                                    @forelse($audit->responders as $resp)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase">
-                                            {{ $resp->responder_name }}
-                                        </span>
-                                    @empty
-                                        <span class="text-xs text-gray-400 italic">No responders</span>
-                                    @endforelse
-                                </div>
-                            </td>
-<td class="px-6 py-4 whitespace-nowrap text-center">
-    @php
-        $status = strtolower($audit->status ?? '');
-    @endphp
+    {{-- Script Pencarian + Loading --}}
+    <script>
+        // Simulasi loading (opsional: bisa diganti dengan AJAX jika butuh loading real)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Jika ada data, sembunyikan loading
+            if (document.querySelectorAll('.dept-row').length > 0) {
+                document.getElementById('loadingSkeleton').classList.add('hidden');
+                document.getElementById('tableContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('loadingSkeleton').classList.remove('hidden');
+                document.getElementById('tableContainer').classList.add('hidden');
+            }
 
-    @if(in_array($status, ['COMPLETE', 'selesai', 'done']))
-        <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-full bg-green-100 text-green-700 border border-green-200 uppercase">
-            ● SELESAI
-        </span>
-    @elseif(in_array($status, ['IN_PROGRESS', 'pending', 'berjalan', 'on_going']))
-        <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-full bg-blue-100 text-blue-700 border border-blue-200 uppercase">
-            ● BERJALAN
-        </span>
-    @else
-        <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-full bg-gray-100 text-gray-600 border border-gray-200 uppercase">
-            ● {{ strtoupper($audit->status ?? 'UNKNOWN') }}
-        </span>
-    @endif
-</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center"> <!-- ✅ CENTER -->
-                                <a href="{{ route('admin.audit.overview', $audit->id) }}" 
-                                   class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all active:scale-95">
-                                    Lihat Hasil 
-                                    <svg class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-16 text-center">
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-gray-50 p-4 rounded-full mb-4">
-                                        <svg class="w-12 h-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                        </svg>
-                                    </div>
-                                    <p class="text-gray-500 font-bold">Data Tidak Ditemukan</p>
-                                    <p class="text-gray-400 text-sm mt-1">Tidak ada data audit untuk tahun atau departemen ini.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+            // Script pencarian
+            document.getElementById('tableSearch').addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('.dept-row');
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const name = row.querySelector('.dept-name').textContent.toLowerCase();
+                    if(name.includes(term)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                const noResult = document.getElementById('tableNoResult');
+                if(visibleCount === 0) noResult.classList.remove('hidden');
+                else noResult.classList.add('hidden');
+            });
+        });
+    </script>
 @endsection
