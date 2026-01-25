@@ -7,7 +7,7 @@
     <div class="mb-8">
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Audit Overview</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Informasi Audit</h1>
                 <p class="text-gray-500">
                     Department: {{ $audit->department->name ?? '-' }} | 
                     Date: {{ $audit->created_at->format('d M Y') }}
@@ -21,21 +21,11 @@
                     </svg>
                     Export PDF
                 </a>
-                <a href="{{ route('admin.dashboard') }}" 
-                   class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-bold transition">
-                    Back to Dashboard
-                </a>
             </div>
         </div>
 
         {{-- 📋 RINGKASAN DATA (KOTAK BIRU) --}}
         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
-            <h3 class="font-bold text-lg text-blue-800 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Informasi Audit
-            </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-sm">
                 <div class="space-y-3">
@@ -67,17 +57,17 @@
 
                 <div class="space-y-3">
                     <div class="flex">
-                        <span class="w-44 font-bold text-gray-600">Auditor Utama</span>
+                        <span class="w-44 font-bold text-gray-600">Auditor</span>
                         <span class="mr-2">:</span>
                         <span class="text-gray-800 font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-44 font-bold text-gray-600">Penanggung Jawab</span>
+                        <span class="w-44 font-bold text-gray-600">Penanggung Jawab Dept</span>
                         <span class="mr-2">:</span>
                         <span class="text-gray-800 font-medium">{{ $audit->pic_auditee_name ?? '-' }}</span>
                     </div>
                     <div class="flex">
-                        <span class="w-44 font-bold text-gray-600">Anggota Tim</span>
+                        <span class="w-44 font-bold text-gray-600">Anggota</span>
                         <span class="mr-2">:</span>
                         <div class="flex-1">
                             @forelse($teamMembers as $member)
@@ -122,14 +112,14 @@
     {{-- GRAFIK SECTION --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Overview per Main Clause</h3>
+            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Gambaran Per Klausul Utama</h3>
             <div class="h-64">
                 <canvas id="mainClauseChart"></canvas>
             </div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Detailed Breakdown (All Clauses)</h3>
+            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Rincian Lengkap (Semua Klausus)</h3>
             <div class="h-64">
                 <canvas id="detailedClauseChart"></canvas>
             </div>
@@ -144,8 +134,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
         @foreach($mainClauses as $key => $subClauses)
             @php 
-                $mStats = $mainStats[$key] ?? ['yes'=>0, 'no'=>0, 'partial'=>0, 'na'=>0, 'unanswered'=>0];
-                $sudahDikerjakan = $mStats['yes'] + $mStats['no'] + $mStats['partial'] + $mStats['na'];
+                $mStats = $mainStats[$key] ?? ['yes'=>0, 'no'=>0, 'na'=>0, 'unanswered'=>0];
+                $sudahDikerjakan = $mStats['yes'] + $mStats['no'] + $mStats['na'];
                 $totalSoal = array_sum($mStats);
                 $persenProgres = $totalSoal > 0 ? round(($sudahDikerjakan / $totalSoal) * 100) : 0;
                 $isComplete = ($mStats['unanswered'] == 0);
@@ -217,7 +207,6 @@ new Chart(document.getElementById('mainClauseChart'), {
         labels: mainLabels.map(l => 'Clause ' + l),
         datasets: [
             { label: 'Yes', data: mainLabels.map(l => mainStats[l].yes), backgroundColor: '#22c55e' }, // Green
-            { label: 'Partial', data: mainLabels.map(l => mainStats[l].partial), backgroundColor: '#94a3b8' }, // Slate
             { label: 'No', data: mainLabels.map(l => mainStats[l].no), backgroundColor: '#ef4444' }, // Red
             { label: 'N/A', data: mainLabels.map(l => mainStats[l].na), backgroundColor: '#facc15' }, // Yellow
             // TAMBAHAN DATASET BARU UNTUK BELUM DIISI (WARNA ABU-ABU MUDA)
@@ -243,7 +232,6 @@ new Chart(document.getElementById('detailedClauseChart'), {
         labels: detailLabels,
         datasets: [
             { label: 'Yes', data: detailLabels.map(l => detailStats[l].yes), backgroundColor: '#22c55e' },
-            { label: 'Partial', data: detailLabels.map(l => detailStats[l].partial), backgroundColor: '#94a3b8' },
             { label: 'No', data: detailLabels.map(l => detailStats[l].no), backgroundColor: '#ef4444' },
             { label: 'N/A', data: detailLabels.map(l => detailStats[l].na), backgroundColor: '#facc15' },
             // TAMBAHAN DATASET BARU JUGA DI SINI
@@ -271,11 +259,6 @@ datasets: [
         label: 'Yes', 
         data: labels.map(l => stats[l].yes), 
         backgroundColor: '#22c55e' // Hijau
-    },
-    { 
-        label: 'Partial', 
-        data: labels.map(l => stats[l].partial), 
-        backgroundColor: '#94a3b8' // Slate/Abu Tua
     },
     { 
         label: 'No', 
