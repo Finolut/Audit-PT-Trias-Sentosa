@@ -1,18 +1,33 @@
 @extends('layouts.admin')
 
 @section('content')
-    {{-- HEADER & NAVIGATION --}}
-    <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm py-4 mb-6 border-b border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div>
-                <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Kembali ke Menu Utama
-                </a>
-                <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
-            </div>
+{{-- HEADER & NAVIGATION --}}
+<div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between px-6 lg:px-10 py-4">
+        <div>
+            <a href="{{ route('admin.audit.overview', $audit->id) }}"
+               class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 19l-7-7 7-7" />
+                </svg>
+                Kembali ke Menu Utama
+            </a>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-1">
+                Main Clause {{ $mainClause }}
+            </h2>
+        </div>
+
+        {{-- SLOT KANAN (opsional) --}}
+        <div class="flex items-center gap-3">
+            {{-- contoh: status / tombol --}}
+            {{-- <span class="text-sm text-gray-500">Draft</span> --}}
+        </div>
+    </div>
+</div>
+
             
             {{-- Mini Stats Summary --}}
             <div class="flex gap-3">
