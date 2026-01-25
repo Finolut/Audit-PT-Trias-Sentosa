@@ -293,48 +293,82 @@
 @push('scripts')
 <script>
 function showAuditDetails(dateString, count) {
-const url = `{{ route('admin.audit.day-details') }}?date=${encodeURIComponent(dateString)}`;
+    // 1. Definisikan elemen panel dan content agar JS tahu ke mana data harus dimasukkan
+    const panel = document.getElementById('auditDetailPanel');
+    const content = document.getElementById('detailContent');
 
-fetch(url, {
-    headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-    }
-})
-.then(response => {
-    if (!response.ok) {
-        // Jika error 500, kita tangkap teks errornya untuk debug
-        return response.text().then(text => { throw new Error(text) });
-    }
-    return response.json();
-})
-.then(data => {
-    if (data.success && data.audits.length > 0) {
-        let html = `<div class="mb-3"><span class="font-bold text-gray-800">${dateString}</span> <span class="text-blue-600 text-xs">(${data.count} audit)</span></div><div class="space-y-3">`;
-        
-        data.audits.forEach(audit => {
-            html += `
-                <div class="p-2 bg-gray-50 rounded border border-gray-200">
-                    <div class="text-[10px] font-bold text-blue-700 bg-blue-100 inline-block px-2 py-0.5 rounded mb-1 uppercase">
-                        ${audit.department_name}
+    if (!panel || !content) return; // Guard clause jika elemen tidak ditemukan
+
+    // Tampilkan panel (karena defaultnya hidden di mobile/tertentu)
+    panel.classList.remove('hidden');
+
+    // Tampilkan loading state
+    content.innerHTML = `<div class="text-xs text-gray-500 italic animate-pulse">Memuat data...</div>`;
+
+    // 2. Gunakan URL dari Route Laravel
+    const url = `{{ route('admin.audit.day-details') }}?date=${encodeURIComponent(dateString)}`;
+
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.audits.length > 0) {
+            let html = `
+                <div class="mb-3 border-b border-gray-100 pb-2">
+                    <span class="font-bold text-gray-800">${dateString}</span> 
+                    <span class="text-blue-600 text-[10px] font-bold">(${data.count} AUDIT)</span>
+                </div>
+                <div class="space-y-3">
+            `;
+            
+            data.audits.forEach(audit => {
+                // Link detail disesuaikan dengan route overview kamu
+                const detailUrl = `{{ url('/admin/audit/overview') }}/${audit.id}`;
+                
+                html += `
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors shadow-sm">
+                        <div class="text-[9px] font-black text-blue-700 bg-blue-100 inline-block px-2 py-0.5 rounded mb-2 uppercase tracking-tighter">
+                            ${audit.department_name}
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[11px] text-gray-700"><strong>PIC:</strong> ${audit.pic_auditee_name}</p>
+                            <p class="text-[11px] text-gray-700"><strong>Auditor:</strong> ${audit.auditor_name}</p>
+                            <p class="text-[11px] text-gray-600 line-clamp-2 italic">"${audit.scope}"</p>
+                        </div>
+                        <a href="${detailUrl}" class="text-[11px] text-blue-600 font-bold hover:underline mt-3 block text-right">
+                            DETAIL AKTIVITAS →
+                        </a>
                     </div>
-                    <div class="text-[11px] text-gray-700"><strong>PIC:</strong> ${audit.pic_auditee_name}</div>
-                    <div class="text-[11px] text-gray-700"><strong>Auditor:</strong> ${audit.auditor_name}</div>
-                    <div class="text-[11px] text-gray-700 line-clamp-1"><strong>Scope:</strong> ${audit.scope}</div>
-                    <a href="/admin/audit/overview/${audit.id}" class="text-[11px] text-blue-600 font-bold hover:underline mt-2 block italic">Lihat Detail →</a>
+                `;
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        } else {
+            content.innerHTML = `
+                <div class="text-center py-4 text-gray-400">
+                    <p class="text-xs italic">Tidak ada aktivitas audit pada tanggal ini.</p>
                 </div>
             `;
-        });
-        html += '</div>';
-        content.innerHTML = html;
-    } else {
-        content.innerHTML = `<div class="text-xs text-gray-500 italic">Tidak ada audit pada tanggal ini.</div>`;
-    }
-})
-.catch(err => {
-    console.error('Full Error:', err);
-    content.innerHTML = `<div class="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100">❌ Terjadi kesalahan sistem (500).</div>`;
-});
+        }
+    })
+    .catch(err => {
+        console.error('Full Error:', err);
+        content.innerHTML = `
+            <div class="text-[10px] text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+                <strong>Gagal Memuat:</strong><br>
+                ${err.message}. Pastikan koneksi aman dan controller tidak error 500.
+            </div>
+        `;
+    });
 }
 </script>
 @endpush
