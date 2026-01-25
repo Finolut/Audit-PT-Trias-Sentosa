@@ -293,60 +293,48 @@
 @push('scripts')
 <script>
 function showAuditDetails(dateString, count) {
-    const panel = document.getElementById('auditDetailPanel');
-    const content = document.getElementById('detailContent');
-    panel.classList.remove('hidden');
+const url = `{{ route('admin.audit.day-details') }}?date=${encodeURIComponent(dateString)}`;
 
-    content.innerHTML = `
-        <div class="text-xs text-gray-500">Memuat data untuk ${dateString}...</div>
-    `;
-
-    // Gunakan path absolut
-    const url = `/admin/audit/day-details?date=${encodeURIComponent(dateString)}&year={{ $selectedYear }}`;
-
-    fetch(url, {
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success && data.audits.length > 0) {
-            let html = `<div class="mb-3"><span class="font-bold text-gray-800">${dateString}</span> <span class="text-blue-600 text-xs">(${count} audit)</span></div><div class="space-y-3">`;
-            data.audits.forEach(audit => {
-                html += `
-                    <div class="p-2 bg-gray-50 rounded border">
-                        <div class="text-xs font-bold text-blue-700 bg-blue-100 inline-block px-2 py-0.5 rounded mb-1">
-                            ${audit.department_name}
-                        </div>
-                        <div class="text-xs text-gray-700"><strong>PIC:</strong> ${audit.pic_auditee_name}</div>
-                        <div class="text-xs text-gray-700"><strong>Auditor:</strong> ${audit.auditor_name}</div>
-                        <div class="text-xs text-gray-700"><strong>Scope:</strong> ${audit.scope}</div>
-                        <a href="/admin/audit/${audit.id}" class="text-xs text-blue-600 hover:underline mt-1 inline-block">Lihat Detail →</a>
+fetch(url, {
+    headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+})
+.then(response => {
+    if (!response.ok) {
+        // Jika error 500, kita tangkap teks errornya untuk debug
+        return response.text().then(text => { throw new Error(text) });
+    }
+    return response.json();
+})
+.then(data => {
+    if (data.success && data.audits.length > 0) {
+        let html = `<div class="mb-3"><span class="font-bold text-gray-800">${dateString}</span> <span class="text-blue-600 text-xs">(${data.count} audit)</span></div><div class="space-y-3">`;
+        
+        data.audits.forEach(audit => {
+            html += `
+                <div class="p-2 bg-gray-50 rounded border border-gray-200">
+                    <div class="text-[10px] font-bold text-blue-700 bg-blue-100 inline-block px-2 py-0.5 rounded mb-1 uppercase">
+                        ${audit.department_name}
                     </div>
-                `;
-            });
-            html += '</div>';
-            content.innerHTML = html;
-        } else {
-            content.innerHTML = `<div class="text-xs text-gray-500 italic">Tidak ada audit pada tanggal ini.</div>`;
-        }
-    })
-    .catch(err => {
-        console.error('AJAX Error:', err);
-        content.innerHTML = `
-            <div class="text-xs text-red-600">
-                ❌ Gagal: ${err.message || 'Cek konsol browser'}
-            </div>
-        `;
-    });
+                    <div class="text-[11px] text-gray-700"><strong>PIC:</strong> ${audit.pic_auditee_name}</div>
+                    <div class="text-[11px] text-gray-700"><strong>Auditor:</strong> ${audit.auditor_name}</div>
+                    <div class="text-[11px] text-gray-700 line-clamp-1"><strong>Scope:</strong> ${audit.scope}</div>
+                    <a href="/admin/audit/overview/${audit.id}" class="text-[11px] text-blue-600 font-bold hover:underline mt-2 block italic">Lihat Detail →</a>
+                </div>
+            `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+    } else {
+        content.innerHTML = `<div class="text-xs text-gray-500 italic">Tidak ada audit pada tanggal ini.</div>`;
+    }
+})
+.catch(err => {
+    console.error('Full Error:', err);
+    content.innerHTML = `<div class="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100">❌ Terjadi kesalahan sistem (500).</div>`;
+});
 }
 </script>
 @endpush
