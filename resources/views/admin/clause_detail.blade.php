@@ -4,8 +4,8 @@
     {{-- HEADER & NAVIGATION --}}
     {{-- Tambahkan -mx-4 atau -mx-6 tergantung padding pembungkus di layouts.admin --}}
     {{-- -mt-6 atau -mt-8 digunakan untuk menariknya ke atas agar benar-benar menempel --}}
-    <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 -mt-6 mb-8">
-        <div class="w-full flex items-center justify-between px-6 lg:px-10 py-4">
+   <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-6 sm:!-mt-8 mb-8">
+    <div class="w-full flex items-center justify-between px-6 lg:px-10 py-4">
             <div>
                 <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
