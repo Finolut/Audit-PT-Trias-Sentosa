@@ -3,24 +3,17 @@
 @section('content')
     <div class="mb-8 flex justify-between items-center">
         <div>
-            <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Status Audit Departemen</h2>
-            <p class="text-gray-500 mt-1">Rekapitulasi progres audit seluruh departemen.</p>
-        </div>
-        <div>
-            {{-- Tombol Kembali ke Dashboard --}}
-            <a href="{{ route('admin.dashboard') }}" class="text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Kembali ke Dashboard
-            </a>
+            <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Departemen PT Trias Sentosa</h2>
+            <p class="text-gray-500 mt-1">Ringkasan progres audit seluruh departemen.</p>
         </div>
     </div>
 
-    {{-- Tabel Full Width dengan Gaya Dashboard --}}
+    {{-- Tabel Full Width --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
             <h3 class="font-bold text-gray-800">Daftar Semua Departemen</h3>
 
-            {{-- Search Lokal untuk Tabel --}}
+            {{-- Search Lokal --}}
             <div class="relative w-64">
                 <input type="text" id="tableSearch" placeholder="Cari nama departemen..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -29,7 +22,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-500 font-bold uppercase text-xs">
+                <thead class="bg-white text-gray-500 font-bold uppercase text-xs">
                     <tr>
                         <th class="px-6 py-4 text-center">Departemen</th>
                         <th class="px-6 py-4 text-center">Total Audit</th>
@@ -58,7 +51,8 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <a href="{{ route('admin.dept.show', $dept->id) }}" class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm inline-block">
+                            {{-- Tambahkan class btn-detail di sini --}}
+                            <a href="{{ route('admin.dept.show', $dept->id) }}" class="btn-detail text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm inline-block">
                                 DETAIL
                             </a>
                         </td>
@@ -72,8 +66,9 @@
         </div>
     </div>
 
-    {{-- Script Pencarian --}}
+    @push('scripts')
     <script>
+        // 1. Script Pencarian Lokal (Tetap Ada)
         document.getElementById('tableSearch').addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('.dept-row');
@@ -93,5 +88,21 @@
             if(visibleCount === 0) noResult.classList.remove('hidden');
             else noResult.classList.add('hidden');
         });
+
+        // 2. Script Loading saat Klik Detail
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            button.addEventListener('click', function(e) {
+                Swal.fire({
+                    title: 'Memuat Data...',
+                    text: 'Sedang mengambil ringkasan departemen',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            });
+        });
     </script>
+    @endpush
 @endsection
