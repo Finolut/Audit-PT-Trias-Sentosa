@@ -310,7 +310,7 @@ function showAuditDetails(dateString, count) {
     `;
 
     // Fetch data via AJAX
-    fetch(`{{ route('admin.audit.day-details') }}?date=${encodeURIComponent(dateString)}&year={{ $selectedYear }}`)
+   fetch(`/admin/audit/day-details?date=${encodeURIComponent(dateString)}&year={{ $selectedYear }}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.audits.length > 0) {
