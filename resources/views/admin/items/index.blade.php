@@ -2,6 +2,16 @@
 
 @section('content')
 <div class="p-6 bg-white">
+
+       <!-- TOMBOL TAMBAH SOAL -->
+<div class="mb-6 flex justify-end">
+    <a 
+        href="{{ route('admin.items.create') }}" 
+        class="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-200 transition"
+    >
+        + Tambah Soal
+    </a>
+</div>
    <!-- FILTER CARD -->
    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
         <form method="GET" action="{{ route('admin.items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -73,16 +83,6 @@
             </div>
         </form>
     </div>
-
-    <!-- TOMBOL TAMBAH SOAL -->
-<div class="mb-6 flex justify-end">
-    <a 
-        href="{{ route('admin.items.create') }}" 
-        class="px-4 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-200 transition"
-    >
-        + Tambah Soal
-    </a>
-</div>
 
     <!-- TABLE -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
