@@ -6,7 +6,9 @@
     <title>PT TRIAS SENTOSA Tbk - Landing Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
+  <link rel="icon" href="{{ asset('images/ts.jpg') }}" type="image/jpeg">
+
+  <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .bg-custom-gray { background-color: #E5E7EB; }
     </style>
@@ -51,7 +53,7 @@
             <div class="pt-6">
                 <a href="{{ route('audit.setup') }}" 
                    class="bg-white hover:bg-gray-50 text-gray-900 font-extrabold text-xl py-4 px-14 rounded-sm shadow-md transition-all hover:shadow-lg inline-block border border-gray-100 active:scale-95">
-                    Survey
+                    Start Audit
                 </a>
             </div>
         </div>
