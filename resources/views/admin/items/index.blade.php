@@ -2,81 +2,75 @@
 
 @section('content')
 <div class="p-6 bg-white">
-    <!-- FILTER CARD -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
-        <form method="GET" action="{{ route('admin.items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Order -->
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1.5">Order</label>
-                <input 
-                    type="number" 
-                    name="order" 
-                    value="{{ request('order') }}" 
-                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-                >
-            </div>
+   <!-- FILTER CARD -->
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
+    <form method="GET" action="{{ route('admin.items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Klausul Utama (4, 5, 6, ..., 10) -->
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1.5">Klausul Utama</label>
+            <select 
+                name="main_clause" 
+                class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+            >
+                <option value="">Semua Klausul</option>
+                @for($i = 4; $i <= 10; $i++)
+                    <option value="{{ $i }}" {{ request('main_clause') == $i ? 'selected' : '' }}>
+                        Klausul {{ $i }}
+                    </option>
+                @endfor
+            </select>
+        </div>
 
-            <!-- Klausul -->
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1.5">Klausul</label>
-                <select 
-                    name="clause_id" 
-                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-                >
-                    <option value="">Semua Klausul</option>
-                    @foreach($clauses as $clause)
-                        <option value="{{ $clause->id }}" {{ request('clause_id') == $clause->id ? 'selected' : '' }}>
-                            {{ $clause->clause_code }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+        <!-- Sub-Klausul (dinamis berdasarkan Klausul Utama) -->
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1.5">Sub-Klausul</label>
+            <select 
+                name="clause_id" 
+                class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+            >
+                <option value="">Semua Sub-Klausul</option>
+                @foreach($filteredClauses as $clause)
+                    <option value="{{ $clause->id }}" {{ request('clause_id') == $clause->id ? 'selected' : '' }}>
+                        {{ $clause->clause_code }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-            <!-- Maturity Level -->
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1.5">Maturity</label>
-                <select 
-                    name="maturity_level_id" 
-                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-                >
-                    <option value="">Semua Level</option>
-                    @foreach($levels as $level)
-                        <option value="{{ $level->id }}" {{ request('maturity_level_id') == $level->id ? 'selected' : '' }}>
-                            Level {{ $level->level_number }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+        <!-- Maturity Level -->
+        <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1.5">Maturity</label>
+            <select 
+                name="maturity_level_id" 
+                class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+            >
+                <option value="">Semua Level</option>
+                @foreach($levels as $level)
+                    <option value="{{ $level->id }}" {{ request('maturity_level_id') == $level->id ? 'selected' : '' }}>
+                        Level {{ $level->level_number }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-            <!-- Pencarian Isi Soal -->
-            <div class="lg:col-span-2">
-                <label class="block text-xs font-medium text-gray-500 mb-1.5">Isi Soal</label>
-                <input 
-                    type="text" 
-                    name="search" 
-                    value="{{ request('search') }}" 
-                    placeholder="Cari isi soal..." 
-                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-                >
-            </div>
-
-            <!-- Tombol Aksi -->
-            <div class="flex items-end space-x-2">
-                <button 
-                    type="submit" 
-                    class="px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-200 transition w-full"
-                >
-                    Filter
-                </button>
-                <a 
-                    href="{{ route('admin.items.index') }}" 
-                    class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 transition text-center w-full"
-                >
-                    Reset
-                </a>
-            </div>
-        </form>
-    </div>
+        <!-- Tombol Aksi -->
+        <div class="flex items-end space-x-2">
+            <button 
+                type="submit" 
+                class="px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-200 transition w-full"
+            >
+                Filter
+            </button>
+            <a 
+                href="{{ route('admin.items.index') }}" 
+                class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 transition text-center w-full"
+            >
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
 
     <!-- TABLE -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -84,7 +78,6 @@
             <table class="w-full text-left">
                 <thead class="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wide">
                     <tr>
-                        <th class="px-5 py-3.5">Order</th>
                         <th class="px-5 py-3.5">Klausul</th>
                         <th class="px-5 py-3.5">Maturity</th>
                         <th class="px-5 py-3.5">Isi Soal (Item Text)</th>
@@ -94,8 +87,7 @@
                 <tbody class="divide-y divide-gray-100 text-sm">
                     @foreach($items as $item)
                     <tr class="hover:bg-gray-50/50 transition-colors">
-                        <td class="px-5 py-4 font-medium text-gray-800">{{ $item->item_order }}</td>
-                        <td class="px-5 py-4 text-gray-700">{{ $item->clause->clause_code }}</td>
+                        <td class="px-5 py-4 text-gray-700 font-medium">{{ $item->clause->clause_code }}</td>
                         <td class="px-5 py-4 text-gray-700">Level {{ $item->maturityLevel->level_number }}</td>
                         <td class="px-5 py-4 text-gray-600 max-w-md break-words">{{ $item->item_text }}</td>
                         <td class="px-5 py-4 text-center">
@@ -105,7 +97,7 @@
                                     class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 text-sm font-medium"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="PencilIcon" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                     Edit
                                 </a>
@@ -141,4 +133,70 @@
         @endif
     </div>
 </div>
+
+{{-- JavaScript untuk Dropdown Dinamis --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const mainClauseSelect = document.getElementById('mainClauseSelect');
+    const subClauseSelect = document.getElementById('subClauseSelect');
+
+    // Simpan semua opsi sub-klausul saat load
+    const allOptions = Array.from(subClauseSelect.options).map(opt => ({
+        value: opt.value,
+        text: opt.text,
+        clauseCode: opt.dataset.clauseCode || ''
+    }));
+
+    // Tambahkan data-clause-code ke setiap option (jika belum ada)
+    if (allOptions.length > 1 && !allOptions[1].clauseCode) {
+        // Rebuild options with data
+        subClauseSelect.innerHTML = '<option value="">Semua Sub-Klausul</option>';
+        @foreach($clauses as $clause)
+            const opt = document.createElement('option');
+            opt.value = "{{ $clause->id }}";
+            opt.textContent = "{{ $clause->clause_code }}";
+            opt.dataset.clauseCode = "{{ $clause->clause_code }}";
+            @if(request('clause_id') == $clause->id)
+                opt.selected = true;
+            @endif
+            subClauseSelect.appendChild(opt);
+        @endforeach
+    }
+
+    mainClauseSelect.addEventListener('change', function () {
+        const selectedMain = this.value;
+        subClauseSelect.innerHTML = '<option value="">Semua Sub-Klausul</option>';
+
+        if (!selectedMain) {
+            // Tampilkan semua jika tidak ada klausul utama dipilih
+            @foreach($clauses as $clause)
+                const opt = document.createElement('option');
+                opt.value = "{{ $clause->id }}";
+                opt.textContent = "{{ $clause->clause_code }}";
+                @if(request('clause_id') == $clause->id)
+                    opt.selected = true;
+                @endif
+                subClauseSelect.appendChild(opt);
+            @endforeach
+        } else {
+            // Tampilkan hanya sub-klausul yang cocok
+            @foreach($clauses as $clause)
+                @if(str_starts_with($clause->clause_code, $loop->parent->index + 4 . '.')) {{-- fallback jika JS gagal --}}
+                    // Ini hanya sebagai cadangan; JS akan handle secara dinamis
+                @endif
+            @endforeach
+
+            // Gunakan data yang sudah disimpan
+            allOptions.forEach(optData => {
+                if (optData.value && optData.clauseCode.startsWith(selectedMain + '.')) {
+                    const opt = document.createElement('option');
+                    opt.value = optData.value;
+                    opt.textContent = optData.text;
+                    subClauseSelect.appendChild(opt);
+                }
+            });
+        }
+    });
+});
+</script>
 @endsection
