@@ -30,11 +30,11 @@
                 class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
             >
                 <option value="">Semua Sub-Klausul</option>
-                @foreach($filteredClauses as $clause)
-                    <option value="{{ $clause->id }}" {{ request('clause_id') == $clause->id ? 'selected' : '' }}>
-                        {{ $clause->clause_code }}
-                    </option>
-                @endforeach
+@foreach($filteredClauses as $clause)
+    <option value="{{ $clause->id }}" {{ request('clause_id') == $clause->id ? 'selected' : '' }}>
+        {{ $clause->clause_code }}
+    </option>
+@endforeach
             </select>
         </div>
 
@@ -134,61 +134,4 @@
     </div>
 </div>
 
-{{-- JavaScript untuk Dropdown Dinamis --}}
-<script>
-
-    // Simpan semua opsi sub-klausul saat load
-    const allOptions = Array.from(subClauseSelect.options).map(opt => ({
-        value: opt.value,
-        text: opt.text,
-        clauseCode: opt.dataset.clauseCode || ''
-    }));
-
-    // Tambahkan data-clause-code ke setiap option (jika belum ada)
-    if (allOptions.length > 1 && !allOptions[1].clauseCode) {
-        // Rebuild options with data
-        subClauseSelect.innerHTML = '<option value="">Semua Sub-Klausul</option>';
-        @foreach($clauses as $clause)
-            const opt = document.createElement('option');
-            opt.value = "{{ $clause->id }}";
-            opt.textContent = "{{ $clause->clause_code }}";
-            opt.dataset.clauseCode = "{{ $clause->clause_code }}";
-            @if(request('clause_id') == $clause->id)
-                opt.selected = true;
-            @endif
-            subClauseSelect.appendChild(opt);
-        @endforeach
-    }
-
-    mainClauseSelect.addEventListener('change', function () {
-        const selectedMain = this.value;
-        subClauseSelect.innerHTML = '<option value="">Semua Sub-Klausul</option>';
-
-        if (!selectedMain) {
-            // Tampilkan semua jika tidak ada klausul utama dipilih
-            @foreach($clauses as $clause)
-                const opt = document.createElement('option');
-                opt.value = "{{ $clause->id }}";
-                opt.textContent = "{{ $clause->clause_code }}";
-                @if(request('clause_id') == $clause->id)
-                    opt.selected = true;
-                @endif
-                subClauseSelect.appendChild(opt);
-            @endforeach
-        } else {
-            // Tampilkan hanya sub-klausul yang coco
-
-            // Gunakan data yang sudah disimpan
-            allOptions.forEach(optData => {
-                if (optData.value && optData.clauseCode.startsWith(selectedMain + '.')) {
-                    const opt = document.createElement('option');
-                    opt.value = optData.value;
-                    opt.textContent = optData.text;
-                    subClauseSelect.appendChild(opt);
-                }
-            });
-        }
-    });
-});
-</script>
 @endsection
