@@ -146,6 +146,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::get('/admin/audit/search', [AuditController::class, 'search'])
          ->name('admin.audit.search');
 
+         Route::get('/admin/items/create', [ItemController::class, 'create'])->name('admin.items.create');
+Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
+
 });
 
 // Preserved special routes (public)
