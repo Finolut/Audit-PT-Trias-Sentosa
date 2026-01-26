@@ -34,10 +34,7 @@
                 </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Urutan (Order)</label>
-                <input type="number" name="item_order" class="w-full rounded-xl border-gray-200 shadow-sm text-sm" placeholder="Contoh: 1" required>
-            </div>
+            {{-- HAPUS FIELD item_order --}}
 
             <div class="mb-8">
                 <label class="block text-sm font-bold text-gray-700 mb-2">Teks Pertanyaan (Item Text)</label>
@@ -45,7 +42,7 @@
             </div>
 
             <div class="flex justify-end gap-3">
-                <a href="{{ route('admin.items.index') }}" class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-all">Batal</a>
+                <a href="{{ route('admin.items.index') }}" class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50">Batal</a>
                 <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">Simpan Soal</button>
             </div>
         </form>

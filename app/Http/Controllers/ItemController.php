@@ -73,17 +73,29 @@ public function create()
     return view('admin.items.create', compact('departments', 'clauses', 'levels'));
 }
 
-    public function store(Request $request) {
-        $request->validate([
-            'clause_id' => 'required',
-            'maturity_level_id' => 'required',
-            'item_text' => 'required',
-            'item_order' => 'required|integer'
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'clause_id' => 'required|exists:clauses,id',
+        'maturity_level_id' => 'required|exists:maturity_levels,id',
+        'item_text' => 'required|string|max:1000',
+    ]);
 
-        Item::create($request->all());
-        return redirect()->route('admin.items.index')->with('success', 'Soal berhasil ditambahkan');
-    }
+    // Hitung urutan terakhir untuk clause_id yang dipilih
+    $lastOrder = Item::where('clause_id', $request->clause_id)
+                     ->max('item_order');
+
+    $nextOrder = $lastOrder ? $lastOrder + 1 : 1;
+
+    Item::create([
+        'clause_id' => $request->clause_id,
+        'maturity_level_id' => $request->maturity_level_id,
+        'item_text' => $request->item_text,
+        'item_order' => $nextOrder,
+    ]);
+
+    return redirect()->route('admin.items.index')->with('success', 'Soal berhasil ditambahkan.');
+}
 
     public function destroy($id) {
         $item = Item::findOrFail($id);
