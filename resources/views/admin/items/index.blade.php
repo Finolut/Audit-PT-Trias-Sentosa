@@ -136,9 +136,6 @@
 
 {{-- JavaScript untuk Dropdown Dinamis --}}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const mainClauseSelect = document.getElementById('mainClauseSelect');
-    const subClauseSelect = document.getElementById('subClauseSelect');
 
     // Simpan semua opsi sub-klausul saat load
     const allOptions = Array.from(subClauseSelect.options).map(opt => ({
@@ -179,12 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 subClauseSelect.appendChild(opt);
             @endforeach
         } else {
-            // Tampilkan hanya sub-klausul yang cocok
-            @foreach($clauses as $clause)
-                @if(str_starts_with($clause->clause_code, $loop->parent->index + 4 . '.')) {{-- fallback jika JS gagal --}}
-                    // Ini hanya sebagai cadangan; JS akan handle secara dinamis
-                @endif
-            @endforeach
+            // Tampilkan hanya sub-klausul yang coco
 
             // Gunakan data yang sudah disimpan
             allOptions.forEach(optData => {
