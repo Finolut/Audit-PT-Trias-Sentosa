@@ -1,22 +1,27 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Edit Soal Audit ISO</h2>
-        <p class="text-gray-500 text-sm">Perbarui detail butir pertanyaan audit.</p>
+        <p class="text-gray-500 text-sm mt-1">Perbarui detail butir pertanyaan audit.</p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <form action="{{ route('admin.items.update', $item->id) }}" method="POST">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <form action="{{ route('admin.items.update', $item->id) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {{-- Pilih Klausul --}}
+            <!-- Klausul & Maturity Level -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Pilih Klausul -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Klausul</label>
-                    <select name="clause_id" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 shadow-sm text-sm" required>
+                    <label class="block text-xs font-medium text-gray-500 mb-2">Pilih Klausul</label>
+                    <select 
+                        name="clause_id" 
+                        class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+                        required
+                    >
                         @foreach($clauses as $clause)
                             <option value="{{ $clause->id }}" {{ $item->clause_id == $clause->id ? 'selected' : '' }}>
                                 {{ $clause->clause_code }} - {{ $clause->title }}
@@ -25,10 +30,14 @@
                     </select>
                 </div>
 
-                {{-- Pilih Maturity Level --}}
+                <!-- Pilih Maturity Level -->
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Maturity Level</label>
-                    <select name="maturity_level_id" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 shadow-sm text-sm" required>
+                    <label class="block text-xs font-medium text-gray-500 mb-2">Maturity Level</label>
+                    <select 
+                        name="maturity_level_id" 
+                        class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+                        required
+                    >
                         @foreach($levels as $level)
                             <option value="{{ $level->id }}" {{ $item->maturity_level_id == $level->id ? 'selected' : '' }}>
                                 Level {{ $level->level_number }}
@@ -38,19 +47,43 @@
                 </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Urutan (Order)</label>
-                <input type="number" name="item_order" value="{{ $item->item_order }}" class="w-full rounded-xl border-gray-200 shadow-sm text-sm" required>
+            <!-- Urutan (Order) -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-2">Urutan (Order)</label>
+                <input 
+                    type="number" 
+                    name="item_order" 
+                    value="{{ $item->item_order }}" 
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+                    required
+                >
             </div>
 
-            <div class="mb-8">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Teks Pertanyaan (Item Text)</label>
-                <textarea name="item_text" rows="4" class="w-full rounded-xl border-gray-200 shadow-sm text-sm" required>{{ $item->item_text }}</textarea>
+            <!-- Teks Pertanyaan -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-2">Teks Pertanyaan (Item Text)</label>
+                <textarea 
+                    name="item_text" 
+                    rows="4" 
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition resize-y"
+                    required
+                >{{ $item->item_text }}</textarea>
             </div>
 
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('admin.items.index') }}" class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-all">Batal</a>
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">Perbarui Soal</button>
+            <!-- Tombol Aksi -->
+            <div class="flex justify-end space-x-3 pt-4">
+                <a 
+                    href="{{ route('admin.items.index') }}" 
+                    class="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+                >
+                    Batal
+                </a>
+                <button 
+                    type="submit" 
+                    class="px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-200 transition"
+                >
+                    Perbarui Soal
+                </button>
             </div>
         </form>
     </div>
