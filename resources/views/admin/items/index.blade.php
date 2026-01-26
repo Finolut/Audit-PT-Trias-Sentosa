@@ -94,7 +94,10 @@
                         <td class="px-5 py-4 text-gray-600 max-w-md break-words">{{ $item->item_text }}</td>
                         <td class="px-5 py-4 text-center">
                             <div class="flex justify-center space-x-3">
-<a href="{{ route('admin.items.edit', $item->id) }}" class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 text-sm font-medium btn-clause">
+                                <a 
+                                    href="{{ route('admin.items.edit', $item->id) }}" 
+                                    class="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 text-sm font-medium"
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
@@ -164,31 +167,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateSubClauses();
     mainSelect.addEventListener('change', updateSubClauses);
-});
-
-   // === 2. Loading Saat Klik Edit ===
-    const editButtons = document.querySelectorAll('.btn-clause');
-    
-    editButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault(); // Hentikan redirect langsung
-
-            Swal.fire({
-                title: 'Memuat Klausul...',
-                text: 'Mohon tunggu sebentar',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Setelah 300ms (simulasi loading), redirect
-            setTimeout(() => {
-                window.location.href = btn.href;
-            }, 300);
-        });
-    });
 });
 </script>
 @endpush
