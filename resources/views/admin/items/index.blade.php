@@ -3,74 +3,76 @@
 @section('content')
 <div class="p-6 bg-white">
    <!-- FILTER CARD -->
-<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
-    <form method="GET" action="{{ route('admin.items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- Klausul Utama (4, 5, 6, ..., 10) -->
-        <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5">Klausul Utama</label>
-            <select 
-                name="main_clause" 
-                class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-            >
-                <option value="">Semua Klausul</option>
-                @for($i = 4; $i <= 10; $i++)
-                    <option value="{{ $i }}" {{ request('main_clause') == $i ? 'selected' : '' }}>
-                        Klausul {{ $i }}
-                    </option>
-                @endfor
-            </select>
-        </div>
+   <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
+        <form method="GET" action="{{ route('admin.items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Klausul Utama (4, 5, 6, ..., 10) -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1.5">Klausul Utama</label>
+                <select 
+                    name="main_clause" 
+                    id="mainClauseSelect"
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+                >
+                    <option value="">Semua Klausul</option>
+                    @for($i = 4; $i <= 10; $i++)
+                        <option value="{{ $i }}" {{ request('main_clause') == $i ? 'selected' : '' }}>
+                            Klausul {{ $i }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
 
-        <!-- Sub-Klausul (dinamis berdasarkan Klausul Utama) -->
-        <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5">Sub-Klausul</label>
-            <select 
-                name="clause_id" 
-                class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-            >
-                <option value="">Semua Sub-Klausul</option>
-@foreach($filteredClauses as $clause)
-    <option value="{{ $clause->id }}" {{ request('clause_id') == $clause->id ? 'selected' : '' }}>
-        {{ $clause->clause_code }}
-    </option>
-@endforeach
-            </select>
-        </div>
+            <!-- Sub-Klausul (dinamis berdasarkan Klausul Utama) -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1.5">Sub-Klausul</label>
+                <select 
+                    name="clause_id" 
+                    id="subClauseSelect"
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+                >
+                    <option value="">Semua Sub-Klausul</option>
+                    @foreach($filteredClauses as $clause)
+                        <option value="{{ $clause->id }}" {{ request('clause_id') == $clause->id ? 'selected' : '' }}>
+                            {{ $clause->clause_code }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        <!-- Maturity Level -->
-        <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1.5">Maturity</label>
-            <select 
-                name="maturity_level_id" 
-                class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
-            >
-                <option value="">Semua Level</option>
-                @foreach($levels as $level)
-                    <option value="{{ $level->id }}" {{ request('maturity_level_id') == $level->id ? 'selected' : '' }}>
-                        Level {{ $level->level_number }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            <!-- Maturity Level -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1.5">Maturity</label>
+                <select 
+                    name="maturity_level_id" 
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
+                >
+                    <option value="">Semua Level</option>
+                    @foreach($levels as $level)
+                        <option value="{{ $level->id }}" {{ request('maturity_level_id') == $level->id ? 'selected' : '' }}>
+                            Level {{ $level->level_number }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        <!-- Tombol Aksi -->
-        <div class="flex items-end space-x-2">
-            <button 
-                type="submit" 
-                class="px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-200 transition w-full"
-            >
-                Filter
-            </button>
-            <a 
-                href="{{ route('admin.items.index') }}" 
-                class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 transition text-center w-full"
-            >
-                Reset
-            </a>
-        </div>
-    </form>
-</div>
+            <!-- Tombol Aksi -->
+            <div class="flex items-end space-x-2">
+                <button 
+                    type="submit" 
+                    class="px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-200 transition w-full"
+                >
+                    Filter
+                </button>
+                <a 
+                    href="{{ route('admin.items.index') }}" 
+                    class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-200 transition text-center w-full"
+                >
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
 
     <!-- TABLE -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -134,4 +136,38 @@
     </div>
 </div>
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const allClauses = @json($clauses->map(fn($c) => ['id' => $c->id, 'code' => $c->clause_code]));
+    const mainSelect = document.getElementById('mainClauseSelect');
+    const subSelect = document.getElementById('subClauseSelect');
+
+    function updateSubClauses() {
+        const selectedMain = mainSelect.value;
+        subSelect.innerHTML = '<option value="">Semua Sub-Klausul</option>';
+
+        let filtered = selectedMain
+            ? allClauses.filter(c => c.code.startsWith(selectedMain + '.'))
+            : allClauses;
+
+        // Natural sort: 4.2 before 4.10
+        filtered.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' }));
+
+        filtered.forEach(clause => {
+            const option = document.createElement('option');
+            option.value = clause.id;
+            option.textContent = clause.code;
+            if ("{{ request('clause_id') }}" == clause.id) {
+                option.selected = true;
+            }
+            subSelect.appendChild(option);
+        });
+    }
+
+    updateSubClauses();
+    mainSelect.addEventListener('change', updateSubClauses);
+});
+</script>
+@endpush
 @endsection
