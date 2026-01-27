@@ -103,6 +103,29 @@
         .main-cta:hover {
             background: #0a2445;
         }
+        /* TomSelect override untuk styling konsisten */
+        .ts-wrapper .ts-control {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            min-height: 40px !important;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: var(--navy) !important;
+            box-shadow: 0 0 0 2px rgba(12, 45, 90, 0.1) !important;
+        }
+        .ts-dropdown {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 0.375rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important;
+        }
+        .ts-dropdown .option {
+            padding: 0.5rem 0.75rem !important;
+        }
+        .ts-dropdown .option:hover, .ts-dropdown .option.highlight {
+            background-color: rgba(12, 45, 90, 0.08) !important;
+            color: var(--slate-dark) !important;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -243,7 +266,7 @@
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Lead Auditor</label>
                     <select id="select-auditor" name="lead_auditor_id" 
-                            placeholder="Cari nama Lead Auditor..." required 
+                            placeholder="Pilih Lead Auditor..." required 
                             class="form-input">
                         <!-- Data akan diisi via JavaScript -->
                     </select>
@@ -263,7 +286,7 @@
             <div>
                 <label class="block text-sm font-semibold mb-2 text-slate-700">Anggota Tim Tambahan</label>
                 <div id="team-container" class="space-y-4"></div>
-                <button type="button" onclick="addTeamMember()" 
+                <button type="button" id="add-team-btn" 
                         class="mt-3 text-sm text-slate-600 font-medium hover:text-slate-800 flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -325,25 +348,32 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     // --- 1. DATA ASLI DARI LARAVEL ---
     const DEPARTMENTS = @json($departments); 
     const AUDITORS = @json($auditorsList); 
 
-    // --- 2. INITIALIZATION ---
+    // --- 2. GLOBAL VARIABLES ---
+    let deptSelect = null;
+    let memberCount = 0;
+
+    // --- 3. INITIALIZATION ---
 
     // Standards & Scope (Multi-select)
     new TomSelect('#select-standards', { 
         plugins: ['remove_button'],
-        maxItems: null
+        maxItems: null,
+        placeholder: 'Pilih standar yang relevan...'
     });
     
     new TomSelect('#select-scope', { 
         plugins: ['remove_button'],
-        maxItems: null
+        maxItems: null,
+        placeholder: 'Pilih batasan area audit...'
     });
 
     // Lead Auditor
-    const leadAuditorSelect = new TomSelect('#select-auditor', {
+    new TomSelect('#select-auditor', {
         valueField: 'nik',
         labelField: 'name',
         searchField: 'name',
@@ -353,7 +383,6 @@
         onChange: function(value) {
             const auditor = AUDITORS.find(a => a.nik == value);
             if(auditor) {
-                // Simpan nama departemen auditor di hidden input untuk cek independensi
                 document.getElementById('auditor_dept_id').value = auditor.dept;
                 validateIndependence();
             }
@@ -361,7 +390,7 @@
     });
 
     // Departemen Auditee
-    const deptSelect = new TomSelect('#select-department', {
+    deptSelect = new TomSelect('#select-department', {
         valueField: 'id',
         labelField: 'name',
         searchField: 'name',
@@ -373,11 +402,9 @@
         }
     });
 
-    // --- 3. LOGIC: CEK KONFLIK KEPENTINGAN ---
+    // --- 4. LOGIC: CEK KONFLIK KEPENTINGAN ---
     function validateIndependence() {
         const auditorDeptName = document.getElementById('auditor_dept_id').value;
-        
-        // Ambil nama departemen yang sedang dipilih dari TomSelect
         const auditeeDeptId = deptSelect.getValue();
         const selectedDeptData = DEPARTMENTS.find(d => d.id == auditeeDeptId);
         const auditeeDeptName = selectedDeptData ? selectedDeptData.name : '';
@@ -385,7 +412,6 @@
         const warning = document.getElementById('conflict-warning');
         const submitBtn = document.querySelector('button[type="submit"]');
 
-        // Jika Nama Departemen Auditor SAMA dengan Nama Departemen Auditee
         if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
             warning.classList.remove('hidden');
             submitBtn.disabled = true;
@@ -397,42 +423,41 @@
         }
     }
 
-    // --- 4. LOGIC: DYNAMIC TEAM MEMBER ---
-    let memberCount = 0;
-
-    function addTeamMember() {
+    // --- 5. LOGIC: DYNAMIC TEAM MEMBER ---
+    window.addTeamMember = function() {
         memberCount++;
         const container = document.getElementById('team-container');
         
-        // 1. Buat elemen baris
         const row = document.createElement('div');
         row.className = "p-4 bg-slate-50 rounded-lg border border-slate-200 relative";
         row.id = `member-row-${memberCount}`;
 
-        // 2. Isi HTML baris (Gunakan array name: audit_team[index][field])
         row.innerHTML = `
-            <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">✕</button>
+            <button type="button" onclick="document.getElementById('member-row-${memberCount}').remove()" 
+                    class="absolute top-2 right-2 text-slate-400 hover:text-red-500 text-lg font-bold">×</button>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                 <div>
                     <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Nama Personil</label>
-                    <select id="ts-member-${memberCount}" name="audit_team[${memberCount}][name]" placeholder="Cari atau ketik nama..."></select>
+                    <select id="ts-member-${memberCount}" name="audit_team[${memberCount}][name]" 
+                            placeholder="Cari atau ketik nama..."></select>
                 </div>
                 <div>
                     <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">NIK</label>
                     <input type="text" name="audit_team[${memberCount}][nik]" id="nik-${memberCount}" 
-                           class="w-full text-sm border-slate-300 rounded px-3 py-2" placeholder="NIK (Opsional)">
+                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" placeholder="NIK (Opsional)">
                 </div>
                 <div>
                     <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Departemen</label>
                     <input type="text" name="audit_team[${memberCount}][department]" id="dept-${memberCount}" 
-                           class="w-full text-sm border-slate-300 rounded px-3 py-2" placeholder="Departemen">
+                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" placeholder="Departemen">
                 </div>
             </div>
             
             <div class="w-full">
                 <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Peran dalam Audit</label>
-                <select name="audit_team[${memberCount}][role]" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
+                <select name="audit_team[${memberCount}][role]" 
+                        class="w-full text-sm border border-slate-300 rounded px-3 py-2 bg-white">
                     <option value="Auditor">Auditor Anggota</option>
                     <option value="Observer">Observer (Pengamat)</option>
                     <option value="Technical Expert">Tenaga Ahli Teknis</option>
@@ -442,7 +467,7 @@
 
         container.appendChild(row);
 
-        // 3. Inisialisasi TomSelect untuk baris yang baru dibuat
+        // Inisialisasi TomSelect untuk anggota baru
         new TomSelect(`#ts-member-${memberCount}`, {
             valueField: 'name',
             labelField: 'name',
@@ -452,7 +477,10 @@
             placeholder: 'Cari atau ketik nama...',
             render: {
                 option: function(data, escape) {
-                    return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-slate-500">(${escape(data.nik)})</span></div>`;
+                    return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-slate-500 ml-2">(${escape(data.nik)})</span></div>`;
+                },
+                item: function(data, escape) {
+                    return `<div>${escape(data.name)}</div>`;
                 }
             },
             onChange: function(value) {
@@ -461,7 +489,6 @@
                 const deptInp = document.getElementById(`dept-${memberCount}`);
                 
                 if (person) {
-                    // Jika personil ditemukan di list: auto-fill & lock
                     nikInp.value = person.nik;
                     deptInp.value = person.dept;
                     nikInp.readOnly = true;
@@ -469,7 +496,6 @@
                     nikInp.classList.add('bg-slate-100');
                     deptInp.classList.add('bg-slate-100');
                 } else {
-                    // Jika ketik manual: buka kunci agar bisa diisi
                     nikInp.readOnly = false;
                     deptInp.readOnly = false;
                     nikInp.classList.remove('bg-slate-100');
@@ -477,7 +503,11 @@
                 }
             }
         });
-    }
+    };
+
+    // Event listener untuk tombol tambah tim
+    document.getElementById('add-team-btn').addEventListener('click', addTeamMember);
+});
 </script>
 </body>
 </html>
