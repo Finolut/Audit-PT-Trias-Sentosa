@@ -25,10 +25,11 @@
             box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
             transform: translateY(-2px);
         }
-        .hero-image {
-            background: url('https://www.trias-sentosa.com/assets/images/hero.jpg') no-repeat center center;
-            background-size: cover;
-        }
+.hero-image {
+    background-image: url('https://trias-sentosa.com/images/about2.webp');
+    background-size: cover;
+}
+
         .card-hover:hover {
             transform: translateY(-4px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
