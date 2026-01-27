@@ -30,8 +30,8 @@
         </div>
     </div>
 
-    <form action="{{ route('audit.start') }}" method="POST">
-        @csrf
+<form action="{{ route('audit.start') }}" method="POST">
+    @csrf <div id="team-container" class="space-y-2">
         <input type="hidden" name="audit_status" value="Planned"> <input type="hidden" name="created_at" value="{{ date('Y-m-d H:i:s') }}">
         
         <div class="section-card ts-border-left">
@@ -110,6 +110,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
         <div class="section-card ts-border-left border-l-purple-600">
@@ -278,6 +279,80 @@
                     </select>
                 </div>
                 <button type="button" onclick="document.getElementById('member-${memberCount}').remove()" class="text-red-500 hover:bg-red-50 px-2 rounded">✕</button>
+            </div>
+        `;
+        document.getElementById('team-container').insertAdjacentHTML('beforeend', html);
+    }
+
+    // MOCK DATA DEPARTEMEN (Pastikan ID ini UUID sesuai database Anda)
+    // Contoh: 'b1f8...' bukan '1'
+    const DEPARTMENTS = [
+        @foreach($departments as $dept)
+            {id: '{{ $dept->id }}', name: '{{ $dept->name }}'},
+        @endforeach
+    ];
+    
+    // Ambil data auditor dari Controller (Data yang Anda berikan tadi)
+    const AUDITORS = @json($auditorsList); 
+
+    // Initialize TomSelect Lead Auditor
+    new TomSelect('#select-auditor', {
+        valueField: 'id',
+        labelField: 'name',
+        searchField: 'name',
+        options: AUDITORS,
+        onChange: function(value) {
+            const auditor = AUDITORS.find(a => a.id == value);
+            if(auditor) {
+                // Simpan nama departemen auditor untuk pengecekan konflik
+                document.getElementById('auditor_dept_id').value = auditor.dept;
+                validateIndependence();
+            }
+        }
+    });
+
+    // Initialize TomSelect Departemen Auditee
+    new TomSelect('#select-department', {
+        valueField: 'id',
+        labelField: 'name',
+        searchField: 'name',
+        options: DEPARTMENTS,
+        onChange: function(value) {
+            validateIndependence();
+        }
+    });
+
+    function validateIndependence() {
+        const auditorDeptName = document.getElementById('auditor_dept_id').value; // String (e.g., 'BOPET')
+        const auditeeDeptSelect = document.getElementById('select-department').tomselect;
+        const auditeeDeptName = auditeeDeptSelect.options[auditeeDeptSelect.getValue()]?.name;
+
+        const warning = document.getElementById('conflict-warning');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
+            warning.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50');
+        } else {
+            warning.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50');
+        }
+    }
+
+    // Perbaikan fungsi Tambah Anggota Tim
+    let memberCount = 0;
+    function addTeamMember() {
+        memberCount++;
+        const html = `
+            <div class="flex gap-3 bg-slate-50 p-3 rounded" id="member-${memberCount}">
+                <input type="text" name="audit_team[${memberCount}][name]" placeholder="Nama Anggota" class="flex-grow border rounded px-3 py-2">
+                <select name="audit_team[${memberCount}][role]" class="border rounded px-3 py-2">
+                    <option value="Auditor">Auditor</option>
+                    <option value="Observer">Observer</option>
+                </select>
+                <button type="button" onclick="document.getElementById('member-${memberCount}').remove()">✕</button>
             </div>
         `;
         document.getElementById('team-container').insertAdjacentHTML('beforeend', html);

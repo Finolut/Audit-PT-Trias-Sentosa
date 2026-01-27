@@ -29,38 +29,38 @@ class AuditController extends Controller
     ];
 
 private $auditorsList = [
-    ['name' => 'Joko Nofrianto', 'nik' => '2477', 'dept' => 'BOPET'],
-    ['name' => 'Laurentius Kelik Dwi Ananta', 'nik' => 'N/A', 'dept' => 'Q A'],
-    ['name' => 'Edy Setiono', 'nik' => '1631', 'dept' => 'Q A-Product Stewardship'],
-    ['name' => 'Mugi Slamet Priyanto', 'nik' => '943', 'dept' => 'Q A'],
-    ['name' => 'Satyo Ady Prihatno', 'nik' => '1522', 'dept' => 'QA'],
-    ['name' => 'Adhi Setyo Budi', 'nik' => '1074', 'dept' => 'SSSE'],
-    ['name' => 'Rizal Pratama Firyanto', 'nik' => '3077', 'dept' => 'SSSE'],
-    ['name' => 'Brahmanto Anggoro Laksono', 'nik' => '3186', 'dept' => 'SSSE'],
-    ['name' => 'Eko Susanto', 'nik' => '1421', 'dept' => 'BOPET'],
-    ['name' => 'Yusriel Yahya Wahyu Lisandi', 'nik' => '3127', 'dept' => 'F E'],
-    ['name' => 'M. Agung Wibowo', 'nik' => '2086', 'dept' => 'MANAGEMENT SYSTEM'],
-    ['name' => 'Adhek Widyo Purnama', 'nik' => '3138', 'dept' => 'I A'],
-    ['name' => 'Benediktus Wahyu Kurniawan', 'nik' => '2701', 'dept' => 'I A'],
-    ['name' => 'Nedwin Lembar Hermavian', 'nik' => '3054', 'dept' => 'I A'],
-    ['name' => 'Teguh Imam Santosa', 'nik' => '1891', 'dept' => 'G S'],
-    ['name' => 'Dodod Wahjudhi', 'nik' => '1456', 'dept' => 'G S'],
-    ['name' => 'Dhanny', 'nik' => '2135', 'dept' => 'ENGINEERING'],
-    ['name' => 'Kasiyono', 'nik' => '1240', 'dept' => 'ENGINEERING'],
-    ['name' => 'M. Nadif', 'nik' => '1002', 'dept' => 'R&D'],
-    ['name' => 'Eko Saifudin Yulianto', 'nik' => '944', 'dept' => 'LOGISTICS'],
-    ['name' => 'Lisa Santoso', 'nik' => '2319', 'dept' => 'PURCHASING'],
-    ['name' => 'Fenny Maria Veronica Lukman', 'nik' => '2910', 'dept' => 'PURCHASING'],
-    ['name' => 'Melisa', 'nik' => '2833', 'dept' => 'PURCHASING'],
-    ['name' => 'Catur Putra Prajoko', 'nik' => 'N/A', 'dept' => 'R&D'],
-    ['name' => 'Sari Dewi Cahyaning Tyas', 'nik' => '2615', 'dept' => 'R&D'],
-    ['name' => 'Ahmad Solihudin', 'nik' => '3055', 'dept' => 'TTA'],
-    ['name' => 'Fahrisal Surya Kusuma', 'nik' => '2605', 'dept' => 'MFG SUPPORT'],
-    ['name' => 'Suhadak', 'nik' => '2148', 'dept' => 'MFG SUPPORT'],
-    ['name' => 'Gunaryanto Cahyo Edi', 'nik' => '1511', 'dept' => 'PPIC'],
-    ['name' => 'Mohamad Taufik', 'nik' => '991', 'dept' => 'THERMAL'],
-    ['name' => 'Nanang Sugianto', 'nik' => '850', 'dept' => 'BOPP'],
-    ['name' => 'Solikan', 'nik' => '1207', 'dept' => 'PROJECT'],
+    ['id' => '2477', 'name' => 'Joko Nofrianto', 'nik' => '2477', 'dept' => 'BOPET'],
+    ['id' => 'NA-1', 'name' => 'Laurentius Kelik Dwi Ananta', 'nik' => 'N/A', 'dept' => 'Q A'],
+    ['id' => '1631', 'name' => 'Edy Setiono', 'nik' => '1631', 'dept' => 'Q A-Product Stewardship'],
+    ['id' => '943', 'name' => 'Mugi Slamet Priyanto', 'nik' => '943', 'dept' => 'Q A'],
+    ['id' => '1522', 'name' => 'Satyo Ady Prihatno', 'nik' => '1522', 'dept' => 'QA'],
+    ['id' => '1074', 'name' => 'Adhi Setyo Budi', 'nik' => '1074', 'dept' => 'SSSE'],
+    ['id' => '3077', 'name' => 'Rizal Pratama Firyanto', 'nik' => '3077', 'dept' => 'SSSE'],
+    ['id' => '3186', 'name' => 'Brahmanto Anggoro Laksono', 'nik' => '3186', 'dept' => 'SSSE'],
+    ['id' => '1421', 'name' => 'Eko Susanto', 'nik' => '1421', 'dept' => 'BOPET'],
+    ['id' => '3127', 'name' => 'Yusriel Yahya Wahyu Lisandi', 'nik' => '3127', 'dept' => 'F E'],
+    ['id' => '2086', 'name' => 'M. Agung Wibowo', 'nik' => '2086', 'dept' => 'MANAGEMENT SYSTEM'],
+    ['id' => '3138', 'name' => 'Adhek Widyo Purnama', 'nik' => '3138', 'dept' => 'I A'],
+    ['id' => '2701', 'name' => 'Benediktus Wahyu Kurniawan', 'nik' => '2701', 'dept' => 'I A'],
+    ['id' => '3054', 'name' => 'Nedwin Lembar Hermavian', 'nik' => '3054', 'dept' => 'I A'],
+    ['id' => '1891', 'name' => 'Teguh Imam Santosa', 'nik' => '1891', 'dept' => 'G S'],
+    ['id' => '1456', 'name' => 'Dodod Wahjudhi', 'nik' => '1456', 'dept' => 'G S'],
+    ['id' => '2135', 'name' => 'Dhanny', 'nik' => '2135', 'dept' => 'ENGINEERING'],
+    ['id' => '1240', 'name' => 'Kasiyono', 'nik' => '1240', 'dept' => 'ENGINEERING'],
+    ['id' => '1002', 'name' => 'M. Nadif', 'nik' => '1002', 'dept' => 'R&D'],
+    ['id' => '944', 'name' => 'Eko Saifudin Yulianto', 'nik' => '944', 'dept' => 'LOGISTICS'],
+    ['id' => '2319', 'name' => 'Lisa Santoso', 'nik' => '2319', 'dept' => 'PURCHASING'],
+    ['id' => '2910', 'name' => 'Fenny Maria Veronica Lukman', 'nik' => '2910', 'dept' => 'PURCHASING'],
+    ['id' => '2833', 'name' => 'Melisa', 'nik' => '2833', 'dept' => 'PURCHASING'],
+    ['id' => 'NA-2', 'name' => 'Catur Putra Prajoko', 'nik' => 'N/A', 'dept' => 'R&D'],
+    ['id' => '2615', 'name' => 'Sari Dewi Cahyaning Tyas', 'nik' => '2615', 'dept' => 'R&D'],
+    ['id' => '3055', 'name' => 'Ahmad Solihudin', 'nik' => '3055', 'dept' => 'TTA'],
+    ['id' => '2605', 'name' => 'Fahrisal Surya Kusuma', 'nik' => '2605', 'dept' => 'MFG SUPPORT'],
+    ['id' => '2148', 'name' => 'Suhadak', 'nik' => '2148', 'dept' => 'MFG SUPPORT'],
+    ['id' => '1511', 'name' => 'Gunaryanto Cahyo Edi', 'nik' => '1511', 'dept' => 'PPIC'],
+    ['id' => '991', 'name' => 'Mohamad Taufik', 'nik' => '991', 'dept' => 'THERMAL'],
+    ['id' => '850', 'name' => 'Nanang Sugianto', 'nik' => '850', 'dept' => 'BOPP'],
+    ['id' => '1207', 'name' => 'Solikan', 'nik' => '1207', 'dept' => 'PROJECT'],
 ];
 
     public function setup()
@@ -74,10 +74,9 @@ private $auditorsList = [
 
 public function startAudit(Request $request) 
 {
-    // 1. Validasi: Nama field disesuaikan dengan atribut 'name' di FORM
     $request->validate([
-        'auditee_dept_id'   => 'required|exists:departments,id',
-        'lead_auditor_id'   => 'required', // Ini adalah auditor_name di form
+        'auditee_dept_id'   => 'required|uuid|exists:departments,id', // Validasi UUID
+        'lead_auditor_id'   => 'required',
         'audit_type'        => 'required',
         'audit_standards'   => 'required|array',
         'audit_objective'   => 'required',
@@ -90,41 +89,37 @@ public function startAudit(Request $request)
     ]);
 
     return DB::transaction(function () use ($request) {
-        // 2. Ambil detail Lead Auditor dari static list berdasarkan Nama/ID
-        // Catatan: Di form Anda pakai 'lead_auditor_id', pastikan value yang dikirim adalah Nama
-        // Di dalam Controller
-$selectedAuditor = collect($this->auditorsList)->firstWhere('id', $request->lead_auditor_id);
-        $auditorNik = $selectedAuditor['nik'] ?? 'N/A';
+        // Ambil data auditor berdasarkan ID yang dipilih di TomSelect
+        $selectedAuditor = collect($this->auditorsList)->firstWhere('id', $request->lead_auditor_id);
+        
+        $auditorName = $selectedAuditor['name'] ?? 'Unknown';
+        $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
         $auditorDept = $selectedAuditor['dept'] ?? 'N/A';
 
         $sessionId = (string) Str::uuid();
         $newAuditId = (string) Str::uuid();
         
-        // 3. Gunakan Audit Code dari form (IA-2026-XXXX)
-        $auditCode = $request->audit_code;
-
-        // 4. Simpan ke audit_sessions
+        // 4. Simpan Sesi
         DB::table('audit_sessions')->insert([
             'id'                 => $sessionId,
-            'auditor_name'       => $request->lead_auditor_id,
+            'auditor_name'       => $auditorName,
             'auditor_nik'        => $auditorNik,
             'auditor_department' => $auditorDept,
             'audit_date'         => $request->audit_date,
             'created_at'         => now(),
         ]);
 
-        // 5. Simpan ke audits (Gunakan implode untuk data array)
+        // 5. Simpan Detail Audit
         DB::table('audits')->insert([
             'id'               => $newAuditId,
             'audit_session_id' => $sessionId,
-            'audit_code'       => $auditCode,
-            'department_id'    => $request->auditee_dept_id, // Cocok dengan form
+            'audit_code'       => $request->audit_code,
+            'department_id'    => $request->auditee_dept_id, // Sekarang mengirim UUID
             'type'             => $request->audit_type, 
             'objective'        => $request->audit_objective,
-            // Mengubah array menjadi string agar bisa masuk ke kolom text/string di DB
             'scope'            => implode(', ', $request->audit_scope), 
-            'standards'        => implode(', ', $request->audit_standards), // Tambahkan kolom ini di DB jika belum ada
-            'methodology'      => implode(', ', $request->methodology),   // Tambahkan kolom ini di DB jika belum ada
+            'standards'        => implode(', ', $request->audit_standards),
+            'methodology'      => implode(', ', $request->methodology),
             'pic_auditee_name' => $request->auditee_pic,
             'start_time'       => $request->start_time,
             'end_time'         => $request->end_time,
@@ -133,39 +128,38 @@ $selectedAuditor = collect($this->auditorsList)->firstWhere('id', $request->lead
             'updated_at'       => now(),
         ]);
 
-        // 6. Simpan Responders (Tim Audit)
-        $responders = [];
-        // Lead Auditor
-        $responders[] = [
+        // 6. Responders
+        $responders = [[
             'id' => (string) Str::uuid(),
             'audit_session_id' => $sessionId,
-            'responder_name' => $request->lead_auditor_id,
+            'responder_name' => $auditorName,
             'responder_role' => 'Lead Auditor',
             'responder_nik' => $auditorNik,
             'responder_department' => $auditorDept,
             'created_at' => now(),
-        ];
+        ]];
 
-        // Anggota tim tambahan dari input dinamis (jika ada)
-        $auditTeam = $request->input('audit_team', []); 
-        foreach ($auditTeam as $member) {
-            if (!empty($member['name'])) {
-                $responders[] = [
-                    'id' => (string) Str::uuid(),
-                    'audit_session_id' => $sessionId,
-                    'responder_name' => $member['name'],
-                    'responder_role' => $member['role'] ?? 'Member',
-                    'responder_nik' => $member['nik'] ?? null,
-                    'responder_department' => $member['department'] ?? null,
-                    'created_at' => now(),
-                ];
+        // Masukkan tim tambahan (Pastikan name di form adalah 'audit_team')
+        if ($request->has('audit_team')) {
+            foreach ($request->audit_team as $member) {
+                if (!empty($member['name'])) {
+                    $responders[] = [
+                        'id' => (string) Str::uuid(),
+                        'audit_session_id' => $sessionId,
+                        'responder_name' => $member['name'],
+                        'responder_role' => $member['role'] ?? 'Member',
+                        'responder_nik' => $member['nik'] ?? null,
+                        'responder_department' => $member['department'] ?? null,
+                        'created_at' => now(),
+                    ];
+                }
             }
         }
 
         DB::table('audit_responders')->insert($responders);
 
         return redirect()->route('audit.menu', ['id' => $newAuditId])
-                         ->with('success', "Audit {$auditCode} berhasil dibuat!");
+                         ->with('success', "Audit {$request->audit_code} berhasil dibuat!");
     });
 }
 
