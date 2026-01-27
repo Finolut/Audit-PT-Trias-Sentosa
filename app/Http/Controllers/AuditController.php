@@ -68,7 +68,7 @@ private $auditorsList = [
         $departments = DB::table('departments')->orderBy('name')->get();
         return view('test-form', [
             'departments' => $departments,
-            'auditors' => $this->auditorsList
+           'auditorsList' => $this->auditorsList
         ]);
     }
 
