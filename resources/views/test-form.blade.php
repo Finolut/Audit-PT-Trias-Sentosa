@@ -324,127 +324,147 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
-    // Inisialisasi TomSelect dengan palet korporat
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inisialisasi select-standards
-        new TomSelect('#select-standards', {
-            plugins: ['remove_button'],
-            maxItems: null,
-            render: {
-                item: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
-                }
-            }
-        });
+    // --- 1. DATA ASLI DARI LARAVEL ---
+    const DEPARTMENTS = @json($departments); 
+    const AUDITORS = @json($auditorsList); 
 
-        // Inisialisasi select-scope
-        new TomSelect('#select-scope', {
-            plugins: ['remove_button'],
-            maxItems: null,
-            render: {
-                item: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
-                }
-            }
-        });
+    // --- 2. INITIALIZATION ---
 
-        // Inisialisasi select-auditor
-        new TomSelect('#select-auditor', {
-            valueField: 'nik',
-            labelField: 'name',
-            searchField: 'name',
-            options: @json($auditorsList),
-            render: {
-                item: function(data, escape) {
-                    return '<div>' + escape(data.name) + '</div>';
-                }
-            },
-            onChange: function(value) {
+    // Standards & Scope (Multi-select)
+    new TomSelect('#select-standards', { plugins: ['remove_button'] });
+    new TomSelect('#select-scope', { plugins: ['remove_button'] });
+
+    // Lead Auditor
+    new TomSelect('#select-auditor', {
+        valueField: 'nik', // Mengirim NIK ke controller
+        labelField: 'name',
+        searchField: 'name',
+        options: AUDITORS,
+        onChange: function(value) {
+            const auditor = AUDITORS.find(a => a.nik == value);
+            if(auditor) {
+                // Simpan nama departemen auditor di hidden input untuk cek independensi
+                document.getElementById('auditor_dept_id').value = auditor.dept;
                 validateIndependence();
             }
-        });
-
-        // Inisialisasi select-department
-        const deptSelect = new TomSelect('#select-department', {
-            valueField: 'id',
-            labelField: 'name',
-            searchField: 'name',
-            options: @json($departments),
-            render: {
-                item: function(data, escape) {
-                    return '<div>' + escape(data.name) + '</div>';
-                }
-            },
-            onChange: function(value) {
-                validateIndependence();
-            }
-        });
-
-        // Fungsi validasi independensi
-        function validateIndependence() {
-            // ... (logika validasi yang sama dengan versi asli)
-        }
-
-        // Fungsi tambah anggota tim
-        let memberCount = 0;
-        function addTeamMember() {
-            memberCount++;
-            const container = document.getElementById('team-container');
-            const row = document.createElement('div');
-            row.className = "bg-slate-50 border border-slate-200 rounded-lg p-4";
-            row.innerHTML = `
-                <div class="flex justify-end mb-2">
-                    <button type="button" onclick="this.parentElement.remove()" 
-                            class="text-slate-400 hover:text-red-500 text-sm">
-                        Hapus
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                    <div>
-                        <label class="text-xs font-semibold mb-1 block text-slate-600">Nama Personil</label>
-                        <select id="ts-member-${memberCount}" 
-                                name="audit_team[${memberCount}][name]" 
-                                class="form-input">
-                            <!-- Data diisi via TomSelect -->
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold mb-1 block text-slate-600">NIK</label>
-                        <input type="text" name="audit_team[${memberCount}][nik]" 
-                               class="form-input" placeholder="NIK (Opsional)">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold mb-1 block text-slate-600">Departemen</label>
-                        <input type="text" name="audit_team[${memberCount}][department]" 
-                               class="form-input" placeholder="Departemen">
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-semibold mb-1 block text-slate-600">Peran dalam Audit</label>
-                    <select name="audit_team[${memberCount}][role]" class="form-input">
-                        <option value="Auditor">Auditor Anggota</option>
-                        <option value="Observer">Observer (Pengamat)</option>
-                        <option value="Technical Expert">Tenaga Ahli Teknis</option>
-                    </select>
-                </div>
-            `;
-            container.appendChild(row);
-            
-            // Inisialisasi TomSelect untuk anggota baru
-            new TomSelect(`#ts-member-${memberCount}`, {
-                valueField: 'name',
-                labelField: 'name',
-                searchField: ['name', 'nik'],
-                options: @json($auditorsList),
-                create: true,
-                render: {
-                    option: function(data, escape) {
-                        return `<div><span class="font-medium">${escape(data.name)}</span> <span class="text-xs text-slate-500">(${escape(data.nik)})</span></div>`;
-                    }
-                }
-            });
         }
     });
+
+    // Departemen Auditee
+    const deptSelect = new TomSelect('#select-department', {
+        valueField: 'id', // Mengirim UUID ke controller (Mencegah Error syntax uuid: "2")
+        labelField: 'name',
+        searchField: 'name',
+        options: DEPARTMENTS,
+        onChange: function(value) {
+            validateIndependence();
+        }
+    });
+
+    // --- 3. LOGIC: CEK KONFLIK KEPENTINGAN ---
+    function validateIndependence() {
+        const auditorDeptName = document.getElementById('auditor_dept_id').value; // e.g., 'BOPET'
+        
+        // Ambil nama departemen yang sedang dipilih dari TomSelect
+        const auditeeDeptId = deptSelect.getValue();
+        const selectedDeptData = DEPARTMENTS.find(d => d.id == auditeeDeptId);
+        const auditeeDeptName = selectedDeptData ? selectedDeptData.name : '';
+
+        const warning = document.getElementById('conflict-warning');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        // Jika Nama Departemen Auditor SAMA dengan Nama Departemen Auditee
+        if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
+            warning.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            warning.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    // --- 4. LOGIC: DYNAMIC TEAM MEMBER ---
+    let memberCount = 0;
+
+    function addTeamMember() {
+        memberCount++;
+        const container = document.getElementById('team-container');
+        
+        // 1. Buat elemen baris
+        const row = document.createElement('div');
+        row.className = "p-4 bg-slate-50 rounded-lg border border-slate-200 relative";
+        row.id = `member-row-${memberCount}`;
+
+        // 2. Isi HTML baris (Gunakan array name: audit_team[index][field])
+        row.innerHTML = `
+            <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">✕</button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Nama Personil</label>
+                    <select id="ts-member-${memberCount}" name="audit_team[${memberCount}][name]" placeholder="Cari atau ketik nama..."></select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">NIK</label>
+                    <input type="text" name="audit_team[${memberCount}][nik]" id="nik-${memberCount}" 
+                           class="w-full text-sm border-slate-300 rounded px-3 py-2" placeholder="NIK (Opsional)">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Departemen</label>
+                    <input type="text" name="audit_team[${memberCount}][department]" id="dept-${memberCount}" 
+                           class="w-full text-sm border-slate-300 rounded px-3 py-2" placeholder="Departemen">
+                </div>
+            </div>
+            
+            <div class="w-full">
+                <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Peran dalam Audit</label>
+                <select name="audit_team[${memberCount}][role]" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
+                    <option value="Auditor">Auditor Anggota</option>
+                    <option value="Observer">Observer (Pengamat)</option>
+                    <option value="Technical Expert">Tenaga Ahli Teknis</option>
+                </select>
+            </div>
+        `;
+
+        container.appendChild(row);
+
+        // 3. Inisialisasi TomSelect untuk baris yang baru dibuat
+        new TomSelect(`#ts-member-${memberCount}`, {
+            valueField: 'name', // Kita kirim nama karena role manual butuh nama
+            labelField: 'name',
+            searchField: ['name', 'nik'],
+            options: AUDITORS, // Menggunakan data dari controller
+            create: true,      // BISA KETIK MANUAL
+            render: {
+                option: function(data, escape) {
+                    return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-gray-500">(${escape(data.nik)})</span></div>`;
+                }
+            },
+            onChange: function(value) {
+                const person = AUDITORS.find(a => a.name === value);
+                const nikInp = document.getElementById(`nik-${memberCount}`);
+                const deptInp = document.getElementById(`dept-${memberCount}`);
+                
+                if (person) {
+                    // Jika personil ditemukan di list: auto-fill & lock
+                    nikInp.value = person.nik;
+                    deptInp.value = person.dept;
+                    nikInp.readOnly = true;
+                    deptInp.readOnly = true;
+                    nikInp.classList.add('bg-slate-100');
+                    deptInp.classList.add('bg-slate-100');
+                } else {
+                    // Jika ketik manual: buka kunci agar bisa diisi
+                    nikInp.readOnly = false;
+                    deptInp.readOnly = false;
+                    nikInp.classList.remove('bg-slate-100');
+                    deptInp.classList.remove('bg-slate-100');
+                }
+            }
+        });
+    }
 </script>
 </body>
 </html>
