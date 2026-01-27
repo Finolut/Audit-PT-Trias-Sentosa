@@ -139,6 +139,7 @@
         @csrf
         <input type="hidden" name="audit_status" value="Planned">
         <input type="hidden" name="created_at" value="{{ date('Y-m-d H:i:s') }}">
+        <input type="hidden" id="auditor_dept_id" name="auditor_dept_id" value="">
 
         <!-- Section 1: Identitas & Standar Audit -->
         <section>
@@ -331,15 +332,24 @@
     // --- 2. INITIALIZATION ---
 
     // Standards & Scope (Multi-select)
-    new TomSelect('#select-standards', { plugins: ['remove_button'] });
-    new TomSelect('#select-scope', { plugins: ['remove_button'] });
+    new TomSelect('#select-standards', { 
+        plugins: ['remove_button'],
+        maxItems: null
+    });
+    
+    new TomSelect('#select-scope', { 
+        plugins: ['remove_button'],
+        maxItems: null
+    });
 
     // Lead Auditor
-    new TomSelect('#select-auditor', {
-        valueField: 'nik', // Mengirim NIK ke controller
+    const leadAuditorSelect = new TomSelect('#select-auditor', {
+        valueField: 'nik',
         labelField: 'name',
         searchField: 'name',
         options: AUDITORS,
+        create: false,
+        placeholder: 'Pilih Lead Auditor...',
         onChange: function(value) {
             const auditor = AUDITORS.find(a => a.nik == value);
             if(auditor) {
@@ -352,10 +362,12 @@
 
     // Departemen Auditee
     const deptSelect = new TomSelect('#select-department', {
-        valueField: 'id', // Mengirim UUID ke controller (Mencegah Error syntax uuid: "2")
+        valueField: 'id',
         labelField: 'name',
         searchField: 'name',
         options: DEPARTMENTS,
+        create: false,
+        placeholder: 'Pilih Departemen...',
         onChange: function(value) {
             validateIndependence();
         }
@@ -363,7 +375,7 @@
 
     // --- 3. LOGIC: CEK KONFLIK KEPENTINGAN ---
     function validateIndependence() {
-        const auditorDeptName = document.getElementById('auditor_dept_id').value; // e.g., 'BOPET'
+        const auditorDeptName = document.getElementById('auditor_dept_id').value;
         
         // Ambil nama departemen yang sedang dipilih dari TomSelect
         const auditeeDeptId = deptSelect.getValue();
@@ -432,14 +444,15 @@
 
         // 3. Inisialisasi TomSelect untuk baris yang baru dibuat
         new TomSelect(`#ts-member-${memberCount}`, {
-            valueField: 'name', // Kita kirim nama karena role manual butuh nama
+            valueField: 'name',
             labelField: 'name',
             searchField: ['name', 'nik'],
-            options: AUDITORS, // Menggunakan data dari controller
-            create: true,      // BISA KETIK MANUAL
+            options: AUDITORS,
+            create: true,
+            placeholder: 'Cari atau ketik nama...',
             render: {
                 option: function(data, escape) {
-                    return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-gray-500">(${escape(data.nik)})</span></div>`;
+                    return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-slate-500">(${escape(data.nik)})</span></div>`;
                 }
             },
             onChange: function(value) {
