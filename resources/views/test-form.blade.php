@@ -351,6 +351,13 @@
     </form>
 </div>
 
+<div class="absolute top-4 right-4">
+    <a href="{{ route('audit.resume.form') }}" 
+       class="text-sm font-semibold text-white/80 hover:text-white border border-white/30 px-4 py-2 rounded hover:bg-white/10 transition">
+       Lanjutkan Audit Tertunda →
+    </a>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

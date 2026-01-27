@@ -155,3 +155,7 @@ Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
+
+Route::get('/audit/resume', [AuditController::class, 'showResumePage'])->name('audit.resume.form');
+Route::post('/audit/resume/check', [AuditController::class, 'validateResumeToken'])->name('audit.resume.check');
+Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])->name('audit.resume.action');
