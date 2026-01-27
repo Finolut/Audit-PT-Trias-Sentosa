@@ -14,18 +14,18 @@
 
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 mx-4">
         {{-- Header / Logo Area --}}
-        <div class="bg-blue-900 px-8 py-8 text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-            
-            <h1 class="text-2xl font-bold text-white tracking-wide relative z-10">INTERNAL AUDIT</h1>
-            <p class="text-blue-200 text-sm mt-1 relative z-10">PT Trias Sentosa Tbk</p>
-        </div>
+       <div class="relative z-10 flex flex-col items-center gap-2">
+    <img src="https://s3-symbol-logo.tradingview.com/trias-sentosa-rp-500--600.png" alt="Logo" class="h-8 opacity-90">
+    <h1 class="text-xl font-bold tracking-wide">INTERNAL AUDIT</h1>
+    <p class="text-blue-200 text-xs">PT Trias Sentosa Tbk</p>
+</div>
+
 
         {{-- Form Area --}}
         <div class="p-8">
             <div class="mb-6 text-center">
                 <h2 class="text-xl font-semibold text-slate-800">Selamat Datang Kembali</h2>
-                <p class="text-sm text-slate-500 mt-1">Silakan masuk untuk mengakses dashboard</p>
+                <p class="text-sm text-slate-500 mt-1">Silakan masuk untuk mengelola audit internal perusahaan</p>
             </div>
 
             @if(session('error'))
@@ -58,7 +58,7 @@
                         </div>
                         <input type="email" name="email" id="email" required 
                             class="pl-10 block w-full rounded-lg border-slate-300 bg-slate-50 border focus:bg-white focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5 transition-colors"
-                            placeholder="admin@trias.com">
+                            placeholder="Email Admin">
                     </div>
                 </div>
 
@@ -77,9 +77,13 @@
                 </div>
 
                 <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:-translate-y-0.5">
-                    MASUK PORTAL
+                    MASUK PORTAL AUDIT
                 </button>
             </form>
+
+            <p class="mt-4 text-[11px] text-slate-400 text-center">
+Akses terbatas untuk personel resmi PT Trias Sentosa Tbk
+</p>
 
             <div class="mt-6 text-center">
                 <a href="{{ route('landing') }}" class="text-xs text-slate-400 hover:text-blue-600 font-medium transition-colors">
