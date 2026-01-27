@@ -100,10 +100,14 @@
             margin: 2rem auto 0;
             text-align: center;
         }
-        .main-cta:hover {
+        .main-cta:hover:not(:disabled) {
             background: #0a2445;
         }
-        /* TomSelect override untuk styling konsisten */
+        .main-cta:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+        /* TomSelect override */
         .ts-wrapper .ts-control {
             border: 1px solid #cbd5e1 !important;
             border-radius: 0.375rem !important;
@@ -130,7 +134,7 @@
 </head>
 <body class="text-slate-800">
 
-<!-- Mini Hero Section (sesuai landing page) -->
+<!-- Mini Hero Section -->
 <section class="hero-section text-white">
     <div class="max-w-4xl mx-auto px-4">
         <h1 class="text-3xl md:text-4xl font-bold mb-3">INTERNAL AUDIT CHARTER</h1>
@@ -158,8 +162,9 @@
 
 <!-- Form Content -->
 <div class="max-w-4xl mx-auto px-4 py-8">
-    <form action="{{ route('audit.start') }}" method="POST">
+    <form id="audit-charter-form" action="{{ route('audit.start') }}" method="POST">
         @csrf
+        <!-- HIDDEN FIELDS - POSISI BENAR DI ATAS (BUKAN DI DALAM CONTAINER DINAMIS) -->
         <input type="hidden" name="audit_status" value="Planned">
         <input type="hidden" name="created_at" value="{{ date('Y-m-d H:i:s') }}">
         <input type="hidden" id="auditor_dept_id" name="auditor_dept_id" value="">
@@ -338,7 +343,7 @@
 
         <!-- CTA Utama -->
         <div class="mt-12 text-center">
-            <button type="submit" class="main-cta">
+            <button type="submit" id="submit-btn" class="main-cta">
                 Start Audit Process <span>→</span>
             </button>
             <p class="text-slate-500 text-sm mt-2">Formulir ini akan memulai proses audit sesuai standar ISO 19011</p>
@@ -349,17 +354,32 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // --- 1. DATA ASLI DARI LARAVEL ---
+    // --- DATA DARI LARAVEL ---
     const DEPARTMENTS = @json($departments); 
     const AUDITORS = @json($auditorsList); 
 
-    // --- 2. GLOBAL VARIABLES ---
+    // --- GLOBAL VARIABLES ---
     let deptSelect = null;
     let memberCount = 0;
+    let formSubmitted = false;
 
-    // --- 3. INITIALIZATION ---
+    // --- PROTEKSI DOUBLE SUBMIT ---
+    const form = document.getElementById('audit-charter-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    form.addEventListener('submit', function(e) {
+        if (formSubmitted) {
+            e.preventDefault();
+            return;
+        }
+        formSubmitted = true;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Processing... <span>→</span>';
+    });
 
-    // Standards & Scope (Multi-select)
+    // --- INITIALIZATION ---
+
+    // Standards & Scope
     new TomSelect('#select-standards', { 
         plugins: ['remove_button'],
         maxItems: null,
@@ -402,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- 4. LOGIC: CEK KONFLIK KEPENTINGAN ---
+    // --- VALIDASI INDEPENDENSI ---
     function validateIndependence() {
         const auditorDeptName = document.getElementById('auditor_dept_id').value;
         const auditeeDeptId = deptSelect.getValue();
@@ -410,21 +430,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const auditeeDeptName = selectedDeptData ? selectedDeptData.name : '';
 
         const warning = document.getElementById('conflict-warning');
-        const submitBtn = document.querySelector('button[type="submit"]');
+        const submitBtn = document.getElementById('submit-btn');
 
         if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
             warning.classList.remove('hidden');
             submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
             warning.classList.add('hidden');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            if (!formSubmitted) {
+                submitBtn.disabled = false;
+            }
         }
     }
 
-    // --- 5. LOGIC: DYNAMIC TEAM MEMBER ---
-    window.addTeamMember = function() {
+    // --- DYNAMIC TEAM MEMBER ---
+    function addTeamMember() {
         memberCount++;
         const container = document.getElementById('team-container');
         
@@ -433,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
         row.id = `member-row-${memberCount}`;
 
         row.innerHTML = `
-            <button type="button" onclick="document.getElementById('member-row-${memberCount}').remove()" 
+            <button type="button" onclick="removeTeamMember(${memberCount})" 
                     class="absolute top-2 right-2 text-slate-400 hover:text-red-500 text-lg font-bold">×</button>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -503,9 +523,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    }
+
+    // Fungsi hapus anggota tim (global scope)
+    window.removeTeamMember = function(index) {
+        const row = document.getElementById(`member-row-${index}`);
+        if (row) row.remove();
     };
 
-    // Event listener untuk tombol tambah tim
+    // Event listener tombol tambah
     document.getElementById('add-team-btn').addEventListener('click', addTeamMember);
 });
 </script>
