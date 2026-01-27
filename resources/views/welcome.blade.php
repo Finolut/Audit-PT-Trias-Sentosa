@@ -38,20 +38,19 @@
 </head>
 <body class="bg-custom-gray min-h-screen">
 
-    <!-- Header -->
-    <header class="p-6 md:p-8 w-full max-w-7xl mx-auto flex justify-between items-center bg-white shadow-sm">
-        <div class="flex items-center gap-4">
-            <img src="https://trias-sentosa.com/images/logo.webp" alt="Logo PT Trias Sentosa Tbk" class="h-12 md:h-16 object-contain">
-        </div>
+    <header class="w-full p-4 md:px-12 flex justify-between items-center bg-white shadow-sm">
+    <div class="flex items-center">
+        <img src="https://trias-sentosa.com/images/logo.webp" alt="Logo PT Trias Sentosa Tbk" class="h-10 md:h-12 object-contain">
+    </div>
 
-        <a href="{{ route('admin.dashboard') }}" 
-           class="bg-yellow-500 hover:bg-yellow-600 text-primary-blue font-bold py-2 px-6 rounded-lg transition-all flex items-center gap-2 btn-glow">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            ADMIN PANEL
-        </a>
-    </header>
+    <a href="{{ route('admin.dashboard') }}" 
+       class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-2 px-4 md:px-6 rounded-lg transition-all flex items-center gap-2 shadow-md">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-sm md:text-base">ADMIN PANEL</span>
+    </a>
+</header>
 
     <!-- Hero Section -->
     <section class="relative hero-image h-[80vh] md:h-screen flex items-center justify-center">
