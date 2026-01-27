@@ -41,15 +41,7 @@
     <!-- Header -->
     <header class="p-6 md:p-8 w-full max-w-7xl mx-auto flex justify-between items-center bg-white shadow-sm">
         <div class="flex items-center gap-4">
-            <img src="{{ asset('images/ts.jpg') }}" alt="Logo PT Trias Sentosa Tbk" class="h-12 md:h-16 object-contain">
-            <div class="border-l-2 border-gray-300 pl-4">
-                <h1 class="text-lg md:text-xl font-bold text-primary-blue leading-none uppercase tracking-tighter">
-                    PT Trias Sentosa Tbk
-                </h1>
-                <p class="text-[10px] md:text-xs text-gray-500 font-medium uppercase tracking-[0.2em] mt-1">
-                    Flexible Packaging Film Manufacturer
-                </p>
-            </div>
+            <img src="https://trias-sentosa.com/images/logo.webp" alt="Logo PT Trias Sentosa Tbk" class="h-12 md:h-16 object-contain">
         </div>
 
         <a href="{{ route('admin.dashboard') }}" 
@@ -79,7 +71,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
-                <a href="#" 
+                <a href="https://trias-sentosa.com/home" 
                    class="bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-lg transition-all inline-flex items-center justify-center gap-2 hover:bg-white hover:text-primary-blue card-hover">
                     Learn More
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
