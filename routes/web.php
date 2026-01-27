@@ -159,3 +159,4 @@ Route::get('/audit/thanks', function () {
 Route::get('/audit/resume', [AuditController::class, 'showResumePage'])->name('audit.resume.form');
 Route::post('/audit/resume/check', [AuditController::class, 'validateResumeToken'])->name('audit.resume.check');
 Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])->name('audit.resume.action');
+Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
