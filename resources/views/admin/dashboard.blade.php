@@ -13,14 +13,19 @@
     </div>
 
     {{-- 1. Stats Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 active:scale-[0.98] transition-transform">
         <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-md transition-shadow">
-            <div class="p-3 bg-blue-50 text-blue-600 rounded-xl mr-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <div class="p-2 md:p-3 bg-blue-50 text-blue-600 rounded-lg md:rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Audit</p>
-                <p class="text-3xl font-black text-gray-800">{{ $stats['total_audits'] }}</p>
+<p class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">
+    Total Audit
+</p>
+<p class="text-2xl md:text-3xl font-black text-gray-800 leading-tight">
+    {{ $stats['total_audits'] }}
+</p>
+
             </div>
         </div>
 
@@ -178,7 +183,7 @@
       {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
 <div class="lg:col-span-2">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-<div class="px-6 py-5 bg-[#1a365d] flex justify-between items-center">
+<div class="px-6 py-4 bg-[#1a365d] flex justify-between items-center">
     <h3 class="font-bold text-white text-lg tracking-tight">
         Daftar Audit Terbaru
     </h3>
@@ -248,7 +253,7 @@
        {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
 <div class="lg:col-span-1">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-<div class="px-6 py-5 bg-[#1a365d] flex items-center justify-between">
+<div class="px-6 py-4 bg-[#1a365d] flex items-center justify-between">
     <h3 class="font-bold text-white flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
