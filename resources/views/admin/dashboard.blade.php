@@ -178,10 +178,15 @@
       {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
 <div class="lg:col-span-2">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 bg-white-50 flex justify-between items-center">
-            <h3 class="font-bold text-gray-800 text-lg">Daftar Audit Terbaru</h3>
-            <span class="text-xs text-gray-500 font-medium">Menampilkan 5 aktivitas terakhir</span>
-        </div>
+<div class="px-6 py-5 bg-primary-blue flex justify-between items-center">
+    <h3 class="font-bold text-white text-lg tracking-tight">
+        Daftar Audit Terbaru
+    </h3>
+    <span class="text-xs text-blue-100 font-medium">
+        Menampilkan 5 aktivitas terakhir
+    </span>
+</div>
+
         <div class="divide-y divide-gray-100">
             @forelse($recentAudits as $audit)
             <div class="p-5 hover:bg-gray-50 transition-colors">
@@ -243,15 +248,16 @@
        {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
 <div class="lg:col-span-1">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
-                </svg>
-                Pertanyaan
-            </h3>
-            <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Live</span>
-        </div>
+<div class="px-6 py-5 bg-primary-blue flex items-center justify-between">
+    <h3 class="font-bold text-white flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+        </svg>
+        Pertanyaan
+    </h3>
+</div>
+
 
         <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
             @forelse($liveQuestions as $q)
@@ -282,7 +288,7 @@
             @endforelse
         </div>
 
-        <div class="p-4 bg-gray-50/60 text-center border-t border-gray-100">
+       <div class="p-4 bg-slate-50 text-center border-t border-gray-200">
             <a href="{{ route('admin.question_log') }}" class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
                 Lihat Semua Pertanyaan →
             </a>
