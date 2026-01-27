@@ -30,10 +30,16 @@
 <body class="min-h-screen bg-custom-gray flex items-center justify-center">
 
 <div class="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-<div class="hidden md:flex bg-primary-blue text-white flex-col justify-center items-center px-10">
-    <img src="https://trias-sentosa.com/images/ts.jpg" class="h-12 mb-6">
-    <h1 class="text-2xl font-bold tracking-wide">INTERNAL AUDIT</h1>
-    <p class="text-white-200 text-sm mt-1">PT Trias Sentosa Tbk</p>
+    <div class="hidden md:flex relative flex-col justify-center items-center px-10 min-h-[300px] bg-cover bg-center" 
+         style="background-image: url('https://trias-sentosa.com/images/about3.webp');">
+        
+        <div class="absolute inset-0 bg-blue-900/70"></div>
+
+        <div class="relative z-10 text-center text-white">
+            <h1 class="text-4xl font-extrabold tracking-wider uppercase">INTERNAL AUDIT</h1>
+            <p class="text-lg font-medium mt-2 opacity-90">PT Trias Sentosa Tbk</p>
+        </div>
+    </div>
 </div>
 
 
