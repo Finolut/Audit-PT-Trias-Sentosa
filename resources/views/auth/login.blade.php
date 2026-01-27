@@ -10,15 +10,41 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
+<style>
+    body { 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+    }
+
+    .bg-custom-gray { background-color: #F8FAFC; }
+    .text-primary-blue { color: #1a365d; }
+    .bg-primary-blue { background-color: #1a365d; }
+    .hover-bg-primary-blue:hover { background-color: #1e40af; }
+    .hover-bg-yellow:hover { background-color: #FFD700; }
+
+    .btn-glow {
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+</style>
+
 <body class="bg-slate-50 min-h-screen flex items-center justify-center">
 
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 mx-4">
-        {{-- Header / Logo Area --}}
-       <div class="relative z-10 flex flex-col items-center gap-2">
-    <img src="https://img2.beritasatu.com/cache/investor/480x310-3/2025/06/1749997476-1009x572.webp" alt="Logo" class="h-8 opacity-90">
-    <h1 class="text-xl font-bold tracking-wide">INTERNAL AUDIT</h1>
-    <p class="text-blue-200 text-xs">PT Trias Sentosa Tbk</p>
+<div class="bg-primary-blue px-8 py-8 text-center">
+    <div class="flex flex-col items-center gap-2">
+        <img 
+            src="https://img2.beritasatu.com/cache/investor/480x310-3/2025/06/1749997476-1009x572.webp"
+            alt="Logo"
+            class="h-8 opacity-95"
+        >
+        <h1 class="text-xl font-bold tracking-wide text-white">
+            INTERNAL AUDIT
+        </h1>
+        <p class="text-blue-200 text-xs">
+            PT Trias Sentosa Tbk
+        </p>
+    </div>
 </div>
+
 
 
         {{-- Form Area --}}
