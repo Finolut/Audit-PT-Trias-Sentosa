@@ -165,13 +165,13 @@ public function startAudit(Request $request)
 
 public function createAudit() 
 {
-    // Ambil data departemen asli dari database (yang berisi UUID)
-    $departments = DB::table('departments')->select('id', 'name')->get();
+    // 1. Ambil data departemen (id akan berisi UUID dari DB)
+    $departments = DB::table('departments')->select('id', 'name')->orderBy('name')->get();
     
-    // Kirim data ke view
+    // 2. Kirim ke view dengan nama 'auditorsList'
     return view('test-form', [
         'departments' => $departments,
-        'auditorsList' => $this->auditorsList // Pastikan variabel ini dikirim
+        'auditorsList' => $this->auditorsList // Diambil dari private property di atas
     ]);
 }
 

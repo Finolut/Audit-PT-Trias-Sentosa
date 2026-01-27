@@ -193,122 +193,37 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
-    // --- Mock Data (Replace with Backend JSON) ---
-    const DEPARTMENTS = [
-        {id: 1, name: 'Warehouse & Logistics'},
-        {id: 2, name: 'Production'},
-        {id: 3, name: 'Finance & Accounting'},
-        {id: 4, name: 'Human Resources (HR)'},
-        {id: 5, name: 'IT & Security'}
-    ];
-    
-    const AUDITORS = [
-        {id: 101, name: 'Andi Saputra', dept_id: 5, nik: 'IT-001'},
-        {id: 102, name: 'Budi Santoso', dept_id: 4, nik: 'HR-023'},
-        {id: 103, name: 'Citra Lestari', dept_id: 3, nik: 'FA-011'}
-    ];
-
-    // --- TomSelect Initialization ---
-    
-    // 1. Standards (Multi)
-    new TomSelect('#select-standards', { plugins: ['remove_button'] });
-
-    // 2. Scope (Multi)
-    new TomSelect('#select-scope', { plugins: ['remove_button'] });
-
-    // 3. Lead Auditor
-    new TomSelect('#select-auditor', {
-        valueField: 'id',
-        labelField: 'name',
-        searchField: 'name',
-        options: AUDITORS,
-        onChange: function(value) {
-            const auditor = AUDITORS.find(a => a.id == value);
-            if(auditor) {
-                document.getElementById('auditor_dept_id').value = auditor.dept_id;
-                validateIndependence();
-            }
-        }
-    });
-
-    // 4. Department Auditee
-    new TomSelect('#select-department', {
-        valueField: 'id',
-        labelField: 'name',
-        searchField: 'name',
-        options: DEPARTMENTS,
-        onChange: function(value) {
-            validateIndependence();
-        }
-    });
-
-    // --- Logic: Conflict of Interest Check ---
-    function validateIndependence() {
-        const auditorDept = document.getElementById('auditor_dept_id').value;
-        const auditeeDept = document.getElementById('select-department').value;
-        const warning = document.getElementById('conflict-warning');
-        const submitBtn = document.querySelector('button[type="submit"]');
-
-        if (auditorDept && auditeeDept && auditorDept === auditeeDept) {
-            warning.classList.remove('hidden');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            alert('PERINGATAN STANDAR ISO:\n\nAuditor tidak diperbolehkan mengaudit departemennya sendiri (Konflik Kepentingan). Silakan ganti Lead Auditor atau Departemen.');
-        } else {
-            warning.classList.add('hidden');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-    }
-
-    // --- Logic: Dynamic Team Member ---
-    let memberCount = 0;
-    function addTeamMember() {
-        memberCount++;
-        const html = `
-            <div class="flex flex-col md:flex-row gap-3 bg-slate-50 p-3 rounded border border-slate-200 animate-fade-in" id="member-${memberCount}">
-                <div class="flex-grow">
-                    <input type="text" name="audit_team[${memberCount}][name]" placeholder="Nama Anggota Tim" class="w-full text-sm border-slate-300 rounded px-3 py-2">
-                </div>
-                <div class="w-full md:w-1/3">
-                    <select name="audit_team[${memberCount}][role]"" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
-                        <option value="Auditor">Auditor Anggota</option>
-                        <option value="Observer">Observer (Pengamat)</option>
-                        <option value="Technical Expert">Tenaga Ahli Teknis</option>
-                    </select>
-                </div>
-                <button type="button" onclick="document.getElementById('member-${memberCount}').remove()" class="text-red-500 hover:bg-red-50 px-2 rounded">✕</button>
-            </div>
-        `;
-        document.getElementById('team-container').insertAdjacentHTML('beforeend', html);
-    }
-
-// 1. Ambil data Departemen ASLI dari database (Isinya UUID)
+    // --- 1. DATA ASLI DARI LARAVEL ---
     const DEPARTMENTS = @json($departments); 
-    
-    // 2. Ambil data Auditor ASLI dari Controller
     const AUDITORS = @json($auditorsList); 
 
-    // --- TomSelect Lead Auditor ---
+    // --- 2. INITIALIZATION ---
+
+    // Standards & Scope (Multi-select)
+    new TomSelect('#select-standards', { plugins: ['remove_button'] });
+    new TomSelect('#select-scope', { plugins: ['remove_button'] });
+
+    // Lead Auditor
     new TomSelect('#select-auditor', {
-        valueField: 'nik', // Gunakan NIK sebagai value unik
+        valueField: 'nik', // Mengirim NIK ke controller
         labelField: 'name',
         searchField: 'name',
         options: AUDITORS,
         onChange: function(value) {
             const auditor = AUDITORS.find(a => a.nik == value);
             if(auditor) {
-                // Simpan nama departemen auditor untuk pengecekan konflik independensi
+                // Simpan nama departemen auditor di hidden input untuk cek independensi
                 document.getElementById('auditor_dept_id').value = auditor.dept;
                 validateIndependence();
             }
         }
     });
 
-    // --- TomSelect Departemen Auditee ---
-    new TomSelect('#select-department', {
-        valueField: 'id', // Ini akan berisi UUID dari database
+    // Departemen Auditee
+    const deptSelect = new TomSelect('#select-department', {
+        valueField: 'id', // Mengirim UUID ke controller (Mencegah Error syntax uuid: "2")
         labelField: 'name',
         searchField: 'name',
         options: DEPARTMENTS,
@@ -317,16 +232,19 @@
         }
     });
 
+    // --- 3. LOGIC: CEK KONFLIK KEPENTINGAN ---
     function validateIndependence() {
-        const auditorDeptName = document.getElementById('auditor_dept_id').value; // Contoh: 'BOPET'
-        const auditeeSelect = document.getElementById('select-department').tomselect;
-        const selectedDeptData = auditeeSelect.options[auditeeSelect.getValue()];
+        const auditorDeptName = document.getElementById('auditor_dept_id').value; // e.g., 'BOPET'
+        
+        // Ambil nama departemen yang sedang dipilih dari TomSelect
+        const auditeeDeptId = deptSelect.getValue();
+        const selectedDeptData = DEPARTMENTS.find(d => d.id == auditeeDeptId);
         const auditeeDeptName = selectedDeptData ? selectedDeptData.name : '';
 
         const warning = document.getElementById('conflict-warning');
         const submitBtn = document.querySelector('button[type="submit"]');
 
-        // Cek jika nama departemen sama (Konflik Independensi)
+        // Jika Nama Departemen Auditor SAMA dengan Nama Departemen Auditee
         if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
             warning.classList.remove('hidden');
             submitBtn.disabled = true;
@@ -337,7 +255,28 @@
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     }
-</script>
 
+    // --- 4. LOGIC: DYNAMIC TEAM MEMBER ---
+    let memberCount = 0;
+    function addTeamMember() {
+        memberCount++;
+        const html = `
+            <div class="flex flex-col md:flex-row gap-3 bg-slate-50 p-3 rounded border border-slate-200" id="member-${memberCount}">
+                <div class="flex-grow">
+                    <input type="text" name="audit_team[${memberCount}][name]" placeholder="Nama Anggota Tim" class="w-full text-sm border-slate-300 rounded px-3 py-2">
+                </div>
+                <div class="w-full md:w-1/3">
+                    <select name="audit_team[${memberCount}][role]" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
+                        <option value="Auditor">Auditor Anggota</option>
+                        <option value="Observer">Observer (Pengamat)</option>
+                        <option value="Technical Expert">Tenaga Ahli Teknis</option>
+                    </select>
+                </div>
+                <button type="button" onclick="document.getElementById('member-${memberCount}').remove()" class="text-red-500 px-2">✕</button>
+            </div>
+        `;
+        document.getElementById('team-container').insertAdjacentHTML('beforeend', html);
+    }
+</script>
 </body>
 </html>
