@@ -36,21 +36,38 @@
         }
     </style>
 </head>
-<body class="bg-custom-gray min-h-screen">
+<body class="bg-custom-gray flex flex-col min-h-screen">
+    <main class="grow">
 
-    <header class="w-full p-4 md:px-12 flex justify-between items-center bg-white shadow-sm">
+<header class="w-full px-4 py-3 md:py-4 md:px-12 flex justify-between items-center bg-white shadow-sm">
+    
+    <!-- Logo -->
     <div class="flex items-center">
-        <img src="https://trias-sentosa.com/images/logo.webp" alt="Logo PT Trias Sentosa Tbk" class="h-10 md:h-12 object-contain">
+        <img 
+            src="https://trias-sentosa.com/images/logo.webp"
+            alt="Logo PT Trias Sentosa Tbk"
+            class="h-8 md:h-12 object-contain"
+        >
     </div>
 
-    <a href="{{ route('admin.dashboard') }}" 
-       class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-bold py-2 px-4 md:px-6 rounded-lg transition-all flex items-center gap-2 shadow-md">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Admin Button -->
+    <a href="{{ route('admin.dashboard') }}"
+       class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 
+              font-bold text-xs md:text-base 
+              px-3 py-2 md:px-6 md:py-2.5 
+              rounded-lg transition-all 
+              flex items-center gap-1.5 md:gap-2 shadow-md">
+        
+        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="text-sm md:text-base">ADMIN PANEL</span>
+
+        <span>ADMIN</span>
     </a>
+
 </header>
+
 
     <!-- Hero Section -->
     <section class="relative hero-image h-[80vh] md:h-screen flex items-center justify-center">
@@ -83,13 +100,19 @@
 
 
     <!-- Footer -->
-    <footer class="bg-primary-blue text-white py-8">
-        <div class="max-w-7xl mx-auto px-6 md:px-12 text-center">
-            <p class="text-xs font-bold uppercase tracking-[0.3em]">
-                &copy; 2026 PT Trias Sentosa Tbk. All Rights Reserved.
-            </p>
-        </div>
-    </footer>
+<footer class="bg-primary-blue text-white py-5 md:py-8">
+    <div class="max-w-7xl mx-auto px-4 md:px-12 text-center">
+        <p class="text-[10px] md:text-xs 
+                  font-mono font-bold uppercase 
+                  tracking-[0.2em] md:tracking-[0.3em] 
+                  leading-relaxed md:leading-normal">
+            © 2026 PT Trias Sentosa Tbk. All rights reserved.
+        </p>
+    </div>
+    </main>
+</footer>
+
+
 
 </body>
 </html>
