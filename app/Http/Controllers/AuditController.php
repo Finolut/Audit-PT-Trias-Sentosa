@@ -74,16 +74,25 @@ private $auditorsList = [
     }
 
 // 1. UPDATE startAudit (Generate Token saat mulai)
-    public function startAudit(Request $request) 
+    public function startAudit(Request $request)
     {
-        // ... (Validasi request tetap sama) ...
         $request->validate([
-            // ... validasi yang sudah ada ...
-            'audit_date' => 'required|date',
+            'lead_auditor_id'     => 'required|string',
+            'auditee_dept_id'     => 'required|exists:departments,id',
+            'audit_code'          => 'required|string',
+            'audit_type'          => 'required|string',
+            'audit_objective'     => 'required|string',
+            'audit_scope'         => 'required|array|min:1',
+            'audit_standards'     => 'required|array|min:1',
+            'methodology'         => 'required|array|min:1',
+            'auditee_pic'         => 'required|string',
+            'start_time'          => 'required|date_format:H:i',
+            'end_time'            => 'required|date_format:H:i|after:start_time',
+            'audit_date'          => 'required|date',
+            'audit_team'          => 'nullable|array',
         ]);
 
         return DB::transaction(function () use ($request) {
-            // ... (Logika pengambilan auditor tetap sama) ...
             $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
             $auditorName = $selectedAuditor['name'] ?? 'Unknown';
             $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
@@ -91,41 +100,35 @@ private $auditorsList = [
 
             $sessionId = (string) Str::uuid();
             $newAuditId = (string) Str::uuid();
-            
-            // --- LOGIKA BARU: Generate Token ---
-            // Token format: XXX-XXX (Huruf Kapital) agar mudah diketik
-            $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
-            
-            // Cek keunikan (simple check loop)
-            while(DB::table('audit_sessions')->where('resume_token', $tokenRaw)->exists()) {
-                $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
-            }
 
-            // Simpan Sesi dengan Token
+            // Generate token unik dengan format ABC-XYZ
+            do {
+                $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
+            } while (DB::table('audit_sessions')->where('resume_token', $tokenRaw)->exists());
+
+            // Simpan sesi audit
             DB::table('audit_sessions')->insert([
-                'id'                 => $sessionId,
-                'auditor_name'       => $auditorName,
-                'auditor_nik'        => $auditorNik,
-                'auditor_department' => $auditorDept,
-                'audit_date'         => $request->audit_date,
-                'resume_token'       => $tokenRaw,
-                // Token expired dalam 7 hari (sesuaikan kebijakan)
-                'resume_token_expires_at' => now()->addDays(7), 
-                'last_activity_at'   => now(),
-                'created_at'         => now(),
+                'id'                      => $sessionId,
+                'auditor_name'            => $auditorName,
+                'auditor_nik'             => $auditorNik,
+                'auditor_department'      => $auditorDept,
+                'audit_date'              => $request->audit_date,
+                'resume_token'            => $tokenRaw,
+                'resume_token_expires_at' => now()->addDays(7),
+                'last_activity_at'        => now(),
+                'created_at'              => now(),
             ]);
 
-            // ... (Insert ke tabel audits tetap sama) ...
+            // Simpan audit utama
             DB::table('audits')->insert([
                 'id'               => $newAuditId,
                 'audit_session_id' => $sessionId,
                 'department_id'    => $request->auditee_dept_id,
-                'audit_code'       => $request->audit_code, // Pastikan dikirim dari form
+                'audit_code'       => $request->audit_code,
                 'status'           => 'IN_PROGRESS',
-                // ... fields lain sesuai kode lama ...
-                'type'             => $request->audit_type, 
+                'type'             => $request->audit_type,
                 'objective'        => $request->audit_objective,
-                'scope'            => implode(', ', $request->audit_scope), 
+                'scope'            => implode(', ', $request->audit_scope),
                 'standards'        => implode(', ', $request->audit_standards),
                 'methodology'      => implode(', ', $request->methodology),
                 'pic_auditee_name' => $request->auditee_pic,
@@ -135,142 +138,133 @@ private $auditorsList = [
                 'updated_at'       => now(),
             ]);
 
-            // ... (Insert Responders tetap sama) ...
-             $responders = [[
-                'id' => (string) Str::uuid(),
-                'audit_session_id' => $sessionId,
-                'responder_name' => $auditorName,
-                'responder_role' => 'Lead Auditor',
-                'responder_nik' => $auditorNik,
-                'responder_department' => $auditorDept,
-                'created_at' => now(),
-            ]];
-            // ... (Loop audit_team tetap sama) ...
-             if ($request->has('audit_team')) {
+            // Simpan responders (Lead Auditor + Tim)
+            $responders = [
+                [
+                    'id'                   => (string) Str::uuid(),
+                    'audit_session_id'     => $sessionId,
+                    'responder_name'       => $auditorName,
+                    'responder_role'       => 'Lead Auditor',
+                    'responder_nik'        => $auditorNik,
+                    'responder_department' => $auditorDept,
+                    'created_at'           => now(),
+                ]
+            ];
+
+            if ($request->has('audit_team')) {
                 foreach ($request->audit_team as $member) {
                     if (!empty($member['name'])) {
                         $responders[] = [
-                            'id' => (string) Str::uuid(),
-                            'audit_session_id' => $sessionId,
-                            'responder_name' => $member['name'],
-                            'responder_role' => $member['role'] ?? 'Member',
-                            'responder_nik' => $member['nik'] ?? null,
+                            'id'                   => (string) Str::uuid(),
+                            'audit_session_id'     => $sessionId,
+                            'responder_name'       => $member['name'],
+                            'responder_role'       => $member['role'] ?? 'Member',
+                            'responder_nik'        => $member['nik'] ?? null,
                             'responder_department' => $member['department'] ?? null,
-                            'created_at' => now(),
+                            'created_at'           => now(),
                         ];
                     }
                 }
             }
+
             DB::table('audit_responders')->insert($responders);
 
-            // Redirect dengan membawa pesan Token
             return redirect()->route('audit.menu', ['id' => $newAuditId])
-                            ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>. Simpan token ini untuk melanjutkan audit nanti.");
+                ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>. Simpan token ini untuk melanjutkan audit nanti.");
         });
     }
 
-    // 2. HALAMAN INPUT TOKEN (Hanya View)
+    // ----------------------------------------------------------------------
+    // 2. Tampilkan Form Input Token Resume
+    // ----------------------------------------------------------------------
     public function showResumePage()
     {
-        return view('audit.resume_form'); 
+        return view('audit.resume_form');
     }
 
-    // 3. VALIDASI TOKEN (Decision Gate)
+    // ----------------------------------------------------------------------
+    // 3. Validasi Token & Tampilkan Decision Gate
+    // ----------------------------------------------------------------------
     public function validateResumeToken(Request $request)
     {
         $request->validate(['resume_token' => 'required|string']);
-        $token = strtoupper($request->resume_token);
+        $token = strtoupper(trim($request->resume_token));
 
-        // Cari session berdasarkan token
         $session = DB::table('audit_sessions')
             ->where('resume_token', $token)
             ->first();
 
-        // VALIDASI: Token Tidak Ditemukan
         if (!$session) {
-            return back()->withErrors(['resume_token' => 'Token tidak ditemukan atau salah.']);
+            return back()->withErrors(['resume_token' => 'Token tidak valid.']);
         }
 
-        // VALIDASI: Token Expired
-        if (Carbon::parse($session->resume_token_expires_at)->isPast()) {
+        if ($session->resume_token_expires_at && Carbon::parse($session->resume_token_expires_at)->isPast()) {
             return back()->withErrors(['resume_token' => 'Token sudah kadaluarsa. Silakan buat audit baru.']);
         }
 
-        // Ambil data Audit terkait session ini
-        // Kita ambil yang terakhir dibuat jika ada multiple (meski logicnya 1 session = 1 audit aktif)
         $audit = DB::table('audits')
             ->where('audit_session_id', $session->id)
-            ->whereIn('status', ['IN_PROGRESS', 'DRAFT']) // Hanya yang belum selesai
+            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
             ->orderByDesc('created_at')
             ->first();
 
-        // VALIDASI: Tidak ada audit aktif (mungkin sudah COMPLETED atau ABANDONED)
         if (!$audit) {
-            return back()->withErrors(['resume_token' => 'Audit untuk token ini sudah selesai atau dibatalkan. Tidak bisa dilanjutkan.']);
+            return back()->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini (mungkin sudah Selesai atau Dibatalkan).']);
         }
 
-        // Ambil nama Departemen Auditee
         $auditeeDept = DB::table('departments')->where('id', $audit->department_id)->value('name');
 
-        // Tampilkan halaman Decision Gate
         return view('audit.resume_decision', [
             'token'         => $token,
             'auditorName'   => $session->auditor_name,
             'auditeeDept'   => $auditeeDept,
-            'auditDate'     => $session->audit_date,
-            'lastActivity'  => $session->last_activity_at ? Carbon::parse($session->last_activity_at)->diffForHumans() : 'Belum ada aktivitas',
-            'auditId'       => $audit->id
+            'auditDate'     => Carbon::parse($session->audit_date)->format('d M Y'),
+            'lastActivity'  => $session->last_activity_at ? Carbon::parse($session->last_activity_at)->diffForHumans() : '-',
+            'auditId'       => $audit->id,
         ]);
     }
 
-    // 4. PROSES KEPUTUSAN (Lanjut atau Batal)
+    // ----------------------------------------------------------------------
+    // 4. Tangani Keputusan: Lanjutkan atau Batalkan Audit
+    // ----------------------------------------------------------------------
     public function handleResumeDecision(Request $request)
     {
         $request->validate([
-            'token' => 'required',
-            'action' => 'required|in:continue,abandon'
+            'token'    => 'required',
+            'audit_id' => 'required',
+            'action'   => 'required|in:continue,abandon',
         ]);
 
-        $session = DB::table('audit_sessions')->where('resume_token', $request->token)->first();
-        if (!$session) abort(404);
-
-        $audit = DB::table('audits')
-            ->where('audit_session_id', $session->id)
-            ->whereIn('status', ['IN_PROGRESS', 'DRAFT'])
-            ->orderByDesc('created_at')
-            ->first();
-
-        if (!$audit) return redirect()->route('audit.resume.form')->withErrors(['Audit tidak valid/sudah selesai']);
+        $auditId = $request->audit_id;
 
         if ($request->action === 'continue') {
-            // A. LANJUTKAN AUDIT
-            
             // Update last activity
+            $audit = DB::table('audits')->where('id', $auditId)->first();
+            if (!$audit) {
+                return redirect()->route('audit.resume.form')->withErrors(['Audit tidak ditemukan.']);
+            }
+
             DB::table('audit_sessions')
-                ->where('id', $session->id)
+                ->where('id', $audit->audit_session_id)
                 ->update(['last_activity_at' => now()]);
 
-            return redirect()->route('audit.menu', ['id' => $audit->id])
-                             ->with('success', 'Selamat datang kembali. Silakan lanjutkan audit.');
+            return redirect()->route('audit.menu', ['id' => $auditId])
+                ->with('success', 'Sesi dipulihkan. Silakan lanjutkan audit.');
 
         } else {
-            // B. ABANDON (BATALKAN & BUAT BARU)
-            
-            DB::transaction(function() use ($audit, $session) {
-                // 1. Set status audit lama jadi ABANDONED
+            // Abandon: batalkan audit & nonaktifkan token
+            DB::transaction(function () use ($auditId, $request) {
                 DB::table('audits')
-                    ->where('id', $audit->id)
+                    ->where('id', $auditId)
                     ->update(['status' => 'ABANDONED', 'updated_at' => now()]);
-                
-                // 2. Token dimatikan (expiredkan sekarang) agar tidak bisa dipakai lagi
+
                 DB::table('audit_sessions')
-                    ->where('id', $session->id)
+                    ->where('resume_token', $request->token)
                     ->update(['resume_token_expires_at' => now()]);
             });
 
-            // Redirect ke halaman buat audit baru
             return redirect()->route('audit.create')
-                             ->with('info', 'Sesi audit sebelumnya telah dibatalkan. Silakan buat audit baru.');
+                ->with('info', 'Audit sebelumnya telah dibatalkan. Silakan mulai audit baru.');
         }
     }
 

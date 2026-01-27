@@ -82,7 +82,11 @@ Route::post('/test-form', function (Request $request) {
 | AUDIT PROCESS ROUTES (Public / Khusus Auditor lapangan)
 |--------------------------------------------------------------------------
 */
+Route::get('/audit/resume', [AuditController::class, 'showResumePage'])->name('audit.resume.form');
+Route::post('/audit/resume/check', [AuditController::class, 'validateResumeToken'])->name('audit.resume.check');
+Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])->name('audit.resume.action');
 Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
+Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
 Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
 Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
 Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.menu');
@@ -156,7 +160,3 @@ Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
 
-Route::get('/audit/resume', [AuditController::class, 'showResumePage'])->name('audit.resume.form');
-Route::post('/audit/resume/check', [AuditController::class, 'validateResumeToken'])->name('audit.resume.check');
-Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])->name('audit.resume.action');
-Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
