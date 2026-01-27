@@ -29,11 +29,11 @@
 
 <body class="min-h-screen bg-custom-gray flex items-center justify-center">
 
-<div class="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-<div class="hidden md:flex bg-primary-blue text-white flex-col justify-center items-center px-10">
+<div class="hidden md:flex bg-primary-blue text-white flex-col justify-center items-center px-10 relative">
+    <div class="absolute top-10 w-12 h-1 bg-yellow-400 rounded-full"></div>
+
     <img src="https://trias-sentosa.com/images/logo.webp" class="h-12 mb-6">
     <h1 class="text-2xl font-bold tracking-wide">INTERNAL AUDIT</h1>
-    <p class="text-blue-200 text-sm mt-1">PT Trias Sentosa Tbk</p>
 </div>
 
 
