@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <form method="POST" action="#" id="auditForm">
+    <form action="{{ route('audit.start') }}" method="POST">
         <input type="hidden" name="audit_status" value="Planned"> <input type="hidden" name="created_at" value="{{ date('Y-m-d H:i:s') }}">
         
         <div class="section-card ts-border-left">
@@ -188,12 +188,7 @@
         </div>
 
         <div class="flex gap-4 pt-4">
-            <button type="button" class="flex-1 py-3 px-6 rounded-lg bg-slate-200 text-slate-700 font-bold hover:bg-slate-300 transition">
-                Simpan sebagai Draft
-            </button>
-            <button type="submit" class="flex-1 py-3 px-6 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
-                🗓️ Jadwalkan Audit (Plan)
-            </button>
+<button type="submit" class="btn btn-primary">Mulai Audit</button>
         </div>
     </form>
 </div>
