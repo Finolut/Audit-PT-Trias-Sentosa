@@ -109,6 +109,40 @@ public function startAudit(Request $request)
             'created_at'         => now(),
         ]);
 
+        // ... bagian insert audit_sessions dan audits tetap sama ...
+
+// 6. Responders
+$responders = [[
+    'id' => (string) Str::uuid(),
+    'audit_session_id' => $sessionId,
+    'responder_name' => $auditorName,
+    'responder_role' => 'Lead Auditor',
+    'responder_nik' => $auditorNik,
+    'responder_department' => $auditorDept,
+    'created_at' => now(),
+]];
+
+// Masukkan tim tambahan
+if ($request->has('audit_team')) {
+    foreach ($request->audit_team as $member) {
+        // Cek apakah minimal Nama terisi
+        if (!empty($member['name'])) {
+            $responders[] = [
+                'id' => (string) Str::uuid(),
+                'audit_session_id' => $sessionId,
+                'responder_name' => $member['name'],
+                'responder_role' => $member['role'] ?? 'Member',
+                // NIK dan Dept diambil langsung dari input (baik hasil otomatis TomSelect atau ketik manual)
+                'responder_nik' => $member['nik'] ?? null,
+                'responder_department' => $member['department'] ?? null,
+                'created_at' => now(),
+            ];
+        }
+    }
+}
+
+DB::table('audit_responders')->insert($responders);
+
         // 5. Simpan Detail Audit
         DB::table('audits')->insert([
             'id'               => $newAuditId,
@@ -174,8 +208,6 @@ public function createAudit()
         'auditorsList' => $this->auditorsList // Diambil dari private property di atas
     ]);
 }
-
-    // ... (method menu(), show(), store(), clauseDetail() tetap sama seperti sebelumnya)
     
 public function menu($auditId)
 {

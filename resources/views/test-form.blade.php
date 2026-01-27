@@ -125,31 +125,36 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Lead Auditor <span class="req-star">*</span></label>
-                    <select id="select-auditor" name="lead_auditor_id" placeholder="Cari nama Lead Auditor..." required></select>
-                    <input type="hidden" id="auditor_dept_id">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1">Deklarasi Kepatuhan</label>
-                    <div class="flex items-start gap-3 pt-2">
-                        <input type="checkbox" id="independence_decl" name="independence_decl" required 
-                               class="mt-1 h-5 w-5 text-purple-600 rounded focus:ring-purple-600">
-                        <label for="independence_decl" class="text-sm text-slate-600">
-                            Saya menyatakan <strong>bebas dari konflik kepentingan</strong> terhadap area yang akan diaudit dan akan bertindak objektif.
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <label class="block text-sm font-semibold mb-2">Anggota Tim Tambahan</label>
-            <div id="team-container" class="space-y-2"></div>
-            <button type="button" onclick="addTeamMember()" 
-                    class="mt-3 text-sm text-purple-700 font-medium hover:underline flex items-center gap-1">
-                + Tambah Auditor / Observer / Expert
-            </button>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-4">
+    <div>
+        <label class="block text-sm font-semibold mb-1">Lead Auditor <span class="req-star">*</span></label>
+        <select id="select-auditor" name="lead_auditor_id" placeholder="Cari nama Lead Auditor..." required></select>
+        <input type="hidden" id="auditor_dept_id">
+    </div>
+    <div>
+        <label class="block text-sm font-semibold mb-1">Deklarasi Kepatuhan</label>
+        <div class="flex items-start gap-3 pt-2">
+            <input type="checkbox" id="independence_decl" name="independence_decl" required 
+                   class="mt-1 h-5 w-5 text-purple-600 rounded focus:ring-purple-600">
+            <label for="independence_decl" class="text-sm text-slate-600">
+                Saya menyatakan <strong>bebas dari konflik kepentingan</strong> terhadap area yang akan diaudit dan akan bertindak objektif.
+            </label>
         </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="block text-sm font-semibold mb-2">Anggota Tim Tambahan</label>
+    <div id="team-container" class="space-y-3">
+        </div>
+    <button type="button" onclick="addTeamMember()" 
+            class="mt-3 text-sm text-purple-700 font-medium hover:underline flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Tambah Auditor / Observer / Expert
+    </button>
+</div>
 
         <div class="section-card ts-border-left border-l-emerald-600">
             <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2">
@@ -256,27 +261,86 @@
         }
     }
 
-    // --- 4. LOGIC: DYNAMIC TEAM MEMBER ---
-    let memberCount = 0;
-    function addTeamMember() {
-        memberCount++;
-        const html = `
-            <div class="flex flex-col md:flex-row gap-3 bg-slate-50 p-3 rounded border border-slate-200" id="member-${memberCount}">
-                <div class="flex-grow">
-                    <input type="text" name="audit_team[${memberCount}][name]" placeholder="Nama Anggota Tim" class="w-full text-sm border-slate-300 rounded px-3 py-2">
-                </div>
-                <div class="w-full md:w-1/3">
-                    <select name="audit_team[${memberCount}][role]" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
-                        <option value="Auditor">Auditor Anggota</option>
-                        <option value="Observer">Observer (Pengamat)</option>
-                        <option value="Technical Expert">Tenaga Ahli Teknis</option>
-                    </select>
-                </div>
-                <button type="button" onclick="document.getElementById('member-${memberCount}').remove()" class="text-red-500 px-2">✕</button>
+ // --- 4. LOGIC: DYNAMIC TEAM MEMBER ---
+let memberCount = 0;
+
+function addTeamMember() {
+    memberCount++;
+    const container = document.getElementById('team-container');
+    
+    // 1. Buat elemen baris
+    const row = document.createElement('div');
+    row.className = "p-4 bg-slate-50 rounded-lg border border-slate-200 relative";
+    row.id = `member-row-${memberCount}`;
+
+    // 2. Isi HTML baris (Gunakan array name: audit_team[index][field])
+    row.innerHTML = `
+        <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500">✕</button>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div>
+                <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Nama Personil</label>
+                <select id="ts-member-${memberCount}" name="audit_team[${memberCount}][name]" placeholder="Cari atau ketik nama..."></select>
             </div>
-        `;
-        document.getElementById('team-container').insertAdjacentHTML('beforeend', html);
-    }
+            <div>
+                <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">NIK</label>
+                <input type="text" name="audit_team[${memberCount}][nik]" id="nik-${memberCount}" 
+                       class="w-full text-sm border-slate-300 rounded px-3 py-2" placeholder="NIK (Opsional)">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Departemen</label>
+                <input type="text" name="audit_team[${memberCount}][department]" id="dept-${memberCount}" 
+                       class="w-full text-sm border-slate-300 rounded px-3 py-2" placeholder="Departemen">
+            </div>
+        </div>
+        
+        <div class="w-full">
+            <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Peran dalam Audit</label>
+            <select name="audit_team[${memberCount}][role]" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
+                <option value="Auditor">Auditor Anggota</option>
+                <option value="Observer">Observer (Pengamat)</option>
+                <option value="Technical Expert">Tenaga Ahli Teknis</option>
+            </select>
+        </div>
+    `;
+
+    container.appendChild(row);
+
+    // 3. Inisialisasi TomSelect untuk baris yang baru dibuat
+    new TomSelect(`#ts-member-${memberCount}`, {
+        valueField: 'name', // Kita kirim nama karena role manual butuh nama
+        labelField: 'name',
+        searchField: ['name', 'nik'],
+        options: AUDITORS, // Menggunakan data dari controller
+        create: true,      // BISA KETIK MANUAL
+        render: {
+            option: function(data, escape) {
+                return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-gray-500">(${escape(data.nik)})</span></div>`;
+            }
+        },
+        onChange: function(value) {
+            const person = AUDITORS.find(a => a.name === value);
+            const nikInp = document.getElementById(`nik-${memberCount}`);
+            const deptInp = document.getElementById(`dept-${memberCount}`);
+            
+            if (person) {
+                // Jika personil ditemukan di list: auto-fill & lock
+                nikInp.value = person.nik;
+                deptInp.value = person.dept;
+                nikInp.readOnly = true;
+                deptInp.readOnly = true;
+                nikInp.classList.add('bg-slate-100');
+                deptInp.classList.add('bg-slate-100');
+            } else {
+                // Jika ketik manual: buka kunci agar bisa diisi
+                nikInp.readOnly = false;
+                deptInp.readOnly = false;
+                nikInp.classList.remove('bg-slate-100');
+                deptInp.classList.remove('bg-slate-100');
+            }
+        }
+    });
+}
 </script>
 </body>
 </html>
