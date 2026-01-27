@@ -8,34 +8,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .bg-custom-gray { background-color: #F8FAFC; }
+        .text-primary-blue { color: #1a365d; }
+        .bg-primary-blue { background-color: #1a365d; }
+        .hover-bg-primary-blue:hover { background-color: #1e40af; }
     </style>
 </head>
-<style>
-    body { 
-        font-family: 'Plus Jakarta Sans', sans-serif; 
-    }
 
-    .bg-custom-gray { background-color: #F8FAFC; }
-    .text-primary-blue { color: #1a365d; }
-    .bg-primary-blue { background-color: #1a365d; }
-    .hover-bg-primary-blue:hover { background-color: #1e40af; }
-    .hover-bg-yellow:hover { background-color: #FFD700; }
-
-    .btn-glow {
-        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-        transition: all 0.3s ease;
-    }
-</style>
-
-<body class="min-h-screen bg-custom-gray flex items-center justify-center">
+<body class="min-h-screen bg-custom-gray flex items-center justify-center p-4">
 
 <div class="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
     
     <div class="flex relative flex-col justify-center items-center px-10 py-16 md:py-0 min-h-[250px] md:min-h-[300px] bg-cover bg-center" 
          style="background-image: url('https://trias-sentosa.com/images/about3.webp');">
-        
         <div class="absolute inset-0 bg-blue-900/70"></div>
-
         <div class="relative z-10 text-center text-white">
             <h1 class="text-3xl md:text-4xl font-extrabold tracking-wider uppercase">INTERNAL AUDIT</h1>
             <p class="text-base md:text-lg font-medium mt-2 opacity-90">PT Trias Sentosa Tbk</p>
@@ -44,32 +30,21 @@
 
     <div class="p-8 md:p-10 flex flex-col justify-center">
         <div class="mb-6 text-center">
-            <h2 class="text-xl font-semibold text-slate-800">
-                Selamat Datang Kembali
-            </h2>
-            <p class="text-sm text-slate-500 mt-1">
-                Silakan masuk untuk mengelola audit internal perusahaan
-            </p>
+            <h2 class="text-xl font-semibold text-slate-800">Selamat Datang Kembali</h2>
+            <p class="text-sm text-slate-500 mt-1">Silakan masuk untuk mengelola audit internal perusahaan</p>
         </div>
 
         @if(session('error'))
             <div class="mb-5 bg-red-50 border-l-4 border-red-500 p-4 rounded-r shadow-sm">
                 <div class="flex">
-                    <div class="shrink-0">
-                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
                     <div class="ml-3">
-                        <p class="text-sm text-red-700 font-medium">
-                            {{ session('error') }}
-                        </p>
+                        <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
                     </div>
                 </div>
             </div>
         @endif
 
-        <form action="{{ route('login.post') }}" method="POST" class="space-y-5">
+        <form id="loginForm" action="{{ route('login.post') }}" method="POST" class="space-y-5">
             @csrf
             <div>
                 <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Perusahaan</label>
@@ -99,13 +74,18 @@
                 </div>
             </div>
 
-            <button type="submit"
+            <button type="submit" id="submitBtn"
                 class="w-full flex justify-center items-center py-3 px-4 rounded-lg shadow-sm text-sm font-bold text-white bg-primary-blue hover-bg-primary-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 transition-all transform hover:-translate-y-0.5">
-                MASUK PORTAL AUDIT
+                <span id="btnText">MASUK PORTAL AUDIT</span>
+                
+                <svg id="loadingIcon" class="hidden animate-spin ml-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
             </button>
         </form>
 
-        <p class="mt-4 text-[11px] text-slate-400 text-center">
+        <p class="mt-4 text-[11px] text-slate-400 text-center uppercase tracking-tighter">
             Akses terbatas untuk personel resmi PT Trias Sentosa Tbk
         </p>
 
@@ -116,6 +96,23 @@
         </div>
     </div>
 </div>
+
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingIcon = document.getElementById('loadingIcon');
+    const btnText = document.getElementById('btnText');
+
+    loginForm.addEventListener('submit', function() {
+        // 1. Disable tombol agar tidak diklik 2x
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+        
+        // 2. Tampilkan Spinner & ubah teks
+        loadingIcon.classList.remove('hidden');
+        btnText.innerText = 'MEMPROSES...';
+    });
+</script>
 
 </body>
 </html>
