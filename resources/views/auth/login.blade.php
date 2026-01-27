@@ -27,34 +27,35 @@
     }
 </style>
 
-<body class="bg-slate-50 min-h-screen flex items-center justify-center">
+<body class="min-h-screen bg-custom-gray flex items-center justify-center">
 
-<div class="bg-primary-blue px-8 py-8 text-center">
-    <div class="flex flex-col items-center gap-2">
-        <img 
-            src="https://trias-sentosa.com/images/logo.webp"
-            alt="Logo"
-            class="h-8 opacity-95"
-        >
-        <h1 class="text-xl font-bold tracking-wide text-white">
-            INTERNAL AUDIT
-        </h1>
-    </div>
+<div class="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+<div class="hidden md:flex bg-primary-blue text-white flex-col justify-center items-center px-10">
+    <img src="https://trias-sentosa.com/images/logo.webp" class="h-12 mb-6">
+    <h1 class="text-2xl font-bold tracking-wide">INTERNAL AUDIT</h1>
+    <p class="text-blue-200 text-sm mt-1">PT Trias Sentosa Tbk</p>
 </div>
 
 
 
         {{-- Form Area --}}
-        <div class="p-8">
-            <div class="mb-6 text-center">
-                <h2 class="text-xl font-semibold text-slate-800">Selamat Datang Kembali</h2>
-                <p class="text-sm text-slate-500 mt-1">Silakan masuk untuk mengelola audit internal perusahaan</p>
-            </div>
+<div class="p-10 flex flex-col justify-center">
+    <div class="mb-6 text-center">
+        <h2 class="text-xl font-semibold text-slate-800">
+            Selamat Datang Kembali
+        </h2>
+        <p class="text-sm text-slate-500 mt-1">
+            Silakan masuk untuk mengelola audit internal perusahaan
+        </p>
+    </div>
+
+    <!-- FORM DI SINI (punya kamu sudah benar) -->
+
 
             @if(session('error'))
                 <div class="mb-5 bg-red-50 border-l-4 border-red-500 p-4 rounded-r shadow-sm">
                     <div class="flex">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
