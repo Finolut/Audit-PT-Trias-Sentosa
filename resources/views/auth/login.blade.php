@@ -32,16 +32,13 @@
 <div class="bg-primary-blue px-8 py-8 text-center">
     <div class="flex flex-col items-center gap-2">
         <img 
-            src="https://img2.beritasatu.com/cache/investor/480x310-3/2025/06/1749997476-1009x572.webp"
+            src="https://trias-sentosa.com/images/logo.webp"
             alt="Logo"
             class="h-8 opacity-95"
         >
         <h1 class="text-xl font-bold tracking-wide text-white">
             INTERNAL AUDIT
         </h1>
-        <p class="text-blue-200 text-xs">
-            PT Trias Sentosa Tbk
-        </p>
     </div>
 </div>
 
