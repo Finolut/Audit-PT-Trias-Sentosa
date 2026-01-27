@@ -72,86 +72,102 @@ private $auditorsList = [
         ]);
     }
 
-    public function startAudit(Request $request) 
-    {
-        $request->validate([
-            'department_id'   => 'required|exists:departments,id',
-            'auditor_name'    => 'required',
-            'audit_type'      => 'required',
-            'audit_objective' => 'required',
-            'pic_name'        => 'required',
-            'audit_date'      => 'required|date',
+public function startAudit(Request $request) 
+{
+    // 1. Validasi diperketat sesuai kebutuhan form Charter
+    $request->validate([
+        'department_id'   => 'required|exists:departments,id',
+        'auditor_name'    => 'required|string',
+        'audit_type'      => 'required|string',
+        'audit_objective' => 'required|string',
+        'audit_scope'     => 'nullable|string', // Tambahkan scope
+        'pic_name'        => 'required|string',
+        'pic_nik'         => 'nullable|string',
+        'audit_date'      => 'required|date',
+        'audit_team'      => 'array', // Pastikan tim adalah array
+    ]);
+
+    return DB::transaction(function () use ($request) {
+        // 2. Ambil detail Auditor dari list (Logic tetap dipertahankan)
+        $selectedAuditor = collect($this->auditorsList)->firstWhere('name', $request->auditor_name);
+        $auditorNik = $selectedAuditor['nik'] ?? ($request->auditor_nik ?? 'N/A');
+        $auditorDept = $selectedAuditor['dept'] ?? ($request->auditor_department ?? 'N/A');
+
+        $sessionId = (string) Str::uuid();
+        $newAuditId = (string) Str::uuid();
+        
+        // 3. Generate Audit Code Otomatis (Contoh: IA-2026-0001)
+        // Ini membuat audit Anda terlihat lebih profesional
+        $year = date('Y', strtotime($request->audit_date));
+        $count = DB::table('audits')->whereYear('created_at', $year)->count() + 1;
+        $auditCode = "IA-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
+
+        // 4. Simpan ke audit_sessions (Induk Sesi)
+        DB::table('audit_sessions')->insert([
+            'id'                 => $sessionId,
+            'auditor_name'       => $request->auditor_name,
+            'auditor_nik'        => $auditorNik,
+            'auditor_department' => $auditorDept,
+            'audit_date'         => $request->audit_date,
+            'created_at'         => now(),
         ]);
 
-        return DB::transaction(function () use ($request) {
-            $selectedAuditor = collect($this->auditorsList)->firstWhere('name', $request->auditor_name);
-            $auditorNik = $selectedAuditor['nik'] ?? $request->auditor_nik;
-            $auditorDept = $selectedAuditor['dept'] ?? $request->auditor_department;
+        // 5. Simpan ke audits (Isi Form Charter)
+        DB::table('audits')->insert([
+            'id'               => $newAuditId,
+            'audit_session_id' => $sessionId,
+            'department_id'    => $request->department_id,
+            'type'             => $request->audit_type, 
+            'objective'        => $request->audit_objective,
+            'scope'            => $request->audit_scope, // Diambil dari input
+            'pic_auditee_name' => $request->pic_name,
+            'pic_auditee_nik'  => $request->pic_nik,
+            'status'           => 'IN_PROGRESS',
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
 
-            $sessionId = (string) Str::uuid();
-            $newAuditId = (string) Str::uuid();
+        // 6. Siapkan Data Responders (Lead + Team) untuk Batch Insert
+        $responders = [];
 
-            // Simpan ke audit_sessions
-            DB::table('audit_sessions')->insert([
-                'id'                 => $sessionId,
-                'auditor_name'       => $request->auditor_name,
-                'auditor_nik'        => $auditorNik,
-                'auditor_department' => $auditorDept,
-                'audit_date'         => $request->audit_date,
-                'created_at'         => now(),
-            ]);
+        // Masukkan Lead Auditor ke Responder
+        $responders[] = [
+            'id'                   => (string) Str::uuid(),
+            'audit_session_id'     => $sessionId,
+            'responder_name'       => $request->auditor_name,
+            'responder_nik'        => $auditorNik,
+            'responder_department' => $auditorDept,
+            'responder_role'       => 'Lead Auditor',
+            'created_at'           => now(),
+            'updated_at'           => now(),
+        ];
 
-            // Simpan ke audits
-            DB::table('audits')->insert([
-                'id'               => $newAuditId,
-                'audit_session_id' => $sessionId,
-                'department_id'    => $request->department_id,
-                'type'             => $request->audit_type, 
-                'objective'        => $request->audit_objective,
-                'scope'            => $request->audit_scope,
-                'pic_auditee_name' => $request->pic_name,
-                'pic_auditee_nik'  => $request->pic_nik ?? null,
-                'status'           => 'IN_PROGRESS',
-                'submitted_at'     => now(),
-                'created_at'       => now(),
-            ]);
-
-            // === SIMPAN KE audit_responders ===
-            // 1. Lead Auditor
-            DB::table('audit_responders')->insert([
-                'id' => (string) Str::uuid(),
-                'audit_session_id' => $sessionId,
-                'responder_name' => $request->auditor_name,
-                'responder_role' => 'Lead Auditor',
-                'responder_nik' => $auditorNik,
-                'responder_department' => $auditorDept,
-                'created_at' => now(),
-            ]);
-
-            // 2. Tim Audit Tambahan
-            $auditTeam = $request->input('audit_team', []);
-            foreach ($auditTeam as $member) {
-                if (!empty(trim($member['name']))) {
-                    DB::table('audit_responders')->insert([
-                        'id' => (string) Str::uuid(),
-                        'audit_session_id' => $sessionId,
-                        'responder_name' => trim($member['name']),
-                        'responder_role' => $member['role'] ?? 'Member',
-                        'responder_nik' => null,
-                        'responder_department' =>  $member['department'] ?? null,
-                        'created_at' => now(),
-                    ]);
-                }
+        // Masukkan Anggota Tim Tambahan
+        $auditTeam = $request->input('audit_team', []);
+        foreach ($auditTeam as $member) {
+            if (!empty($member['name'])) {
+                $responders[] = [
+                    'id'                   => (string) Str::uuid(),
+                    'audit_session_id'     => $sessionId,
+                    'responder_name'       => trim($member['name']),
+                    'responder_nik'        => $member['nik'] ?? null,
+                    'responder_department' => $member['department'] ?? null,
+                    'responder_role'       => $member['role'] ?? 'Member',
+                    'created_at'           => now(),
+                    'updated_at'           => now(),
+                ];
             }
+        }
 
-  if (!empty($responders)) {
-            DB::table('audit_responders')->insert($responders); // ✅ Batch insert!
+        // 7. Eksekusi Batch Insert (Lebih cepat daripada insert satu-satu di dalam loop)
+        if (!empty($responders)) {
+            DB::table('audit_responders')->insert($responders);
         }
 
         return redirect()->route('audit.menu', ['id' => $newAuditId])
-                         ->with('success', 'Audit baru berhasil dibuat!');
+                         ->with('success', "Audit {$auditCode} berhasil dibuat!");
     });
-    }
+}
 
     // ... (method menu(), show(), store(), clauseDetail() tetap sama seperti sebelumnya)
     
