@@ -178,7 +178,7 @@
       {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
 <div class="lg:col-span-2">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-<div class="px-6 py-5 bg-primary-blue flex justify-between items-center">
+<div class="px-6 py-5 bg-[#1a365d] flex justify-between items-center">
     <h3 class="font-bold text-white text-lg tracking-tight">
         Daftar Audit Terbaru
     </h3>
@@ -248,7 +248,7 @@
        {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
 <div class="lg:col-span-1">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-<div class="px-6 py-5 bg-primary-blue flex items-center justify-between">
+<div class="px-6 py-5 bg-[#1a365d] flex items-center justify-between">
     <h3 class="font-bold text-white flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
