@@ -40,7 +40,7 @@
             <p class="text-lg font-medium mt-2 opacity-90">PT Trias Sentosa Tbk</p>
         </div>
     </div>
-</div>
+
 
 
 
