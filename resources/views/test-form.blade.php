@@ -164,7 +164,7 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
     <form id="audit-charter-form" action="{{ route('audit.start') }}" method="POST">
         @csrf
-        <!-- HIDDEN FIELDS - POSISI BENAR DI ATAS (BUKAN DI DALAM CONTAINER DINAMIS) -->
+        <!-- HIDDEN FIELDS - POSISI BENAR DI ATAS -->
         <input type="hidden" name="audit_status" value="Planned">
         <input type="hidden" name="created_at" value="{{ date('Y-m-d H:i:s') }}">
         <input type="hidden" id="auditor_dept_id" name="auditor_dept_id" value="">
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
         placeholder: 'Pilih batasan area audit...'
     });
 
-    // Lead Auditor
+    // Lead Auditor (HANYA INI YANG PAKAI TOMSELECT)
     new TomSelect('#select-auditor', {
         valueField: 'nik',
         labelField: 'name',
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- DYNAMIC TEAM MEMBER ---
+    // --- DYNAMIC TEAM MEMBER (INPUT MANUAL) ---
     function addTeamMember() {
         memberCount++;
         const container = document.getElementById('team-container');
@@ -459,18 +459,21 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                 <div>
                     <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Nama Personil</label>
-                    <select id="ts-member-${memberCount}" name="audit_team[${memberCount}][name]" 
-                            placeholder="Cari atau ketik nama..."></select>
+                    <input type="text" name="audit_team[${memberCount}][name]" 
+                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" 
+                           placeholder="Ketik nama personil...">
                 </div>
                 <div>
                     <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">NIK</label>
-                    <input type="text" name="audit_team[${memberCount}][nik]" id="nik-${memberCount}" 
-                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" placeholder="NIK (Opsional)">
+                    <input type="text" name="audit_team[${memberCount}][nik]" 
+                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" 
+                           placeholder="NIK (Opsional)">
                 </div>
                 <div>
                     <label class="text-[10px] font-bold uppercase text-slate-500 mb-1 block">Departemen</label>
-                    <input type="text" name="audit_team[${memberCount}][department]" id="dept-${memberCount}" 
-                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" placeholder="Departemen">
+                    <input type="text" name="audit_team[${memberCount}][department]" 
+                           class="w-full text-sm border border-slate-300 rounded px-3 py-2" 
+                           placeholder="Departemen">
                 </div>
             </div>
             
@@ -486,46 +489,9 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         container.appendChild(row);
-
-        // Inisialisasi TomSelect untuk anggota baru
-        new TomSelect(`#ts-member-${memberCount}`, {
-            valueField: 'name',
-            labelField: 'name',
-            searchField: ['name', 'nik'],
-            options: AUDITORS,
-            create: true,
-            placeholder: 'Cari atau ketik nama...',
-            render: {
-                option: function(data, escape) {
-                    return `<div><span class="font-bold">${escape(data.name)}</span> <span class="text-xs text-slate-500 ml-2">(${escape(data.nik)})</span></div>`;
-                },
-                item: function(data, escape) {
-                    return `<div>${escape(data.name)}</div>`;
-                }
-            },
-            onChange: function(value) {
-                const person = AUDITORS.find(a => a.name === value);
-                const nikInp = document.getElementById(`nik-${memberCount}`);
-                const deptInp = document.getElementById(`dept-${memberCount}`);
-                
-                if (person) {
-                    nikInp.value = person.nik;
-                    deptInp.value = person.dept;
-                    nikInp.readOnly = true;
-                    deptInp.readOnly = true;
-                    nikInp.classList.add('bg-slate-100');
-                    deptInp.classList.add('bg-slate-100');
-                } else {
-                    nikInp.readOnly = false;
-                    deptInp.readOnly = false;
-                    nikInp.classList.remove('bg-slate-100');
-                    deptInp.classList.remove('bg-slate-100');
-                }
-            }
-        });
     }
 
-    // Fungsi hapus anggota tim (global scope)
+    // Fungsi hapus anggota tim
     window.removeTeamMember = function(index) {
         const row = document.getElementById(`member-row-${index}`);
         if (row) row.remove();
