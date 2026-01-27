@@ -284,36 +284,31 @@
         document.getElementById('team-container').insertAdjacentHTML('beforeend', html);
     }
 
-    // MOCK DATA DEPARTEMEN (Pastikan ID ini UUID sesuai database Anda)
-    // Contoh: 'b1f8...' bukan '1'
-    const DEPARTMENTS = [
-        @foreach($departments as $dept)
-            {id: '{{ $dept->id }}', name: '{{ $dept->name }}'},
-        @endforeach
-    ];
+// 1. Ambil data Departemen ASLI dari database (Isinya UUID)
+    const DEPARTMENTS = @json($departments); 
     
-    // Ambil data auditor dari Controller (Data yang Anda berikan tadi)
+    // 2. Ambil data Auditor ASLI dari Controller
     const AUDITORS = @json($auditorsList); 
 
-    // Initialize TomSelect Lead Auditor
+    // --- TomSelect Lead Auditor ---
     new TomSelect('#select-auditor', {
-        valueField: 'id',
+        valueField: 'nik', // Gunakan NIK sebagai value unik
         labelField: 'name',
         searchField: 'name',
         options: AUDITORS,
         onChange: function(value) {
-            const auditor = AUDITORS.find(a => a.id == value);
+            const auditor = AUDITORS.find(a => a.nik == value);
             if(auditor) {
-                // Simpan nama departemen auditor untuk pengecekan konflik
+                // Simpan nama departemen auditor untuk pengecekan konflik independensi
                 document.getElementById('auditor_dept_id').value = auditor.dept;
                 validateIndependence();
             }
         }
     });
 
-    // Initialize TomSelect Departemen Auditee
+    // --- TomSelect Departemen Auditee ---
     new TomSelect('#select-department', {
-        valueField: 'id',
+        valueField: 'id', // Ini akan berisi UUID dari database
         labelField: 'name',
         searchField: 'name',
         options: DEPARTMENTS,
@@ -323,39 +318,24 @@
     });
 
     function validateIndependence() {
-        const auditorDeptName = document.getElementById('auditor_dept_id').value; // String (e.g., 'BOPET')
-        const auditeeDeptSelect = document.getElementById('select-department').tomselect;
-        const auditeeDeptName = auditeeDeptSelect.options[auditeeDeptSelect.getValue()]?.name;
+        const auditorDeptName = document.getElementById('auditor_dept_id').value; // Contoh: 'BOPET'
+        const auditeeSelect = document.getElementById('select-department').tomselect;
+        const selectedDeptData = auditeeSelect.options[auditeeSelect.getValue()];
+        const auditeeDeptName = selectedDeptData ? selectedDeptData.name : '';
 
         const warning = document.getElementById('conflict-warning');
         const submitBtn = document.querySelector('button[type="submit"]');
 
+        // Cek jika nama departemen sama (Konflik Independensi)
         if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
             warning.classList.remove('hidden');
             submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50');
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
             warning.classList.add('hidden');
             submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50');
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
-    }
-
-    // Perbaikan fungsi Tambah Anggota Tim
-    let memberCount = 0;
-    function addTeamMember() {
-        memberCount++;
-        const html = `
-            <div class="flex gap-3 bg-slate-50 p-3 rounded" id="member-${memberCount}">
-                <input type="text" name="audit_team[${memberCount}][name]" placeholder="Nama Anggota" class="flex-grow border rounded px-3 py-2">
-                <select name="audit_team[${memberCount}][role]" class="border rounded px-3 py-2">
-                    <option value="Auditor">Auditor</option>
-                    <option value="Observer">Observer</option>
-                </select>
-                <button type="button" onclick="document.getElementById('member-${memberCount}').remove()">✕</button>
-            </div>
-        `;
-        document.getElementById('team-container').insertAdjacentHTML('beforeend', html);
     }
 </script>
 

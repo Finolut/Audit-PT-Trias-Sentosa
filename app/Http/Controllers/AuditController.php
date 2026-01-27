@@ -89,8 +89,8 @@ public function startAudit(Request $request)
     ]);
 
     return DB::transaction(function () use ($request) {
-        // Ambil data auditor berdasarkan ID yang dipilih di TomSelect
-        $selectedAuditor = collect($this->auditorsList)->firstWhere('id', $request->lead_auditor_id);
+        // Cari data auditor berdasarkan NIK/ID dari list statis
+        $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
         
         $auditorName = $selectedAuditor['name'] ?? 'Unknown';
         $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
@@ -161,6 +161,18 @@ public function startAudit(Request $request)
         return redirect()->route('audit.menu', ['id' => $newAuditId])
                          ->with('success', "Audit {$request->audit_code} berhasil dibuat!");
     });
+}
+
+public function createAudit() 
+{
+    // Ambil data departemen asli dari database (yang berisi UUID)
+    $departments = DB::table('departments')->select('id', 'name')->get();
+    
+    // Kirim data ke view
+    return view('test-form', [
+        'departments' => $departments,
+        'auditorsList' => $this->auditorsList // Pastikan variabel ini dikirim
+    ]);
 }
 
     // ... (method menu(), show(), store(), clauseDetail() tetap sama seperti sebelumnya)
