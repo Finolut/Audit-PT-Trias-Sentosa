@@ -28,12 +28,10 @@
             <h1 class="text-2xl font-bold text-slate-900">📄 Internal Audit Charter</h1>
             <p class="text-slate-500 text-sm">Formulir Perencanaan Pemeriksaan Internal (ISO 19011 Compliant)</p>
         </div>
-        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-mono text-sm font-bold border border-blue-200">
-            Status: <span id="status-badge">DRAFT</span>
-        </div>
     </div>
 
     <form action="{{ route('audit.start') }}" method="POST">
+        @csrf
         <input type="hidden" name="audit_status" value="Planned"> <input type="hidden" name="created_at" value="{{ date('Y-m-d H:i:s') }}">
         
         <div class="section-card ts-border-left">
@@ -270,10 +268,10 @@
         const html = `
             <div class="flex flex-col md:flex-row gap-3 bg-slate-50 p-3 rounded border border-slate-200 animate-fade-in" id="member-${memberCount}">
                 <div class="flex-grow">
-                    <input type="text" name="team[${memberCount}][name]" placeholder="Nama Anggota Tim" class="w-full text-sm border-slate-300 rounded px-3 py-2">
+                    <input type="text" name="audit_team[${memberCount}][name]" placeholder="Nama Anggota Tim" class="w-full text-sm border-slate-300 rounded px-3 py-2">
                 </div>
                 <div class="w-full md:w-1/3">
-                    <select name="team[${memberCount}][role]" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
+                    <select name="audit_team[${memberCount}][role]"" class="w-full text-sm border-slate-300 rounded px-3 py-2 bg-white">
                         <option value="Auditor">Auditor Anggota</option>
                         <option value="Observer">Observer (Pengamat)</option>
                         <option value="Technical Expert">Tenaga Ahli Teknis</option>
