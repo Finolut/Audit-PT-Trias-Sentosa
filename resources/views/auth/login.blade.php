@@ -15,7 +15,7 @@
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 mx-4">
         {{-- Header / Logo Area --}}
        <div class="relative z-10 flex flex-col items-center gap-2">
-    <img src="https://s3-symbol-logo.tradingview.com/trias-sentosa-rp-500--600.png" alt="Logo" class="h-8 opacity-90">
+    <img src="https://img2.beritasatu.com/cache/investor/480x310-3/2025/06/1749997476-1009x572.webp" alt="Logo" class="h-8 opacity-90">
     <h1 class="text-xl font-bold tracking-wide">INTERNAL AUDIT</h1>
     <p class="text-blue-200 text-xs">PT Trias Sentosa Tbk</p>
 </div>
@@ -76,9 +76,17 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:-translate-y-0.5">
-                    MASUK PORTAL AUDIT
-                </button>
+<button 
+    type="submit"
+    class="w-full flex justify-center items-center
+           py-3 px-4 rounded-lg shadow-sm
+           text-sm font-bold text-white
+           bg-primary-blue hover-bg-primary-blue
+           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900
+           transition-all transform hover:-translate-y-0.5">
+    MASUK PORTAL AUDIT
+</button>
+
             </form>
 
             <p class="mt-4 text-[11px] text-slate-400 text-center">
