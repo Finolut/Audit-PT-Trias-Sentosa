@@ -76,21 +76,26 @@ private $auditorsList = [
 // 1. UPDATE startAudit (Generate Token saat mulai)
     public function startAudit(Request $request)
     {
-        $request->validate([
-            'lead_auditor_id'     => 'required|string',
-            'auditee_dept_id'     => 'required|exists:departments,id',
-            'audit_code'          => 'required|string',
-            'audit_type'          => 'required|string',
-            'audit_objective'     => 'required|string',
-            'audit_scope'         => 'required|array|min:1',
-            'audit_standards'     => 'required|array|min:1',
-            'methodology'         => 'required|array|min:1',
-            'auditee_pic'         => 'required|string',
-            'start_time'          => 'required|date_format:H:i',
-            'end_time'            => 'required|date_format:H:i|after:start_time',
-            'audit_date'          => 'required|date',
-            'audit_team'          => 'nullable|array',
-        ]);
+$request->validate([
+    'lead_auditor_id'        => 'required|string',
+    'lead_auditor_email'     => 'nullable|email',
+    'auditee_dept_ids'       => 'required|array|min:1',
+    'auditee_dept_ids.*'     => 'exists:departments,id',
+
+    'audit_code'             => 'required|string',
+    'audit_type'             => 'required|string',
+    'audit_objective'        => 'required|string',
+    'audit_scope'            => 'required|array|min:1',
+    'audit_standards'        => 'required|array|min:1',
+    'methodology'            => 'required|array|min:1',
+
+    'start_time'             => 'required|date_format:H:i',
+    'end_time'               => 'required|date_format:H:i|after:start_time',
+    'audit_date'             => 'required|date',
+
+    'audit_team'             => 'nullable|array',
+]);
+
 
         return DB::transaction(function () use ($request) {
             $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
@@ -112,6 +117,7 @@ private $auditorsList = [
                 'auditor_name'            => $auditorName,
                 'auditor_nik'             => $auditorNik,
                 'auditor_department'      => $auditorDept,
+                'auditor_email'           => $request->lead_auditor_email,
                 'audit_date'              => $request->audit_date,
                 'resume_token'            => $tokenRaw,
                 'resume_token_expires_at' => now()->addDays(7),
@@ -120,23 +126,27 @@ private $auditorsList = [
             ]);
 
             // Simpan audit utama
-            DB::table('audits')->insert([
-                'id'               => $newAuditId,
-                'audit_session_id' => $sessionId,
-                'department_id'    => $request->auditee_dept_id,
-                'audit_code'       => $request->audit_code,
-                'status'           => 'IN_PROGRESS',
-                'type'             => $request->audit_type,
-                'objective'        => $request->audit_objective,
-                'scope'            => implode(', ', $request->audit_scope),
-                'standards'        => implode(', ', $request->audit_standards),
-                'methodology'      => implode(', ', $request->methodology),
-                'pic_auditee_name' => $request->auditee_pic,
-                'start_time'       => $request->start_time,
-                'end_time'         => $request->end_time,
-                'created_at'       => now(),
-                'updated_at'       => now(),
-            ]);
+DB::table('audits')->insert([
+    'id'               => $newAuditId,
+    'audit_session_id' => $sessionId,
+
+    // simpan multi departemen sebagai JSON / string
+    'department_ids'   => json_encode($request->auditee_dept_ids),
+
+    'audit_code'       => $request->audit_code,
+    'status'           => 'IN_PROGRESS',
+    'type'             => $request->audit_type,
+    'objective'        => $request->audit_objective,
+    'scope'            => json_encode($request->audit_scope),
+    'standards'        => json_encode($request->audit_standards),
+    'methodology'      => json_encode($request->methodology),
+
+    'start_time'       => $request->start_time,
+    'end_time'         => $request->end_time,
+    'created_at'       => now(),
+    'updated_at'       => now(),
+]);
+
 
             // Simpan responders (Lead Auditor + Tim)
             $responders = [
