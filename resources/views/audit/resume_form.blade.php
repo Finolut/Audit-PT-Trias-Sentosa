@@ -36,7 +36,7 @@
         @endif
 
         <!-- Form -->
-<form id="resumeForm" action="{{ route('audit.resume.check') }}" method="POST" class="space-y-6">
+<form id="resumeForm" action="{{ route('audit.resume.validate') }}" method="POST" class="space-y-6">
     @csrf
 
     <div>

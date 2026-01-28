@@ -84,13 +84,17 @@ Route::post('/test-form', function (Request $request) {
 
 */
 // 1. Route untuk MENAMPILKAN halaman konfirmasi resume (pakai GET)
-Route::get('/audit/resume/form', [AuditController::class, 'showResumeForm'])
+Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
     ->name('audit.resume.form');
 
 // 2. Route untuk MEMPROSES keputusan (continue/abandon) — pakai POST
 Route::post('/audit/resume/check', [AuditController::class, 'handleResumeDecision'])
     ->name('audit.resume.action');
 // ✅ Route untuk MENAMPILKAN halaman konfirmasi (GET) - WAJIB ADA
+
+// ✅ Route untuk validasi token dari form resume
+Route::post('/audit/resume/validate', [AuditController::class, 'validateResumeToken'])
+    ->name('audit.resume.validate'); // ← NAMA ROUTE INI YANG DIGUNAKAN DI FORM
 
 
 // ✅ Route untuk MEMPROSES keputusan (POST) - sesuai kode Anda
