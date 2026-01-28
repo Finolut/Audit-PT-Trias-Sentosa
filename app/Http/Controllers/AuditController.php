@@ -398,6 +398,19 @@ public function show($auditId, $mainClause)
     $audit = DB::table('audits')->where('id', $auditId)->first();
     if(!$audit) abort(404);
 
+    // === PERBAIKAN: AMBIL DEPARTEMEN AKTIF DARI SESSION ===
+    $activeDeptId = session('active_department_id');
+    
+    if (!$activeDeptId) {
+        // Jika belum pilih departemen, redirect ke pemilihan
+        return redirect()->route('audit.select_department', ['id' => $auditId]);
+    }
+
+    $targetDeptName = DB::table('departments')
+        ->where('id', $activeDeptId)
+        ->value('name') ?? 'Unknown Department';
+    // =====================================================
+
     $subCodes = $this->mainClauses[$mainClause];
     $clausesData = DB::table('clauses')->whereIn('clause_code', $subCodes)->get();
 
@@ -412,14 +425,16 @@ public function show($auditId, $mainClause)
     $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
     $existingNotes = DB::table('audit_questions')
         ->where('audit_id', $auditId)
+        ->where('department_id', $activeDeptId) // Filter per departemen aktif
         ->whereIn('clause_code', $subCodes)
         ->pluck('question_text', 'clause_code');
 
     // --- TAMBAHKAN LOGIKA INI ---
-    // Mengambil jawaban yang sudah tersimpan untuk audit ini
+    // Mengambil jawaban yang sudah tersimpan untuk audit ini DAN departemen aktif
     $existingAnswers = [];
     $rawAnswers = DB::table('answers')
         ->where('audit_id', $auditId)
+        ->where('department_id', $activeDeptId) // ✅ Filter per departemen aktif
         ->get();
 
     foreach ($rawAnswers as $ans) {
@@ -438,12 +453,12 @@ public function show($auditId, $mainClause)
         'clauseTitles'   => $clausesData->pluck('title', 'clause_code'),
         'nextMainClause' => $nextMain,
         'auditorName'    => $session->auditor_name,
-        'targetDept'     => DB::table('departments')->where('id', $audit->department_id)->value('name'),
+        'targetDept'     => $targetDeptName, // ✅ Gunakan nama departemen aktif
         'itemsGrouped'   => $itemsGrouped,
         'existingNotes'  => $existingNotes,
         'maturityLevels' => DB::table('maturity_levels')->orderBy('level_number')->get(),
         'responders'     => DB::table('audit_responders')->where('audit_session_id', $session->id)->get(),
-        'existingAnswers'=> $existingAnswers, // Kirim ke Blade
+        'existingAnswers'=> $existingAnswers,
     ]);
 }
 
