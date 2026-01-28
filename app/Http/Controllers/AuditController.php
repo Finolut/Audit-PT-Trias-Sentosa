@@ -301,8 +301,12 @@ public function menu($auditId)
     $audit = DB::table('audits')->where('id', $auditId)->first();
     if(!$audit) abort(404);
 
+    $departmentIds = json_decode($audit->department_ids, true);
+
     $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-    $deptName = DB::table('departments')->where('id', $audit->department_id)->value('name');
+    $departmentNames = DB::table('departments')
+    ->whereIn('id', $departmentIds)
+    ->pluck('name');
 
     $clauseProgress = [];
     $allFinished = true;
@@ -345,6 +349,8 @@ public function menu($auditId)
             'updated_at' => now()
         ]);
     }
+
+    $deptName = $departmentNames->implode(', ');
 
     return view('audit.menu', [
         'auditId'          => $auditId,
