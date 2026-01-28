@@ -114,14 +114,13 @@
 <!-- Mini Hero Section -->
 <section class="hero-section text-white">
     <div class="max-w-7xl mx-auto px-4 lg:px-6">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">
-            INTERNAL AUDIT CHARTER
-        </h1>
+<h1 class="text-3xl md:text-4xl font-bold mb-3">
+    INTERNAL AUDIT CHARTER
+</h1>
+<p class="text-base md:text-lg opacity-90 max-w-3xl">
+    Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
+</p>
 
-        <!-- OPSI 1: versi kamu (lebih marketing) -->
-        <p class="text-base md:text-lg opacity-90 max-w-3xl">
-            Formalize your audit planning in compliance with ISO 19011 standards for enterprise-grade assurance
-        </p>
 
         <!-- OPSI 2: versi lebih audit-grade (DISARANKAN) -->
         <!--
@@ -155,23 +154,19 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Jenis Pemeriksaan</label>
-                    <select name="audit_type" required class="form-input">
-                        <option value="First Party">Pihak Pertama (Internal Rutin)</option>
-                        <option value="Follow Up">Pemeriksaan Lanjutan (Corrective Action)</option>
-                        <option value="Investigative">Investigasi Khusus (Insidentil)</option>
-                        <option value="Surprise">Mendadak (Unannounced)</option>
-                    </select>
+<select name="audit_type" required class="form-input">
+    <option value="FIRST_PARTY">Pihak Pertama (Internal Rutin)</option>
+    <option value="FOLLOW_UP">Pemeriksaan Lanjutan (Corrective Action)</option>
+    <option value="INVESTIGATIVE">Investigasi Khusus (Insidentil)</option>
+    <option value="SURPRISE">Audit Mendadak (Unannounced)</option>
+</select>
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Referensi Standar / Kriteria Audit</label>
                     <select id="select-standards" name="audit_standards[]" multiple 
                             placeholder="Pilih standar yang relevan..." required 
                             class="form-input">
-                        <option value="ISO 9001:2015">ISO 9001:2015 (Mutu)</option>
-                        <option value="ISO 14001:2015">ISO 14001:2015 (Lingkungan)</option>
-                        <option value="ISO 45001:2018">ISO 45001:2018 (K3)</option>
-                        <option value="Company SOP">SOP / Kebijakan Perusahaan</option>
-                        <option value="Regulatory">Peraturan Pemerintah / UU</option>
+                        <option value="ISO 14001:2015">ISO 14001:2015 (Environmental Management System)</option>
                     </select>
                 </div>
             </div>
@@ -190,78 +185,85 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Audit Scope (Lingkup)</label>
-                    <select id="select-scope" name="audit_scope[]" multiple 
-                            placeholder="Pilih batasan area audit..." required 
-                            class="form-input">
-                        <option value="Process-Procurement">Proses Pengadaan</option>
-                        <option value="Process-Production">Proses Produksi</option>
-                        <option value="Process-Finance">Laporan Keuangan</option>
-                        <option value="Physical-Asset">Fisik Aset / Inventaris</option>
-                        <option value="HR-Competency">Kompetensi SDM</option>
-                        <option value="Digital-Security">Keamanan Data / IT</option>
-                    </select>
+<select id="select-scope" name="audit_scope[]" multiple
+        placeholder="Pilih batasan area audit..." required
+        class="form-input">
+
+    <!-- PROSES -->
+    <option value="PROCESS_PROCUREMENT">Proses Pengadaan</option>
+    <option value="PROCESS_PRODUCTION">Proses Produksi</option>
+    <option value="PROCESS_FINANCE">Proses Keuangan</option>
+    <!-- ASET -->
+    <option value="ASSET_PHYSICAL">Fisik Aset / Inventaris</option>
+    <!-- SDM -->
+    <option value="HR_COMPETENCY">Kompetensi SDM</option>
+    <!-- IT -->
+    <option value="IT_SECURITY">Keamanan Data / IT</option>
+</select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-700">
-        Metodologi Pemeriksaan
+<label class="block text-sm font-semibold mb-2 text-slate-700">
+    Metodologi Pemeriksaan
+</label>
+
+<div class="flex flex-wrap gap-3">
+
+    <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
+        <input type="checkbox" name="methodology[]" value="METHOD_DOC_REVIEW"
+               class="rounded text-slate-800 focus:ring-slate-800">
+        <span class="text-sm">Document Review</span>
     </label>
-                    <div class="flex flex-wrap gap-3">
-                        <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" name="methodology[]" value="Document Review" class="rounded text-slate-800 focus:ring-slate-800">
-                            <span class="text-sm">Document Review</span>
-                        </label>
-                        <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" name="methodology[]" value="Interview" class="rounded text-slate-800 focus:ring-slate-800">
-                            <span class="text-sm">Wawancara (Interview)</span>
-                        </label>
-                        <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" name="methodology[]" value="Observation" class="rounded text-slate-800 focus:ring-slate-800">
-                            <span class="text-sm">Observasi Lapangan</span>
-                        </label>
-                        <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" name="methodology[]" value="Sampling" class="rounded text-slate-800 focus:ring-slate-800">
-                            <span class="text-sm">Sampling Fisik</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </section>
+
+    <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
+        <input type="checkbox" name="methodology[]" value="METHOD_INTERVIEW"
+               class="rounded text-slate-800 focus:ring-slate-800">
+        <span class="text-sm">Wawancara (Interview)</span>
+    </label>
+
+    <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
+        <input type="checkbox" name="methodology[]" value="METHOD_OBSERVATION"
+               class="rounded text-slate-800 focus:ring-slate-800">
+        <span class="text-sm">Observasi Lapangan</span>
+    </label>
+
+    <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
+        <input type="checkbox" name="methodology[]" value="METHOD_SAMPLING"
+               class="rounded text-slate-800 focus:ring-slate-800">
+        <span class="text-sm">Sampling Fisik</span>
+    </label>
+
+</div>
+
 
         <!-- Section 3: Tim Pemeriksa -->
         <section class="mt-10">
             <h2 class="section-title">Tim Pemeriksa (Audit Team)</h2>
             <p class="section-description">Ensure team composition meets independence requirements per ISO 19011 clause 5.3</p>
-            
-            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
-                <div class="flex items-start gap-2">
-                    <span class="text-slate-500">⚠️</span>
-                    <div>
-                        <strong class="text-slate-700">Prinsip Independensi:</strong> 
-                        Auditor tidak boleh mengaudit departemen dimana ia bekerja atau memiliki tanggung jawab langsung.
-                    </div>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Lead Auditor</label>
-                    <select id="select-auditor" name="lead_auditor_id" 
-                            placeholder="Pilih Lead Auditor..." required 
-                            class="form-input">
-                        <!-- Data akan diisi via JavaScript -->
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Deklarasi Kepatuhan</label>
-                    <div class="flex items-start gap-3 pt-2">
-                        <input type="checkbox" id="independence_decl" name="independence_decl" required 
-                               class="mt-1 h-5 w-5 text-slate-800 rounded focus:ring-slate-800">
-                        <label for="independence_decl" class="text-sm text-slate-600">
-                            Saya menyatakan <strong>bebas dari konflik kepentingan</strong> terhadap area yang akan diaudit dan akan bertindak objektif.
-                        </label>
-                    </div>
-                </div>
-            </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div>
+        <label class="block text-sm font-semibold mb-1 text-slate-700">
+            Lead Auditor
+        </label>
+        <select id="select-auditor" name="lead_auditor_id"
+                placeholder="Pilih Lead Auditor..." required
+                class="form-input">
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-sm font-semibold mb-1 text-slate-700">
+            Email Lead Auditor <span class="text-slate-400 font-normal">(opsional)</span>
+        </label>
+        <input type="email" name="lead_auditor_email"
+               placeholder="nama@perusahaan.com"
+               class="form-input">
+        <p class="text-xs text-slate-500 mt-1">
+            Digunakan untuk komunikasi dan distribusi laporan audit.
+        </p>
+    </div>
+</div>
+
 
             <div>
                 <label class="block text-sm font-semibold mb-2 text-slate-700">Anggota Tim Tambahan</label>
@@ -277,44 +279,61 @@
         </section>
 
         <!-- Section 4: Target Audit & Jadwal -->
-        <section class="mt-10">
-            <h2 class="section-title">Target Audit & Jadwal</h2>
-            <p class="section-description">Schedule the operational execution phase with precise timing and resource allocation</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Departemen Auditee</label>
-                    <select id="select-department" name="auditee_dept_id" 
-                            placeholder="Pilih Departemen..." required 
-                            class="form-input">
-                        <!-- Data akan diisi via JavaScript -->
-                    </select>
-                    <div id="conflict-warning" class="hidden text-xs text-red-600 font-bold mt-1">
-                        ⛔ KONFLIK: Lead Auditor berasal dari departemen ini!
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">PIC / Penanggung Jawab Area</label>
-                    <input type="text" name="auditee_pic" placeholder="Nama Manager/SPV Area" 
-                           class="form-input">
-                </div>
-            </div>
+<section class="mt-10">
+    <h2 class="section-title">Target Audit & Jadwal</h2>
+    <p class="section-description">
+        Define the auditee departments and schedule the audit execution period.
+    </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Tanggal Audit</label>
-                    <input type="date" name="audit_date" required class="form-input">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Jam Mulai</label>
-                    <input type="time" name="start_time" required class="form-input">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Estimasi Selesai</label>
-                    <input type="time" name="end_time" required class="form-input">
-                </div>
-            </div>
-        </section>
+    <!-- Departemen Auditee (Multi) -->
+    <div class="mb-6">
+        <label class="block text-sm font-semibold mb-1 text-slate-700">
+            Departemen Auditee
+        </label>
+        <select id="select-department"
+                name="auditee_dept_ids[]"
+                multiple
+                placeholder="Pilih satu atau lebih departemen..."
+                required
+                class="form-input">
+            <!-- Data via JavaScript -->
+        </select>
+
+        <div id="conflict-warning"
+             class="hidden text-xs text-red-600 font-bold mt-1">
+            ⛔ KONFLIK: Lead Auditor berasal dari salah satu departemen yang dipilih!
+        </div>
+
+        <p class="text-xs text-slate-500 mt-1">
+            Audit dapat mencakup lebih dari satu departemen dalam satu penugasan.
+        </p>
+    </div>
+
+    <!-- Jadwal Audit -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+            <label class="block text-sm font-semibold mb-1 text-slate-700">
+                Tanggal Audit
+            </label>
+            <input type="date" name="audit_date" required class="form-input">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1 text-slate-700">
+                Jam Mulai
+            </label>
+            <input type="time" name="start_time" required class="form-input">
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-1 text-slate-700">
+                Estimasi Selesai
+            </label>
+            <input type="time" name="end_time" required class="form-input">
+        </div>
+    </div>
+</section>
+
 
         <!-- CTA Utama -->
         <div class="mt-8 text-center">
@@ -422,25 +441,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- VALIDASI INDEPENDENSI ---
-    function validateIndependence() {
-        const auditorDeptName = document.getElementById('auditor_dept_id').value;
-        const auditeeDeptId = deptSelect.getValue();
-        const selectedDeptData = DEPARTMENTS.find(d => d.id == auditeeDeptId);
-        const auditeeDeptName = selectedDeptData ? selectedDeptData.name : '';
+function validateIndependence() {
+    const auditorDept = document.getElementById('auditor_dept_id').value;
+    const auditeeDeptIds = deptSelect.getValue(); // array
+    const warning = document.getElementById('conflict-warning');
+    const submitBtn = document.getElementById('submit-btn');
 
-        const warning = document.getElementById('conflict-warning');
-        const submitBtn = document.getElementById('submit-btn');
+    const conflict = auditeeDeptIds.some(id => {
+        const dept = DEPARTMENTS.find(d => d.id == id);
+        return dept && dept.name === auditorDept;
+    });
 
-        if (auditorDeptName && auditeeDeptName && auditorDeptName === auditeeDeptName) {
-            warning.classList.remove('hidden');
-            submitBtn.disabled = true;
-        } else {
-            warning.classList.add('hidden');
-            if (!formSubmitted) {
-                submitBtn.disabled = false;
-            }
-        }
+    if (conflict) {
+        warning.classList.remove('hidden');
+        submitBtn.disabled = true;
+    } else {
+        warning.classList.add('hidden');
+        submitBtn.disabled = false;
     }
+}
 
     // --- DYNAMIC TEAM MEMBER (INPUT MANUAL) ---
     function addTeamMember() {
