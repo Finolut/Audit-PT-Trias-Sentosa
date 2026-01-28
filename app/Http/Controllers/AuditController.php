@@ -128,29 +128,30 @@ public function startAudit(Request $request)
             'created_at'              => now(),
         ]);
 
-        // Simpan audit utama
-        DB::table('audits')->insert([
-            'id'               => $newAuditId,
-            'audit_session_id' => $sessionId,
-            'department_ids'   => json_encode($request->auditee_dept_ids),
-            // PERBAIKAN: Ambil departemen pertama sebagai primary jika struktur DB butuh single ID
-            'department_id'    => $request->auditee_dept_ids[0] ?? null, 
+ DB::table('audits')->insert([
+    'id'               => $newAuditId,
+    'audit_session_id' => $sessionId,
 
-            'audit_code'       => $request->audit_code,
-            'status'           => 'IN_PROGRESS',
-            'type'             => $request->audit_type,
-            'objective'        => $request->audit_objective,
-            'scope'            => json_encode($request->audit_scope),
-            'standards'        => json_encode($request->audit_standards),
-            'methodology'      => json_encode($request->methodology),
+    // MULTI DEPARTEMEN (FINAL)
+    'department_ids'   => json_encode($request->auditee_dept_ids),
 
-            // PERBAIKAN: Mapping nama field form ke kolom database
-            'start_time'       => $request->audit_start_date, 
-            'end_time'         => $request->audit_end_date,
-            
-            'created_at'       => now(),
-            'updated_at'       => now(),
-        ]);
+    'audit_code'       => $request->audit_code,
+    'status'           => 'IN_PROGRESS',
+    'type'             => $request->audit_type,
+    'objective'        => $request->audit_objective,
+
+    'scope'            => json_encode($request->audit_scope),
+    'standards'        => json_encode($request->audit_standards),
+    'methodology'      => json_encode($request->methodology),
+
+    // RENTANG TANGGAL (BUKAN JAM)
+    'audit_start_date' => $request->audit_start_date,
+    'audit_end_date'   => $request->audit_end_date,
+
+    'created_at'       => now(),
+    'updated_at'       => now(),
+]);
+
 
         // Simpan responders (Lead Auditor + Tim)
         $responders = [
