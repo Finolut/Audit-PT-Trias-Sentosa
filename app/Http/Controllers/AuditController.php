@@ -290,21 +290,37 @@ private function generateUniqueAuditCode($userInput = null)
         return back()->withErrors(['resume_token' => 'Token sudah kadaluarsa. Silakan buat audit baru.']);
     }
     
-    // Ambil semua child sessions yang terkait
+    // ✅ Ambil semua child sessions yang terkait (tanpa filter status)
     $childSessions = DB::table('audit_sessions')
         ->where('parent_session_id', $parentSession->id)
-        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+        ->where('is_parent', false)
         ->get();
     
     if ($childSessions->isEmpty()) {
         return back()->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
     }
     
-    // Ambil audit dari child session pertama
-    $firstChild = $childSessions->first();
+    // ✅ Filter child sessions berdasarkan status audit-nya
+    $activeChildSessions = [];
+    foreach ($childSessions as $child) {
+        $audit = DB::table('audits')
+            ->where('audit_session_id', $child->id)
+            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+            ->first();
+        
+        if ($audit) {
+            $activeChildSessions[] = $child;
+        }
+    }
+    
+    if (empty($activeChildSessions)) {
+        return back()->withErrors(['resume_token' => 'Semua audit untuk token ini sudah selesai atau dibatalkan.']);
+    }
+    
+    // Ambil audit dari child session pertama yang aktif
+    $firstChild = $activeChildSessions[0];
     $audit = DB::table('audits')
         ->where('audit_session_id', $firstChild->id)
-        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
         ->first();
     
     if (!$audit) {
@@ -321,7 +337,7 @@ private function generateUniqueAuditCode($userInput = null)
         'lastActivity'  => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
         'auditId'       => $audit->id,
         'parentSessionId' => $parentSession->id,
-        'childCount'    => $childSessions->count(), // Jumlah departemen
+        'childCount'    => count($activeChildSessions), // Jumlah departemen aktif
     ]);
 }
 
