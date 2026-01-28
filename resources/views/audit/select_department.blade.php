@@ -308,17 +308,16 @@
             @endforeach
         </div>
 
-        <div class="summary-section">
-            <p class="summary-text">
-                <strong>{{ $departments->where('status', 'completed')->count() }}</strong> dari <strong>{{ $departments->count() }}</strong> departemen telah selesai
-            </p>
-            @if($departments->where('status', 'completed')->count() == $departments->count())
-                <a href="{{ route('audit.finish') }}" class="finish-button">
-                    ✅ Selesai Semua Audit
-                </a>
-            @endif
-        </div>
-    </div>
+ <div class="summary-section">
+    <p class="summary-text">
+        <strong>{{ collect($departments)->where('status', 'completed')->count() }}</strong> dari <strong>{{ count($departments) }}</strong> departemen telah selesai
+    </p>
+    @if(collect($departments)->where('status', 'completed')->count() == count($departments))
+        <a href="{{ route('audit.finish') }}" class="finish-button">
+            ✅ Selesai Semua Audit
+        </a>
+    @endif
+</div>
 
     <form id="deptForm" method="POST" action="{{ route('audit.set_department', ['id' => $auditId]) }}">
         @csrf
