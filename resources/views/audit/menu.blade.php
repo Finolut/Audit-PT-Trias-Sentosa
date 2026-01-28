@@ -59,52 +59,15 @@
             font-size: 0.9rem;
         }
 
-        .audit-switcher {
-            background: var(--slate-50);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-        }
-
-        .switcher-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--slate-600);
-            margin-bottom: 0.75rem;
-        }
-
-        .audit-tabs {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .audit-tab {
-            padding: 0.75rem 1.25rem;
+        .token-banner {
+            background: #e0f2fe;
+            padding: 12px 20px;
             border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid var(--slate-200);
-            background: white;
-        }
-
-        .audit-tab:hover {
-            background: var(--slate-50);
-        }
-
-        .audit-tab.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .audit-tab.completed {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
+            border: 1px solid #bae6fd;
+            margin-top: 10px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #0c4a6e;
         }
 
         .grid-container {
@@ -140,10 +103,6 @@
             transform: translateY(-5px);
             box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1);
             border-color: var(--primary);
-        }
-
-        .card:hover::before {
-            width: 8px;
         }
 
         .card-number {
@@ -194,85 +153,6 @@
         }
         .card:hover .arrow { transform: translateX(5px); }
 
-        .finish-banner {
-            margin-top: 3rem;
-            padding: 2.5rem;
-            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-            border-radius: 16px;
-            text-align: center;
-            border: 2px solid var(--success);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .finish-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            color: var(--success);
-        }
-
-        .finish-message {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--slate-900);
-            margin: 0 0 1rem;
-        }
-
-        .finish-subtext {
-            color: var(--slate-600);
-            font-size: 1rem;
-            max-width: 600px;
-            margin: 0 auto 1.5rem;
-        }
-
-        .banner-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn {
-            padding: 12px 32px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
-            border: 2px solid;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: white;
-            color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
-        }
-
-        .btn-success:hover {
-            background: white;
-            color: var(--success);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -282,16 +162,6 @@
             
             .grid-container {
                 grid-template-columns: 1fr;
-            }
-            
-            .banner-actions {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 300px;
             }
         }
     </style>
@@ -303,6 +173,20 @@
         <div class="header-left">
             <h1>Audit Dashboard - {{ $deptName }}</h1>
             <p>Auditor: <strong>{{ $auditorName }}</strong> • Dept: <strong>{{ $deptName }}</strong></p>
+            
+            <!-- ✅ TAMPILKAN TOKEN DI SINI -->
+            <div class="token-banner">
+                🔑 TOKEN RESUME: {{ $resumeToken }}
+            </div>
+            
+            @if(isset($showReturnButton) && $showReturnButton)
+                <div style="margin-top: 15px;">
+                    <a href="{{ route('audit.select_department', ['id' => $auditId]) }}" 
+                       style="display: inline-block; background: var(--primary); color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-size: 14px;">
+                        ← Kembali Pilih Departemen Lain
+                    </a>
+                </div>
+            @endif
         </div>
         
         <div style="text-align: right;">
@@ -314,33 +198,6 @@
             </span>
         </div>
     </div>
-
-    <!-- Audit Switcher -->
-    @if(count($relatedAudits) > 1)
-    <div class="audit-switcher">
-        <div class="switcher-title">📋 Audit Lainnya oleh {{ $auditorName }}:</div>
-        <div class="audit-tabs">
-            @foreach($relatedAudits as $auditInfo)
-                @php
-                    $deptNameTab = DB::table('departments')->where('id', $auditInfo['dept_id'])->value('name');
-                    $isCurrent = $auditInfo['id'] === $currentAuditId;
-                    $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
-                    $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
-                @endphp
-                
-                <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}" 
-                   class="audit-tab {{ $isCurrent ? 'active' : '' }} {{ $isCompleted ? 'completed' : '' }}"
-                   style="{{ $isCompleted ? 'opacity: 0.8;' : '' }}"
-                   title="{{ $isCompleted ? '✅ Selesai' : ($isCurrent ? '📋 Sedang dikerjakan' : 'Klik untuk beralih') }}">
-                    {{ $deptNameTab }}
-                    @if($isCompleted)
-                        <span style="margin-left: 4px;">✅</span>
-                    @endif
-                </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
 
     <div class="grid-container">
         @foreach($mainClauses as $code)
@@ -384,28 +241,6 @@
             </a>
         @endforeach
     </div>
-
-    @if($allFinished)
-        <div class="finish-banner">
-            <div class="finish-icon">🎉</div>
-            <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
-            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap.</p>
-            
-            @if(count($relatedAudits) > 1)
-                <div class="banner-actions">
-                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
-                        ✅ Selesai Semua Audit
-                    </a>
-                </div>
-            @else
-                <div class="banner-actions">
-                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
-                        ✅ Selesai Audit
-                    </a>
-                </div>
-            @endif
-        </div>
-    @endif
 </div>
 
 </body>

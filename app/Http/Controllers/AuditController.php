@@ -403,69 +403,76 @@ public function createAudit()
 }
     
 public function menu($auditId)
-    {
-        $audit = DB::table('audits')->where('id', $auditId)->first();
-        if (!$audit) abort(404);
+{
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    if (!$audit) abort(404);
 
-        $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    // Ambil session terkait audit
+    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    if (!$session) abort(404);
+
+    // CEK ACTIVE DEPARTMENT DARI SESSION
+    $activeDeptId = session('active_department_id');
+    
+    if (!$activeDeptId) {
+        return redirect()->route('audit.select_department', ['id' => $auditId]);
+    }
+
+    $departmentName = DB::table('departments')->where('id', $activeDeptId)->value('name');
+
+    // Hitung progress
+    $clauseProgress = [];
+    $allFinished = true;
+
+    foreach ($this->mainClauses as $mainCode => $subCodes) {
+        $totalItems = DB::table('items')
+            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+            ->whereIn('clauses.clause_code', $subCodes)
+            ->count();
+
+        $answeredItems = DB::table('answers')
+            ->join('items', 'answers.item_id', '=', 'items.id')
+            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+            ->where('answers.audit_id', $auditId)
+            ->where('answers.department_id', $activeDeptId)
+            ->whereIn('clauses.clause_code', $subCodes)
+            ->count();
+
+        $percentage = ($totalItems > 0) ? round(($answeredItems / $totalItems) * 100) : 0;
         
-        // Ambil nama departemen tunggal
-        $departmentName = DB::table('departments')->where('id', $audit->department_id)->value('name');
-
-        // Hitung progress untuk audit ini
-        $clauseProgress = [];
-        $allFinished = true;
-
-        foreach ($this->mainClauses as $mainCode => $subCodes) {
-            $totalItems = DB::table('items')
-                ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                ->whereIn('clauses.clause_code', $subCodes)
-                ->count();
-
-            $answeredItems = DB::table('answers')
-                ->join('items', 'answers.item_id', '=', 'items.id')
-                ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                ->where('answers.audit_id', $auditId)
-                ->whereIn('clauses.clause_code', $subCodes)
-                ->count();
-
-            $percentage = ($totalItems > 0) ? round(($answeredItems / $totalItems) * 100) : 0;
-            
-            if ($percentage < 100) {
-                $allFinished = false;
-            }
-
-            $clauseProgress[$mainCode] = [
-                'percentage' => $percentage,
-                'count'      => $answeredItems,
-                'total'      => $totalItems
-            ];
+        if ($percentage < 100) {
+            $allFinished = false;
         }
 
-        // Update status jika selesai
-        if ($allFinished && count($this->mainClauses) > 0) {
-            DB::table('audits')->where('id', $auditId)->update([
-                'status' => 'COMPLETE',
-                'updated_at' => now()
-            ]);
-        }
+        $clauseProgress[$mainCode] = [
+            'percentage' => $percentage,
+            'count'      => $answeredItems,
+            'total'      => $totalItems
+        ];
+    }
 
-        // Ambil audit terkait (audit lain dari departemen yang sama auditor)
-        $relatedAudits = session('related_audits', []);
-
-        return view('audit.menu', [
-            'auditId'          => $auditId,
-            'auditorName'      => $session->auditor_name,
-            'deptName'         => $departmentName,
-            'mainClauses'      => array_keys($this->mainClauses),
-            'titles'           => $this->mainClauseTitles,
-            'clauseProgress'   => $clauseProgress,
-            'allFinished'      => $allFinished,
-            'relatedAudits'    => $relatedAudits,
-            'currentAuditId'   => $auditId,
+    if ($allFinished && count($this->mainClauses) > 0) {
+        DB::table('audits')->where('id', $auditId)->update([
+            'status' => 'COMPLETE',
+            'updated_at' => now()
         ]);
     }
 
+    $showReturnButton = $allFinished;
+
+    return view('audit.menu', [
+        'auditId'          => $auditId,
+        'auditorName'      => $session->auditor_name,
+        'deptName'         => $departmentName,
+        'mainClauses'      => array_keys($this->mainClauses),
+        'titles'           => $this->mainClauseTitles,
+        'clauseProgress'   => $clauseProgress,
+        'allFinished'      => $allFinished,
+        'showReturnButton' => $showReturnButton,
+        'activeDepartmentId' => $activeDeptId,
+        'resumeToken'      => $session->resume_token ?? 'TOKEN TIDAK TERSEDIA', // ✅ KIRIM TOKEN KE VIEW
+    ]);
+}
  public function show($auditId, $mainClause)
     {
         if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
