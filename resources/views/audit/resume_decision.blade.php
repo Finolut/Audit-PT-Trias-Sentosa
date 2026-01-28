@@ -52,7 +52,7 @@
             </div>
 
             <!-- Actions -->
-            <form action="{{ route('audit.resume.action') }}" method="POST" class="space-y-4">
+           <form action="{{ route('audit.resume.action') }}" method="POST"> 
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
                 <input type="hidden" name="audit_id" value="{{ $auditId }}">

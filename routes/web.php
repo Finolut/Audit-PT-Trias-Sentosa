@@ -82,11 +82,13 @@ Route::post('/test-form', function (Request $request) {
 | AUDIT PROCESS ROUTES (Public / Khusus Auditor lapangan)
 |--------------------------------------------------------------------------
 */
-Route::get('/audit/resume', [AuditController::class, 'showResumePage'])->name('audit.resume.form');
-Route::post('/audit/resume/check', [AuditController::class, 'validateResumeToken'])->name('audit.resume.check');
-Route::get('/audit/resume/decision', [AuditController::class, 'showResumeDecision'])
-    ->name('audit.resume.decision');
-Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])->name('audit.resume.action');
+// ✅ Route untuk MENAMPILKAN halaman konfirmasi (GET) - WAJIB ADA
+Route::get('audit/resume/form', [AuditController::class, 'showResumeDecisionForm'])
+    ->name('audit.resume.form');
+
+// ✅ Route untuk MEMPROSES keputusan (POST) - sesuai kode Anda
+Route::post('audit/resume/action', [AuditController::class, 'handleResumeDecision'])
+    ->name('audit.resume.action'); // Pastikan view menggunakan route ini!
 Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
 Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
 Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');

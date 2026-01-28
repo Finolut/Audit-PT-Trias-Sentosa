@@ -412,6 +412,32 @@ public function validateResumeToken(Request $request)
     }
 }
 
+// Di AuditController
+public function showResumeDecisionForm(Request $request)
+{
+    $request->validate(['token' => 'required']);
+    
+    // Ambil data audit berdasarkan token (sesuaikan logika)
+    $session = DB::table('audit_sessions')
+        ->where('resume_token', $request->token)
+        ->where('resume_token_expires_at', '>', now())
+        ->first();
+    
+    if (!$session) {
+        return redirect()->route('audit.create')->withErrors(['Token tidak valid atau kadaluarsa.']);
+    }
+    
+    $audit = DB::table('audits')->where('audit_session_id', $session->id)->first();
+    
+    return view('resume.decision', [
+        'token' => $request->token,
+        'auditId' => $audit->id,
+        'auditorName' => 'Nama Auditor', // Ambil dari DB
+        'auditeeDept' => 'Departemen Target', // Ambil dari DB
+        'auditDate' => '2026-01-29', // Format sesuai kebutuhan
+        'lastActivity' => $session->last_activity_at,
+    ]);
+}
 public function createAudit() 
 {
     // 1. Ambil data departemen (id akan berisi UUID dari DB)
