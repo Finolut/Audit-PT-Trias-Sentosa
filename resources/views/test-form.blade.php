@@ -113,7 +113,7 @@
 
 <!-- Mini Hero Section -->
 <section class="hero-section text-white">
-    <div class="max-w-4xl mx-auto px-4">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
         <h1 class="text-3xl md:text-4xl font-bold mb-3">
             INTERNAL AUDIT CHARTER
         </h1>
@@ -134,7 +134,7 @@
 
 
 <!-- Form Content -->
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
     <form id="audit-charter-form" action="{{ route('audit.start') }}" method="POST">
         @csrf
         <!-- HIDDEN FIELDS - POSISI BENAR DI ATAS -->
@@ -182,7 +182,7 @@
             <h2 class="section-title">Tujuan & Lingkup (Objective & Scope)</h2>
             <p class="section-description">Define the strategic purpose and operational boundaries of the audit engagement</p>
             
-            <div class="space-y-6">
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Audit Objective (Tujuan)</label>
                     <textarea name="audit_objective" rows="3" class="form-input" 
@@ -202,7 +202,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-700">Metodologi Pemeriksaan</label>
+                    <label class="block text-sm font-semibold mb-2 text-slate-700">
+        Metodologi Pemeriksaan
+    </label>
                     <div class="flex flex-wrap gap-3">
                         <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
                             <input type="checkbox" name="methodology[]" value="Document Review" class="rounded text-slate-800 focus:ring-slate-800">
@@ -315,7 +317,7 @@
         </section>
 
         <!-- CTA Utama -->
-        <div class="mt-12 text-center">
+        <div class="mt-8 text-center">
             <button type="submit" id="submit-btn" class="main-cta">
                 Start Audit Process <span>→</span>
             </button>
