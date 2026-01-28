@@ -309,15 +309,6 @@
         </p>
     </div>
 
-    <!-- Jadwal Audit -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-700">
-                Tanggal Audit
-            </label>
-            <input type="date" name="audit_date" required class="form-input">
-        </div>
-
 <!-- Jadwal Audit -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div>
