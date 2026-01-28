@@ -91,8 +91,7 @@ Route::get('/audit/resume/form', [AuditController::class, 'showResumeForm'])
 Route::post('/audit/resume/check', [AuditController::class, 'handleResumeDecision'])
     ->name('audit.resume.action');
 // ✅ Route untuk MENAMPILKAN halaman konfirmasi (GET) - WAJIB ADA
-Route::get('audit/resume/form', [AuditController::class, 'showResumeDecisionForm'])
-    ->name('audit.resume.form');
+
 
 // ✅ Route untuk MEMPROSES keputusan (POST) - sesuai kode Anda
 Route::post('audit/resume/action', [AuditController::class, 'handleResumeDecision'])
