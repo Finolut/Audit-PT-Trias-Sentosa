@@ -90,6 +90,8 @@ Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audi
 Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
 Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
 Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.menu');
+Route::get('/audit/{id}/select-department', [AuditController::class, 'selectDepartment'])->name('audit.select_department');
+Route::post('/audit/{id}/set-department', [AuditController::class, 'setActiveDepartment'])->name('audit.set_department');
 
 // Dynamic Clause Routes (UUID validation)
 Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])

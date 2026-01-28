@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Dashboard - {{ $deptName }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #2563eb;
             --success: #10b981;
+            --warning: #f59e0b;
             --slate-50: #f8fafc;
             --slate-200: #e2e8f0;
             --slate-600: #475569;
@@ -53,6 +55,37 @@
             margin: 0.5rem 0 0;
             color: var(--slate-600);
             font-size: 0.9rem;
+        }
+
+        /* Progress Bar Header */
+        .progress-bar-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-bar-header h3 {
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            color: var(--slate-900);
+            font-size: 1.1rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background: var(--slate-200);
+            border-radius: 8px;
+            height: 12px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 8px;
+            transition: width 0.5s ease;
         }
 
         /* Grid */
@@ -137,12 +170,38 @@
 
         .badge-completed { background: #dcfce7; color: var(--success); }
         .badge-pending { background: #f1f5f9; color: var(--slate-600); }
+        .badge-inprogress { background: #fef3c7; color: var(--warning); }
 
         .arrow {
             color: var(--primary);
             transition: transform 0.3s;
         }
         .card:hover .arrow { transform: translateX(5px); }
+
+        /* Return Button */
+        .return-button {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            border: 2px solid var(--primary);
+        }
+
+        .return-button:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .return-button i {
+            margin-right: 6px;
+        }
 
         /* Finish Banner */
         .finish-banner {
@@ -164,6 +223,7 @@
             font-size: 3.5rem;
             margin-bottom: 1rem;
             display: block;
+            color: var(--success);
         }
 
         .finish-message {
@@ -180,90 +240,205 @@
             margin: 0 auto 1.5rem;
         }
 
-        .countdown {
-            font-weight: 700;
-            color: var(--success);
-            font-size: 1.1rem;
-            margin-top: 1rem;
+        .banner-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
-        @media (max-width: 640px) {
-            .header { flex-direction: column; text-align: center; gap: 1rem; }
-            .finish-message { font-size: 1.2rem; }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border: 2px solid var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border: 2px solid var(--success);
+        }
+
+        .btn-success:hover {
+            background: white;
+            color: var(--success);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .banner-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-primary, .btn-success {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .finish-message {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    @if(session('success'))
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('info'))
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> {{ session('info') }}
+        </div>
+    @endif
+
     <div class="header">
         <div class="header-content">
-            <h1>Audit Dashboard</h1>
+            <h1>Audit Dashboard - {{ $deptName }}</h1>
             <p>Auditor: <strong>{{ $auditorName }}</strong> • Dept: <strong>{{ $deptName }}</strong></p>
+            
+            @if(isset($showReturnButton) && $showReturnButton)
+                <div style="margin-top: 15px;">
+                    <a href="{{ route('audit.select_department', ['id' => $auditId]) }}" class="return-button">
+                        <i class="fas fa-arrow-left"></i> Kembali Pilih Departemen Lain
+                    </a>
+                </div>
+            @endif
         </div>
+        
         <div class="progress-info">
+            @php
+                $completedCount = collect($clauseProgress)->filter(fn($p) => $p['percentage'] >= 100)->count();
+            @endphp
             <span style="font-size: 0.85rem; font-weight: 700; color: var(--slate-600);">
-               @php
-    $completedCount = collect($clauseProgress)->filter(fn($p) => $p['percentage'] >= 100)->count();
-@endphp
-PROGRES: {{ $completedCount }} / {{ count($mainClauses) }} Klausul
+                PROGRES: {{ $completedCount }} / {{ count($mainClauses) }} Klausul
             </span>
         </div>
     </div>
 
-<div class="grid-container">
-    @foreach($mainClauses as $code)
-        @php
-            $prog = $clauseProgress[$code] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
-            $isDone = $prog['percentage'] >= 100;
-        @endphp
+    <!-- Progress Bar -->
+    <div class="progress-bar-header">
+        <h3>PROGRES: {{ $completedCount }} / {{ count($mainClauses) }} Klausul</h3>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: {{ ($completedCount / count($mainClauses)) * 100 }}%;"></div>
+        </div>
+    </div>
 
-        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
-            class="card {{ $isDone ? 'completed' : '' }}">
-            
-            <span class="card-number">Klausul {{ $code }}</span>
-            <span class="card-title">{{ $titles[$code] ?? 'Detail Klausul ' . $code }}</span>
+    <div class="grid-container">
+        @foreach($mainClauses as $code)
+            @php
+                $prog = $clauseProgress[$code] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
+                $isDone = $prog['percentage'] >= 100;
+                $inProgress = $prog['count'] > 0 && !$isDone;
+            @endphp
 
-            <div style="margin-top: auto; margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; font-weight: 700;">
-                    <span>{{ $prog['count'] }} / {{ $prog['total'] }} Soal</span>
-                    <span>{{ $prog['percentage'] }}%</span>
-                </div>
-                <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 10px; overflow: hidden;">
-                    <div style="width: {{ $prog['percentage'] }}%; background: {{ $isDone ? 'var(--success)' : 'var(--primary)' }}; height: 100%; transition: width 0.5s;"></div>
-                </div>
-            </div>
-
-            <div class="status-area">
-                @if($isDone)
-                    <div class="status-badge badge-completed">
-                        <i class="fas fa-check-circle"></i> Selesai
-                    </div>
-                @else
-                    <div class="status-badge badge-pending">Belum Lengkap</div>
-                    <span class="arrow">→</span>
-                @endif
-            </div>
-        </a>
-    @endforeach
-</div>
-
-        <script>
-            // Auto-redirect setelah 3 detik
-            let seconds = 3;
-            const countdownEl = document.getElementById('seconds');
-            
-            const timer = setInterval(() => {
-                seconds--;
-                countdownEl.textContent = seconds;
+            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+                class="card {{ $isDone ? 'completed' : '' }}">
                 
-                if (seconds <= 0) {
-                    clearInterval(timer);
-                    // Ganti dengan route dashboard utama kamu
-                    window.location.href = "{{ route('audit.setup') }}";
-                }
-            }, 1000);
-        </script>
+                <span class="card-number">Klausul {{ $code }}</span>
+                <span class="card-title">{{ $titles[$code] ?? 'Detail Klausul ' . $code }}</span>
+
+                <div style="margin-top: auto; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; font-weight: 700;">
+                        <span>{{ $prog['count'] }} / {{ $prog['total'] }} Soal</span>
+                        <span>{{ $prog['percentage'] }}%</span>
+                    </div>
+                    <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 10px; overflow: hidden;">
+                        <div style="width: {{ $prog['percentage'] }}%; background: {{ $isDone ? 'var(--success)' : ($inProgress ? 'var(--warning)' : 'var(--primary)') }}; height: 100%; transition: width 0.5s;"></div>
+                    </div>
+                </div>
+
+                <div class="status-area">
+                    @if($isDone)
+                        <div class="status-badge badge-completed">
+                            <i class="fas fa-check-circle"></i> Selesai
+                        </div>
+                    @elseif($inProgress)
+                        <div class="status-badge badge-inprogress">
+                            <i class="fas fa-spinner"></i> Dikerjakan
+                        </div>
+                        <span class="arrow">→</span>
+                    @else
+                        <div class="status-badge badge-pending">Belum Dimulai</div>
+                        <span class="arrow">→</span>
+                    @endif
+                </div>
+            </a>
+        @endforeach
+    </div>
+
+    @if(isset($allFinished) && $allFinished)
+        <div class="finish-banner">
+            <i class="fas fa-trophy finish-icon"></i>
+            <h2 class="finish-message">🎉 Audit {{ $deptName }} Selesai!</h2>
+            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap. Anda dapat memilih departemen lain atau menyelesaikan audit.</p>
+            
+            <div class="banner-actions">
+                <a href="{{ route('audit.select_department', ['id' => $auditId]) }}" class="btn-primary">
+                    <i class="fas fa-list"></i> Pilih Departemen Lain
+                </a>
+                <a href="{{ route('audit.finish') }}" class="btn-success">
+                    <i class="fas fa-check-double"></i> Selesai Semua Audit
+                </a>
+            </div>
+        </div>
+    @endif
 </div>
 
 </body>

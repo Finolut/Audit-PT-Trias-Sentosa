@@ -185,8 +185,8 @@ public function startAudit(Request $request)
         DB::table('audit_responders')->insert($responders);
 
         // PERBAIKAN: Redirect ke route audit.menu sesuai permintaan
-        return redirect()->route('audit.menu', ['id' => $newAuditId])
-            ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>.");
+        return redirect()->route('audit.select_department', ['id' => $newAuditId])
+    ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>.");
     });
 }
 
@@ -299,32 +299,38 @@ public function createAudit()
 public function menu($auditId)
 {
     $audit = DB::table('audits')->where('id', $auditId)->first();
-    if(!$audit) abort(404);
+    if (!$audit) abort(404);
 
-    $departmentIds = json_decode($audit->department_ids, true);
+    // CEK ACTIVE DEPARTMENT DARI SESSION
+    $activeDeptId = session('active_department_id');
+    
+    // Jika belum ada active department, redirect ke pemilihan departemen
+    if (!$activeDeptId) {
+        return redirect()->route('audit.select_department', ['id' => $auditId]);
+    }
 
     $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-    $departmentNames = DB::table('departments')
-    ->whereIn('id', $departmentIds)
-    ->pluck('name');
+    
+    // Ambil nama departemen aktif
+    $departmentName = DB::table('departments')->where('id', $activeDeptId)->value('name');
 
+    // Hitung progress untuk departemen aktif saja
     $clauseProgress = [];
     $allFinished = true;
 
     foreach ($this->mainClauses as $mainCode => $subCodes) {
-        // 1. Hitung total item soal untuk klausul utama ini
+        // Hitung total item soal untuk klausul utama ini
         $totalItems = DB::table('items')
             ->join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->whereIn('clauses.clause_code', $subCodes)
             ->count();
 
-        // 2. Hitung berapa yang sudah dijawab (SESUAIKAN NAMA KOLOM DI SINI)
+        // Hitung berapa yang sudah dijawab untuk departemen aktif
         $answeredItems = DB::table('answers')
             ->join('items', 'answers.item_id', '=', 'items.id')
             ->join('clauses', 'items.clause_id', '=', 'clauses.id')
             ->where('answers.audit_id', $auditId)
-            // Ganti 'responder_name' menjadi 'auditor_name' sesuai tabel Anda
-            ->where('answers.auditor_name', $session->auditor_name) 
+            ->where('answers.department_id', $activeDeptId) // Filter per departemen
             ->whereIn('clauses.clause_code', $subCodes)
             ->count();
 
@@ -342,7 +348,7 @@ public function menu($auditId)
         ];
     }
 
-    // 3. Update status jika benar-benar sudah selesai semua
+    // Update status jika benar-benar sudah selesai semua
     if ($allFinished && count($this->mainClauses) > 0) {
         DB::table('audits')->where('id', $auditId)->update([
             'status' => 'COMPLETE',
@@ -350,16 +356,19 @@ public function menu($auditId)
         ]);
     }
 
-    $deptName = $departmentNames->implode(', ');
+    // Tampilkan tombol kembali jika semua sudah selesai
+    $showReturnButton = $allFinished;
 
     return view('audit.menu', [
         'auditId'          => $auditId,
         'auditorName'      => $session->auditor_name,
-        'deptName'         => $deptName,
+        'deptName'         => $departmentName,
         'mainClauses'      => array_keys($this->mainClauses), 
         'titles'           => $this->mainClauseTitles,
         'clauseProgress'   => $clauseProgress,
-        'allFinished'      => $allFinished
+        'allFinished'      => $allFinished,
+        'showReturnButton' => $showReturnButton,
+        'activeDepartmentId' => $activeDeptId,
     ]);
 }
 
@@ -424,11 +433,16 @@ public function store(Request $request, $auditId, $mainClause)
     $answers = $request->input('answers', []);
     $notes   = $request->input('audit_notes', []);
 
-    DB::transaction(function () use ($answers, $notes, $auditId) {
-        $auditRecord = DB::table('audits')->where('id', $auditId)->first();
-        $departmentId = $auditRecord?->department_id;
+    // AMBIL DEPARTMENT ID DARI SESSION
+    $activeDeptId = session('active_department_id');
+    
+    if (!$activeDeptId) {
+        return redirect()->route('audit.select_department', ['id' => $auditId])
+            ->withErrors(['Pilih departemen terlebih dahulu.']);
+    }
 
-        // 1. BATCH UPSERT NOTES
+    DB::transaction(function () use ($answers, $notes, $auditId, $activeDeptId) {
+        // 1. BATCH UPSERT NOTES (dengan department_id)
         $noteRecords = [];
         foreach ($notes as $clauseCode => $text) {
             if (empty(trim($text))) continue;
@@ -436,7 +450,7 @@ public function store(Request $request, $auditId, $mainClause)
                 'id'             => (string) Str::uuid(),
                 'audit_id'       => $auditId,
                 'clause_code'    => $clauseCode,
-                'department_id'  => $departmentId,
+                'department_id'  => $activeDeptId, // Tambahkan department_id
                 'question_text'  => $text,
                 'created_at'     => now(),
                 'updated_at'     => now(),
@@ -444,10 +458,14 @@ public function store(Request $request, $auditId, $mainClause)
         }
 
         if (!empty($noteRecords)) {
-            DB::table('audit_questions')->upsert($noteRecords, ['audit_id', 'clause_code'], ['question_text', 'updated_at']);
+            DB::table('audit_questions')->upsert(
+                $noteRecords, 
+                ['audit_id', 'clause_code', 'department_id'], // Unique key include department
+                ['question_text', 'updated_at']
+            );
         }
 
-        // 2. KUMPULKAN DATA JAWABAN
+        // 2. KUMPULKAN DATA JAWABAN (dengan department_id)
         $answerRecords = [];
         $finalRecords = [];
 
@@ -463,6 +481,7 @@ public function store(Request $request, $auditId, $mainClause)
                         'audit_id'     => $auditId,
                         'item_id'      => $itemId,
                         'auditor_name' => $personName,
+                        'department_id' => $activeDeptId, // Tambahkan department_id
                         'answer'       => $data['val'],
                         'answered_at'  => now(),
                         'created_at'   => now(),
@@ -485,6 +504,7 @@ public function store(Request $request, $auditId, $mainClause)
                     'id'         => (string) Str::uuid(),
                     'audit_id'   => $auditId,
                     'item_id'    => $itemId,
+                    'department_id' => $activeDeptId, // Tambahkan department_id
                     'yes_count'  => $yesCount,
                     'no_count'   => $noCount,
                     'final_yes'  => $finalYes,
@@ -497,11 +517,19 @@ public function store(Request $request, $auditId, $mainClause)
         }
 
         if (!empty($answerRecords)) {
-            DB::table('answers')->upsert($answerRecords, ['audit_id', 'item_id', 'auditor_name'], ['answer', 'answered_at', 'updated_at']);
+            DB::table('answers')->upsert(
+                $answerRecords, 
+                ['audit_id', 'item_id', 'auditor_name', 'department_id'], // Include department_id
+                ['answer', 'answered_at', 'updated_at']
+            );
         }
 
         if (!empty($finalRecords)) {
-            DB::table('answer_finals')->upsert($finalRecords, ['audit_id', 'item_id'], ['yes_count', 'no_count', 'final_yes', 'final_no', 'decided_at', 'updated_at']);
+            DB::table('answer_finals')->upsert(
+                $finalRecords, 
+                ['audit_id', 'item_id', 'department_id'], // Include department_id
+                ['yes_count', 'no_count', 'final_yes', 'final_no', 'decided_at', 'updated_at']
+            );
         }
     });
 
@@ -512,13 +540,24 @@ public function store(Request $request, $auditId, $mainClause)
     $currentIndex = array_search($mainClause, $mainKeys);
     $nextMain = $mainKeys[$currentIndex + 1] ?? null;
 
-    // 2. Hitung total progres untuk menentukan apakah muncul pop-up "All Complete"
+    // 2. Hitung total progres untuk departemen aktif
     $allFinished = true;
     foreach ($this->mainClauses as $mCode => $subCodes) {
-        $totalItems = DB::table('items')->join('clauses', 'items.clause_id', '=', 'clauses.id')->whereIn('clauses.clause_code', $subCodes)->count();
-        $answered = DB::table('answer_finals')->where('audit_id', $auditId)->whereIn('item_id', function($q) use ($subCodes) {
-            $q->select('items.id')->from('items')->join('clauses', 'items.clause_id', '=', 'clauses.id')->whereIn('clauses.clause_code', $subCodes);
-        })->count();
+        $totalItems = DB::table('items')
+            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+            ->whereIn('clauses.clause_code', $subCodes)
+            ->count();
+        
+        $answered = DB::table('answer_finals')
+            ->where('audit_id', $auditId)
+            ->where('department_id', $activeDeptId) // Filter per departemen
+            ->whereIn('item_id', function($q) use ($subCodes) {
+                $q->select('items.id')
+                  ->from('items')
+                  ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                  ->whereIn('clauses.clause_code', $subCodes);
+            })
+            ->count();
 
         if ($answered < $totalItems) {
             $allFinished = false;
@@ -527,18 +566,24 @@ public function store(Request $request, $auditId, $mainClause)
     }
 
     if ($allFinished) {
-        // Update status audits tabel jadi COMPLETE
-        DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE', 'updated_at' => now()]);
+        // Update status audit jadi COMPLETE untuk departemen ini
+        DB::table('audits')->where('id', $auditId)->update([
+            'status' => 'COMPLETE',
+            'updated_at' => now()
+        ]);
         
-        return redirect()->route('audit.menu', $auditId)->with('all_complete', true);
+        return redirect()->route('audit.menu', $auditId)
+            ->with('success', 'Audit untuk departemen ini telah selesai!')
+            ->with('all_complete', true);
     }
 
     if ($nextMain) {
         return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $nextMain])
-                         ->with('success', "Klausul {$mainClause} disimpan. Berlanjut ke Klausul {$nextMain}");
+            ->with('success', "Klausul {$mainClause} disimpan. Berlanjut ke Klausul {$nextMain}");
     }
 
-    return redirect()->route('audit.menu', $auditId)->with('success', 'Data disimpan');
+    return redirect()->route('audit.menu', $auditId)
+        ->with('success', 'Data berhasil disimpan.');
 }
 
     public function clauseDetail($auditId, $mainClause)
@@ -735,4 +780,92 @@ public function finalSubmit(Request $request, $auditId)
     return redirect()->route('audit.thanks');
 }
 
+// Tampilkan halaman pemilihan departemen
+public function selectDepartment($auditId)
+{
+    $audit = DB::table('audits')->where('id', $auditId)->first();
+    if (!$audit) abort(404);
+
+    $departmentIds = json_decode($audit->department_ids, true);
+    
+    // Ambil data departemen beserta progress
+    $departments = DB::table('departments')
+        ->whereIn('id', $departmentIds)
+        ->get()
+        ->map(function($dept) use ($auditId) {
+            return [
+                'id' => $dept->id,
+                'name' => $dept->name,
+                'progress' => $this->getDepartmentProgress($auditId, $dept->id),
+                'status' => $this->getDepartmentStatus($auditId, $dept->id)
+            ];
+        });
+
+    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    
+    return view('audit.select_department', [
+        'auditId' => $auditId,
+        'departments' => $departments,
+        'auditorName' => $session->auditor_name,
+        'auditCode' => $audit->audit_code ?? 'Audit',
+    ]);
+}
+
+// Set departemen aktif untuk dikerjakan
+public function setActiveDepartment(Request $request, $auditId)
+{
+    $request->validate([
+        'department_id' => 'required|uuid|exists:departments,id'
+    ]);
+
+    // Simpan departemen aktif di session
+    session(['active_department_id' => $request->department_id]);
+    
+    return redirect()->route('audit.menu', ['id' => $auditId]);
+}
+
+// Helper: Hitung progress per departemen
+private function getDepartmentProgress($auditId, $departmentId)
+{
+    $totalClauses = count($this->mainClauses);
+    $completedClauses = 0;
+
+    foreach ($this->mainClauses as $mainCode => $subCodes) {
+        $totalItems = DB::table('items')
+            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+            ->whereIn('clauses.clause_code', $subCodes)
+            ->count();
+
+        $answeredItems = DB::table('answers')
+            ->join('items', 'answers.item_id', '=', 'items.id')
+            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+            ->where('answers.audit_id', $auditId)
+            ->where('answers.department_id', $departmentId)
+            ->whereIn('clauses.clause_code', $subCodes)
+            ->count();
+
+        if ($answeredItems >= $totalItems && $totalItems > 0) {
+            $completedClauses++;
+        }
+    }
+
+    return [
+        'percentage' => $totalClauses > 0 ? round(($completedClauses / $totalClauses) * 100) : 0,
+        'completed' => $completedClauses,
+        'total' => $totalClauses
+    ];
+}
+
+// Helper: Status departemen
+private function getDepartmentStatus($auditId, $departmentId)
+{
+    $progress = $this->getDepartmentProgress($auditId, $departmentId);
+    
+    if ($progress['percentage'] == 100) {
+        return 'completed';
+    } elseif ($progress['completed'] > 0) {
+        return 'in_progress';
+    }
+    return 'pending';
+}
 }
