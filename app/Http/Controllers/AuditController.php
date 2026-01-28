@@ -221,8 +221,8 @@ public function startAudit(Request $request)
     ]);
 
     // ✅ Redirect ke pemilihan departemen (BUKAN langsung ke menu)
-    return redirect()->route('audit.select_department', ['id' => $auditIds[0]['id']])
-        ->with('success', "Audit dimulai untuk " . count($auditIds) . " departemen!<br>TOKEN RESUME (1 token untuk semua): <strong>{$sharedToken}</strong>");
+ return redirect()->route('audit.menu', ['id' => $auditIds[0]['id']])
+    ->with('success', "Audit dimulai untuk " . count($auditIds) . " departemen!<br>TOKEN RESUME (1 token untuk semua): <strong>{$sharedToken}</strong>");
 }
 
         // Helper: Generate audit code unik
