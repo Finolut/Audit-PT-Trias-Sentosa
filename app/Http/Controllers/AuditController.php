@@ -89,8 +89,8 @@ $request->validate([
     'audit_standards'        => 'required|array|min:1',
     'methodology'            => 'required|array|min:1',
 
-    'start_time'             => 'required|date_format:H:i',
-    'end_time'               => 'required|date_format:H:i|after:start_time',
+'audit_start_date' => 'required|date',
+    'audit_end_date'   => 'required|date|after_or_equal:audit_start_date',
     'audit_date'             => 'required|date',
 
     'audit_team'             => 'nullable|array',

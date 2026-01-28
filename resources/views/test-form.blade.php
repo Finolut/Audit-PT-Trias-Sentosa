@@ -318,20 +318,27 @@
             <input type="date" name="audit_date" required class="form-input">
         </div>
 
-        <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-700">
-                Jam Mulai
-            </label>
-            <input type="time" name="start_time" required class="form-input">
-        </div>
-
-        <div>
-            <label class="block text-sm font-semibold mb-1 text-slate-700">
-                Estimasi Selesai
-            </label>
-            <input type="time" name="end_time" required class="form-input">
-        </div>
+<!-- Jadwal Audit -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+        <label class="block text-sm font-semibold mb-1 text-slate-700">
+            Tanggal Mulai Audit
+        </label>
+        <input type="date" name="audit_start_date" required class="form-input">
     </div>
+
+    <div>
+        <label class="block text-sm font-semibold mb-1 text-slate-700">
+            Tanggal Selesai Audit
+        </label>
+        <input type="date" name="audit_end_date" required class="form-input">
+    </div>
+</div>
+
+<p class="text-xs text-slate-500 mt-2">
+    Rentang tanggal digunakan untuk audit yang berlangsung lebih dari satu hari.
+</p>
+
 </section>
 
 
