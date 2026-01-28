@@ -332,16 +332,7 @@ public function validateResumeToken(Request $request)
     
     $auditeeDept = DB::table('departments')->where('id', $audit->department_id)->value('name');
     
-    return view('audit.resume_decision', [
-        'token'         => $token,
-        'auditorName'   => $parentSession->auditor_name,
-        'auditeeDept'   => $auditeeDept,
-        'auditDate'     => Carbon::parse($parentSession->audit_date)->format('d M Y'),
-        'lastActivity'  => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
-        'auditId'       => $audit->id,
-        'parentSessionId' => $parentSession->id,
-        'childCount'    => count($activeChildSessions),
-    ]);
+    return redirect()->route('audit.resume.decision');
 }
 
     // ----------------------------------------------------------------------
@@ -411,6 +402,19 @@ public function validateResumeToken(Request $request)
             ->with('info', 'Semua audit sebelumnya telah dibatalkan. Silakan mulai audit baru.');
     }
 }
+
+public function showResumeDecision()
+{
+    $data = session('resume_decision');
+
+    if (!$data) {
+        return redirect()->route('audit.resume.form')
+            ->withErrors(['Token tidak ditemukan atau sesi habis.']);
+    }
+
+    return view('audit.resume_decision', $data);
+}
+
 
 public function createAudit() 
 {

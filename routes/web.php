@@ -84,6 +84,8 @@ Route::post('/test-form', function (Request $request) {
 */
 Route::get('/audit/resume', [AuditController::class, 'showResumePage'])->name('audit.resume.form');
 Route::post('/audit/resume/check', [AuditController::class, 'validateResumeToken'])->name('audit.resume.check');
+Route::get('/audit/resume/decision', [AuditController::class, 'showResumeDecision'])
+    ->name('audit.resume.decision');
 Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])->name('audit.resume.action');
 Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
 Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
