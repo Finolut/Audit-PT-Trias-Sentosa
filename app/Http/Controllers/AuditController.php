@@ -403,18 +403,6 @@ public function validateResumeToken(Request $request)
     }
 }
 
-public function showResumeDecision()
-{
-    $data = session('resume_decision');
-
-    if (!$data) {
-        return redirect()->route('audit.resume.form')
-            ->withErrors(['Token tidak ditemukan atau sesi habis.']);
-    }
-
-    return view('audit.resume_decision', $data);
-}
-
 
 public function createAudit() 
 {
