@@ -66,15 +66,11 @@ $stats = [
                          ->take(5)
                          ->get();
 
-    // PERBAIKAN QUERY: Join ke tabel sessions (sesuaikan nama tabelnya, biasanya plural 'sessions' atau 'audit_sessions')
-    $liveQuestions = DB::table('audit_questions')
-    ->join('audits', 'audit_questions.audit_id', '=', 'audits.id')
-    ->join('departments', 'audits.department_id', '=', 'departments.id')
-    /* KARENA audit_id tidak ada di audit_sessions, besar kemungkinan 
-       tabel audits yang memiliki kolom session_id. 
-       Atau audit_sessions menggunakan ID sebagai primary key yang dirujuk audit.
-    */
-    ->leftJoin('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id') 
+// GUNAKAN QUERY BARU INI:
+$liveQuestions = DB::table('audit_questions')
+    ->join('departments', 'audit_questions.department_id', '=', 'departments.id') // ✅ Langsung dari audit_questions
+    ->leftJoin('audits', 'audit_questions.audit_id', '=', 'audits.id')
+    ->leftJoin('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id')
     ->select(
         'audit_questions.*',
         'departments.name as dept_name',
