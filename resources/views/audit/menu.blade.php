@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Dashboard - {{ $deptName }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #2563eb;
@@ -17,85 +16,103 @@
             --slate-900: #0f172a;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f1f5f9;
-            margin: 0;
             color: var(--slate-900);
             line-height: 1.5;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
+            min-height: 100vh;
             padding: 2rem 1rem;
         }
 
-        /* Header Modern */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background: white;
             padding: 2rem;
             border-radius: 16px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 4px solid var(--slate-200);
         }
 
-        .header-content h1 {
+        .header-left h1 {
             font-size: 1.5rem;
             font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
         }
 
-        .header-content p {
-            margin: 0.5rem 0 0;
+        .header-left p {
             color: var(--slate-600);
             font-size: 0.9rem;
         }
 
-        /* Progress Bar Header */
-        .progress-bar-header {
-            background: white;
+        .audit-switcher {
+            background: var(--slate-50);
             padding: 1.5rem;
             border-radius: 12px;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .progress-bar-header h3 {
-            margin: 0 0 10px 0;
+        .switcher-title {
+            font-size: 0.85rem;
             font-weight: 700;
-            color: var(--slate-900);
-            font-size: 1.1rem;
+            color: var(--slate-600);
+            margin-bottom: 0.75rem;
         }
 
-        .progress-bar-container {
-            width: 100%;
-            background: var(--slate-200);
+        .audit-tabs {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .audit-tab {
+            padding: 0.75rem 1.25rem;
             border-radius: 8px;
-            height: 12px;
-            overflow: hidden;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid var(--slate-200);
+            background: white;
         }
 
-        .progress-bar-fill {
-            height: 100%;
+        .audit-tab:hover {
+            background: var(--slate-50);
+        }
+
+        .audit-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .audit-tab.completed {
             background: var(--success);
-            border-radius: 8px;
-            transition: width 0.5s ease;
+            color: white;
+            border-color: var(--success);
         }
 
-        /* Grid */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.25rem;
         }
 
-        /* Card Modern */
         .card {
             background: white;
             border-radius: 12px;
@@ -103,7 +120,7 @@
             text-decoration: none;
             color: inherit;
             border: 1px solid var(--slate-200);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -146,7 +163,6 @@
             padding-right: 1.5rem;
         }
 
-        /* Status Styling */
         .status-area {
             margin-top: auto;
             display: flex;
@@ -178,32 +194,6 @@
         }
         .card:hover .arrow { transform: translateX(5px); }
 
-        /* Return Button */
-        .return-button {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            border: 2px solid var(--primary);
-        }
-
-        .return-button:hover {
-            background: white;
-            color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        }
-
-        .return-button i {
-            margin-right: 6px;
-        }
-
-        /* Finish Banner */
         .finish-banner {
             margin-top: 3rem;
             padding: 2.5rem;
@@ -247,16 +237,20 @@
             margin-top: 1.5rem;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
+        .btn {
             padding: 12px 32px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 700;
             font-size: 1rem;
             transition: all 0.3s;
-            border: 2px solid var(--primary);
+            border: 2px solid;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .btn-primary:hover {
@@ -269,13 +263,7 @@
         .btn-success {
             background: var(--success);
             color: white;
-            padding: 12px 32px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
-            border: 2px solid var(--success);
+            border-color: var(--success);
         }
 
         .btn-success:hover {
@@ -283,27 +271,6 @@
             color: var(--success);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #86efac;
-        }
-
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #93c5fd;
         }
 
         @media (max-width: 768px) {
@@ -322,13 +289,9 @@
                 align-items: center;
             }
             
-            .btn-primary, .btn-success {
+            .btn {
                 width: 100%;
                 max-width: 300px;
-            }
-            
-            .finish-message {
-                font-size: 1.2rem;
             }
         }
     </style>
@@ -336,33 +299,13 @@
 <body>
 
 <div class="container">
-    @if(session('success'))
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('info'))
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> {{ session('info') }}
-        </div>
-    @endif
-
     <div class="header">
-        <div class="header-content">
+        <div class="header-left">
             <h1>Audit Dashboard - {{ $deptName }}</h1>
             <p>Auditor: <strong>{{ $auditorName }}</strong> • Dept: <strong>{{ $deptName }}</strong></p>
-            
-            @if(isset($showReturnButton) && $showReturnButton)
-                <div style="margin-top: 15px;">
-                    <a href="{{ route('audit.select_department', ['id' => $auditId]) }}" class="return-button">
-                        <i class="fas fa-arrow-left"></i> Kembali Pilih Departemen Lain
-                    </a>
-                </div>
-            @endif
         </div>
         
-        <div class="progress-info">
+        <div style="text-align: right;">
             @php
                 $completedCount = collect($clauseProgress)->filter(fn($p) => $p['percentage'] >= 100)->count();
             @endphp
@@ -372,13 +315,32 @@
         </div>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="progress-bar-header">
-        <h3>PROGRES: {{ $completedCount }} / {{ count($mainClauses) }} Klausul</h3>
-        <div class="progress-bar-container">
-            <div class="progress-bar-fill" style="width: {{ ($completedCount / count($mainClauses)) * 100 }}%;"></div>
+    <!-- Audit Switcher -->
+    @if(count($relatedAudits) > 1)
+    <div class="audit-switcher">
+        <div class="switcher-title">📋 Audit Lainnya oleh {{ $auditorName }}:</div>
+        <div class="audit-tabs">
+            @foreach($relatedAudits as $auditInfo)
+                @php
+                    $deptNameTab = DB::table('departments')->where('id', $auditInfo['dept_id'])->value('name');
+                    $isCurrent = $auditInfo['id'] === $currentAuditId;
+                    $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
+                    $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
+                @endphp
+                
+                <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}" 
+                   class="audit-tab {{ $isCurrent ? 'active' : '' }} {{ $isCompleted ? 'completed' : '' }}"
+                   style="{{ $isCompleted ? 'opacity: 0.8;' : '' }}"
+                   title="{{ $isCompleted ? '✅ Selesai' : ($isCurrent ? '📋 Sedang dikerjakan' : 'Klik untuk beralih') }}">
+                    {{ $deptNameTab }}
+                    @if($isCompleted)
+                        <span style="margin-left: 4px;">✅</span>
+                    @endif
+                </a>
+            @endforeach
         </div>
     </div>
+    @endif
 
     <div class="grid-container">
         @foreach($mainClauses as $code)
@@ -407,11 +369,11 @@
                 <div class="status-area">
                     @if($isDone)
                         <div class="status-badge badge-completed">
-                            <i class="fas fa-check-circle"></i> Selesai
+                            <span>✅ Selesai</span>
                         </div>
                     @elseif($inProgress)
                         <div class="status-badge badge-inprogress">
-                            <i class="fas fa-spinner"></i> Dikerjakan
+                            <span>📝 Dikerjakan</span>
                         </div>
                         <span class="arrow">→</span>
                     @else
@@ -423,20 +385,25 @@
         @endforeach
     </div>
 
-    @if(isset($allFinished) && $allFinished)
+    @if($allFinished)
         <div class="finish-banner">
-            <i class="fas fa-trophy finish-icon"></i>
-            <h2 class="finish-message">🎉 Audit {{ $deptName }} Selesai!</h2>
-            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap. Anda dapat memilih departemen lain atau menyelesaikan audit.</p>
+            <div class="finish-icon">🎉</div>
+            <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
+            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap.</p>
             
-            <div class="banner-actions">
-                <a href="{{ route('audit.select_department', ['id' => $auditId]) }}" class="btn-primary">
-                    <i class="fas fa-list"></i> Pilih Departemen Lain
-                </a>
-                <a href="{{ route('audit.finish') }}" class="btn-success">
-                    <i class="fas fa-check-double"></i> Selesai Semua Audit
-                </a>
-            </div>
+            @if(count($relatedAudits) > 1)
+                <div class="banner-actions">
+                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
+                        ✅ Selesai Semua Audit
+                    </a>
+                </div>
+            @else
+                <div class="banner-actions">
+                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
+                        ✅ Selesai Audit
+                    </a>
+                </div>
+            @endif
         </div>
     @endif
 </div>

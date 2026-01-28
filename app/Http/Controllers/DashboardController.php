@@ -47,52 +47,33 @@ private $mainClauseTitles = [
 public function index(Request $request)
 {
     $departments = Department::orderBy('name', 'asc')->get();
-$stats = [
+    
+    $stats = [
         'total_audits' => Audit::count(),
-        
-        // --- PERBAIKAN DI SINI ---
-        // Menghitung audit yang statusnya 'COMPLETE' atau 'COMPLETED' (Case-Insensitive)
-        'completed' => Audit::whereIn('status', ['COMPLETE', 'COMPLETED', 'complete', 'completed'])->count(),
-        
-        // Menghitung audit yang BELUM selesai (tidak termasuk status di atas)
-        'pending' => Audit::whereNotIn('status', ['COMPLETE', 'COMPLETED', 'complete', 'completed'])->count(),
-        // -------------------------
-
+        'completed' => Audit::whereIn('status', ['COMPLETE', 'COMPLETED'])->count(),
+        'pending' => Audit::whereNotIn('status', ['COMPLETE', 'COMPLETED'])->count(),
         'departments'  => Department::count(),
     ];
 
-$recentAudits = Audit::with('session') // Hanya load session
-                     ->orderBy('created_at', 'desc')
-                     ->take(5)
-                     ->get()
-                     ->map(function ($audit) {
-                         // Decode department_ids JSON
-                         $deptIds = json_decode($audit->department_ids, true) ?? [];
-                         
-                         // Ambil nama-nama departemen
-                         $deptNames = DB::table('departments')
-                             ->whereIn('id', $deptIds)
-                             ->pluck('name')
-                             ->toArray();
-                         
-                         // Simpan sebagai properti baru
-                         $audit->department_names = $deptNames;
-                         return $audit;
-                     });
+    // Ambil recent audits (termasuk multiple audit dari 1 auditor)
+    $recentAudits = Audit::with(['department', 'session'])
+                         ->orderBy('created_at', 'desc')
+                         ->take(5)
+                         ->get();
 
-// GUNAKAN QUERY BARU INI:
-$liveQuestions = DB::table('audit_questions')
-    ->join('departments', 'audit_questions.department_id', '=', 'departments.id') // ✅ Langsung dari audit_questions
-    ->leftJoin('audits', 'audit_questions.audit_id', '=', 'audits.id')
-    ->leftJoin('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id')
-    ->select(
-        'audit_questions.*',
-        'departments.name as dept_name',
-        'audit_sessions.auditor_name as auditor_name'
-    )
-    ->orderBy('audit_questions.created_at', 'desc')
-    ->take(5)
-    ->get();
+    // Query live questions (sudah benar, langsung dari audit_questions)
+    $liveQuestions = DB::table('audit_questions')
+        ->join('departments', 'audit_questions.department_id', '=', 'departments.id')
+        ->leftJoin('audits', 'audit_questions.audit_id', '=', 'audits.id')
+        ->leftJoin('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id')
+        ->select(
+            'audit_questions.*',
+            'departments.name as dept_name',
+            'audit_sessions.auditor_name as auditor_name'
+        )
+        ->orderBy('audit_questions.created_at', 'desc')
+        ->take(5)
+        ->get();
 
   // 1. Tentukan Tahun yang dipilih (Default tahun sekarang)
     $selectedYear = $request->input('year', Carbon::now()->year);
