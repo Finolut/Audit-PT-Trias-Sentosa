@@ -26,38 +26,6 @@
             display: flex;
             align-items: center;
         }
-        .step-indicator {
-            background-color: white;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .step-indicator .step {
-            position: relative;
-            flex: 1;
-            text-align: center;
-            padding: 1rem 0;
-        }
-        .step-indicator .step::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 0;
-            width: 100%;
-            height: 1px;
-            background: #cbd5e1;
-        }
-        .step-indicator .step:last-child::after {
-            display: none;
-        }
-        .step-indicator .step.active::before {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 32px;
-            height: 3px;
-            background: var(--navy);
-        }
         .section-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -141,24 +109,6 @@
         <p class="text-xl opacity-90 max-w-3xl">Formalize your audit planning in compliance with ISO 19011 standards for enterprise-grade assurance</p>
     </div>
 </section>
-
-<!-- Step Indicator -->
-<div class="step-indicator">
-    <div class="max-w-4xl mx-auto flex">
-        <div class="step active">
-            <div class="font-bold text-lg">01 Charter</div>
-            <div class="text-xs opacity-70">Planning & Authorization</div>
-        </div>
-        <div class="step">
-            <div class="font-bold text-lg">02 Pelaksanaan</div>
-            <div class="text-xs opacity-70">Execution & Documentation</div>
-        </div>
-        <div class="step">
-            <div class="font-bold text-lg">03 Temuan</div>
-            <div class="text-xs opacity-70">Reporting & Follow-up</div>
-        </div>
-    </div>
-</div>
 
 <!-- Form Content -->
 <div class="max-w-4xl mx-auto px-4 py-8">
