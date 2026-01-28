@@ -269,78 +269,57 @@ private function generateUniqueAuditCode($userInput = null)
     // ----------------------------------------------------------------------
 public function validateResumeToken(Request $request)
 {
-    // ✅ PROTEKSI: Redirect jika diakses via GET
+    // Jika diakses via GET (misal: refresh), redirect ke form
     if ($request->isMethod('get')) {
-        return redirect()->route('audit.resume.form')
-            ->with('warning', 'Silakan masukkan token resume melalui form yang tersedia.');
+        return redirect()->route('audit.resume.form');
     }
 
-    $request->validate(['resume_token' => 'required|string']);
-    
+    // Validasi input
+    $request->validate([
+        'resume_token' => 'required|string',
+    ]);
+
     $token = strtoupper(trim($request->resume_token));
-    
-    // Cari parent session berdasarkan token
+
+    // Cari session aktif berdasarkan token
     $parentSession = DB::table('audit_sessions')
         ->where('resume_token', $token)
         ->where('is_parent', true)
+        ->where('resume_token_expires_at', '>', now())
         ->first();
-    
+
     if (!$parentSession) {
-        return back()->withErrors(['resume_token' => 'Token tidak valid.']);
+        // ❌ JANGAN return view() di sini!
+        // ✅ Redirect ke form dengan pesan error
+        return redirect()
+            ->route('audit.resume.form')
+            ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
     }
-    
-    if ($parentSession->resume_token_expires_at && Carbon::parse($parentSession->resume_token_expires_at)->isPast()) {
-        return back()->withErrors(['resume_token' => 'Token sudah kadaluarsa. Silakan buat audit baru.']);
-    }
-    
-    // ✅ Ambil semua child sessions yang terkait (tanpa filter status)
-    $childSessions = DB::table('audit_sessions')
-        ->where('parent_session_id', $parentSession->id)
-        ->where('is_parent', false)
-        ->get();
-    
-    if ($childSessions->isEmpty()) {
-        return back()->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
-    }
-    
-    // ✅ Filter child sessions berdasarkan status audit-nya
-    $activeChildSessions = [];
-    foreach ($childSessions as $child) {
-        $audit = DB::table('audits')
-            ->where('audit_session_id', $child->id)
-            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
-            ->first();
-        
-        if ($audit) {
-            $activeChildSessions[] = $child;
-        }
-    }
-    
-    if (empty($activeChildSessions)) {
-        return back()->withErrors(['resume_token' => 'Semua audit untuk token ini sudah selesai atau dibatalkan.']);
-    }
-    
-    // Ambil audit dari child session pertama yang aktif
-    $firstChild = $activeChildSessions[0];
+
+    // Cari audit terkait
     $audit = DB::table('audits')
-        ->where('audit_session_id', $firstChild->id)
+        ->where('audit_session_id', $parentSession->id)
         ->first();
-    
+
     if (!$audit) {
-        return back()->withErrors(['resume_token' => 'Audit tidak ditemukan.']);
+        return redirect()
+            ->route('audit.resume.form')
+            ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
     }
-    
-    $auditeeDept = DB::table('departments')->where('id', $audit->department_id)->value('name');
-    
+
+    // Ambil data tambahan (opsional)
+    $department = DB::table('departments')
+        ->where('id', $audit->department_id)
+        ->first();
+
+    // ✅ Semua valid → tampilkan halaman keputusan
     return view('audit.resume_decision', [
-        'token'         => $token,
-        'auditorName'   => $parentSession->auditor_name,
-        'auditeeDept'   => $auditeeDept,
-        'auditDate'     => Carbon::parse($parentSession->audit_date)->format('d M Y'),
-        'lastActivity'  => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
-        'auditId'       => $audit->id,
-        'parentSessionId' => $parentSession->id,
-        'childCount'    => count($activeChildSessions),
+        'token' => $token,
+        'auditId' => $audit->id,
+        'auditorName' => $audit->lead_auditor_name ?? '—',
+        'auditeeDept' => $department?->name ?? '—',
+        'auditDate' => $audit->audit_start_date . ' s/d ' . $audit->audit_end_date,
+        'lastActivity' => $parentSession->last_activity_at,
     ]);
 }
 
