@@ -74,160 +74,191 @@ private $auditorsList = [
     }
 
 // 1. UPDATE startAudit (Generate Token saat mulai)
-    public function startAudit(Request $request)
-    {
-        $request->validate([
-            'lead_auditor_id'    => 'required|string',
-            'lead_auditor_email' => 'nullable|email',
-            'auditee_dept_ids'   => 'required|array|min:1',
-            'auditee_dept_ids.*' => 'exists:departments,id',
-            'audit_code'         => 'nullable|string',
-            'audit_type'         => 'required|string',
-            'audit_objective'    => 'required|string',
-            'audit_scope'        => 'required|array|min:1',
-            'audit_standards'    => 'required|array|min:1',
-            'methodology'        => 'required|array|min:1',
-            'audit_start_date'   => 'required|date',
-            'audit_end_date'     => 'required|date|after_or_equal:audit_start_date',
-            'audit_team'         => 'nullable|array',
+public function startAudit(Request $request)
+{
+    $request->validate([
+        'lead_auditor_id'    => 'required|string',
+        'lead_auditor_email' => 'nullable|email',
+        'auditee_dept_ids'   => 'required|array|min:1',
+        'auditee_dept_ids.*' => 'exists:departments,id',
+        'audit_code'         => 'nullable|string',
+        'audit_type'         => 'required|string',
+        'audit_objective'    => 'required|string',
+        'audit_scope'        => 'required|array|min:1',
+        'audit_standards'    => 'required|array|min:1',
+        'methodology'        => 'required|array|min:1',
+        'audit_start_date'   => 'required|date',
+        'audit_end_date'     => 'required|date|after_or_equal:audit_start_date',
+        'audit_team'         => 'nullable|array',
+    ]);
+
+    $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
+    $auditorName = $selectedAuditor['name'] ?? 'Unknown';
+    $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
+    $auditorDept = $selectedAuditor['dept'] ?? 'N/A';
+
+    $departmentIds = $request->auditee_dept_ids;
+    $auditIds = [];
+    
+    // ✅ Generate audit code DI LUAR transaction
+    $auditCode = $this->generateUniqueAuditCode($request->audit_code);
+    
+    // ✅ Deklarasikan variabel untuk sharedToken (akan diisi di dalam transaction)
+    $sharedToken = null;
+
+    DB::transaction(function () use ($request, $auditorName, $auditorNik, $auditorDept, $departmentIds, &$auditIds, $auditCode, &$sharedToken) {
+        // === 1. BUAT PARENT SESSION (1x token untuk semua departemen) ===
+        $parentSessionId = (string) Str::uuid();
+        
+        // Generate 1 token untuk semua departemen
+        do {
+            $sharedToken = strtoupper(Str::random(3) . '-' . Str::random(3));
+        } while (DB::table('audit_sessions')->where('resume_token', $sharedToken)->exists());
+
+        // Simpan parent session
+        DB::table('audit_sessions')->insert([
+            'id'                      => $parentSessionId,
+            'auditor_name'            => $auditorName,
+            'auditor_nik'             => $auditorNik,
+            'auditor_department'      => $auditorDept,
+            'auditor_email'           => $request->lead_auditor_email,
+            'audit_date'              => $request->audit_start_date,
+            'resume_token'            => $sharedToken, // ✅ 1 token untuk semua
+            'resume_token_expires_at' => now()->addDays(7),
+            'last_activity_at'        => now(),
+            'is_parent'               => true, // ✅ Mark sebagai parent
+            'created_at'              => now(),
+            'updated_at'              => now(),
         ]);
+        // ===============================================================
 
-        $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
-        $auditorName = $selectedAuditor['name'] ?? 'Unknown';
-        $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
-        $auditorDept = $selectedAuditor['dept'] ?? 'N/A';
+        // === 2. BUAT CHILD SESSION UNTUK SETIAP DEPARTEMEN ===
+        foreach ($departmentIds as $deptId) {
+            $childSessionId = (string) Str::uuid();
+            $newAuditId = (string) Str::uuid();
 
-        $departmentIds = $request->auditee_dept_ids;
-        $auditIds = [];
+            // Simpan child session (tanpa token, pakai parent token)
+            DB::table('audit_sessions')->insert([
+                'id'                      => $childSessionId,
+                'parent_session_id'       => $parentSessionId, // ✅ Link ke parent
+                'auditor_name'            => $auditorName,
+                'auditor_nik'             => $auditorNik,
+                'auditor_department'      => $auditorDept,
+                'auditor_email'           => $request->lead_auditor_email,
+                'audit_date'              => $request->audit_start_date,
+                'resume_token'            => null, // ✅ Token kosong, pakai parent
+                'resume_token_expires_at' => null,
+                'last_activity_at'        => now(),
+                'is_parent'               => false, // ✅ Child session
+                'created_at'              => now(),
+                'updated_at'              => now(),
+            ]);
 
-        DB::transaction(function () use ($request, $auditorName, $auditorNik, $auditorDept, $departmentIds, &$auditIds) {
-            foreach ($departmentIds as $deptId) {
-                $sessionId = (string) Str::uuid();
-                $newAuditId = (string) Str::uuid();
+            // Simpan audit untuk departemen ini
+            DB::table('audits')->insert([
+                'id'               => $newAuditId,
+                'audit_session_id' => $childSessionId, // ✅ Link ke child session
+                'department_id'    => $deptId,
+                'audit_code'       => $auditCode, // ✅ Gunakan audit code yang sama
+                'status'           => 'IN_PROGRESS',
+                'type'             => $request->audit_type,
+                'objective'        => $request->audit_objective,
+                'scope'            => json_encode($request->audit_scope),
+                'standards'        => json_encode($request->audit_standards),
+                'methodology'      => json_encode($request->methodology),
+                'audit_start_date' => $request->audit_start_date,
+                'audit_end_date'   => $request->audit_end_date,
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ]);
 
-                // Generate token unik untuk setiap departemen
-                do {
-                    $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
-                } while (DB::table('audit_sessions')->where('resume_token', $tokenRaw)->exists());
+            // Simpan responders untuk child session
+            $responders = [
+                [
+                    'id'                   => (string) Str::uuid(),
+                    'audit_session_id'     => $childSessionId,
+                    'responder_name'       => $auditorName,
+                    'responder_role'       => 'Lead Auditor',
+                    'responder_nik'        => $auditorNik,
+                    'responder_department' => $auditorDept,
+                    'created_at'           => now(),
+                ]
+            ];
 
-                // Generate audit code unik untuk setiap departemen
-                $auditCode = $this->generateUniqueAuditCode($request->audit_code);
-
-                // Simpan sesi audit untuk departemen ini
-                DB::table('audit_sessions')->insert([
-                    'id'                      => $sessionId,
-                    'auditor_name'            => $auditorName,
-                    'auditor_nik'             => $auditorNik,
-                    'auditor_department'      => $auditorDept,
-                    'auditor_email'           => $request->lead_auditor_email,
-                    'audit_date'              => $request->audit_start_date,
-                    'resume_token'            => $tokenRaw,
-                    'resume_token_expires_at' => now()->addDays(7),
-                    'last_activity_at'        => now(),
-                    'created_at'              => now(),
-                ]);
-
-                // Simpan audit untuk departemen ini (1 audit = 1 departemen)
-                DB::table('audits')->insert([
-                    'id'               => $newAuditId,
-                    'audit_session_id' => $sessionId,
-                    'department_id'    => $deptId, // Single department
-                    'audit_code'       => $auditCode,
-                    'status'           => 'IN_PROGRESS',
-                    'type'             => $request->audit_type,
-                    'objective'        => $request->audit_objective,
-                    'scope'            => json_encode($request->audit_scope),
-                    'standards'        => json_encode($request->audit_standards),
-                    'methodology'      => json_encode($request->methodology),
-                    'audit_start_date' => $request->audit_start_date,
-                    'audit_end_date'   => $request->audit_end_date,
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
-                ]);
-
-                // Simpan responders untuk departemen ini
-                $responders = [
-                    [
-                        'id'                   => (string) Str::uuid(),
-                        'audit_session_id'     => $sessionId,
-                        'responder_name'       => $auditorName,
-                        'responder_role'       => 'Lead Auditor',
-                        'responder_nik'        => $auditorNik,
-                        'responder_department' => $auditorDept,
-                        'created_at'           => now(),
-                    ]
-                ];
-
-                if ($request->has('audit_team')) {
-                    foreach ($request->audit_team as $member) {
-                        if (!empty($member['name'])) {
-                            $responders[] = [
-                                'id'                   => (string) Str::uuid(),
-                                'audit_session_id'     => $sessionId,
-                                'responder_name'       => $member['name'],
-                                'responder_role'       => $member['role'] ?? 'Member',
-                                'responder_nik'        => $member['nik'] ?? null,
-                                'responder_department' => $member['department'] ?? null,
-                                'created_at'           => now(),
-                            ];
-                        }
+            if ($request->has('audit_team')) {
+                foreach ($request->audit_team as $member) {
+                    if (!empty($member['name'])) {
+                        $responders[] = [
+                            'id'                   => (string) Str::uuid(),
+                            'audit_session_id'     => $childSessionId,
+                            'responder_name'       => $member['name'],
+                            'responder_role'       => $member['role'] ?? 'Member',
+                            'responder_nik'        => $member['nik'] ?? null,
+                            'responder_department' => $member['department'] ?? null,
+                            'created_at'           => now(),
+                        ];
                     }
                 }
-
-                DB::table('audit_responders')->insert($responders);
-
-                // Simpan audit ID untuk redirect
-                $auditIds[] = [
-                    'id' => $newAuditId,
-                    'dept_id' => $deptId,
-                    'token' => $tokenRaw,
-                    'audit_code' => $auditCode
-                ];
             }
-        });
 
-        // Redirect ke audit pertama
-        $firstAudit = $auditIds[0];
-        
-        // Simpan info audit lainnya di session untuk ditampilkan di menu
-        session(['related_audits' => $auditIds]);
+            DB::table('audit_responders')->insert($responders);
 
-        return redirect()->route('audit.menu', ['id' => $firstAudit['id']])
-            ->with('success', "Audit dimulai untuk " . count($auditIds) . " departemen!<br>Kode Audit: <strong>{$firstAudit['audit_code']}</strong><br>TOKEN RESUME: <strong>{$firstAudit['token']}</strong>");
-    }
+            // Simpan audit ID untuk redirect
+            $auditIds[] = [
+                'id' => $newAuditId,
+                'dept_id' => $deptId,
+                'child_session_id' => $childSessionId
+            ];
+        }
+        // =====================================================
+
+        // Simpan parent session ID di session untuk referensi
+        session(['parent_session_id' => $parentSessionId]);
+    });
+
+    // ✅ Sekarang $sharedToken bisa diakses di sini karena menggunakan reference &
+    $firstAudit = $auditIds[0];
+    
+    // Simpan info audit lainnya di session untuk ditampilkan di menu
+    session(['related_audits' => $auditIds]);
+
+    return redirect()->route('audit.menu', ['id' => $firstAudit['id']])
+        ->with('success', "Audit dimulai untuk " . count($auditIds) . " departemen!<br>Kode Audit: <strong>{$auditCode}</strong><br>TOKEN RESUME (1 token untuk semua): <strong>{$sharedToken}</strong>");
+}
 
         // Helper: Generate audit code unik
-    private function generateUniqueAuditCode($userInput = null)
-    {
-        $year = date('Y');
-        $prefix = 'IA';
+// Helper: Generate audit code unik
+private function generateUniqueAuditCode($userInput = null)
+{
+    $year = date('Y');
+    $prefix = 'IA';
 
-        if (!empty($userInput)) {
-            $originalCode = $userInput;
-            $counter = 1;
-            
-            while (DB::table('audits')->where('audit_code', $userInput)->exists()) {
-                $userInput = $originalCode . '-' . $counter;
-                $counter++;
-            }
-            return $userInput;
+    if (!empty($userInput)) {
+        $originalCode = $userInput;
+        $counter = 1;
+        
+        while (DB::table('audits')->where('audit_code', $userInput)->exists()) {
+            $userInput = $originalCode . '-' . $counter;
+            $counter++;
         }
-
-        // Auto-generate
-        $lastAudit = DB::table('audits')
-            ->whereYear('created_at', $year)
-            ->where('audit_code', 'LIKE', "{$prefix}-{$year}-%")
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $lastNumber = 0;
-        if ($lastAudit && preg_match('/' . preg_quote($prefix, '/') . '-' . $year . '-(\d+)$/', $lastAudit->audit_code, $matches)) {
-            $lastNumber = (int)$matches[1];
-        }
-
-        $newNumber = $lastNumber + 1;
-        return sprintf('%s-%s-%04d', $prefix, $year, $newNumber);
+        return $userInput;
     }
+
+    // Auto-generate
+    $lastAudit = DB::table('audits')
+        ->whereYear('created_at', $year)
+        ->where('audit_code', 'LIKE', "{$prefix}-{$year}-%")
+        ->orderBy('created_at', 'desc')
+        ->first();
+
+    $lastNumber = 0;
+    if ($lastAudit && preg_match('/' . preg_quote($prefix, '/') . '-' . $year . '-(\d+)$/', $lastAudit->audit_code, $matches)) {
+        $lastNumber = (int)$matches[1];
+    }
+
+    $newNumber = $lastNumber + 1;
+    return sprintf('%s-%s-%04d', $prefix, $year, $newNumber);
+}
 
     // ----------------------------------------------------------------------
     // 2. Tampilkan Form Input Token Resume
@@ -240,88 +271,121 @@ private $auditorsList = [
     // ----------------------------------------------------------------------
     // 3. Validasi Token & Tampilkan Decision Gate
     // ----------------------------------------------------------------------
-    public function validateResumeToken(Request $request)
-    {
-        $request->validate(['resume_token' => 'required|string']);
-        $token = strtoupper(trim($request->resume_token));
-
-        $session = DB::table('audit_sessions')
-            ->where('resume_token', $token)
-            ->first();
-
-        if (!$session) {
-            return back()->withErrors(['resume_token' => 'Token tidak valid.']);
-        }
-
-        if ($session->resume_token_expires_at && Carbon::parse($session->resume_token_expires_at)->isPast()) {
-            return back()->withErrors(['resume_token' => 'Token sudah kadaluarsa. Silakan buat audit baru.']);
-        }
-
-        $audit = DB::table('audits')
-            ->where('audit_session_id', $session->id)
-            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
-            ->orderByDesc('created_at')
-            ->first();
-
-        if (!$audit) {
-            return back()->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini (mungkin sudah Selesai atau Dibatalkan).']);
-        }
-
-        $auditeeDept = DB::table('departments')->where('id', $audit->department_id)->value('name');
-
-        return view('audit.resume_decision', [
-            'token'         => $token,
-            'auditorName'   => $session->auditor_name,
-            'auditeeDept'   => $auditeeDept,
-            'auditDate'     => Carbon::parse($session->audit_date)->format('d M Y'),
-            'lastActivity'  => $session->last_activity_at ? Carbon::parse($session->last_activity_at)->diffForHumans() : '-',
-            'auditId'       => $audit->id,
-        ]);
+   public function validateResumeToken(Request $request)
+{
+    $request->validate(['resume_token' => 'required|string']);
+    
+    $token = strtoupper(trim($request->resume_token));
+    
+    // Cari parent session berdasarkan token
+    $parentSession = DB::table('audit_sessions')
+        ->where('resume_token', $token)
+        ->where('is_parent', true)
+        ->first();
+    
+    if (!$parentSession) {
+        return back()->withErrors(['resume_token' => 'Token tidak valid.']);
     }
+    
+    if ($parentSession->resume_token_expires_at && Carbon::parse($parentSession->resume_token_expires_at)->isPast()) {
+        return back()->withErrors(['resume_token' => 'Token sudah kadaluarsa. Silakan buat audit baru.']);
+    }
+    
+    // Ambil semua child sessions yang terkait
+    $childSessions = DB::table('audit_sessions')
+        ->where('parent_session_id', $parentSession->id)
+        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+        ->get();
+    
+    if ($childSessions->isEmpty()) {
+        return back()->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
+    }
+    
+    // Ambil audit dari child session pertama
+    $firstChild = $childSessions->first();
+    $audit = DB::table('audits')
+        ->where('audit_session_id', $firstChild->id)
+        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+        ->first();
+    
+    if (!$audit) {
+        return back()->withErrors(['resume_token' => 'Audit tidak ditemukan.']);
+    }
+    
+    $auditeeDept = DB::table('departments')->where('id', $audit->department_id)->value('name');
+    
+    return view('audit.resume_decision', [
+        'token'         => $token,
+        'auditorName'   => $parentSession->auditor_name,
+        'auditeeDept'   => $auditeeDept,
+        'auditDate'     => Carbon::parse($parentSession->audit_date)->format('d M Y'),
+        'lastActivity'  => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
+        'auditId'       => $audit->id,
+        'parentSessionId' => $parentSession->id,
+        'childCount'    => $childSessions->count(), // Jumlah departemen
+    ]);
+}
 
     // ----------------------------------------------------------------------
     // 4. Tangani Keputusan: Lanjutkan atau Batalkan Audit
     // ----------------------------------------------------------------------
     public function handleResumeDecision(Request $request)
-    {
-        $request->validate([
-            'token'    => 'required',
-            'audit_id' => 'required',
-            'action'   => 'required|in:continue,abandon',
-        ]);
-
-        $auditId = $request->audit_id;
-
-        if ($request->action === 'continue') {
-            // Update last activity
-            $audit = DB::table('audits')->where('id', $auditId)->first();
-            if (!$audit) {
-                return redirect()->route('audit.resume.form')->withErrors(['Audit tidak ditemukan.']);
-            }
-
-            DB::table('audit_sessions')
-                ->where('id', $audit->audit_session_id)
-                ->update(['last_activity_at' => now()]);
-
-            return redirect()->route('audit.menu', ['id' => $auditId])
-                ->with('success', 'Sesi dipulihkan. Silakan lanjutkan audit.');
-
-        } else {
-            // Abandon: batalkan audit & nonaktifkan token
-            DB::transaction(function () use ($auditId, $request) {
-                DB::table('audits')
-                    ->where('id', $auditId)
-                    ->update(['status' => 'ABANDONED', 'updated_at' => now()]);
-
-                DB::table('audit_sessions')
-                    ->where('resume_token', $request->token)
-                    ->update(['resume_token_expires_at' => now()]);
-            });
-
-            return redirect()->route('audit.create')
-                ->with('info', 'Audit sebelumnya telah dibatalkan. Silakan mulai audit baru.');
+{
+    $request->validate([
+        'token'    => 'required',
+        'audit_id' => 'required',
+        'action'   => 'required|in:continue,abandon',
+    ]);
+    
+    $auditId = $request->audit_id;
+    
+    if ($request->action === 'continue') {
+        // Update last activity di parent session
+        $audit = DB::table('audits')->where('id', $auditId)->first();
+        if (!$audit) {
+            return redirect()->route('audit.resume.form')->withErrors(['Audit tidak ditemukan.']);
         }
+        
+        $childSession = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+        if ($childSession && $childSession->parent_session_id) {
+            DB::table('audit_sessions')
+                ->where('id', $childSession->parent_session_id)
+                ->update(['last_activity_at' => now()]);
+        }
+        
+        return redirect()->route('audit.menu', ['id' => $auditId])
+            ->with('success', 'Sesi dipulihkan. Silakan lanjutkan audit.');
+    } else {
+        // Abandon: batalkan semua child sessions & nonaktifkan parent token
+        DB::transaction(function () use ($request) {
+            $parentSession = DB::table('audit_sessions')
+                ->where('resume_token', $request->token)
+                ->where('is_parent', true)
+                ->first();
+            
+            if ($parentSession) {
+                // Batalkan semua child sessions
+                $childSessions = DB::table('audit_sessions')
+                    ->where('parent_session_id', $parentSession->id)
+                    ->get();
+                
+                foreach ($childSessions as $child) {
+                    DB::table('audits')
+                        ->where('audit_session_id', $child->id)
+                        ->update(['status' => 'ABANDONED', 'updated_at' => now()]);
+                }
+                
+                // Nonaktifkan parent token
+                DB::table('audit_sessions')
+                    ->where('id', $parentSession->id)
+                    ->update(['resume_token_expires_at' => now()]);
+            }
+        });
+        
+        return redirect()->route('audit.create')
+            ->with('info', 'Semua audit sebelumnya telah dibatalkan. Silakan mulai audit baru.');
     }
+}
 
 public function createAudit() 
 {
