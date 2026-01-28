@@ -18,14 +18,23 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: #f8fafc;
         }
-        .hero-section {
-            background: linear-gradient(rgba(12, 45, 90, 0.95), rgba(12, 45, 90, 0.95)), url('industrial-bg.jpg');
-            background-size: cover;
-            background-position: center;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-        }
+.hero-section {
+    background:
+        linear-gradient(
+            rgba(12, 45, 90, 0.88),
+            rgba(12, 45, 90, 0.88)
+        ),
+        url('https://media.licdn.com/dms/image/v2/D563DAQEpYdKv0Os29A/image-scale_191_1128/image-scale_191_1128/0/1690510724603/pt_trias_sentosa_tbk_cover?e=2147483647&v=beta&t=dOGhpl6HrbRAla_mDVT5azyevrvu-cOGFxPcrlizZ6M');
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    min-height: 260px; /* ideal untuk charter, jangan lebih */
+    display: flex;
+    align-items: center;
+}
+
         .section-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -105,10 +114,24 @@
 <!-- Mini Hero Section -->
 <section class="hero-section text-white">
     <div class="max-w-4xl mx-auto px-4">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">INTERNAL AUDIT CHARTER</h1>
-        <p class="text-xl opacity-90 max-w-3xl">Formalize your audit planning in compliance with ISO 19011 standards for enterprise-grade assurance</p>
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">
+            INTERNAL AUDIT CHARTER
+        </h1>
+
+        <!-- OPSI 1: versi kamu (lebih marketing) -->
+        <p class="text-base md:text-lg opacity-90 max-w-3xl">
+            Formalize your audit planning in compliance with ISO 19011 standards for enterprise-grade assurance
+        </p>
+
+        <!-- OPSI 2: versi lebih audit-grade (DISARANKAN) -->
+        <!--
+        <p class="text-base md:text-lg opacity-90 max-w-3xl">
+            Dokumen resmi penetapan tujuan, lingkup, dan kriteria audit internal berdasarkan ISO 19011
+        </p>
+        -->
     </div>
 </section>
+
 
 <!-- Form Content -->
 <div class="max-w-4xl mx-auto px-4 py-8">
