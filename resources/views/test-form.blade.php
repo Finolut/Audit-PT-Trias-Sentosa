@@ -145,15 +145,7 @@
         <section>
             <h2 class="section-title">Identitas & Standar Audit</h2>
             <p class="section-description">Formalize the foundational elements of your audit engagement per ISO 19011 requirements</p>
-            
-           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div>
-        <label class="block text-sm font-semibold mb-1 text-slate-700">Audit Number (ID)</label>
-        <input type="text" name="audit_code" value="" readonly placeholder="Akan digenerate otomatis" 
-               class="form-input bg-slate-50 cursor-not-allowed">
-        <p class="mt-1 text-xs text-slate-500">Contoh format: IA-2026-0001</p>
-    </div>
-                <div>
+        
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Jenis Pemeriksaan</label>
 <select name="audit_type" required class="form-input">
     <option value="FIRST_PARTY">Pihak Pertama (Internal Rutin)</option>
@@ -277,10 +269,8 @@
                     Tambah Auditor / Observer / Expert
                 </button>
             </div>
-        </section>
 
         <!-- Section 4: Target Audit & Jadwal -->
-<section class="mt-10">
     <h2 class="section-title">Target Audit & Jadwal</h2>
     <p class="section-description">
         Define the auditee departments and schedule the audit execution period.
