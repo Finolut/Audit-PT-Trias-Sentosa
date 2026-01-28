@@ -81,7 +81,15 @@ Route::post('/test-form', function (Request $request) {
 |--------------------------------------------------------------------------
 | AUDIT PROCESS ROUTES (Public / Khusus Auditor lapangan)
 |--------------------------------------------------------------------------
+
 */
+// 1. Route untuk MENAMPILKAN halaman konfirmasi resume (pakai GET)
+Route::get('/audit/resume/form', [AuditController::class, 'showResumeForm'])
+    ->name('audit.resume.form');
+
+// 2. Route untuk MEMPROSES keputusan (continue/abandon) — pakai POST
+Route::post('/audit/resume/check', [AuditController::class, 'handleResumeDecision'])
+    ->name('audit.resume.action');
 // ✅ Route untuk MENAMPILKAN halaman konfirmasi (GET) - WAJIB ADA
 Route::get('audit/resume/form', [AuditController::class, 'showResumeDecisionForm'])
     ->name('audit.resume.form');
