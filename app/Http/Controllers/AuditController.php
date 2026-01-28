@@ -269,19 +269,14 @@ private function generateUniqueAuditCode($userInput = null)
     // ----------------------------------------------------------------------
 public function validateResumeToken(Request $request)
 {
-    // Jika diakses via GET (misal: refresh), redirect ke form
     if ($request->isMethod('get')) {
         return redirect()->route('audit.resume.form');
     }
 
-    // Validasi input
-    $request->validate([
-        'resume_token' => 'required|string',
-    ]);
-
+    $request->validate(['resume_token' => 'required|string']);
     $token = strtoupper(trim($request->resume_token));
 
-    // Cari session aktif berdasarkan token
+    // Cari parent session
     $parentSession = DB::table('audit_sessions')
         ->where('resume_token', $token)
         ->where('is_parent', true)
@@ -289,37 +284,44 @@ public function validateResumeToken(Request $request)
         ->first();
 
     if (!$parentSession) {
-        // ❌ JANGAN return view() di sini!
-        // ✅ Redirect ke form dengan pesan error
-        return redirect()
-            ->route('audit.resume.form')
+        return redirect()->route('audit.resume.form')
             ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
     }
 
-    // Cari audit terkait
+    // Cari child session pertama
+    $childSession = DB::table('audit_sessions')
+        ->where('parent_session_id', $parentSession->id)
+        ->where('is_parent', false)
+        ->first();
+
+    if (!$childSession) {
+        return redirect()->route('audit.resume.form')
+            ->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
+    }
+
+    // Cari audit dari child session
     $audit = DB::table('audits')
-        ->where('audit_session_id', $parentSession->id)
+        ->where('audit_session_id', $childSession->id)
+        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
         ->first();
 
     if (!$audit) {
-        return redirect()
-            ->route('audit.resume.form')
+        return redirect()->route('audit.resume.form')
             ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
     }
 
-    // Ambil data tambahan (opsional)
+    // Ambil data tambahan
     $department = DB::table('departments')
         ->where('id', $audit->department_id)
         ->first();
 
-    // ✅ Semua valid → tampilkan halaman keputusan
     return view('audit.resume_decision', [
         'token' => $token,
         'auditId' => $audit->id,
-        'auditorName' => $audit->lead_auditor_name ?? '—',
+        'auditorName' => $parentSession->auditor_name ?? '—',
         'auditeeDept' => $department?->name ?? '—',
         'auditDate' => $audit->audit_start_date . ' s/d ' . $audit->audit_end_date,
-        'lastActivity' => $parentSession->last_activity_at,
+        'lastActivity' => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
     ]);
 }
 
