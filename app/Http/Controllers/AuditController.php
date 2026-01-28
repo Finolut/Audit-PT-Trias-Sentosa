@@ -76,27 +76,19 @@ private $auditorsList = [
 // 1. UPDATE startAudit (Generate Token saat mulai)
 public function startAudit(Request $request)
 {
-    // 1. Validasi Input (Sesuaikan dengan field yang ada di HTML Form)
     $request->validate([
         'lead_auditor_id'    => 'required|string',
         'lead_auditor_email' => 'nullable|email',
         'auditee_dept_ids'   => 'required|array|min:1',
         'auditee_dept_ids.*' => 'exists:departments,id',
-
-        'audit_code'         => 'required|string',
+        'audit_code'         => 'nullable|string', // Optional
         'audit_type'         => 'required|string',
         'audit_objective'    => 'required|string',
         'audit_scope'        => 'required|array|min:1',
         'audit_standards'    => 'required|array|min:1',
         'methodology'        => 'required|array|min:1',
-
         'audit_start_date'   => 'required|date',
         'audit_end_date'     => 'required|date|after_or_equal:audit_start_date',
-        
-        // 'audit_date' kita hapus dari validasi request karena kita generate otomatis di bawah
-        // atau kita ambil dari hidden field jika Anda menambahkannya.
-        // Untuk aman, kita pakai now() atau ambil dari start_date.
-        
         'audit_team'         => 'nullable|array',
     ]);
 
@@ -114,6 +106,40 @@ public function startAudit(Request $request)
             $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
         } while (DB::table('audit_sessions')->where('resume_token', $tokenRaw)->exists());
 
+        // === GENERATE AUDIT CODE YANG 100% UNIQUE ===
+        $year = date('Y');
+        $prefix = 'IA'; // Internal Audit
+
+        // Cek apakah user mengisi manual (jarang terjadi karena readonly)
+        $auditCode = trim($request->audit_code);
+        
+        if (empty($auditCode)) {
+            // Auto-generate dengan nomor urut berdasarkan audit terakhir di tahun ini
+            $lastAudit = DB::table('audits')
+                ->whereYear('created_at', $year)
+                ->where('audit_code', 'LIKE', "{$prefix}-{$year}-%")
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $lastNumber = 0;
+            if ($lastAudit && preg_match('/' . preg_quote($prefix, '/') . '-' . $year . '-(\d+)$/', $lastAudit->audit_code, $matches)) {
+                $lastNumber = (int)$matches[1];
+            }
+
+            $newNumber = $lastNumber + 1;
+            $auditCode = sprintf('%s-%s-%04d', $prefix, $year, $newNumber);
+        } else {
+            // Jika user input manual (misal dari copy-paste), handle duplikasi
+            $originalCode = $auditCode;
+            $counter = 1;
+            
+            while (DB::table('audits')->where('audit_code', $auditCode)->exists()) {
+                $auditCode = $originalCode . '-' . $counter;
+                $counter++;
+            }
+        }
+        // ===========================================
+
         // Simpan sesi audit
         DB::table('audit_sessions')->insert([
             'id'                      => $sessionId,
@@ -121,39 +147,32 @@ public function startAudit(Request $request)
             'auditor_nik'             => $auditorNik,
             'auditor_department'      => $auditorDept,
             'auditor_email'           => $request->lead_auditor_email,
-            'audit_date'              => $request->audit_start_date, // Pakai start date sebagai tanggal sesi
+            'audit_date'              => $request->audit_start_date,
             'resume_token'            => $tokenRaw,
             'resume_token_expires_at' => now()->addDays(7),
             'last_activity_at'        => now(),
             'created_at'              => now(),
         ]);
 
- DB::table('audits')->insert([
-    'id'               => $newAuditId,
-    'audit_session_id' => $sessionId,
+        // Simpan audit dengan audit_code yang sudah dijamin unique
+        DB::table('audits')->insert([
+            'id'               => $newAuditId,
+            'audit_session_id' => $sessionId,
+            'department_ids'   => json_encode($request->auditee_dept_ids),
+            'audit_code'       => $auditCode, // ✅ Sudah unique!
+            'status'           => 'IN_PROGRESS',
+            'type'             => $request->audit_type,
+            'objective'        => $request->audit_objective,
+            'scope'            => json_encode($request->audit_scope),
+            'standards'        => json_encode($request->audit_standards),
+            'methodology'      => json_encode($request->methodology),
+            'audit_start_date' => $request->audit_start_date,
+            'audit_end_date'   => $request->audit_end_date,
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
 
-    // MULTI DEPARTEMEN (FINAL)
-    'department_ids'   => json_encode($request->auditee_dept_ids),
-
-    'audit_code'       => $request->audit_code,
-    'status'           => 'IN_PROGRESS',
-    'type'             => $request->audit_type,
-    'objective'        => $request->audit_objective,
-
-    'scope'            => json_encode($request->audit_scope),
-    'standards'        => json_encode($request->audit_standards),
-    'methodology'      => json_encode($request->methodology),
-
-    // RENTANG TANGGAL (BUKAN JAM)
-    'audit_start_date' => $request->audit_start_date,
-    'audit_end_date'   => $request->audit_end_date,
-
-    'created_at'       => now(),
-    'updated_at'       => now(),
-]);
-
-
-        // Simpan responders (Lead Auditor + Tim)
+        // Simpan responders
         $responders = [
             [
                 'id'                   => (string) Str::uuid(),
@@ -184,9 +203,9 @@ public function startAudit(Request $request)
 
         DB::table('audit_responders')->insert($responders);
 
-        // PERBAIKAN: Redirect ke route audit.menu sesuai permintaan
+        // Redirect ke pemilihan departemen (sesuai request awal)
         return redirect()->route('audit.select_department', ['id' => $newAuditId])
-    ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>.");
+            ->with('success', "Audit dimulai! Kode Audit: <strong>{$auditCode}</strong><br>TOKEN RESUME: <strong>{$tokenRaw}</strong>");
     });
 }
 
