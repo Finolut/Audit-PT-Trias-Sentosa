@@ -100,81 +100,79 @@ public function startAudit(Request $request)
     $departmentIds = $request->auditee_dept_ids;
     $auditIds = [];
     
-    // ✅ Generate audit code DI LUAR transaction
-    $auditCode = $this->generateUniqueAuditCode($request->audit_code);
-    
-    // ✅ Deklarasikan variabel untuk sharedToken (akan diisi di dalam transaction)
+    // ✅ Deklarasikan variabel untuk sharedToken
     $sharedToken = null;
+    $parentSessionId = null;
 
-    DB::transaction(function () use ($request, $auditorName, $auditorNik, $auditorDept, $departmentIds, &$auditIds, &$sharedToken) {
-    // === 1. BUAT PARENT SESSION (1x token untuk semua departemen) ===
-    $parentSessionId = (string) Str::uuid();
-    
-    // Generate 1 token untuk semua departemen
-    do {
-        $sharedToken = strtoupper(Str::random(3) . '-' . Str::random(3));
-    } while (DB::table('audit_sessions')->where('resume_token', $sharedToken)->exists());
+    DB::transaction(function () use ($request, $auditorName, $auditorNik, $auditorDept, $departmentIds, &$auditIds, &$sharedToken, &$parentSessionId) {
+        // === 1. BUAT PARENT SESSION (1x token untuk semua departemen) ===
+        $parentSessionId = (string) Str::uuid();
+        
+        // Generate 1 token untuk semua departemen
+        do {
+            $sharedToken = strtoupper(Str::random(3) . '-' . Str::random(3));
+        } while (DB::table('audit_sessions')->where('resume_token', $sharedToken)->exists());
 
-    // Simpan parent session
-    DB::table('audit_sessions')->insert([
-        'id'                      => $parentSessionId,
-        'auditor_name'            => $auditorName,
-        'auditor_nik'             => $auditorNik,
-        'auditor_department'      => $auditorDept,
-        'auditor_email'           => $request->lead_auditor_email,
-        'audit_date'              => $request->audit_start_date,
-        'resume_token'            => $sharedToken,
-        'resume_token_expires_at' => now()->addDays(7),
-        'last_activity_at'        => now(),
-        'is_parent'               => true,
-        'created_at'              => now(),
-        'updated_at'              => now(),
-    ]);
-
-    // === 2. BUAT CHILD SESSION UNTUK SETIAP DEPARTEMEN ===
-    foreach ($departmentIds as $deptId) {
-        $childSessionId = (string) Str::uuid();
-        $newAuditId = (string) Str::uuid();
-
-        // ✅ GENERATE AUDIT CODE UNIK UNTUK SETIAP DEPARTEMEN
-        $auditCode = $this->generateUniqueAuditCode($request->audit_code);
-
-        // Simpan child session
+        // Simpan parent session
         DB::table('audit_sessions')->insert([
-            'id'                      => $childSessionId,
-            'parent_session_id'       => $parentSessionId,
+            'id'                      => $parentSessionId,
             'auditor_name'            => $auditorName,
             'auditor_nik'             => $auditorNik,
             'auditor_department'      => $auditorDept,
             'auditor_email'           => $request->lead_auditor_email,
             'audit_date'              => $request->audit_start_date,
-            'resume_token'            => null,
-            'resume_token_expires_at' => null,
+            'resume_token'            => $sharedToken, // ✅ Token disimpan di parent
+            'resume_token_expires_at' => now()->addDays(7),
             'last_activity_at'        => now(),
-            'is_parent'               => false,
+            'is_parent'               => true,
             'created_at'              => now(),
             'updated_at'              => now(),
         ]);
 
-        // ✅ Sekarang setiap child session punya audit_code unik
-        DB::table('audits')->insert([
-            'id'               => $newAuditId,
-            'audit_session_id' => $childSessionId,
-            'department_id'    => $deptId,
-            'audit_code'       => $auditCode, // ✅ Unik per departemen
-            'status'           => 'IN_PROGRESS',
-            'type'             => $request->audit_type,
-            'objective'        => $request->audit_objective,
-            'scope'            => json_encode($request->audit_scope),
-            'standards'        => json_encode($request->audit_standards),
-            'methodology'      => json_encode($request->methodology),
-            'audit_start_date' => $request->audit_start_date,
-            'audit_end_date'   => $request->audit_end_date,
-            'created_at'       => now(),
-            'updated_at'       => now(),
-        ]);
+        // === 2. BUAT CHILD SESSION UNTUK SETIAP DEPARTEMEN ===
+        foreach ($departmentIds as $deptId) {
+            $childSessionId = (string) Str::uuid();
+            $newAuditId = (string) Str::uuid();
 
-            // Simpan responders untuk child session
+            // ✅ GENERATE AUDIT CODE UNIK UNTUK SETIAP DEPARTEMEN
+            $auditCode = $this->generateUniqueAuditCode($request->audit_code);
+
+            // Simpan child session (tanpa token)
+            DB::table('audit_sessions')->insert([
+                'id'                      => $childSessionId,
+                'parent_session_id'       => $parentSessionId, // ✅ Link ke parent
+                'auditor_name'            => $auditorName,
+                'auditor_nik'             => $auditorNik,
+                'auditor_department'      => $auditorDept,
+                'auditor_email'           => $request->lead_auditor_email,
+                'audit_date'              => $request->audit_start_date,
+                'resume_token'            => null, // ✅ Token NULL, pakai parent
+                'resume_token_expires_at' => null,
+                'last_activity_at'        => now(),
+                'is_parent'               => false,
+                'created_at'              => now(),
+                'updated_at'              => now(),
+            ]);
+
+            // Simpan audit untuk departemen ini
+            DB::table('audits')->insert([
+                'id'               => $newAuditId,
+                'audit_session_id' => $childSessionId,
+                'department_id'    => $deptId, // ✅ Departemen yang dipilih
+                'audit_code'       => $auditCode,
+                'status'           => 'IN_PROGRESS',
+                'type'             => $request->audit_type,
+                'objective'        => $request->audit_objective,
+                'scope'            => json_encode($request->audit_scope),
+                'standards'        => json_encode($request->audit_standards),
+                'methodology'      => json_encode($request->methodology),
+                'audit_start_date' => $request->audit_start_date,
+                'audit_end_date'   => $request->audit_end_date,
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ]);
+
+            // Simpan responders
             $responders = [
                 [
                     'id'                   => (string) Str::uuid(),
@@ -205,28 +203,26 @@ public function startAudit(Request $request)
 
             DB::table('audit_responders')->insert($responders);
 
-            // Simpan audit ID untuk redirect
-         $auditIds[] = [
-            'id' => $newAuditId,
-            'dept_id' => $deptId,
-            'child_session_id' => $childSessionId,
-            'audit_code' => $auditCode // ✅ Simpan untuk pesan sukses
-        ];
-    }
+            // Simpan audit info
+            $auditIds[] = [
+                'id' => $newAuditId,
+                'dept_id' => $deptId,
+                'child_session_id' => $childSessionId,
+                'audit_code' => $auditCode
+            ];
+        }
+    });
 
-    
+    // ✅ Simpan info ke session untuk akses nanti
+    session([
+        'parent_session_id' => $parentSessionId,
+        'resume_token' => $sharedToken, // ✅ Simpan token di session
+        'related_audits' => $auditIds,
+    ]);
 
-    session(['parent_session_id' => $parentSessionId]);
-});
-
-    // ✅ Sekarang $sharedToken bisa diakses di sini karena menggunakan reference &
-    $firstAudit = $auditIds[0];
-    
-    // Simpan info audit lainnya di session untuk ditampilkan di menu
-    session(['related_audits' => $auditIds]);
-
-    return redirect()->route('audit.menu', ['id' => $firstAudit['id']])
-        ->with('success', "Audit dimulai untuk " . count($auditIds) . " departemen!<br>Kode Audit: <strong>{$auditCode}</strong><br>TOKEN RESUME (1 token untuk semua): <strong>{$sharedToken}</strong>");
+    // ✅ Redirect ke pemilihan departemen (BUKAN langsung ke menu)
+    return redirect()->route('audit.select_department', ['id' => $auditIds[0]['id']])
+        ->with('success', "Audit dimulai untuk " . count($auditIds) . " departemen!<br>TOKEN RESUME (1 token untuk semua): <strong>{$sharedToken}</strong>");
 }
 
         // Helper: Generate audit code unik
@@ -407,9 +403,14 @@ public function menu($auditId)
     $audit = DB::table('audits')->where('id', $auditId)->first();
     if (!$audit) abort(404);
 
-    // Ambil session terkait audit
-    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-    if (!$session) abort(404);
+    // Ambil child session
+    $childSession = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    if (!$childSession) abort(404);
+
+    // ✅ Ambil parent session untuk token
+    $parentSession = DB::table('audit_sessions')
+        ->where('id', $childSession->parent_session_id)
+        ->first();
 
     // CEK ACTIVE DEPARTMENT DARI SESSION
     $activeDeptId = session('active_department_id');
@@ -460,9 +461,32 @@ public function menu($auditId)
 
     $showReturnButton = $allFinished;
 
+    // ✅ Ambil semua related audits dari parent session yang sama
+    $relatedAudits = [];
+    if ($parentSession) {
+        $siblings = DB::table('audit_sessions')
+            ->where('parent_session_id', $parentSession->id)
+            ->where('is_parent', false)
+            ->get();
+        
+        foreach ($siblings as $sibling) {
+            $sibAudit = DB::table('audits')->where('audit_session_id', $sibling->id)->first();
+            if ($sibAudit) {
+                $sibDept = DB::table('departments')->where('id', $sibAudit->department_id)->value('name');
+                $relatedAudits[] = [
+                    'id' => $sibAudit->id,
+                    'dept_id' => $sibAudit->department_id,
+                    'dept_name' => $sibDept,
+                    'audit_code' => $sibAudit->audit_code,
+                    'status' => $sibAudit->status,
+                ];
+            }
+        }
+    }
+
     return view('audit.menu', [
         'auditId'          => $auditId,
-        'auditorName'      => $session->auditor_name,
+        'auditorName'      => $childSession->auditor_name,
         'deptName'         => $departmentName,
         'mainClauses'      => array_keys($this->mainClauses),
         'titles'           => $this->mainClauseTitles,
@@ -470,7 +494,9 @@ public function menu($auditId)
         'allFinished'      => $allFinished,
         'showReturnButton' => $showReturnButton,
         'activeDepartmentId' => $activeDeptId,
-        'resumeToken'      => $session->resume_token ?? 'TOKEN TIDAK TERSEDIA', // ✅ KIRIM TOKEN KE VIEW
+        'resumeToken'      => $parentSession->resume_token ?? session('resume_token') ?? 'TOKEN TIDAK TERSEDIA', // ✅ Token dari parent
+        'relatedAudits'    => $relatedAudits,
+        'currentAuditId'   => $auditId,
     ]);
 }
  public function show($auditId, $mainClause)
@@ -880,28 +906,45 @@ public function selectDepartment($auditId)
     $audit = DB::table('audits')->where('id', $auditId)->first();
     if (!$audit) abort(404);
 
-    $departmentIds = json_decode($audit->department_ids, true);
-    
-    // Ambil data departemen beserta progress
-    $departments = DB::table('departments')
-        ->whereIn('id', $departmentIds)
-        ->get()
-        ->map(function($dept) use ($auditId) {
-            return [
-                'id' => $dept->id,
-                'name' => $dept->name,
-                'progress' => $this->getDepartmentProgress($auditId, $dept->id),
-                'status' => $this->getDepartmentStatus($auditId, $dept->id)
-            ];
-        });
+    // Ambil child session
+    $childSession = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+    if (!$childSession) abort(404);
 
-    $session = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
-    
+    // Ambil parent session untuk token
+    $parentSession = DB::table('audit_sessions')
+        ->where('id', $childSession->parent_session_id)
+        ->first();
+
+    // Ambil semua child sessions dari parent yang sama
+    $childSessions = DB::table('audit_sessions')
+        ->where('parent_session_id', $childSession->parent_session_id)
+        ->where('is_parent', false)
+        ->get();
+
+    $departments = [];
+    foreach ($childSessions as $child) {
+        $childAudit = DB::table('audits')->where('audit_session_id', $child->id)->first();
+        if ($childAudit) {
+            $dept = DB::table('departments')->where('id', $childAudit->department_id)->first();
+            $deptId = $childAudit->department_id;
+            
+            $departments[] = [
+                'id' => $childAudit->id, // ✅ Audit ID, bukan department ID
+                'dept_id' => $deptId,
+                'name' => $dept->name ?? 'Unknown',
+                'progress' => $this->getDepartmentProgress($childAudit->id, $deptId),
+                'status' => $this->getDepartmentStatus($childAudit->id, $deptId),
+                'audit_code' => $childAudit->audit_code,
+            ];
+        }
+    }
+
     return view('audit.select_department', [
         'auditId' => $auditId,
         'departments' => $departments,
-        'auditorName' => $session->auditor_name,
+        'auditorName' => $parentSession->auditor_name ?? $childSession->auditor_name,
         'auditCode' => $audit->audit_code ?? 'Audit',
+        'resumeToken' => $parentSession->resume_token ?? session('resume_token') ?? 'TOKEN TIDAK TERSEDIA', // ✅ Token dari parent
     ]);
 }
 
@@ -909,13 +952,23 @@ public function selectDepartment($auditId)
 public function setActiveDepartment(Request $request, $auditId)
 {
     $request->validate([
-        'department_id' => 'required|uuid|exists:departments,id'
+        'audit_id' => 'required|uuid|exists:audits,id' // ✅ Validasi audit_id, bukan department_id
     ]);
 
-    // Simpan departemen aktif di session
-    session(['active_department_id' => $request->department_id]);
+    // Ambil audit untuk mendapatkan department_id
+    $audit = DB::table('audits')->where('id', $request->audit_id)->first();
     
-    return redirect()->route('audit.menu', ['id' => $auditId]);
+    if (!$audit) {
+        return back()->withErrors(['Audit tidak ditemukan.']);
+    }
+
+    // ✅ Simpan audit_id dan department_id di session
+    session([
+        'active_audit_id' => $request->audit_id,
+        'active_department_id' => $audit->department_id,
+    ]);
+    
+    return redirect()->route('audit.menu', ['id' => $request->audit_id]);
 }
 
 // Helper: Hitung progress per departemen
