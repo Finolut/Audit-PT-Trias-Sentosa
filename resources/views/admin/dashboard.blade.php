@@ -198,9 +198,15 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                                {{ $audit->department->name }}
-                            </span>
+<div class="flex flex-wrap gap-1">
+    @forelse($audit->department_names as $deptName)
+        <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+            {{ $deptName }}
+        </span>
+    @empty
+        <span class="text-[10px] text-gray-500">Tidak ada departemen</span>
+    @endforelse
+</div>
                             <span class="text-[10px] text-gray-500 italic">
                                 {{ $audit->created_at->diffForHumans() }}
                             </span>

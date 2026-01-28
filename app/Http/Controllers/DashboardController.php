@@ -61,10 +61,24 @@ $stats = [
         'departments'  => Department::count(),
     ];
 
-    $recentAudits = Audit::with(['department', 'session'])
-                         ->orderBy('created_at', 'desc')
-                         ->take(5)
-                         ->get();
+$recentAudits = Audit::with('session') // Hanya load session
+                     ->orderBy('created_at', 'desc')
+                     ->take(5)
+                     ->get()
+                     ->map(function ($audit) {
+                         // Decode department_ids JSON
+                         $deptIds = json_decode($audit->department_ids, true) ?? [];
+                         
+                         // Ambil nama-nama departemen
+                         $deptNames = DB::table('departments')
+                             ->whereIn('id', $deptIds)
+                             ->pluck('name')
+                             ->toArray();
+                         
+                         // Simpan sebagai properti baru
+                         $audit->department_names = $deptNames;
+                         return $audit;
+                     });
 
 // GUNAKAN QUERY BARU INI:
 $liveQuestions = DB::table('audit_questions')
