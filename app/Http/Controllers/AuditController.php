@@ -267,8 +267,14 @@ private function generateUniqueAuditCode($userInput = null)
     // ----------------------------------------------------------------------
     // 3. Validasi Token & Tampilkan Decision Gate
     // ----------------------------------------------------------------------
-   public function validateResumeToken(Request $request)
+public function validateResumeToken(Request $request)
 {
+    // ✅ PROTEKSI: Redirect jika diakses via GET
+    if ($request->isMethod('get')) {
+        return redirect()->route('audit.resume.form')
+            ->with('warning', 'Silakan masukkan token resume melalui form yang tersedia.');
+    }
+
     $request->validate(['resume_token' => 'required|string']);
     
     $token = strtoupper(trim($request->resume_token));
@@ -334,14 +340,14 @@ private function generateUniqueAuditCode($userInput = null)
         'lastActivity'  => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
         'auditId'       => $audit->id,
         'parentSessionId' => $parentSession->id,
-        'childCount'    => count($activeChildSessions), // Jumlah departemen aktif
+        'childCount'    => count($activeChildSessions),
     ]);
 }
 
     // ----------------------------------------------------------------------
     // 4. Tangani Keputusan: Lanjutkan atau Batalkan Audit
     // ----------------------------------------------------------------------
-    public function handleResumeDecision(Request $request)
+  public function handleResumeDecision(Request $request)
 {
     $request->validate([
         'token'    => 'required',
@@ -352,7 +358,6 @@ private function generateUniqueAuditCode($userInput = null)
     $auditId = $request->audit_id;
     
     if ($request->action === 'continue') {
-        // Update last activity di parent session
         $audit = DB::table('audits')->where('id', $auditId)->first();
         if (!$audit) {
             return redirect()->route('audit.resume.form')->withErrors(['Audit tidak ditemukan.']);
@@ -364,6 +369,14 @@ private function generateUniqueAuditCode($userInput = null)
                 ->where('id', $childSession->parent_session_id)
                 ->update(['last_activity_at' => now()]);
         }
+        
+        // ✅ SET SESSION UNTUK DEPARTEMEN PERTAMA (BIAR LANGSUNG KE MENU)
+        session([
+            'active_audit_id' => $auditId,
+            'active_department_id' => $audit->department_id,
+            'parent_session_id' => $childSession->parent_session_id,
+            'resume_token' => $request->token,
+        ]);
         
         return redirect()->route('audit.menu', ['id' => $auditId])
             ->with('success', 'Sesi dipulihkan. Silakan lanjutkan audit.');
@@ -399,6 +412,32 @@ private function generateUniqueAuditCode($userInput = null)
     }
 }
 
+// Di AuditController
+public function showResumeDecisionForm(Request $request)
+{
+    $request->validate(['token' => 'required']);
+    
+    // Ambil data audit berdasarkan token (sesuaikan logika)
+    $session = DB::table('audit_sessions')
+        ->where('resume_token', $request->token)
+        ->where('resume_token_expires_at', '>', now())
+        ->first();
+    
+    if (!$session) {
+        return redirect()->route('audit.create')->withErrors(['Token tidak valid atau kadaluarsa.']);
+    }
+    
+    $audit = DB::table('audits')->where('audit_session_id', $session->id)->first();
+    
+    return view('resume.decision', [
+        'token' => $request->token,
+        'auditId' => $audit->id,
+        'auditorName' => 'Nama Auditor', // Ambil dari DB
+        'auditeeDept' => 'Departemen Target', // Ambil dari DB
+        'auditDate' => '2026-01-29', // Format sesuai kebutuhan
+        'lastActivity' => $session->last_activity_at,
+    ]);
+}
 public function createAudit() 
 {
     // 1. Ambil data departemen (id akan berisi UUID dari DB)
