@@ -55,13 +55,27 @@ public function index(Request $request)
         'departments'  => Department::count(),
     ];
 
-    // Ambil recent audits (termasuk multiple audit dari 1 auditor)
-    $recentAudits = Audit::with(['department', 'session'])
+    // Ambil recent audits dan tambahkan department_names
+    $recentAudits = Audit::with('session')
                          ->orderBy('created_at', 'desc')
                          ->take(5)
-                         ->get();
+                         ->get()
+                         ->map(function ($audit) {
+                             // Decode department_ids JSON
+                             $deptIds = json_decode($audit->department_ids, true) ?? [];
+                             
+                             // Ambil nama-nama departemen
+                             $deptNames = DB::table('departments')
+                                 ->whereIn('id', $deptIds)
+                                 ->pluck('name')
+                                 ->toArray();
+                             
+                             // Simpan sebagai properti baru
+                             $audit->department_names = $deptNames;
+                             return $audit;
+                         });
 
-    // Query live questions (sudah benar, langsung dari audit_questions)
+    // Query live questions (sudah benar)
     $liveQuestions = DB::table('audit_questions')
         ->join('departments', 'audit_questions.department_id', '=', 'departments.id')
         ->leftJoin('audits', 'audit_questions.audit_id', '=', 'audits.id')
