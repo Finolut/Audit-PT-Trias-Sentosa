@@ -74,115 +74,120 @@ private $auditorsList = [
     }
 
 // 1. UPDATE startAudit (Generate Token saat mulai)
-    public function startAudit(Request $request)
-    {
-$request->validate([
-    'lead_auditor_id'        => 'required|string',
-    'lead_auditor_email'     => 'nullable|email',
-    'auditee_dept_ids'       => 'required|array|min:1',
-    'auditee_dept_ids.*'     => 'exists:departments,id',
+public function startAudit(Request $request)
+{
+    // 1. Validasi Input (Sesuaikan dengan field yang ada di HTML Form)
+    $request->validate([
+        'lead_auditor_id'    => 'required|string',
+        'lead_auditor_email' => 'nullable|email',
+        'auditee_dept_ids'   => 'required|array|min:1',
+        'auditee_dept_ids.*' => 'exists:departments,id',
 
-    'audit_code'             => 'required|string',
-    'audit_type'             => 'required|string',
-    'audit_objective'        => 'required|string',
-    'audit_scope'            => 'required|array|min:1',
-    'audit_standards'        => 'required|array|min:1',
-    'methodology'            => 'required|array|min:1',
+        'audit_code'         => 'required|string',
+        'audit_type'         => 'required|string',
+        'audit_objective'    => 'required|string',
+        'audit_scope'        => 'required|array|min:1',
+        'audit_standards'    => 'required|array|min:1',
+        'methodology'        => 'required|array|min:1',
 
-'audit_start_date' => 'required|date',
-    'audit_end_date'   => 'required|date|after_or_equal:audit_start_date',
-    'audit_date'             => 'required|date',
+        'audit_start_date'   => 'required|date',
+        'audit_end_date'     => 'required|date|after_or_equal:audit_start_date',
+        
+        // 'audit_date' kita hapus dari validasi request karena kita generate otomatis di bawah
+        // atau kita ambil dari hidden field jika Anda menambahkannya.
+        // Untuk aman, kita pakai now() atau ambil dari start_date.
+        
+        'audit_team'         => 'nullable|array',
+    ]);
 
-    'audit_team'             => 'nullable|array',
-]);
+    return DB::transaction(function () use ($request) {
+        $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
+        $auditorName = $selectedAuditor['name'] ?? 'Unknown';
+        $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
+        $auditorDept = $selectedAuditor['dept'] ?? 'N/A';
 
+        $sessionId = (string) Str::uuid();
+        $newAuditId = (string) Str::uuid();
 
-        return DB::transaction(function () use ($request) {
-            $selectedAuditor = collect($this->auditorsList)->firstWhere('nik', $request->lead_auditor_id);
-            $auditorName = $selectedAuditor['name'] ?? 'Unknown';
-            $auditorNik  = $selectedAuditor['nik'] ?? 'N/A';
-            $auditorDept = $selectedAuditor['dept'] ?? 'N/A';
+        // Generate token unik
+        do {
+            $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
+        } while (DB::table('audit_sessions')->where('resume_token', $tokenRaw)->exists());
 
-            $sessionId = (string) Str::uuid();
-            $newAuditId = (string) Str::uuid();
+        // Simpan sesi audit
+        DB::table('audit_sessions')->insert([
+            'id'                      => $sessionId,
+            'auditor_name'            => $auditorName,
+            'auditor_nik'             => $auditorNik,
+            'auditor_department'      => $auditorDept,
+            'auditor_email'           => $request->lead_auditor_email,
+            'audit_date'              => $request->audit_start_date, // Pakai start date sebagai tanggal sesi
+            'resume_token'            => $tokenRaw,
+            'resume_token_expires_at' => now()->addDays(7),
+            'last_activity_at'        => now(),
+            'created_at'              => now(),
+        ]);
 
-            // Generate token unik dengan format ABC-XYZ
-            do {
-                $tokenRaw = strtoupper(Str::random(3) . '-' . Str::random(3));
-            } while (DB::table('audit_sessions')->where('resume_token', $tokenRaw)->exists());
+        // Simpan audit utama
+        DB::table('audits')->insert([
+            'id'               => $newAuditId,
+            'audit_session_id' => $sessionId,
+            'department_ids'   => json_encode($request->auditee_dept_ids),
+            // PERBAIKAN: Ambil departemen pertama sebagai primary jika struktur DB butuh single ID
+            'department_id'    => $request->auditee_dept_ids[0] ?? null, 
 
-            // Simpan sesi audit
-            DB::table('audit_sessions')->insert([
-                'id'                      => $sessionId,
-                'auditor_name'            => $auditorName,
-                'auditor_nik'             => $auditorNik,
-                'auditor_department'      => $auditorDept,
-                'auditor_email'           => $request->lead_auditor_email,
-                'audit_date'              => $request->audit_date,
-                'resume_token'            => $tokenRaw,
-                'resume_token_expires_at' => now()->addDays(7),
-                'last_activity_at'        => now(),
-                'created_at'              => now(),
-            ]);
+            'audit_code'       => $request->audit_code,
+            'status'           => 'IN_PROGRESS',
+            'type'             => $request->audit_type,
+            'objective'        => $request->audit_objective,
+            'scope'            => json_encode($request->audit_scope),
+            'standards'        => json_encode($request->audit_standards),
+            'methodology'      => json_encode($request->methodology),
 
-            // Simpan audit utama
-DB::table('audits')->insert([
-    'id'               => $newAuditId,
-    'audit_session_id' => $sessionId,
+            // PERBAIKAN: Mapping nama field form ke kolom database
+            'start_time'       => $request->audit_start_date, 
+            'end_time'         => $request->audit_end_date,
+            
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
 
-    // simpan multi departemen sebagai JSON / string
-    'department_ids'   => json_encode($request->auditee_dept_ids),
+        // Simpan responders (Lead Auditor + Tim)
+        $responders = [
+            [
+                'id'                   => (string) Str::uuid(),
+                'audit_session_id'     => $sessionId,
+                'responder_name'       => $auditorName,
+                'responder_role'       => 'Lead Auditor',
+                'responder_nik'        => $auditorNik,
+                'responder_department' => $auditorDept,
+                'created_at'           => now(),
+            ]
+        ];
 
-    'audit_code'       => $request->audit_code,
-    'status'           => 'IN_PROGRESS',
-    'type'             => $request->audit_type,
-    'objective'        => $request->audit_objective,
-    'scope'            => json_encode($request->audit_scope),
-    'standards'        => json_encode($request->audit_standards),
-    'methodology'      => json_encode($request->methodology),
-
-    'start_time'       => $request->start_time,
-    'end_time'         => $request->end_time,
-    'created_at'       => now(),
-    'updated_at'       => now(),
-]);
-
-
-            // Simpan responders (Lead Auditor + Tim)
-            $responders = [
-                [
-                    'id'                   => (string) Str::uuid(),
-                    'audit_session_id'     => $sessionId,
-                    'responder_name'       => $auditorName,
-                    'responder_role'       => 'Lead Auditor',
-                    'responder_nik'        => $auditorNik,
-                    'responder_department' => $auditorDept,
-                    'created_at'           => now(),
-                ]
-            ];
-
-            if ($request->has('audit_team')) {
-                foreach ($request->audit_team as $member) {
-                    if (!empty($member['name'])) {
-                        $responders[] = [
-                            'id'                   => (string) Str::uuid(),
-                            'audit_session_id'     => $sessionId,
-                            'responder_name'       => $member['name'],
-                            'responder_role'       => $member['role'] ?? 'Member',
-                            'responder_nik'        => $member['nik'] ?? null,
-                            'responder_department' => $member['department'] ?? null,
-                            'created_at'           => now(),
-                        ];
-                    }
+        if ($request->has('audit_team')) {
+            foreach ($request->audit_team as $member) {
+                if (!empty($member['name'])) {
+                    $responders[] = [
+                        'id'                   => (string) Str::uuid(),
+                        'audit_session_id'     => $sessionId,
+                        'responder_name'       => $member['name'],
+                        'responder_role'       => $member['role'] ?? 'Member',
+                        'responder_nik'        => $member['nik'] ?? null,
+                        'responder_department' => $member['department'] ?? null,
+                        'created_at'           => now(),
+                    ];
                 }
             }
+        }
 
-            DB::table('audit_responders')->insert($responders);
+        DB::table('audit_responders')->insert($responders);
 
-            return redirect()->route('audit.menu', ['id' => $newAuditId])
-                ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>. Simpan token ini untuk melanjutkan audit nanti.");
-        });
-    }
+        // PERBAIKAN: Redirect ke route audit.menu sesuai permintaan
+        return redirect()->route('audit.menu', ['id' => $newAuditId])
+            ->with('success', "Audit dimulai! TOKEN RESUME ANDA: <strong>{$tokenRaw}</strong>.");
+    });
+}
 
     // ----------------------------------------------------------------------
     // 2. Tampilkan Form Input Token Resume
