@@ -755,8 +755,18 @@ public function store(Request $request, $auditId, $mainClause)
         }
 
         if ($answerRecords) {
-            DB::table('answers')
-                ->insert($answerRecords); // ⚠️ Pastikan tidak ada duplicate ID — frontend harus konsisten
+            DB::table('answers')->upsert(
+    $answerRecords,
+    ['id'], // PRIMARY KEY
+    [
+        'answer',
+        'finding_level',
+        'answered_at',
+        'updated_at',
+        'department_id',
+    ]
+);
+
         }
 
         if ($finalRecords) {
