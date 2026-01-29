@@ -692,7 +692,7 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
 
-        // 2. KUMPULKAN DATA JAWABAN DAN UPLOAD EVIDENCE
+        // 2. PROSES JAWABAN DAN UPLOAD EVIDENCE
         $answerRecords = [];
         $finalRecords = [];
 
@@ -704,32 +704,44 @@ public function store(Request $request, $auditId, $mainClause)
                 if (!empty($data['val'])) {
                     $hasAnswer = true;
 
-                    // Bersihkan spasi untuk key file
+                    $answerId = (string) Str::uuid();
                     $safePersonName = str_replace(' ', '_', $personName);
                     $fileKey = "evidence_file.{$itemId}.{$safePersonName}";
 
-$evidencePath = null;
-
-if ($request->hasFile($fileKey)) {
-    $file = $request->file($fileKey);
-    // Tambahkan 's3' agar file terbang ke Supabase
-    $evidencePath = $file->store('public/audit-evidence', 's3');
-}
-
-
-                    $answerRecords[] = [
-                        'id'            => (string) Str::uuid(),
+                    // Simpan jawaban (tanpa evidence_path)
+                    $record = [
+                        'id'            => $answerId,
                         'audit_id'      => $auditId,
                         'item_id'       => $itemId,
                         'auditor_name'  => $personName,
                         'department_id' => $departmentId,
                         'answer'        => $data['val'],
                         'finding_level' => $findingLevels[$itemId][$personName] ?? null,
-                        'evidence_path' => $evidencePath,
                         'answered_at'   => now(),
                         'created_at'    => now(),
                         'updated_at'    => now(),
                     ];
+
+                    $answerRecords[] = $record;
+
+                    // Upload dan simpan evidence jika ada file
+                    if ($request->hasFile($fileKey)) {
+                        $file = $request->file($fileKey);
+                        $path = $file->store("audit/{$auditId}/item/{$itemId}", 's3');
+
+                        DB::table('answer_evidences')->insert([
+                            'id'           => (string) Str::uuid(),
+                            'answer_id'    => $answerId,
+                            'audit_id'     => $auditId,
+                            'item_id'      => $itemId,
+                            'auditor_name' => $personName,
+                            'file_path'    => $path,
+                            'file_name'    => $file->getClientOriginalName(),
+                            'mime_type'    => $file->getClientMimeType(),
+                            'file_size'    => $file->getSize(),
+                            'created_at'   => now(),
+                        ]);
+                    }
 
                     match ($data['val']) {
                         'YES' => $yesCount++,
@@ -759,16 +771,12 @@ if ($request->hasFile($fileKey)) {
             }
         }
 
-        // Upsert answers
+        // Insert jawaban (bukan upsert, karena id UUID unik)
         if (!empty($answerRecords)) {
-            DB::table('answers')->upsert(
-                $answerRecords,
-                ['audit_id', 'item_id', 'auditor_name', 'department_id'],
-                ['answer', 'finding_level', 'evidence_path', 'answered_at', 'updated_at']
-            );
+            DB::table('answers')->insert($answerRecords);
         }
 
-        // Upsert final records
+        // Upsert final records (boleh upsert karena key komposit stabil)
         if (!empty($finalRecords)) {
             DB::table('answer_finals')->upsert(
                 $finalRecords,
