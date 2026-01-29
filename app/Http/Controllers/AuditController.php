@@ -312,25 +312,26 @@ public function processTokenInput(Request $request)
                 ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
         }
 
-        // 4. Ambil data Departemen & User (Auditor) untuk ditampilkan di View
-        $department = DB::table('departments')->where('id', $audit->department_id)->first();
-        
-        // Asumsi ada tabel users untuk mengambil nama auditor, jika tidak sesuaikan
-        $auditor = DB::table('users')->where('id', $audit->auditor_id)->first(); 
+// ... kode sebelumnya ...
 
-        // Siapkan data untuk View
-        $data = [
-            'token'        => $token,
-            'auditId'      => $audit->id,
-            'auditorName'  => $auditor ? $auditor->name : 'Auditor #' . $audit->auditor_id,
-            'auditeeDept'  => $department ? $department->name : 'Unknown Dept',
-            'auditDate'    => \Carbon\Carbon::parse($audit->created_at)->format('d M Y'),
-            'lastActivity' => \Carbon\Carbon::parse($parentSession->last_activity_at ?? now())->diffForHumans(),
-        ];
+// 4. Ambil data Departemen
+$department = DB::table('departments')->where('id', $audit->department_id)->first();
 
-        // RETURN VIEW (Bukan Redirect)
-        // Pastikan nama file blade Anda sesuai, misal: audit/resume/decision.blade.php
-        return view('audit.resume.decision', $data);
+// 5. Ambil data Auditor dari tabel audit_sessions (menggunakan user_id dari parent session)
+// Sesuaikan 'user_id' dengan nama kolom yang ada di tabel audit_sessions Anda
+$auditor = DB::table('users')->where('id', $parentSession->user_id)->first(); 
+
+// Siapkan data untuk View
+$data = [
+    'token'        => $token,
+    'auditId'      => $audit->id,
+    'auditorName'  => $auditor ? $auditor->name : 'Auditor Tidak Dikenal',
+    'auditeeDept'  => $department ? $department->name : 'Departemen Tidak Diketahui',
+    'auditDate'    => \Carbon\Carbon::parse($audit->created_at)->format('d M Y'),
+    'lastActivity' => \Carbon\Carbon::parse($parentSession->last_activity_at ?? now())->diffForHumans(),
+];
+
+return view('audit.resume.decision', $data);
     }
 
     // ----------------------------------------------------------------------
