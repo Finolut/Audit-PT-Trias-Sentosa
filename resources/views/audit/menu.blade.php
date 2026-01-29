@@ -332,7 +332,7 @@
             
             <!-- ✅ TOKEN RESUME BANNER -->
             <div class="token-banner">
-                <div class="token-label">🔑 TOKEN RESUME</div>
+                <div class="token-label">🔑 TOKEN</div>
                 <div class="token-value">{{ $resumeToken ?? 'TOKEN TIDAK TERSEDIA' }}</div>
             </div>
             
