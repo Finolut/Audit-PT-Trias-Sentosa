@@ -30,6 +30,6 @@ class EvidencesController extends Controller
             ->orderByDesc('answer_evidences.created_at')
             ->paginate(15);
 
-        return view('admin.evidence-log', compact('evidences'));
+return view('admin.evidence_log', compact('evidences'));
     }
 }
