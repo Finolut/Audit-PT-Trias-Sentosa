@@ -713,7 +713,7 @@ $evidencePath = null;
 if ($request->hasFile($fileKey)) {
     $file = $request->file($fileKey);
     // Tambahkan 's3' agar file terbang ke Supabase
-    $evidencePath = $file->store('audit-evidence', 's3'); 
+    $evidencePath = $file->store('public/audit-evidence', 's3');
 }
 
 
