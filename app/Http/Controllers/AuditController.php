@@ -708,11 +708,13 @@ public function store(Request $request, $auditId, $mainClause)
                     $safePersonName = str_replace(' ', '_', $personName);
                     $fileKey = "evidence_file.{$itemId}.{$safePersonName}";
 
-                    $evidencePath = null;
-                    if ($request->hasFile($fileKey)) {
-                        $file = $request->file($fileKey);
-                        $evidencePath = $file->store('audit_evidence', 'public');
-                    }
+$evidencePath = null;
+
+if ($request->hasFile($fileKey)) {
+    $file = $request->file($fileKey);
+    $evidencePath = $file->store('audit-evidence');
+}
+
 
                     $answerRecords[] = [
                         'id'            => (string) Str::uuid(),
