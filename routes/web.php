@@ -173,7 +173,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
          Route::get('/admin/items/create', [ItemController::class, 'create'])->name('admin.items.create');
 Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
 
-Route::get('/admin/evidences', 
+Route::get('/admin/evidences',
     [EvidencesController::class, 'evidenceLog']
 )->name('admin.evidence.log');
 
