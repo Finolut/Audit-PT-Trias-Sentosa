@@ -855,8 +855,6 @@ public function uploadEvidence(Request $request, $answerId)
         'id' => Str::uuid(),
         'answer_id' => $answerId,
         'audit_id' => $answer->audit_id,
-        'item_id' => $answer->item_id,
-        'auditor_name' => $answer->auditor_name,
         'file_path' => $path,
         'file_name' => $file->getClientOriginalName(),
         'mime_type' => $file->getMimeType(),
