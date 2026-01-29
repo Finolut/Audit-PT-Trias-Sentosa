@@ -54,7 +54,7 @@ return [
     'region' => env('AWS_REGION', env('AWS_DEFAULT_REGION', 'ap-southeast-1')),
     'bucket' => env('AWS_BUCKET'),
     'endpoint' => env('AWS_ENDPOINT'),
-    'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
+    'use_path_style_endpoint' => true,
     'throw' => true,
 ],
 

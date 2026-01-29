@@ -770,7 +770,7 @@ public function store(Request $request, $auditId, $mainClause)
         // 4. BARU UPLOAD & SIMPAN EVIDENCE (child records)
         foreach ($evidenceQueue as $e) {
             $file = $e['file'];
-            $path = $file->store("audit/{$auditId}/item/{$e['item_id']}/{$e['answer_id']}", 's3');
+            $path = $file->store("test-folder", "s3");
 
             DB::table('answer_evidences')->insert([
                 'id'           => $e['id'],
