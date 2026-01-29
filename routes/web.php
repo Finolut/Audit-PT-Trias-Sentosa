@@ -176,25 +176,25 @@ Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items
 Route::get('/admin/evidences', [EvidencesController::class, 'evidenceLog'])
     ->name('admin.evidence.log');
 
-Route::get('/admin/evidence/{id}', function ($id) {
-    $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-    abort_if(!$evidence, 404);
+// Route::get('/admin/evidence/{id}', function ($id) {
+//     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
+//     abort_if(!$evidence, 404);
 
-    $path = $evidence->file_path;
-    $disk = Storage::disk('s3');
+//     $path = $evidence->file_path;
+//     $disk = Storage::disk('s3');
 
-    if (!$disk->exists($path)) {
-        abort(404, 'File tidak ditemukan di S3');
-    }
+//     if (!$disk->exists($path)) {
+//         abort(404, 'File tidak ditemukan di S3');
+//     }
 
-    $file = $disk->get($path);
-    $type = $disk->mimeType($path);
+//     $file = $disk->get($path);
+//     $type = Storage::disk('s3')->mimeType($path); // ✅ Gunakan helper ini
 
-    return response($file, 200, [
-        'Content-Type' => $type,
-        'Content-Disposition' => 'inline; filename="' . basename($path) . '"'
-    ]);
-})->name('admin.evidence.view');
+//     return response($file, 200, [
+//         'Content-Type' => $type,
+//         'Content-Disposition' => 'inline; filename="' . basename($path) . '"'
+//     ]);
+// })->name('admin.evidence.view');
 });
 
 // Preserved special routes (public)
