@@ -88,7 +88,10 @@ Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
     ->name('audit.resume.form');
 
 // ✅ Route untuk validasi token dari form resume
-Route::post('/audit/resume/validate', [AuditController::class, 'validateResumeToken'])
+Route::post('/audit/resume/decision', [AuditController::class, 'validateResumeToken'])
+    ->name('audit.resume.decision'); // ← NAMA ROUTE INI YANG DIGUNAKAN DI FORM
+
+    Route::post('/audit/resume/validate', [AuditController::class, 'validateResumeToken'])
     ->name('audit.resume.validate'); // ← NAMA ROUTE INI YANG DIGUNAKAN DI FORM
 
 
