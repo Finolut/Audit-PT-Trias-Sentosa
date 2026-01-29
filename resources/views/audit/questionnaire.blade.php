@@ -69,59 +69,73 @@
 
                                         <div id="hidden_inputs_{{ $item->id }}"></div>
 
-                                        {{-- === INPUT FINDING + EVIDENCE PER AUDITOR === --}}
-                                        <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
-                                            <div class="flex flex-wrap gap-4 items-end">
-                                                {{-- FINDING LEVEL --}}
-                                                <div class="flex-1 min-w-[160px]">
-                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                                                        Finding Level
-                                                    </label>
-                                                    <select 
-                                                        name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
-                                                        class="w-full text-sm border-gray-300 rounded focus:ring-blue-500">
-                                                        <option value="">-- No Finding --</option>
-                                                        <option value="observed"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'observed' ? 'selected' : '' }}>
-                                                            Observed (OFI)
-                                                        </option>
-                                                        <option value="minor"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'minor' ? 'selected' : '' }}>
-                                                            Minor NC
-                                                        </option>
-                                                        <option value="major"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'major' ? 'selected' : '' }}>
-                                                            Major NC
-                                                        </option>
-                                                    </select>
-                                                </div>
+ {{-- === INPUT FINDING + EVIDENCE PER AUDITOR === --}}
+<div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
+    <div class="flex flex-wrap gap-4 items-end">
+        {{-- FINDING LEVEL --}}
+        <div class="flex-1 min-w-[160px]">
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                Finding Level
+            </label>
+            <select 
+                name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
+                class="w-full text-sm border-gray-300 rounded focus:ring-blue-500">
+                <option value="">-- No Finding --</option>
+                <option value="observed"
+                    {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'observed' ? 'selected' : '' }}>
+                    Observed (OFI)
+                </option>
+                <option value="minor"
+                    {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'minor' ? 'selected' : '' }}>
+                    Minor NC
+                </option>
+                <option value="major"
+                    {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'major' ? 'selected' : '' }}>
+                    Major NC
+                </option>
+            </select>
+        </div>
 
-                                                {{-- HIDDEN ANSWER ID --}}
-                                                <input type="hidden"
-                                                       name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
-                                                       id="answer_id_{{ $item->id }}_{{ $auditorName }}">
+        {{-- ✅ HIDDEN ANSWER ID — GENERATE DI SERVER --}}
+        @php
+            $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+            $answerId = $existingAnswer ? $existingAnswer->id : \Illuminate\Support\Str::uuid();
+        @endphp
 
-                                                {{-- EVIDENCE FILE INPUT (DINAMIS) --}}
-                                                <div class="flex-1 min-w-[200px]">
-                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                                                        Evidence Photo
-                                                    </label>
-                                                    <input
-                                                        type="file"
-                                                        data-item="{{ $item->id }}"
-                                                        data-auditor="{{ $auditorName }}"
-                                                        accept="image/*"
-                                                        multiple
-                                                        class="block w-full text-xs text-gray-400
-        file:mr-2 file:py-1 file:px-2
-        file:rounded file:border-0
-        file:bg-gray-200 file:text-gray-500
-        cursor-not-allowed
-        pointer-events-none">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {{-- === AKHIR FINDING + EVIDENCE === --}}
+        <input type="hidden"
+               name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+               value="{{ $answerId }}">
+
+        {{-- ✅ INPUT FILE LANGSUNG PAKAI answerId --}}
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                Evidence Photo
+            </label>
+            <input
+                type="file"
+                name="evidence[{{ $answerId }}][]"
+                accept="image/*"
+                multiple
+                class="block w-full text-xs text-gray-500
+                       file:mr-2 file:py-1 file:px-2
+                       file:rounded file:border-0
+                       file:bg-blue-50 file:text-blue-700
+                       hover:file:bg-blue-100">
+        </div>
+    </div>
+
+    {{-- OPSIONAL: Tampilkan evidence yang sudah ada --}}
+    @if($existingAnswer && $existingAnswer->evidence_path)
+        <div class="mt-1">
+            <a href="{{ Storage::disk('s3')->temporaryUrl('storage/' . $existingAnswer->evidence_path, now()->addMinutes(5)) }}" 
+               target="_blank" 
+               class="text-[10px] text-blue-600 underline">
+                <i class="fa fa-image"></i> View Current Evidence
+            </a>
+        </div>
+    @endif
+</div>
+{{-- === AKHIR FINDING + EVIDENCE === --}}
                                     </div>
                                 </div>
                             @endforeach
@@ -168,36 +182,21 @@
             el.classList.remove('active-yes', 'active-no', 'active-na');
         });
 
-        // Set active class
-        if (val === 'YES') btn.classList.add('active-yes');
-        else if (val === 'NO') btn.classList.add('active-no');
-        else if (val === 'N/A') btn.classList.add('active-na');
-
-        // Generate answer ID
-        const answerId = crypto.randomUUID();
-
-        // Simpan ke hidden input
-        const hiddenInput = document.getElementById(`answer_id_${itemId}_${auditor}`);
-        if (hiddenInput) {
-            hiddenInput.value = answerId;
+        // Set active class berdasarkan nilai
+        if (val === 'YES') {
+            btn.classList.add('active-yes');
+        } else if (val === 'NO') {
+            btn.classList.add('active-no');
+        } else if (val === 'N/A') {
+            btn.classList.add('active-na');
         }
 
-        // Update nama input file dan aktifkan
-        const fileInput = document.querySelector(
-            `input[data-item="${itemId}"][data-auditor="${auditor}"]`
-        );
-        if (fileInput) {
-            fileInput.name = `evidence[${answerId}][]`;
-            // Hapus kelas yang menonaktifkan
-            fileInput.classList.remove(
-                'pointer-events-none',
-                'cursor-not-allowed',
-                'text-gray-400'
-            );
-            fileInput.classList.add('text-gray-700');
-            fileInput.disabled = false; // pastikan benar-benar enabled
+        // Simpan nilai jawaban ke hidden input (pastikan input ini ada di form)
+        const answerInput = document.querySelector(`input[name='answers[${itemId}][${auditor}]']`);
+        if (answerInput) {
+            answerInput.value = val;
         }
-    } // <-- INI YANG KURANG: TUTUP FUNGSI setVal()
+    }
 
     function confirmSubmit() {
         Swal.fire({
