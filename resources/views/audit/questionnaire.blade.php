@@ -29,7 +29,10 @@
         </header>
 
         {{-- HANYA SATU FORM, DENGAN enctype --}}
-        <form method="POST" action="{{ route('audit.store', ['auditId' => $auditId, 'mainClause' => $currentMain]) }}" id="form" enctype="multipart/form-data">
+        <form method="POST" 
+      action="{{ route('audit.store', ['id' => $auditId, 'clause' => $currentMain]) }}" 
+      id="form" 
+      enctype="multipart/form-data">
             @csrf
 
             @foreach ($subClauses as $subCode)
