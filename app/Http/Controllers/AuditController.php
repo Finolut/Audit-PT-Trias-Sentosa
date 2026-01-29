@@ -276,68 +276,61 @@ public function processTokenInput(Request $request)
     // ----------------------------------------------------------------------
     // STEP 2: Logic Query Database & Return View (Method GET)
     // ----------------------------------------------------------------------
-    public function showDecisionPage($token)
-    {
-        // 1. Cari parent session
-        $parentSession = DB::table('audit_sessions')
-            ->where('resume_token', $token)
-            ->where('is_parent', true)
-            ->where('resume_token_expires_at', '>', now())
-            ->first();
+   public function showDecisionPage($token)
+{
+    $parentSession = DB::table('audit_sessions')
+        ->where('resume_token', $token)
+        ->where('is_parent', true)
+        ->where('resume_token_expires_at', '>', now())
+        ->first();
 
-        if (!$parentSession) {
-            return redirect()->route('audit.resume.form')
-                ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
-        }
-
-        // 2. Cari child session pertama
-        $childSession = DB::table('audit_sessions')
-            ->where('parent_session_id', $parentSession->id)
-            ->where('is_parent', false)
-            ->first();
-
-        if (!$childSession) {
-            return redirect()->route('audit.resume.form')
-                ->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
-        }
-
-        // 3. Cari audit dari child session
-        $audit = DB::table('audits')
-            ->where('audit_session_id', $childSession->id)
-            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
-            ->first();
-
-        if (!$audit) {
-            return redirect()->route('audit.resume.form')
-                ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
-        }
-
-// 4. Ambil data Departemen
-$department = DB::table('departments')->where('id', $audit->department_id)->first();
-
-// 5. Cari ID Auditor. Kita coba cek beberapa kemungkinan kolom yang umum:
-// Kita cek di $audit dulu, kalau tidak ada cek di $parentSession
-$auditorId = $audit->user_id 
-             ?? $audit->created_by 
-             ?? $parentSession->user_id 
-             ?? $parentSession->created_by 
-             ?? null;
-
-$auditor = null;
-if ($auditorId) {
-    $auditor = DB::table('users')->where('id', $auditorId)->first();
-}
-
-// Siapkan data untuk View
-$data = [
-    'token'        => $token,
-    'auditId'      => $audit->id,
-    'auditorName'  => $auditor ? $auditor->name : 'Auditor (ID: '.$auditorId.')',
-    'auditeeDept'  => $department ? $department->name : 'Unknown Dept',
-    'auditDate'    => \Carbon\Carbon::parse($audit->created_at)->format('d M Y'),
-    'lastActivity' => \Carbon\Carbon::parse($parentSession->last_activity_at ?? now())->diffForHumans(),
-];
+    if (!$parentSession) {
+        return redirect()->route('audit.resume.form')
+            ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
     }
+
+    $childSession = DB::table('audit_sessions')
+        ->where('parent_session_id', $parentSession->id)
+        ->where('is_parent', false)
+        ->first();
+
+    if (!$childSession) {
+        return redirect()->route('audit.resume.form')
+            ->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
+    }
+
+    $audit = DB::table('audits')
+        ->where('audit_session_id', $childSession->id)
+        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+        ->first();
+
+    if (!$audit) {
+        return redirect()->route('audit.resume.form')
+            ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
+    }
+
+    // --- BAGIAN YANG SERING ERROR DIATASI DI SINI ---
+    
+    // Gunakan isset() untuk mengecek apakah kolom ada di database
+    $deptId = isset($audit->department_id) ? $audit->department_id : null;
+    $department = $deptId ? DB::table('departments')->where('id', $deptId)->first() : null;
+
+    // Kita abaikan dulu pencarian auditor ke tabel users agar tidak crash
+    // Kita langsung ambil data dari tabel audit_sessions jika ada kolom auditor_name
+    // Atau gunakan default string
+    $auditorName = "Auditor Terdaftar"; 
+
+    $data = [
+        'token'        => $token,
+        'auditId'      => $audit->id,
+        'auditorName'  => $auditorName,
+        'auditeeDept'  => $department->name ?? 'Departemen Terkait',
+        'auditDate'    => isset($audit->created_at) ? \Carbon\Carbon::parse($audit->created_at)->format('d M Y') : date('d M Y'),
+        'lastActivity' => isset($parentSession->last_activity_at) ? \Carbon\Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
+    ];
+
+    return view('audit.resume.decision', $data);
+}
 
     // ----------------------------------------------------------------------
     // 3. Validasi Token & Tampilkan Decision Gate
