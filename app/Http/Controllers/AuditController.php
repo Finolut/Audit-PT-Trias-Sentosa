@@ -669,7 +669,7 @@ public function store(Request $request, $auditId, $mainClause)
         }
         $departmentId = $auditRecord->department_id;
 
-        // 1. BATCH UPSERT NOTES
+        // 1. UPSERT NOTES
         $noteRecords = [];
         foreach ($notes as $clauseCode => $text) {
             if (empty(trim($text))) continue;
@@ -692,9 +692,10 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
 
-        // 2. PROSES JAWABAN DAN UPLOAD EVIDENCE
+        // 2. SIAPKAN DATA JAWABAN DAN EVIDENCE QUEUE
         $answerRecords = [];
         $finalRecords = [];
+        $evidenceQueue = []; // <-- antrian evidence
 
         foreach ($answers as $itemId => $people) {
             $yesCount = $noCount = $naCount = 0;
@@ -703,13 +704,12 @@ public function store(Request $request, $auditId, $mainClause)
             foreach ($people as $personName => $data) {
                 if (!empty($data['val'])) {
                     $hasAnswer = true;
-
                     $answerId = (string) Str::uuid();
                     $safePersonName = str_replace(' ', '_', $personName);
                     $fileKey = "evidence_file.{$itemId}.{$safePersonName}";
 
-                    // Simpan jawaban (tanpa evidence_path)
-                    $record = [
+                    // Simpan jawaban
+                    $answerRecords[] = [
                         'id'            => $answerId,
                         'audit_id'      => $auditId,
                         'item_id'       => $itemId,
@@ -722,25 +722,16 @@ public function store(Request $request, $auditId, $mainClause)
                         'updated_at'    => now(),
                     ];
 
-                    $answerRecords[] = $record;
-
-                    // Upload dan simpan evidence jika ada file
+                    // Antrikan evidence jika ada file
                     if ($request->hasFile($fileKey)) {
-                        $file = $request->file($fileKey);
-                        $path = $file->store("audit/{$auditId}/item/{$itemId}", 's3');
-
-                        DB::table('answer_evidences')->insert([
+                        $evidenceQueue[] = [
                             'id'           => (string) Str::uuid(),
                             'answer_id'    => $answerId,
                             'audit_id'     => $auditId,
                             'item_id'      => $itemId,
                             'auditor_name' => $personName,
-                            'file_path'    => $path,
-                            'file_name'    => $file->getClientOriginalName(),
-                            'mime_type'    => $file->getClientMimeType(),
-                            'file_size'    => $file->getSize(),
-                            'created_at'   => now(),
-                        ]);
+                            'file'         => $request->file($fileKey),
+                        ];
                     }
 
                     match ($data['val']) {
@@ -756,27 +747,46 @@ public function store(Request $request, $auditId, $mainClause)
                 $finalNo  = ($noCount > $yesCount) ? 1 : 0;
 
                 $finalRecords[] = [
-                    'id'         => (string) Str::uuid(),
-                    'audit_id'   => $auditId,
-                    'item_id'    => $itemId,
+                    'id'            => (string) Str::uuid(),
+                    'audit_id'      => $auditId,
+                    'item_id'       => $itemId,
                     'department_id' => $departmentId,
-                    'yes_count'  => $yesCount,
-                    'no_count'   => $noCount,
-                    'final_yes'  => $finalYes,
-                    'final_no'   => $finalNo,
-                    'decided_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'yes_count'     => $yesCount,
+                    'no_count'      => $noCount,
+                    'final_yes'     => $finalYes,
+                    'final_no'      => $finalNo,
+                    'decided_at'    => now(),
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
                 ];
             }
         }
 
-        // Insert jawaban (bukan upsert, karena id UUID unik)
+        // 3. INSERT JAWABAN DULU (parent records)
         if (!empty($answerRecords)) {
             DB::table('answers')->insert($answerRecords);
         }
 
-        // Upsert final records (boleh upsert karena key komposit stabil)
+        // 4. BARU UPLOAD & SIMPAN EVIDENCE (child records)
+        foreach ($evidenceQueue as $e) {
+            $file = $e['file'];
+            $path = $file->store("audit/{$auditId}/item/{$e['item_id']}/{$e['answer_id']}", 's3');
+
+            DB::table('answer_evidences')->insert([
+                'id'           => $e['id'],
+                'answer_id'    => $e['answer_id'],
+                'audit_id'     => $auditId,
+                'item_id'      => $e['item_id'],
+                'auditor_name' => $e['auditor_name'],
+                'file_path'    => $path,
+                'file_name'    => $file->getClientOriginalName(),
+                'mime_type'    => $file->getClientMimeType(),
+                'file_size'    => $file->getSize(),
+                'created_at'   => now(),
+            ]);
+        }
+
+        // 5. UPSERT FINAL RECORDS
         if (!empty($finalRecords)) {
             DB::table('answer_finals')->upsert(
                 $finalRecords,
@@ -786,12 +796,11 @@ public function store(Request $request, $auditId, $mainClause)
         }
     });
 
-    // === LOGIKA REDIRECT & CEK PROGRESS ===
+    // === REDIRECT LOGIC ===
     $mainKeys = array_keys($this->mainClauses);
     $currentIndex = array_search($mainClause, $mainKeys);
     $nextMain = $mainKeys[$currentIndex + 1] ?? null;
 
-    // Cek apakah semua klausul utama sudah selesai
     $allFinished = true;
     foreach ($this->mainClauses as $mCode => $subCodes) {
         $totalItems = DB::table('items')
@@ -816,13 +825,8 @@ public function store(Request $request, $auditId, $mainClause)
     }
 
     if ($allFinished) {
-        DB::table('audits')->where('id', $auditId)->update([
-            'status' => 'COMPLETE',
-            'updated_at' => now()
-        ]);
-
-        return redirect()->route('audit.menu', $auditId)
-            ->with('success', 'Audit untuk departemen ini telah selesai!');
+        DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE', 'updated_at' => now()]);
+        return redirect()->route('audit.menu', $auditId)->with('success', 'Audit untuk departemen ini telah selesai!');
     }
 
     if ($nextMain) {
@@ -830,8 +834,7 @@ public function store(Request $request, $auditId, $mainClause)
             ->with('success', "Klausul {$mainClause} disimpan. Berlanjut ke Klausul {$nextMain}");
     }
 
-    return redirect()->route('audit.menu', $auditId)
-        ->with('success', 'Data berhasil disimpan.');
+    return redirect()->route('audit.menu', $auditId)->with('success', 'Data berhasil disimpan.');
 }
 
     public function clauseDetail($auditId, $mainClause)
