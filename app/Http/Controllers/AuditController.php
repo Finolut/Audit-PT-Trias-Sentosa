@@ -666,6 +666,7 @@ public function store(Request $request, $auditId, $mainClause)
     $findingLevels = $request->input('finding_level', []);
 
     DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels) {
+        
 
         $audit = DB::table('audits')->where('id', $auditId)->first();
         if (!$audit) {
@@ -760,6 +761,36 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
     });
+
+    // === UPLOAD EVIDENCE SETELAH DB COMMIT ===
+$evidenceFiles = $request->file('evidence', []);
+
+foreach ($evidenceFiles as $answerId => $files) {
+    foreach ($files as $file) {
+        if (!$file->isValid()) continue;
+
+        $path = "audit/{$auditId}/{$answerId}/" .
+            Str::uuid() . '.' . $file->extension();
+
+        Storage::disk('s3')->put(
+            $path,
+            file_get_contents($file),
+            'private'
+        );
+
+        DB::table('answer_evidences')->insert([
+            'id'         => Str::uuid(),
+            'answer_id'  => $answerId,
+            'audit_id'   => $auditId,
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
+            'file_size' => $file->getSize(),
+            'created_at'=> now(),
+        ]);
+    }
+}
+
 
     // === REDIRECT LOGIC ===
     $mainKeys = array_keys($this->mainClauses);

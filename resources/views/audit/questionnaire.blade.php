@@ -28,11 +28,10 @@
             </div>
         </header>
 
-        {{-- HANYA SATU FORM, DENGAN enctype --}}
         <form method="POST" 
-      action="{{ route('audit.store', ['id' => $auditId, 'clause' => $currentMain]) }}" 
-      id="form" 
-      enctype="multipart/form-data">
+              action="{{ route('audit.store', ['id' => $auditId, 'clause' => $currentMain]) }}" 
+              id="form" 
+              enctype="multipart/form-data">
             @csrf
 
             @foreach ($subClauses as $subCode)
@@ -70,7 +69,7 @@
 
                                         <div id="hidden_inputs_{{ $item->id }}"></div>
 
-                                        {{-- === INPUT FINDING PER AUDITOR === --}}
+                                        {{-- === INPUT FINDING + EVIDENCE PER AUDITOR === --}}
                                         <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
                                             <div class="flex flex-wrap gap-4 items-end">
                                                 {{-- FINDING LEVEL --}}
@@ -97,28 +96,31 @@
                                                     </select>
                                                 </div>
 
-                                                {{-- EVIDENCE ACTION --}}
-                                                <div class="flex-1 min-w-[200px] text-right">
-                                                    @php
-                                                        $existing = $existingAnswers[$item->id][$auditorName] ?? null;
-                                                    @endphp
+                                                {{-- HIDDEN ANSWER ID --}}
+                                                <input type="hidden"
+                                                       name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+                                                       id="answer_id_{{ $item->id }}_{{ $auditorName }}">
 
-                                                    @if($existing)
-                                                        <button 
-                                                            type="button"
-                                                            class="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                                                            onclick="openEvidenceModal('{{ $existing->id }}')">
-                                                            <i class="fa fa-upload"></i> Upload / Manage Evidence
-                                                        </button>
-                                                    @else
-                                                        <span class="text-[10px] text-gray-400 italic">
-                                                            Simpan jawaban terlebih dahulu
-                                                        </span>
-                                                    @endif
+                                                {{-- EVIDENCE FILE INPUT (DINAMIS) --}}
+                                                <div class="flex-1 min-w-[200px]">
+                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                                                        Evidence Photo
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        data-item="{{ $item->id }}"
+                                                        data-auditor="{{ $auditorName }}"
+                                                        accept="image/*"
+                                                        multiple
+                                                        disabled
+                                                        class="block w-full text-xs text-gray-500
+                                                            file:mr-2 file:py-1 file:px-2
+                                                            file:rounded file:border-0
+                                                            file:bg-blue-50 file:text-blue-700">
                                                 </div>
                                             </div>
                                         </div>
-                                        {{-- === AKHIR FINDING === --}}
+                                        {{-- === AKHIR FINDING + EVIDENCE === --}}
                                     </div>
                                 </div>
                             @endforeach
@@ -158,6 +160,40 @@
         const auditorName = "{{ $auditorName }}";
         const responders = @json($responders);
         const dbAnswers = @json($existingAnswers ?? []);
+
+        function setVal(itemId, auditor, val, btn) {
+            // Reset active classes
+            document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(el => {
+                el.classList.remove('active-yes', 'active-no', 'active-na');
+            });
+
+            // Set active class
+            if (val === 'YES') btn.classList.add('active-yes');
+            else if (val === 'NO') btn.classList.add('active-no');
+            else if (val === 'N/A') btn.classList.add('active-na');
+
+            // Generate answer ID
+            const answerId = crypto.randomUUID();
+
+            // Simpan ke hidden input
+            const hiddenInput = document.getElementById(`answer_id_${itemId}_${auditor}`);
+            if (hiddenInput) {
+                hiddenInput.value = answerId;
+            }
+
+            // Update nama input file
+            const fileInput = document.querySelector(
+                `input[data-item="${itemId}"][data-auditor="${auditor}"]`
+            );
+            if (fileInput) {
+                fileInput.name = `evidence[${answerId}][]`;
+                fileInput.disabled = false; // Aktifkan setelah jawaban dipilih
+            }
+
+            // Simpan nilai jawaban (asumsi ada hidden input untuk jawaban — tambahkan jika perlu)
+            // Contoh: <input type="hidden" name="answers[item][auditor]" value="...">
+            // Anda mungkin sudah menanganinya di audit-script.js
+        }
 
         function confirmSubmit() {
             Swal.fire({
