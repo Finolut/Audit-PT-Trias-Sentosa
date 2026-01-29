@@ -112,11 +112,12 @@
                                                         data-auditor="{{ $auditorName }}"
                                                         accept="image/*"
                                                         multiple
-                                                        disabled
-                                                        class="block w-full text-xs text-gray-500
-                                                            file:mr-2 file:py-1 file:px-2
-                                                            file:rounded file:border-0
-                                                            file:bg-blue-50 file:text-blue-700">
+                                                        class="block w-full text-xs text-gray-400
+        file:mr-2 file:py-1 file:px-2
+        file:rounded file:border-0
+        file:bg-gray-200 file:text-gray-500
+        cursor-not-allowed
+        pointer-events-none">
                                                 </div>
                                             </div>
                                         </div>
@@ -182,19 +183,27 @@
             }
 
             // Update nama input file
-            const fileInput = document.querySelector(
-                `input[data-item="${itemId}"][data-auditor="${auditor}"]`
-            );
-            if (fileInput) {
-                fileInput.name = `evidence[${answerId}][]`;
-                fileInput.disabled = false; // Aktifkan setelah jawaban dipilih
-            }
+const fileInput = document.querySelector(
+    `input[data-item="${itemId}"][data-auditor="${auditor}"]`
+);
 
-            // Simpan nilai jawaban (asumsi ada hidden input untuk jawaban — tambahkan jika perlu)
-            // Contoh: <input type="hidden" name="answers[item][auditor]" value="...">
-            // Anda mungkin sudah menanganinya di audit-script.js
-        }
+if (fileInput) {
+    fileInput.name = `evidence[${answerId}][]`;
 
+    // aktifkan input
+    fileInput.classList.remove(
+        'pointer-events-none',
+        'cursor-not-allowed',
+        'text-gray-400'
+    );
+
+    fileInput.classList.add(
+        'text-gray-700'
+    );
+
+    // optional: ganti warna tombol file
+    fileInput.style.setProperty('--tw-file-bg-opacity', '1');
+}
         function confirmSubmit() {
             Swal.fire({
                 title: 'Simpan Jawaban?',
