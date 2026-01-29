@@ -52,10 +52,10 @@
             </div>
 
             <!-- Actions -->
-           <form action="{{ route('audit.resume.action') }}" method="POST"> 
-                @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-                <input type="hidden" name="audit_id" value="{{ $auditId }}">
+<form action="{{ route('audit.resume.action') }}" method="POST" id="resumeForm"> 
+    @csrf
+    <input type="hidden" name="token" value="{{ $token }}">
+    <input type="hidden" name="audit_id" value="{{ $auditId }}">
 
                 <!-- Continue -->
 <button
@@ -130,27 +130,24 @@
         </div>
     </div>
 <script>
-    const form = document.querySelector('form');
+const resumeForm = document.getElementById('resumeForm');
     const actionButtons = document.querySelectorAll('[data-action-btn]');
 
-    let clickedButton = null;
+    resumeForm.addEventListener('submit', function(e) {
+        // Cari tombol mana yang diklik user
+        const clickedButton = document.activeElement;
 
-    actionButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            clickedButton = btn;
-        });
-    });
-
-    form.addEventListener('submit', () => {
         actionButtons.forEach(btn => {
-            btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
-
-            const spinner = btn.querySelector('.loadingIcon');
-            const arrow   = btn.querySelector('.arrow');
-            const text    = btn.querySelector('.btnText');
+            // JANGAN gunakan btn.disabled = true;
+            // Gunakan pointer-events none agar tidak bisa diklik dua kali tapi form tetap jalan
+            btn.style.pointerEvents = 'none';
+            btn.classList.add('opacity-70');
 
             if (btn === clickedButton) {
+                const spinner = btn.querySelector('.loadingIcon');
+                const arrow = btn.querySelector('.arrow');
+                const text = btn.querySelector('.btnText');
+
                 if (spinner) spinner.classList.remove('hidden');
                 if (arrow) arrow.classList.add('hidden');
                 if (text) text.innerText = 'MEMPROSES...';
