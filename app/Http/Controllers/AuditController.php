@@ -664,10 +664,9 @@ public function store(Request $request, $auditId, $mainClause)
     $answers = $request->input('answers', []);
     $notes   = $request->input('audit_notes', []);
     $findingLevels = $request->input('finding_level', []);
+    $answerIdMap = $request->input('answer_id_map', []); // ✅ BARU: ambil mapping dari frontend
 
-    DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels) {
-        
-
+    DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels, $answerIdMap) {
         $audit = DB::table('audits')->where('id', $auditId)->first();
         if (!$audit) {
             throw new \Exception("Audit tidak ditemukan");
@@ -675,7 +674,7 @@ public function store(Request $request, $auditId, $mainClause)
 
         $departmentId = $audit->department_id;
 
-        // 1. UPSERT NOTES
+        // 1. UPSERT NOTES (tetap sama)
         $noteRecords = [];
         foreach ($notes as $clauseCode => $text) {
             if (!trim($text)) continue;
@@ -699,7 +698,7 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
 
-        // 2. ANSWERS + FINAL
+        // 2. INSERT ANSWERS — 🔑 PERBAIKAN UTAMA
         $answerRecords = [];
         $finalRecords  = [];
 
@@ -711,8 +710,14 @@ public function store(Request $request, $auditId, $mainClause)
                 if (!empty($data['val'])) {
                     $hasAnswer = true;
 
+                    // ✅ AMBIL answer_id DARI FRONTEND (bukan buat baru!)
+                    $answerId = $answerIdMap[$itemId][$name] ?? null;
+                    if (!$answerId) {
+                        throw new \Exception("Missing answer_id for item {$itemId}, auditor {$name}");
+                    }
+
                     $answerRecords[] = [
-                        'id' => (string) Str::uuid(),
+                        'id' => $answerId, // ✅ PAKAI ID YANG DIKIRIM FRONTEND
                         'audit_id' => $auditId,
                         'item_id' => $itemId,
                         'auditor_name' => $name,
@@ -750,7 +755,8 @@ public function store(Request $request, $auditId, $mainClause)
         }
 
         if ($answerRecords) {
-            DB::table('answers')->insert($answerRecords);
+            DB::table('answers')
+                ->insert($answerRecords); // ⚠️ Pastikan tidak ada duplicate ID — frontend harus konsisten
         }
 
         if ($finalRecords) {
@@ -762,37 +768,36 @@ public function store(Request $request, $auditId, $mainClause)
         }
     });
 
-    // === UPLOAD EVIDENCE SETELAH DB COMMIT ===
-$evidenceFiles = $request->file('evidence', []);
+    // === UPLOAD EVIDENCE — SEKARANG AKAN JALAN KARENA ID SESUAI ===
+    $evidenceFiles = $request->file('evidence', []);
 
-foreach ($evidenceFiles as $answerId => $files) {
-    foreach ($files as $file) {
-        if (!$file->isValid()) continue;
+    foreach ($evidenceFiles as $answerId => $files) {
+        foreach ($files as $file) {
+            if (!$file->isValid()) continue;
 
-        $path = "audit/{$auditId}/{$answerId}/" .
-            Str::uuid() . '.' . $file->extension();
+            $path = "audit/{$auditId}/{$answerId}/" .
+                Str::uuid() . '.' . $file->extension();
 
-        Storage::disk('s3')->put(
-            $path,
-            file_get_contents($file),
-            'private'
-        );
+            Storage::disk('s3')->put(
+                $path,
+                file_get_contents($file),
+                'private'
+            );
 
-        DB::table('answer_evidences')->insert([
-            'id'         => Str::uuid(),
-            'answer_id'  => $answerId,
-            'audit_id'   => $auditId,
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'created_at'=> now(),
-        ]);
+            DB::table('answer_evidences')->insert([
+                'id'         => Str::uuid(),
+                'answer_id'  => $answerId, // ✅ Sama dengan answer.id
+                'audit_id'   => $auditId,
+                'file_path'  => $path,
+                'file_name'  => $file->getClientOriginalName(),
+                'mime_type'  => $file->getMimeType(),
+                'file_size'  => $file->getSize(),
+                'created_at' => now(),
+            ]);
+        }
     }
-}
 
-
-    // === REDIRECT LOGIC ===
+    // === REDIRECT LOGIC (tetap sama)
     $mainKeys = array_keys($this->mainClauses);
     $currentIndex = array_search($mainClause, $mainKeys);
     $nextMain = $mainKeys[$currentIndex + 1] ?? null;
@@ -820,10 +825,10 @@ foreach ($evidenceFiles as $answerId => $files) {
         }
     }
 
-    if ($allFinished) {
-        DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE', 'updated_at' => now()]);
-        return redirect()->route('audit.menu', $auditId)->with('success', 'Audit untuk departemen ini telah selesai!');
-    }
+if ($allFinished) {
+    DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE', 'updated_at' => now()]);
+    return redirect()->route('audit.menu', $auditId)->with('success', 'Audit untuk departemen ini telah selesai!');
+}
 
     if ($nextMain) {
         return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $nextMain])
@@ -832,7 +837,6 @@ foreach ($evidenceFiles as $answerId => $files) {
 
     return redirect()->route('audit.menu', $auditId)->with('success', 'Data berhasil disimpan.');
 }
-
 public function uploadEvidence(Request $request, $answerId)
 {
     $request->validate([
