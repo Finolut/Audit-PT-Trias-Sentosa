@@ -312,26 +312,31 @@ public function processTokenInput(Request $request)
                 ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
         }
 
-// ... kode sebelumnya ...
-
 // 4. Ambil data Departemen
 $department = DB::table('departments')->where('id', $audit->department_id)->first();
 
-// 5. Ambil data Auditor dari tabel audit_sessions (menggunakan user_id dari parent session)
-// Sesuaikan 'user_id' dengan nama kolom yang ada di tabel audit_sessions Anda
-$auditor = DB::table('users')->where('id', $parentSession->user_id)->first(); 
+// 5. Cari ID Auditor. Kita coba cek beberapa kemungkinan kolom yang umum:
+// Kita cek di $audit dulu, kalau tidak ada cek di $parentSession
+$auditorId = $audit->user_id 
+             ?? $audit->created_by 
+             ?? $parentSession->user_id 
+             ?? $parentSession->created_by 
+             ?? null;
+
+$auditor = null;
+if ($auditorId) {
+    $auditor = DB::table('users')->where('id', $auditorId)->first();
+}
 
 // Siapkan data untuk View
 $data = [
     'token'        => $token,
     'auditId'      => $audit->id,
-    'auditorName'  => $auditor ? $auditor->name : 'Auditor Tidak Dikenal',
-    'auditeeDept'  => $department ? $department->name : 'Departemen Tidak Diketahui',
+    'auditorName'  => $auditor ? $auditor->name : 'Auditor (ID: '.$auditorId.')',
+    'auditeeDept'  => $department ? $department->name : 'Unknown Dept',
     'auditDate'    => \Carbon\Carbon::parse($audit->created_at)->format('d M Y'),
     'lastActivity' => \Carbon\Carbon::parse($parentSession->last_activity_at ?? now())->diffForHumans(),
 ];
-
-return view('audit.resume.decision', $data);
     }
 
     // ----------------------------------------------------------------------
