@@ -157,87 +157,82 @@
         </div>
     </div>
 
-    <script>
-        const auditorName = "{{ $auditorName }}";
-        const responders = @json($responders);
-        const dbAnswers = @json($existingAnswers ?? []);
+<script>
+    const auditorName = "{{ $auditorName }}";
+    const responders = @json($responders);
+    const dbAnswers = @json($existingAnswers ?? []);
 
-        function setVal(itemId, auditor, val, btn) {
-            // Reset active classes
-            document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(el => {
-                el.classList.remove('active-yes', 'active-no', 'active-na');
-            });
+    function setVal(itemId, auditor, val, btn) {
+        // Reset active classes
+        document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(el => {
+            el.classList.remove('active-yes', 'active-no', 'active-na');
+        });
 
-            // Set active class
-            if (val === 'YES') btn.classList.add('active-yes');
-            else if (val === 'NO') btn.classList.add('active-no');
-            else if (val === 'N/A') btn.classList.add('active-na');
+        // Set active class
+        if (val === 'YES') btn.classList.add('active-yes');
+        else if (val === 'NO') btn.classList.add('active-no');
+        else if (val === 'N/A') btn.classList.add('active-na');
 
-            // Generate answer ID
-            const answerId = crypto.randomUUID();
+        // Generate answer ID
+        const answerId = crypto.randomUUID();
 
-            // Simpan ke hidden input
-            const hiddenInput = document.getElementById(`answer_id_${itemId}_${auditor}`);
-            if (hiddenInput) {
-                hiddenInput.value = answerId;
-            }
-
-            // Update nama input file
-const fileInput = document.querySelector(
-    `input[data-item="${itemId}"][data-auditor="${auditor}"]`
-);
-
-if (fileInput) {
-    fileInput.name = `evidence[${answerId}][]`;
-
-    // aktifkan input
-    fileInput.classList.remove(
-        'pointer-events-none',
-        'cursor-not-allowed',
-        'text-gray-400'
-    );
-
-    fileInput.classList.add(
-        'text-gray-700'
-    );
-
-    // optional: ganti warna tombol file
-    fileInput.style.setProperty('--tw-file-bg-opacity', '1');
-}
-        function confirmSubmit() {
-            Swal.fire({
-                title: 'Simpan Jawaban?',
-                text: "Apakah Anda sudah yakin dengan semua respon di klausul ini?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2563eb',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Simpan',
-                cancelButtonText: 'Cek Lagi'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Menyimpan...',
-                        allowOutsideClick: false,
-                        didOpen: () => { Swal.showLoading() }
-                    });
-                    document.getElementById('form').submit();
-                }
-            });
+        // Simpan ke hidden input
+        const hiddenInput = document.getElementById(`answer_id_${itemId}_${auditor}`);
+        if (hiddenInput) {
+            hiddenInput.value = answerId;
         }
 
-        @if(session('all_complete'))
-            Swal.fire({
-                title: 'Audit Selesai!',
-                text: 'Semua klausul telah terisi 100%. Mengalihkan ke halaman laporan...',
-                icon: 'success',
-                timer: 3000,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "{{ route('audit.thanks') }}";
-            });
-        @endif
-    </script>
+        // Update nama input file dan aktifkan
+        const fileInput = document.querySelector(
+            `input[data-item="${itemId}"][data-auditor="${auditor}"]`
+        );
+        if (fileInput) {
+            fileInput.name = `evidence[${answerId}][]`;
+            // Hapus kelas yang menonaktifkan
+            fileInput.classList.remove(
+                'pointer-events-none',
+                'cursor-not-allowed',
+                'text-gray-400'
+            );
+            fileInput.classList.add('text-gray-700');
+            fileInput.disabled = false; // pastikan benar-benar enabled
+        }
+    } // <-- INI YANG KURANG: TUTUP FUNGSI setVal()
+
+    function confirmSubmit() {
+        Swal.fire({
+            title: 'Simpan Jawaban?',
+            text: "Apakah Anda sudah yakin dengan semua respon di klausul ini?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Simpan',
+            cancelButtonText: 'Cek Lagi'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Menyimpan...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+                document.getElementById('form').submit();
+            }
+        });
+    }
+
+    @if(session('all_complete'))
+        Swal.fire({
+            title: 'Audit Selesai!',
+            text: 'Semua klausul telah terisi 100%. Mengalihkan ke halaman laporan...',
+            icon: 'success',
+            timer: 3000,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = "{{ route('audit.thanks') }}";
+        });
+    @endif
+</script>
     <script src="{{ asset('js/audit-script.js') }}"></script>
 </body>
 </html>
