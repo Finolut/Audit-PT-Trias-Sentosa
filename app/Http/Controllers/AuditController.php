@@ -779,33 +779,47 @@ public function store(Request $request, $auditId, $mainClause)
     });
 
     // === UPLOAD EVIDENCE — SEKARANG AKAN JALAN KARENA ID SESUAI ===
-    $evidenceFiles = $request->file('evidence', []);
+   $evidenceFiles = $request->file('evidence', []);
 
-    foreach ($evidenceFiles as $answerId => $files) {
-        foreach ($files as $file) {
-            if (!$file->isValid()) continue;
+foreach ($evidenceFiles as $answerId => $files) {
 
-            $path = "audit/{$auditId}/{$answerId}/" .
-                Str::uuid() . '.' . $file->extension();
+    // ⛔ WAJIB: ambil parent answer
+    $answer = DB::table('answers')
+        ->select('item_id', 'auditor_name')
+        ->where('id', $answerId)
+        ->first();
 
-            Storage::disk('s3')->put(
-                $path,
-                file_get_contents($file),
-                'private'
-            );
-
-            DB::table('answer_evidences')->insert([
-                'id'         => Str::uuid(),
-                'answer_id'  => $answerId, // ✅ Sama dengan answer.id
-                'audit_id'   => $auditId,
-                'file_path'  => $path,
-                'file_name'  => $file->getClientOriginalName(),
-                'mime_type'  => $file->getMimeType(),
-                'file_size'  => $file->getSize(),
-                'created_at' => now(),
-            ]);
-        }
+    if (!$answer) {
+        throw new \Exception("Answer {$answerId} not found");
     }
+
+    foreach ($files as $file) {
+        if (!$file->isValid()) continue;
+
+        $path = "audit/{$auditId}/{$answerId}/" .
+            Str::uuid() . '.' . $file->extension();
+
+        Storage::disk('s3')->put(
+            $path,
+            file_get_contents($file),
+            'private'
+        );
+
+        DB::table('answer_evidences')->insert([
+            'id'           => Str::uuid(),
+            'answer_id'    => $answerId,
+            'audit_id'     => $auditId,
+            'item_id'      => $answer->item_id,      // ✅ INI WAJIB
+            'auditor_name' => $answer->auditor_name, // ✅ INI WAJIB
+            'file_path'    => $path,
+            'file_name'    => $file->getClientOriginalName(),
+            'mime_type'    => $file->getMimeType(),
+            'file_size'    => $file->getSize(),
+            'created_at'   => now(),
+        ]);
+    }
+}
+
 
     // === REDIRECT LOGIC (tetap sama)
     $mainKeys = array_keys($this->mainClauses);
