@@ -264,6 +264,75 @@ private function generateUniqueAuditCode($userInput = null)
         return view('audit.resume_form');
     }
 
+public function processTokenInput(Request $request)
+    {
+        $request->validate(['resume_token' => 'required|string']);
+        $token = strtoupper(trim($request->resume_token));
+
+        // Redirect ke route GET agar URL bersih dan tidak error 405
+        return redirect()->route('audit.resume.decision', ['token' => $token]);
+    }
+
+    // ----------------------------------------------------------------------
+    // STEP 2: Logic Query Database & Return View (Method GET)
+    // ----------------------------------------------------------------------
+    public function showDecisionPage($token)
+    {
+        // 1. Cari parent session
+        $parentSession = DB::table('audit_sessions')
+            ->where('resume_token', $token)
+            ->where('is_parent', true)
+            ->where('resume_token_expires_at', '>', now())
+            ->first();
+
+        if (!$parentSession) {
+            return redirect()->route('audit.resume.form')
+                ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
+        }
+
+        // 2. Cari child session pertama
+        $childSession = DB::table('audit_sessions')
+            ->where('parent_session_id', $parentSession->id)
+            ->where('is_parent', false)
+            ->first();
+
+        if (!$childSession) {
+            return redirect()->route('audit.resume.form')
+                ->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
+        }
+
+        // 3. Cari audit dari child session
+        $audit = DB::table('audits')
+            ->where('audit_session_id', $childSession->id)
+            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+            ->first();
+
+        if (!$audit) {
+            return redirect()->route('audit.resume.form')
+                ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
+        }
+
+        // 4. Ambil data Departemen & User (Auditor) untuk ditampilkan di View
+        $department = DB::table('departments')->where('id', $audit->department_id)->first();
+        
+        // Asumsi ada tabel users untuk mengambil nama auditor, jika tidak sesuaikan
+        $auditor = DB::table('users')->where('id', $audit->auditor_id)->first(); 
+
+        // Siapkan data untuk View
+        $data = [
+            'token'        => $token,
+            'auditId'      => $audit->id,
+            'auditorName'  => $auditor ? $auditor->name : 'Auditor #' . $audit->auditor_id,
+            'auditeeDept'  => $department ? $department->name : 'Unknown Dept',
+            'auditDate'    => \Carbon\Carbon::parse($audit->created_at)->format('d M Y'),
+            'lastActivity' => \Carbon\Carbon::parse($parentSession->last_activity_at ?? now())->diffForHumans(),
+        ];
+
+        // RETURN VIEW (Bukan Redirect)
+        // Pastikan nama file blade Anda sesuai, misal: audit/resume/decision.blade.php
+        return view('audit.resume.decision', $data);
+    }
+
     // ----------------------------------------------------------------------
     // 3. Validasi Token & Tampilkan Decision Gate
     // ----------------------------------------------------------------------

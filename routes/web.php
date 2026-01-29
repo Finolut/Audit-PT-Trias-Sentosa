@@ -84,20 +84,21 @@ Route::post('/test-form', function (Request $request) {
 
 */
 // 1. Route untuk MENAMPILKAN halaman konfirmasi resume (pakai GET)
+// 1. Halaman Input Token (GET)
 Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
     ->name('audit.resume.form');
 
-// ✅ Route untuk validasi token dari form resume
-Route::post('/audit/resume/decision', [AuditController::class, 'validateResumeToken'])
-    ->name('audit.resume.decision'); // ← NAMA ROUTE INI YANG DIGUNAKAN DI FORM
+// 2. Proses Validasi Token dari Form Input (POST)
+Route::post('/audit/resume/validate', [AuditController::class, 'processTokenInput'])
+    ->name('audit.resume.validate');
 
-    Route::post('/audit/resume/validate', [AuditController::class, 'validateResumeToken'])
-    ->name('audit.resume.validate'); // ← NAMA ROUTE INI YANG DIGUNAKAN DI FORM
+// 3. Tampilkan Halaman Keputusan (GET) - INI YANG ANDA BUTUHKAN
+Route::get('/audit/resume/decision/{token}', [AuditController::class, 'showDecisionPage'])
+    ->name('audit.resume.decision');
 
-
-// ✅ Route untuk MEMPROSES keputusan (POST) - sesuai kode Anda
-Route::post('audit/resume/action', [AuditController::class, 'handleResumeDecision'])
-    ->name('audit.resume.action'); // Pastikan view menggunakan route ini!
+// 4. Eksekusi Keputusan (Lanjut/Batal) (POST)
+Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])
+    ->name('audit.resume.action');
 Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
 Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
 Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
