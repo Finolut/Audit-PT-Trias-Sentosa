@@ -300,7 +300,7 @@
         </div>
 
        <div class="p-4 bg-slate-50 text-center border-t border-gray-200">
-            <a href="{{ route('admin.question_log') }}" class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
+            <a href="{{ route('admin.evidence.log') }}" class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
                 Lihat Semua Pertanyaan →
             </a>
         </div>

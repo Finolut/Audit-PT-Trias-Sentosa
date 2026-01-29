@@ -402,18 +402,6 @@ public function departmentStatusIndex()
     return view('admin.department_status_index', compact('departments', 'deptSummary'));
 }
 
-public function questionLog()
-{
-    $departments = Department::orderBy('name', 'asc')->get();
-    
-    // Mengambil semua log pertanyaan (dengan paginasi agar tidak berat)
-    $allQuestions = \App\Models\AuditQuestion::with(['audit.department', 'audit.session'])
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
-
-    return view('admin.question_log', compact('departments', 'allQuestions'));
-}
-
 public function exportToPdf($auditId)
 {
     $audit = Audit::with('department')->findOrFail($auditId);
