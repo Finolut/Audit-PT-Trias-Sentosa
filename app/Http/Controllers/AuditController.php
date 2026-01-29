@@ -269,9 +269,6 @@ private function generateUniqueAuditCode($userInput = null)
     // ----------------------------------------------------------------------
 public function validateResumeToken(Request $request)
 {
-    if ($request->isMethod('get')) {
-        return redirect()->route('audit.resume.form');
-    }
 
     $request->validate(['resume_token' => 'required|string']);
     $token = strtoupper(trim($request->resume_token));
@@ -315,14 +312,9 @@ public function validateResumeToken(Request $request)
         ->where('id', $audit->department_id)
         ->first();
 
-    return view('audit.resume_decision', [
-        'token' => $token,
-        'auditId' => $audit->id,
-        'auditorName' => $parentSession->auditor_name ?? '—',
-        'auditeeDept' => $department?->name ?? '—',
-        'auditDate' => $audit->audit_start_date . ' s/d ' . $audit->audit_end_date,
-        'lastActivity' => $parentSession->last_activity_at ? Carbon::parse($parentSession->last_activity_at)->diffForHumans() : '-',
-    ]);
+return redirect()->route('audit.resume.decision', [
+    'token' => $token
+]);
 }
 
     // ----------------------------------------------------------------------
