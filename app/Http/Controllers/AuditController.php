@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+
 
 class AuditController extends Controller
 {
@@ -769,22 +772,53 @@ public function store(Request $request, $auditId, $mainClause)
 
         // 4. BARU UPLOAD & SIMPAN EVIDENCE (child records)
         foreach ($evidenceQueue as $e) {
-            $file = $e['file'];
-            $path = $file->store("test-folder", "s3");
-
-            DB::table('answer_evidences')->insert([
-                'id'           => $e['id'],
-                'answer_id'    => $e['answer_id'],
-                'audit_id'     => $auditId,
-                'item_id'      => $e['item_id'],
-                'auditor_name' => $e['auditor_name'],
-                'file_path'    => $path,
-                'file_name'    => $file->getClientOriginalName(),
-                'mime_type'    => $file->getClientMimeType(),
-                'file_size'    => $file->getSize(),
-                'created_at'   => now(),
-            ]);
-        }
+    $file = $e['file'];
+    
+    // Validasi file
+    $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    $maxSize = 5242880; // 5MB
+    
+    if (!$file->isValid()) {
+        throw new \Exception("File {$file->getClientOriginalName()} tidak valid");
+    }
+    
+    if (!in_array($file->getMimeType(), $allowedMimes)) {
+        throw new \Exception("File harus berupa gambar (JPG, PNG, GIF)");
+    }
+    
+    if ($file->getSize() > $maxSize) {
+        throw new \Exception("Ukuran file maksimal 5MB");
+    }
+    
+    try {
+        // Generate unique filename
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $folder = "test-folder/{$auditId}";
+        
+        // Upload dengan konfigurasi lebih spesifik
+        $path = Storage::disk('s3')->put(
+            $folder . '/' . $filename,
+            file_get_contents($file->getRealPath()),
+            'public'
+        );
+        
+        DB::table('answer_evidences')->insert([
+            'id'           => $e['id'],
+            'answer_id'    => $e['answer_id'],
+            'audit_id'     => $auditId,
+            'item_id'      => $e['item_id'],
+            'auditor_name' => $e['auditor_name'],
+            'file_path'    => $path,
+            'file_name'    => $file->getClientOriginalName(),
+            'mime_type'    => $file->getClientMimeType(),
+            'file_size'    => $file->getSize(),
+            'created_at'   => now(),
+        ]);
+    } catch (\Exception $ex) {
+    // Baris \Log::error(...) telah dihapus
+    throw new \Exception("Gagal upload file: " . $ex->getMessage());
+    }
+}
 
         // 5. UPSERT FINAL RECORDS
         if (!empty($finalRecords)) {
