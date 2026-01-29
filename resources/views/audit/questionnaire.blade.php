@@ -70,48 +70,55 @@
 
                                         <div id="hidden_inputs_{{ $item->id }}"></div>
 
-                                        {{-- === INPUT FINDING & EVIDENCE PER AUDITOR === --}}
+                                        {{-- === INPUT FINDING PER AUDITOR === --}}
                                         <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
-                                            <div class="flex flex-wrap gap-4">
-                                                <div class="flex-1 min-w-[150px]">
-                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Finding Level</label>
-                                                    <select name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
-                                                            class="w-full text-sm border-gray-300 rounded focus:ring-blue-500">
+                                            <div class="flex flex-wrap gap-4 items-end">
+                                                {{-- FINDING LEVEL --}}
+                                                <div class="flex-1 min-w-[160px]">
+                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                                                        Finding Level
+                                                    </label>
+                                                    <select 
+                                                        name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
+                                                        class="w-full text-sm border-gray-300 rounded focus:ring-blue-500">
                                                         <option value="">-- No Finding --</option>
-                                                        <option value="observed" {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level == 'observed' ? 'selected' : '' }}>
+                                                        <option value="observed"
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'observed' ? 'selected' : '' }}>
                                                             Observed (OFI)
                                                         </option>
-                                                        <option value="minor" {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level == 'minor' ? 'selected' : '' }}>
+                                                        <option value="minor"
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'minor' ? 'selected' : '' }}>
                                                             Minor NC
                                                         </option>
-                                                        <option value="major" {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level == 'major' ? 'selected' : '' }}>
+                                                        <option value="major"
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'major' ? 'selected' : '' }}>
                                                             Major NC
                                                         </option>
                                                     </select>
                                                 </div>
 
-                                                <div class="flex-1 min-w-[200px]">
-                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Evidence Photo</label>
-                                                    <input type="file" 
-                                                           name="evidence_file[{{ $item->id }}][{{ str_replace(' ', '_', $auditorName) }}]" 
-                                                           accept="image/*"
-                                                           class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                                {{-- EVIDENCE ACTION --}}
+                                                <div class="flex-1 min-w-[200px] text-right">
+                                                    @php
+                                                        $existing = $existingAnswers[$item->id][$auditorName] ?? null;
+                                                    @endphp
+
+                                                    @if($existing)
+                                                        <button 
+                                                            type="button"
+                                                            class="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                                                            onclick="openEvidenceModal('{{ $existing->id }}')">
+                                                            <i class="fa fa-upload"></i> Upload / Manage Evidence
+                                                        </button>
+                                                    @else
+                                                        <span class="text-[10px] text-gray-400 italic">
+                                                            Simpan jawaban terlebih dahulu
+                                                        </span>
+                                                    @endif
                                                 </div>
                                             </div>
-
-                                            {{-- Tampilkan bukti jika sudah ada --}}
-                                            @php
-                                                $existing = $existingAnswers[$item->id][$auditorName] ?? null;
-                                            @endphp
-                                            @if($existing && $existing->evidence_path)
-                                                <div class="mt-1">
-                                                    <a href="{{ asset('storage/' . $existing->evidence_path) }}" target="_blank" class="text-[10px] text-blue-600 underline">
-                                                        <i class="fa fa-image"></i> View Current Evidence
-                                                    </a>
-                                                </div>
-                                            @endif
                                         </div>
-                                        {{-- === AKHIR INPUT FINDING & EVIDENCE === --}}
+                                        {{-- === AKHIR FINDING === --}}
                                     </div>
                                 </div>
                             @endforeach

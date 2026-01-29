@@ -665,29 +665,32 @@ public function store(Request $request, $auditId, $mainClause)
     $notes   = $request->input('audit_notes', []);
     $findingLevels = $request->input('finding_level', []);
 
-    DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels, $request) {
-        $auditRecord = DB::table('audits')->where('id', $auditId)->first();
-        if (!$auditRecord) {
-            throw new \Exception("Audit dengan ID {$auditId} tidak ditemukan.");
+    DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels) {
+
+        $audit = DB::table('audits')->where('id', $auditId)->first();
+        if (!$audit) {
+            throw new \Exception("Audit tidak ditemukan");
         }
-        $departmentId = $auditRecord->department_id;
+
+        $departmentId = $audit->department_id;
 
         // 1. UPSERT NOTES
         $noteRecords = [];
         foreach ($notes as $clauseCode => $text) {
-            if (empty(trim($text))) continue;
+            if (!trim($text)) continue;
+
             $noteRecords[] = [
-                'id'             => (string) Str::uuid(),
-                'audit_id'       => $auditId,
-                'clause_code'    => $clauseCode,
-                'department_id'  => $departmentId,
-                'question_text'  => $text,
-                'created_at'     => now(),
-                'updated_at'     => now(),
+                'id' => (string) Str::uuid(),
+                'audit_id' => $auditId,
+                'clause_code' => $clauseCode,
+                'department_id' => $departmentId,
+                'question_text' => $text,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
 
-        if (!empty($noteRecords)) {
+        if ($noteRecords) {
             DB::table('audit_questions')->upsert(
                 $noteRecords,
                 ['audit_id', 'clause_code', 'department_id'],
@@ -695,133 +698,61 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
 
-        // 2. SIAPKAN DATA JAWABAN DAN EVIDENCE QUEUE
+        // 2. ANSWERS + FINAL
         $answerRecords = [];
-        $finalRecords = [];
-        $evidenceQueue = []; // <-- antrian evidence
+        $finalRecords  = [];
 
         foreach ($answers as $itemId => $people) {
-            $yesCount = $noCount = $naCount = 0;
+            $yes = $no = $na = 0;
             $hasAnswer = false;
 
-            foreach ($people as $personName => $data) {
+            foreach ($people as $name => $data) {
                 if (!empty($data['val'])) {
                     $hasAnswer = true;
-                    $answerId = (string) Str::uuid();
-                    $safePersonName = str_replace(' ', '_', $personName);
-                    $fileKey = "evidence_file.{$itemId}.{$safePersonName}";
 
-                    // Simpan jawaban
                     $answerRecords[] = [
-                        'id'            => $answerId,
-                        'audit_id'      => $auditId,
-                        'item_id'       => $itemId,
-                        'auditor_name'  => $personName,
+                        'id' => (string) Str::uuid(),
+                        'audit_id' => $auditId,
+                        'item_id' => $itemId,
+                        'auditor_name' => $name,
                         'department_id' => $departmentId,
-                        'answer'        => $data['val'],
-                        'finding_level' => $findingLevels[$itemId][$personName] ?? null,
-                        'answered_at'   => now(),
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
+                        'answer' => $data['val'],
+                        'finding_level' => $findingLevels[$itemId][$name] ?? null,
+                        'answered_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
 
-                    // Antrikan evidence jika ada file
-                    if ($request->hasFile($fileKey)) {
-                        $evidenceQueue[] = [
-                            'id'           => (string) Str::uuid(),
-                            'answer_id'    => $answerId,
-                            'audit_id'     => $auditId,
-                            'item_id'      => $itemId,
-                            'auditor_name' => $personName,
-                            'file'         => $request->file($fileKey),
-                        ];
-                    }
-
                     match ($data['val']) {
-                        'YES' => $yesCount++,
-                        'NO'  => $noCount++,
-                        'N/A' => $naCount++,
+                        'YES' => $yes++,
+                        'NO' => $no++,
+                        'N/A' => $na++,
                     };
                 }
             }
 
             if ($hasAnswer) {
-                $finalYes = ($yesCount >= $noCount && $yesCount > 0) ? 1 : 0;
-                $finalNo  = ($noCount > $yesCount) ? 1 : 0;
-
                 $finalRecords[] = [
-                    'id'            => (string) Str::uuid(),
-                    'audit_id'      => $auditId,
-                    'item_id'       => $itemId,
+                    'id' => (string) Str::uuid(),
+                    'audit_id' => $auditId,
+                    'item_id' => $itemId,
                     'department_id' => $departmentId,
-                    'yes_count'     => $yesCount,
-                    'no_count'      => $noCount,
-                    'final_yes'     => $finalYes,
-                    'final_no'      => $finalNo,
-                    'decided_at'    => now(),
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
+                    'yes_count' => $yes,
+                    'no_count' => $no,
+                    'final_yes' => $yes >= $no && $yes > 0,
+                    'final_no' => $no > $yes,
+                    'decided_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
         }
 
-        // 3. INSERT JAWABAN DULU (parent records)
-        if (!empty($answerRecords)) {
+        if ($answerRecords) {
             DB::table('answers')->insert($answerRecords);
         }
 
-        // 4. BARU UPLOAD & SIMPAN EVIDENCE (child records)
-        foreach ($evidenceQueue as $e) {
-    $file = $e['file'];
-    
-    // Validasi file
-    $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    $maxSize = 5242880; // 5MB
-    
-    if (!$file->isValid()) {
-        throw new \Exception("File {$file->getClientOriginalName()} tidak valid");
-    }
-    
-    if (!in_array($file->getMimeType(), $allowedMimes)) {
-        throw new \Exception("File harus berupa gambar (JPG, PNG, GIF)");
-    }
-    
-    if ($file->getSize() > $maxSize) {
-        throw new \Exception("Ukuran file maksimal 5MB");
-    }
-    
-    try {
-        // Generate unique filename
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $folder = "test-folder/{$auditId}";
-        
-        // Upload dengan konfigurasi lebih spesifik
-        $path = Storage::disk('s3')->put(
-            $folder . '/' . $filename,
-            file_get_contents($file->getRealPath()),
-            'public'
-        );
-        
-        DB::table('answer_evidences')->insert([
-            'id'           => $e['id'],
-            'answer_id'    => $e['answer_id'],
-            'audit_id'     => $auditId,
-            'item_id'      => $e['item_id'],
-            'auditor_name' => $e['auditor_name'],
-            'file_path'    => $path,
-            'file_name'    => $file->getClientOriginalName(),
-            'mime_type'    => $file->getClientMimeType(),
-            'file_size'    => $file->getSize(),
-            'created_at'   => now(),
-        ]);
-    } catch (\Exception $ex) {
-    // Baris \Log::error(...) telah dihapus
-    throw new \Exception("Gagal upload file: " . $ex->getMessage());
-    }
-}
-
-        // 5. UPSERT FINAL RECORDS
-        if (!empty($finalRecords)) {
+        if ($finalRecords) {
             DB::table('answer_finals')->upsert(
                 $finalRecords,
                 ['audit_id', 'item_id', 'department_id'],
@@ -870,6 +801,37 @@ public function store(Request $request, $auditId, $mainClause)
 
     return redirect()->route('audit.menu', $auditId)->with('success', 'Data berhasil disimpan.');
 }
+
+public function uploadEvidence(Request $request, $answerId)
+{
+    $request->validate([
+        'image' => 'required|image|max:5120',
+    ]);
+
+    $answer = DB::table('answers')->where('id', $answerId)->first();
+    if (!$answer) abort(404);
+
+    $file = $request->file('image');
+    $path = "audit/{$answer->audit_id}/{$answerId}/" . Str::uuid() . '.' . $file->extension();
+
+    Storage::disk('s3')->put($path, file_get_contents($file), 'private');
+
+    DB::table('answer_evidences')->insert([
+        'id' => Str::uuid(),
+        'answer_id' => $answerId,
+        'audit_id' => $answer->audit_id,
+        'item_id' => $answer->item_id,
+        'auditor_name' => $answer->auditor_name,
+        'file_path' => $path,
+        'file_name' => $file->getClientOriginalName(),
+        'mime_type' => $file->getMimeType(),
+        'file_size' => $file->getSize(),
+        'created_at' => now(),
+    ]);
+
+    return response()->json(['success' => true]);
+}
+
 
     public function clauseDetail($auditId, $mainClause)
     {
