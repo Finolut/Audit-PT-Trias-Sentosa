@@ -173,17 +173,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
          Route::get('/admin/items/create', [ItemController::class, 'create'])->name('admin.items.create');
 Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
 
-Route::get('/admin/evidences',
-    [EvidencesController::class, 'evidenceLog']
-)->name('admin.evidence.log');
+Route::get('/admin/evidences', [EvidencesController::class, 'evidenceLog'])
+    ->name('admin.evidence.log');
 
 Route::get('/admin/evidence/{id}', function ($id) {
     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
     abort_if(!$evidence, 404);
 
-    // Gunakan helper response() untuk menghindari "Undefined type Response"
-    // Gunakan helper storage_path atau method langsung dari Facade
-    
     $path = $evidence->file_path;
     $disk = Storage::disk('s3');
 
@@ -196,7 +192,7 @@ Route::get('/admin/evidence/{id}', function ($id) {
 
     return response($file, 200, [
         'Content-Type' => $type,
-        'Content-Disposition' => 'inline; filename="'.basename($path).'"'
+        'Content-Disposition' => 'inline; filename="' . basename($path) . '"'
     ]);
 })->name('admin.evidence.view');
 });
