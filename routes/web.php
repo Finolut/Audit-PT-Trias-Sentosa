@@ -180,42 +180,6 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 
 });
 
-// Di file routes/web.php
-
-Route::get('/evidence/image/{id}', function ($id) {
-    // 1. Cari data di database
-    $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-    
-    if (!$evidence) {
-        return response("Data evidence tidak ditemukan.", 404);
-    }
-
-    // 2. Ambil path murni dari DB (audit/59ed32...)
-    // Kita ltrim untuk memastikan tidak ada double slash
-    $path = ltrim($evidence->file_path, '/');
-
-    try {
-        $disk = Storage::disk('s3');
-
-        // 3. JANGAN gunakan $disk->exists($path) karena ini penyebab error "Unable to check existence"
-        // Langsung ambil konten file. Server Laravel akan menggunakan Key/Secret di .env 
-        // untuk melakukan request yang sah ke Supabase.
-        $fileContent = $disk->get($path);
-        
-        // 4. Gunakan mime_type dari database agar tidak error di local
-        $contentType = $evidence->mime_type ?? 'image/jpeg';
-
-        return response($fileContent, 200, [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => 'inline',
-            'Cache-Control' => 'public, max-age=86400',
-        ]);
-
-    } catch (\Exception $e) {
-        // Jika gagal, tampilkan pesan error detail
-        return response("Gagal menarik file dari Supabase: " . $e->getMessage(), 500);
-    }
-})->name('evidence.image');
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
