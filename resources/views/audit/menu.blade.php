@@ -1,514 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Session – {{ $deptName }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --slate-50: #f8fafc;
-            --slate-100: #f1f5f9;
-            --slate-200: #e2e8f0;
-            --slate-300: #cbd5e1;
-            --slate-600: #475569;
-            --slate-700: #334155;
-            --slate-900: #0f172a;
-            --border-radius: 16px;
-            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
-            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05);
-            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
+@extends('layouts.menu')
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            color: var(--slate-900);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* === HEADER === */
-        .header-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-lg);
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--slate-200);
-        }
-
-        .header-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 6px;
-            background: linear-gradient(90deg, var(--primary) 0%, #3b82f6 100%);
-        }
-
-        .header-title {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--slate-900);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .header-subtitle {
-            color: var(--slate-600);
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
-        }
-
-        /* === INFO GRID === */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--slate-50);
-            border-radius: 12px;
-            border: 1px solid var(--slate-200);
-        }
-
-        .info-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary);
-            color: white;
-            font-size: 1rem;
-        }
-
-        .info-text {
-            font-weight: 600;
-            color: var(--slate-900);
-        }
-
-        .info-label {
-            font-size: 0.85rem;
-            color: var(--slate-600);
-        }
-
-        /* === PROGRESS SECTION === */
-        .progress-section {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 2px solid var(--primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .progress-title {
-            font-weight: 600;
-            color: var(--slate-900);
-            font-size: 1.1rem;
-        }
-
-        .progress-value {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        .progress-bar-wrapper {
-            height: 12px;
-            background: white;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid var(--slate-200);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, #3b82f6 100%);
-            transition: width 0.5s ease;
-            border-radius: 6px;
-        }
-
-        /* === TOKEN BANNER === */
-        .token-banner {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            padding: 1.25rem;
-            border-radius: 12px;
-            border: 2px solid var(--warning);
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .token-label {
-            font-weight: 600;
-            color: var(--slate-900);
-            font-size: 0.95rem;
-        }
-
-        .token-value {
-            background: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 700;
-            color: var(--slate-900);
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            border: 2px solid var(--slate-200);
-        }
-
-        /* === AUDIT SWITCHER === */
-        .audit-switcher {
-            background: white;
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
-            border: 1px solid var(--slate-200);
-        }
-
-        .switcher-title {
-            font-weight: 700;
-            color: var(--slate-900);
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .audit-tabs {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .audit-tab {
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 2px solid transparent;
-        }
-
-        .audit-tab:hover {
-            background: var(--slate-100);
-            border-color: var(--slate-300);
-        }
-
-        .audit-tab.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .audit-tab.completed {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
-        }
-
-        /* === CLAUSE CARDS === */
-        .clause-grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .clause-card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
-            border: 1px solid var(--slate-200);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .clause-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .clause-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border-bottom: 2px solid var(--primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .clause-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--slate-900);
-            margin: 0;
-        }
-
-        .clause-meta {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .clause-progress {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .progress-count {
-            font-size: 0.9rem;
-            color: var(--slate-600);
-            font-weight: 500;
-        }
-
-        .progress-percent {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 1.1rem;
-        }
-
-        .clause-body {
-            padding: 1.5rem;
-        }
-
-        .clause-description {
-            color: var(--slate-700);
-            margin-bottom: 1.5rem;
-            line-height: 1.7;
-            font-size: 0.95rem;
-        }
-
-        .clause-cta {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-
-        /* === BUTTONS === */
-        .btn {
-            padding: 0.875rem 1.75rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-            border: 2px solid;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: white;
-            color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--slate-700);
-            border-color: var(--slate-300);
-        }
-
-        .btn-outline:hover {
-            background: var(--slate-100);
-            border-color: var(--slate-400);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
-        }
-
-        .btn-success:hover {
-            background: white;
-            color: var(--success);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        /* === FINISH BANNER === */
-        .finish-banner {
-            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-            border-radius: var(--border-radius);
-            padding: 2.5rem;
-            text-align: center;
-            border: 2px solid var(--success);
-            margin-top: 2rem;
-            animation: fadeInUp 0.7s ease-out;
-            box-shadow: var(--shadow-lg);
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .finish-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            display: block;
-            color: var(--success);
-        }
-
-        .finish-message {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--slate-900);
-            margin-bottom: 1rem;
-        }
-
-        .finish-subtext {
-            color: var(--slate-600);
-            font-size: 1.05rem;
-            max-width: 600px;
-            margin: 0 auto 1.75rem;
-            line-height: 1.7;
-        }
-
-        .banner-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1.25rem;
-            flex-wrap: wrap;
-        }
-
-        /* === STATUS BADGE === */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .status-in-progress {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-
-        .status-completed {
-            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        /* === RESPONSIVE === */
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem 0.5rem;
-            }
-
-            .header-card {
-                padding: 1.5rem;
-            }
-
-            .header-title {
-                font-size: 1.5rem;
-            }
-
-            .header-subtitle {
-                font-size: 0.95rem;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .clause-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .clause-meta {
-                justify-content: center;
-            }
-
-            .clause-cta {
-                justify-content: center;
-            }
-
-            .banner-actions {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .btn {
-                width: 100%;
-                max-width: 320px;
-            }
-
-            .audit-tabs {
-                flex-direction: column;
-            }
-
-            .audit-tab {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
+@section('content')
+<div class="max-w-7xl mx-auto">
     <!-- HEADER -->
     <div class="header-card">
         <h1 class="header-title">Audit Session – {{ $deptName }}</h1>
@@ -605,69 +98,79 @@
     </div>
     @endif
 
-    <!-- CLAUSE GRID -->
-    <div class="clause-grid">
-        @foreach($mainClauses as $code)
-            @php
-                $prog = $clauseProgress[$code] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
-                $isDone = $prog['percentage'] >= 100;
-                $inProgress = $prog['count'] > 0 && !$isDone;
-                $title = $titles[$code] ?? "Klausul {$code}";
-            @endphp
-
-            <div class="clause-card">
-                <div class="clause-header">
-                    <h2 class="clause-title">Klausul {{ $code }} – {{ $title }}</h2>
-                    <div class="clause-meta">
-                        <div class="clause-progress">
-                            <span class="progress-count">{{ $prog['count'] }} / {{ $prog['total'] }} soal</span>
-                            <span class="progress-percent">{{ $prog['percentage'] }}%</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="clause-body">
-                    <p class="clause-description">
-                        @if($code === '4-1')
-                            Evaluasi sistem manajemen mutu terhadap persyaratan standar ISO 9001:2015.
-                        @elseif($code === '4-2')
-                            Penilaian kesiapan dokumentasi dan prosedur operasional.
-                        @elseif($code === '5-1')
-                            Pengawasan terhadap pelaksanaan tugas dan tanggung jawab manajemen.
-                        @elseif($code === '6-1')
-                            Analisis risiko dan peluang dalam konteks sistem manajemen.
-                        @elseif($code === '7-1')
-                            Ketersediaan sumber daya manusia, infrastruktur, dan lingkungan kerja.
-                        @elseif($code === '8-1')
-                            Pengendalian proses operasional dan perubahan.
-                        @elseif($code === '9-1')
-                            Pemantauan, pengukuran, analisis, dan evaluasi kinerja.
-                        @else
-                            Deskripsi klausul ini akan ditampilkan berdasarkan data sistem.
-                        @endif
-                    </p>
-
-                    <div class="clause-cta">
-                        @if($isDone)
-                            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
-                               class="btn btn-outline">
-                                <i class="fas fa-eye"></i> Lihat Detail
-                            </a>
-                        @else
-                            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
-                               class="btn btn-primary">
-                                <i class="fas fa-arrow-right"></i> Lanjutkan Audit
-                            </a>
-                        @endif
+    <!-- INSTRUCTION SECTION -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div class="text-center">
+            <div class="inline-block bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
+                <i class="fas fa-info-circle text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-3">Pilih Klausul untuk Memulai Audit</h2>
+            <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+                Gunakan sidebar di sebelah kiri untuk memilih klausul yang ingin diaudit. 
+                Setiap klausul berisi pertanyaan-pertanyaan audit yang harus diisi sesuai dengan kondisi departemen.
+            </p>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-lightbulb text-yellow-500 text-xl mt-1"></i>
+                    <div class="text-left">
+                        <p class="font-semibold text-gray-900 mb-1">Tips:</p>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>• Lihat progress badge di sidebar untuk mengetahui status setiap klausul</li>
+                            <li>• Klausul yang sudah selesai akan ditandai dengan icon ✅</li>
+                            <li>• Gunakan token untuk melanjutkan sesi audit di lain waktu</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        @endforeach
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-play-circle"></i> Mulai dari Klausul 4
+                </a>
+                @if(isset($relatedAudits) && count($relatedAudits) > 1)
+                <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
+                   class="btn btn-outline">
+                    <i class="fas fa-list"></i> Lihat Audit Lain
+                </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK ACCESS GRID -->
+    <div class="mt-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Akses Cepat Klausul</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            @php
+                $clauses = [4,5,6,7,8,9,10];
+            @endphp
+            @foreach($clauses as $clauseNum)
+                @php
+                    $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
+                    $isCompleted = $progress['percentage'] >= 100;
+                    $badgeClass = $isCompleted ? 'completed' : ($progress['count'] > 0 ? 'in-progress' : '');
+                @endphp
+                <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $clauseNum]) }}"
+                   class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all hover:-translate-y-1 {{ $isCompleted ? 'border-green-400' : 'border-blue-200' }}">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
+                            @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
+                        </div>
+                        <div class="text-xs font-medium text-gray-600 mb-1">Klausul {{ $clauseNum }}</div>
+                        <div class="clause-badge {{ $badgeClass }} inline-block text-[10px]">
+                            {{ $progress['count'] }}/{{ $progress['total'] }}
+                        </div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
     </div>
 
     <!-- FINISH BANNER -->
     @if(isset($allFinished) && $allFinished)
-        <div class="finish-banner">
+        <div class="finish-banner mt-6">
             <div class="finish-icon">🎉</div>
             <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
             <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview. Silakan selesaikan proses audit untuk menghasilkan laporan final.</p>
@@ -687,5 +190,387 @@
     @endif
 </div>
 
-</body>
-</html>
+<style>
+    /* === HEADER === */
+    .header-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .header-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    }
+
+    .header-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+        color: #475569;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    /* === INFO GRID === */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .info-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2563eb;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .info-text {
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    /* === PROGRESS SECTION === */
+    .progress-section {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 2px solid #2563eb;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .progress-title {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 1.1rem;
+    }
+
+    .progress-value {
+        font-weight: 700;
+        color: #2563eb;
+        font-size: 1.2rem;
+    }
+
+    .progress-bar-wrapper {
+        height: 12px;
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+        transition: width 0.5s ease;
+        border-radius: 6px;
+    }
+
+    /* === TOKEN BANNER === */
+    .token-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 2px solid #f59e0b;
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .token-label {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 0.95rem;
+    }
+
+    .token-value {
+        background: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        color: #0f172a;
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        border: 2px solid #e2e8f0;
+    }
+
+    /* === AUDIT SWITCHER === */
+    .audit-switcher {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .switcher-title {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .audit-tabs {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .audit-tab {
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+        color: #334155;
+    }
+
+    .audit-tab:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+
+    .audit-tab.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .audit-tab.completed {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+
+    /* === BUTTONS === */
+    .btn {
+        padding: 0.875rem 1.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        border: 2px solid;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+    }
+
+    .btn-primary:hover {
+        background: white;
+        color: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #334155;
+        border-color: #cbd5e1;
+    }
+
+    .btn-outline:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+
+    .btn-success:hover {
+        background: white;
+        color: #10b981;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* === STATUS BADGE === */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .status-in-progress {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        color: #2563eb;
+        border: 1px solid #2563eb;
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+        color: #10b981;
+        border: 1px solid #10b981;
+    }
+
+    /* === CLAUSE BADGE === */
+    .clause-badge {
+        min-width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 0.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .clause-badge.in-progress { 
+        background: #dbeafe; 
+        color: #1d4ed8; 
+    }
+
+    .clause-badge.completed { 
+        background: #dcfce7; 
+        color: #15803d; 
+    }
+
+    /* === FINISH BANNER === */
+    .finish-banner {
+        background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        border: 2px solid #10b981;
+        animation: fadeInUp 0.7s ease-out;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .finish-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        display: block;
+        color: #10b981;
+    }
+
+    .finish-message {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .finish-subtext {
+        color: #475569;
+        font-size: 1.05rem;
+        max-width: 600px;
+        margin: 0 auto 1.75rem;
+        line-height: 1.7;
+    }
+
+    .banner-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .header-card {
+            padding: 1.5rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .audit-tabs {
+            flex-direction: column;
+        }
+
+        .audit-tab {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+@endsection
