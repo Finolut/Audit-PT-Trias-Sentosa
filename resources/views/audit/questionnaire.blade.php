@@ -55,9 +55,9 @@
                                     
                                     <div class="item-action-col">
                                         <div class="button-group" id="btn_group_{{ $item->id }}">
-                                            <button type="button" class="answer-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'YES', this)">Iya</button>
-                                            <button type="button" class="answer-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'NO', this)">Tidak</button>
-                                            <button type="button" class="answer-btn" onclick="setVal('{{ $item->id }}', '{{ $auditorName }}', 'N/A', this)">N/A</button>
+                                            <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
+                                            <button type="button" class="answer-btn no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
+                                            <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
                                         </div>
 
                                         @if(count($responders) > 1)
@@ -67,9 +67,18 @@
                                         @endif
 
                                         {{-- Hidden input jawaban --}}
+                                        @php
+                                            $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+                                            $answerValue = $existingAnswer['answer'] ?? '';
+                                            $findingLevel = $existingAnswer['finding_level'] ?? '';
+                                            $findingNote = $existingAnswer['finding_note'] ?? '';
+                                            $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+                                        @endphp
+
                                         <input type="hidden" 
                                                name="answers[{{ $item->id }}][{{ $auditorName }}][val]" 
-                                               value="{{ ($existingAnswers[$item->id][$auditorName] ?? null)['answer'] ?? '' }}">
+                                               id="answer_input_{{ $item->id }}_{{ $auditorName }}"
+                                               value="{{ $answerValue }}">
 
                                         {{-- === INPUT FINDING + CATATAN TEMUAN PER AUDITOR === --}}
                                         <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
@@ -81,36 +90,30 @@
                                                     </label>
                                                     <select 
                                                         name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
+                                                        id="finding_level_{{ $item->id }}_{{ $auditorName }}"
                                                         class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
                                                         onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
                                                         <option value="">-- No Finding --</option>
-                                                        <option value="observed"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)['finding_level'] ?? '' === 'observed' ? 'selected' : '' }}>
+                                                        <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
                                                             Observed (OFI)
                                                         </option>
-                                                        <option value="minor"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)['finding_level'] ?? '' === 'minor' ? 'selected' : '' }}>
+                                                        <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
                                                             Minor NC
                                                         </option>
-                                                        <option value="major"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)['finding_level'] ?? '' === 'major' ? 'selected' : '' }}>
+                                                        <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
                                                             Major NC
                                                         </option>
                                                     </select>
                                                 </div>
 
                                                 {{-- HIDDEN ANSWER ID --}}
-                                                @php
-                                                    $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                                                    $answerId = $existingAnswer ? ($existingAnswer['id'] ?? \Illuminate\Support\Str::uuid()) : \Illuminate\Support\Str::uuid();
-                                                @endphp
                                                 <input type="hidden"
                                                        name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
                                                        value="{{ $answerId }}">
                                             </div>
 
                                             {{-- TEXTAREA CATATAN TEMUAN --}}
-                                            <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="display: none;">
+                                            <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
                                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
                                                     Catatan Temuan
                                                 </label>
@@ -118,7 +121,7 @@
                                                     name="finding_note[{{ $item->id }}][{{ $auditorName }}]" 
                                                     rows="3" 
                                                     class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
-                                                    placeholder="Jelaskan temuan secara detail...">{{ $existingAnswer['finding_note'] ?? '' }}</textarea>
+                                                    placeholder="Jelaskan temuan secara detail...">{{ $findingNote }}</textarea>
                                             </div>
                                         </div>
                                         {{-- === AKHIR FINDING + CATATAN === --}}
@@ -158,10 +161,6 @@
     </div>
 
 <script>
-    const auditorName = "{{ $auditorName }}";
-    const responders = {!! json_encode($responders) !!};
-    const dbAnswers = {!! json_encode($existingAnswers) !!};
-
     // Toggle visibility catatan temuan
     function toggleFindingNote(itemId, auditorName, value) {
         const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
@@ -170,59 +169,46 @@
         }
     }
 
-    // Inisialisasi saat halaman dimuat
+    // Event delegation untuk button YES/NO/N/A
     document.addEventListener('DOMContentLoaded', function() {
-        @foreach ($itemsGrouped as $subCode => $items)
-            @foreach ($items as $item)
-                @php
-                    $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                    $findingLevel = $existingAnswer['finding_level'] ?? '';
-                @endphp
-                toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', '{{ $findingLevel }}');
+        // Handle klik button jawaban
+        document.querySelectorAll('.answer-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                const value = this.getAttribute('data-value');
+                const auditorName = "{{ $auditorName }}";
                 
-                // Set active button berdasarkan jawaban yang sudah ada
-                const existingAns = '{{ $existingAnswer['answer'] ?? '' }}';
-                if (existingAns) {
-                    const btnGroup = document.getElementById('btn_group_{{ $item->id }}');
-                    if (btnGroup) {
-                        const btns = btnGroup.querySelectorAll('.answer-btn');
-                        btns.forEach(btn => {
-                            if (btn.textContent.trim() === 
-                                (existingAns === 'YES' ? 'Iya' : 
-                                 existingAns === 'NO' ? 'Tidak' : 'N/A')) {
-                                btn.classList.add(
-                                    existingAns === 'YES' ? 'active-yes' :
-                                    existingAns === 'NO' ? 'active-no' : 'active-na'
-                                );
-                            }
-                        });
+                // Reset semua button di group ini
+                document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(btn => {
+                    btn.classList.remove('active-yes', 'active-no', 'active-na');
+                });
+                
+                // Set active class
+                if (value === 'YES') {
+                    this.classList.add('active-yes');
+                } else if (value === 'NO') {
+                    this.classList.add('active-no');
+                } else if (value === 'N/A') {
+                    this.classList.add('active-na');
+                }
+                
+                // Update hidden input
+                const answerInput = document.getElementById(`answer_input_${itemId}_${auditorName}`);
+                if (answerInput) {
+                    answerInput.value = value;
+                }
+                
+                // Optional: Auto-hide finding note jika jawaban YES
+                if (value === 'YES') {
+                    const findingSelect = document.getElementById(`finding_level_${itemId}_${auditorName}`);
+                    if (findingSelect) {
+                        findingSelect.value = '';
+                        toggleFindingNote(itemId, auditorName, '');
                     }
                 }
-            @endforeach
-        @endforeach
-    });
-
-    function setVal(itemId, auditor, val, btn) {
-        // Reset active classes
-        document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(el => {
-            el.classList.remove('active-yes', 'active-no', 'active-na');
+            });
         });
-
-        // Set active class
-        if (val === 'YES') {
-            btn.classList.add('active-yes');
-        } else if (val === 'NO') {
-            btn.classList.add('active-no');
-        } else if (val === 'N/A') {
-            btn.classList.add('active-na');
-        }
-
-        // Update hidden input
-        const answerInput = document.querySelector(`input[name='answers[${itemId}][${auditor}][val]']`);
-        if (answerInput) {
-            answerInput.value = val;
-        }
-    }
+    });
 
     function confirmSubmit() {
         Swal.fire({
