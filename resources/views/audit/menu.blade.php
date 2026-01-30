@@ -47,55 +47,49 @@
     </div>
 
     <!-- CRITICAL TOKEN SECTION - DENGAN COPY BUTTON & INSTRUKSI JELAS -->
-    <div class="max-w-4xl mx-auto mb-10">
-        <div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-5 shadow-md">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div class="flex-1">
-                    <div class="flex items-start mb-3">
-                        <div class="flex-shrink-0 mt-1">
-                            <i class="fas fa-key text-2xl text-amber-500"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h2 class="text-xl font-bold text-amber-800">KODE AUDIT WAJIB DISIMPAN</h2>
-                            <p class="text-amber-700 mt-1">
-                                <span class="font-semibold">⚠️ Penting:</span> Kode ini adalah satu-satunya kunci untuk melanjutkan audit yang belum selesai. 
-                                Tanpa kode ini, progress audit <span class="font-bold">tidak dapat dipulihkan</span>.
-                            </p>
-                            <p class="text-amber-800 font-medium mt-2 bg-amber-100/70 border-l-2 border-amber-400 pl-3 py-1">
-                                💡 Simpan di tempat aman: Catat di buku, screenshot, atau simpan di password manager
-                            </p>
-                        </div>
+<!-- CRITICAL TOKEN SECTION - VERSI POLos & CLEAN -->
+<div class="max-w-4xl mx-auto mb-10">
+    <div class="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div class="flex-1">
+                <div class="flex items-start">
+                    <div class="shrink-0 mt-0.5">
+                        <i class="fas fa-key text-xl text-blue-600"></i>
                     </div>
-                </div>
-                
-                <div class="w-full sm:w-auto">
-                    <div class="flex flex-col gap-2">
-                        <div class="flex items-stretch">
-                            <div id="audit-token" class="flex-1 bg-white border border-amber-300 text-amber-900 font-mono font-semibold text-sm md:text-base px-4 py-3 rounded-l-lg break-all min-w-[250px]">
-                                {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
-                            </div>
-                            <button id="copy-token-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-all duration-200 whitespace-nowrap shadow hover:shadow-md {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}" 
-                                    {{ !$resumeToken ? 'disabled' : '' }}
-                                    aria-label="Salin Kode Audit">
-                                <i class="fas fa-copy"></i>
-                                <span class="hidden sm:inline">Salin Kode</span>
-                            </button>
-                        </div>
-                        <p class="text-xs text-amber-700 text-right mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>Klik tombol Salin untuk menyalin ke clipboard
+                    <div class="ml-3">
+                        <h2 class="text-lg font-bold text-gray-800 mb-1">Kode Audit (Resume Token)</h2>
+                        <p class="text-sm text-gray-600 mb-2">
+                            <span class="font-semibold text-gray-800">⚠️ Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
+                            Tanpa kode ini, progress audit <span class="font-medium text-gray-800">tidak dapat dipulihkan</span>.
+                        </p>
+                        <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+                            💡 <span class="font-medium">Tips:</span> Catat di buku, screenshot, atau simpan token di tempat yang kita ingat
                         </p>
                     </div>
                 </div>
             </div>
+            
+            <div class="w-full sm:w-auto">
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-stretch">
+                        <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-l-lg break-all min-w-[250px]">
+                            {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                        </div>
+                        <button id="copy-token-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-colors duration-200 whitespace-nowrap {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                {{ !$resumeToken ? 'disabled' : '' }}
+                                aria-label="Salin Kode Audit">
+                            <i class="fas fa-copy"></i>
+                            <span class="hidden sm:inline">Salin</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 text-right">
+                        Klik tombol Salin untuk menyalin ke clipboard
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- CTA DIPERKUAT DENGAN KONTEKS -->
-    <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}"
-       class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-        <i class="fas fa-play-circle text-2xl"></i>
-        <span>Mulai Audit dari Klausul 4 (Konteks Organisasi)</span>
-    </a>
+</div>
     
 </div>
 
