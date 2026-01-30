@@ -876,26 +876,42 @@ public function uploadEvidence(Request $request, $answerId)
     ]);
 
     $answer = DB::table('answers')->where('id', $answerId)->first();
-    if (!$answer) abort(404);
+    if (!$answer) {
+        abort(404, 'Answer tidak ditemukan');
+    }
 
     $file = $request->file('image');
-    $path = "audit/{$answer->audit_id}/{$answerId}/" . Str::uuid() . '.' . $file->extension();
 
-    Storage::disk('s3')->put($path, file_get_contents($file), 'private');
+    // 🔑 PATH RELATIF KE BUCKET pttrias (JANGAN TAMBAH pttrias/)
+    $path = "audit/{$answer->audit_id}/{$answerId}/" 
+          . \Illuminate\Support\Str::uuid() . '.' . $file->extension();
+
+    // ✅ UPLOAD SEBAGAI PUBLIC OBJECT
+    Storage::disk('s3')->put(
+        $path,
+        file_get_contents($file),
+        'public'
+    );
 
     DB::table('answer_evidences')->insert([
-        'id' => Str::uuid(),
-        'answer_id' => $answerId,
-        'audit_id' => $answer->audit_id,
-        'file_path' => $path,
-        'file_name' => $file->getClientOriginalName(),
-        'mime_type' => $file->getMimeType(),
-        'file_size' => $file->getSize(),
+        'id'         => \Illuminate\Support\Str::uuid(),
+        'answer_id'  => $answerId,
+        'audit_id'   => $answer->audit_id,
+        'file_path'  => $path, // contoh: audit/xxx/yyy/file.jpg
+        'file_name'  => $file->getClientOriginalName(),
+        'mime_type'  => $file->getMimeType(),
+        'file_size'  => $file->getSize(),
         'created_at' => now(),
     ]);
 
-    return response()->json(['success' => true]);
+    return response()->json([
+        'success' => true,
+        'path'    => $path,
+        'public_url' => config('filesystems.disks.s3.url')
+            . '/storage/v1/object/public/pttrias/' . $path
+    ]);
 }
+
 
 
     public function clauseDetail($auditId, $mainClause)
