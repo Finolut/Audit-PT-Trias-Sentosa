@@ -513,12 +513,8 @@ public function menu($auditId)
         ->where('id', $childSession->parent_session_id)
         ->first();
 
-    // CEK ACTIVE DEPARTMENT DARI SESSION
-    $activeDeptId = session('active_department_id');
-    
-    if (!$activeDeptId) {
-        return redirect()->route('audit.select_department', ['id' => $auditId]);
-    }
+// ✅ LANGSUNG AMBIL DEPARTMENT_ID DARI AUDIT (TIDAK PERLU SESSION)
+$activeDeptId = $audit->department_id;
 
     $departmentName = DB::table('departments')->where('id', $activeDeptId)->value('name');
 
