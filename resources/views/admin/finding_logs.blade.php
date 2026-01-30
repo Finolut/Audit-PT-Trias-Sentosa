@@ -9,10 +9,10 @@
             <nav class="flex text-gray-500 text-xs mb-2 tracking-widest uppercase font-bold">
                 <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
                 <span class="mx-2">/</span>
-                <span class="text-gray-800">Log Evidence Audit</span>
+                <span class="text-gray-800">Catatan Temuan Audit</span>
             </nav>
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight">Riwayat Bukti Audit</h1>
-            <p class="text-gray-500">Daftar lengkap bukti foto yang diunggah auditor selama proses audit lapangan.</p>
+            <h1 class="text-3xl font-black text-gray-800 tracking-tight">Riwayat Catatan Temuan</h1>
+            <p class="text-gray-500">Daftar lengkap catatan temuan yang dibuat auditor selama proses audit lapangan.</p>
         </div>
         
         <a href="{{ route('admin.dashboard') }}" 
@@ -47,19 +47,19 @@
                     <tr class="bg-gray-50/50 border-b border-gray-100">
                         <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Waktu & Klausul</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Departemen & Auditor</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Item & Bukti</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Item & Temuan</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse($evidences as $row)
+                    @forelse($findings as $row)
                     <tr class="hover:bg-blue-50/30 transition-colors">
                         <td class="px-6 py-4">
                             <div class="text-sm font-black text-blue-600">
                                 Clause {{ $row->clause_code }}
                             </div>
                             <div class="text-[10px] text-gray-400 font-bold uppercase">
-                                {{ \Carbon\Carbon::parse($row->evidence_time)->format('d M Y | H:i') }}
+                                {{ \Carbon\Carbon::parse($row->answered_at)->format('d M Y | H:i') }}
                             </div>
                         </td>
 
@@ -77,31 +77,30 @@
                                 <strong>Item:</strong> {{ $row->item_text }}
                             </div>
 
-                            <div class="flex flex-wrap gap-3 items-start">
-<img
-    src="{{ $row->file_path }}"
-    alt="Evidence"
-    class="w-24 h-24 object-cover rounded-xl border shadow-sm"
-/>
-
-
-
-                                <div class="text-xs space-y-1">
-                                    @if($row->finding_level)
-                                        <div class="font-bold uppercase 
-                                            @if($row->finding_level === 'major') text-red-600
-                                            @elseif($row->finding_level === 'minor') text-orange-600
-                                            @else text-green-600 @endif">
-                                            {{ 
-                                                $row->finding_level === 'observed' ? 'OFI' : 
-                                                ($row->finding_level === 'minor' ? 'Minor NC' : 'Major NC')
-                                            }}
-                                        </div>
-                                    @endif
-                                    <div class="text-gray-500">
-                                        Jawaban: <span class="font-medium">{{ $row->answer }}</span>
+                            <div class="space-y-2">
+                                @if($row->finding_level)
+                                    <div class="font-bold uppercase text-xs
+                                        @if($row->finding_level === 'major') text-red-600
+                                        @elseif($row->finding_level === 'minor') text-orange-600
+                                        @else text-green-600 @endif">
+                                        {{ 
+                                            $row->finding_level === 'observed' ? 'OFI' : 
+                                            ($row->finding_level === 'minor' ? 'Minor NC' : 'Major NC')
+                                        }}
                                     </div>
+                                @endif
+
+                                <div class="text-xs text-gray-500">
+                                    Jawaban: <span class="font-medium">{{ $row->answer }}</span>
                                 </div>
+
+                                @if($row->finding_note)
+                                    <div class="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-700">
+                                        {!! nl2br(e($row->finding_note)) !!}
+                                    </div>
+                                @else
+                                    <div class="text-xs text-gray-400 italic">Tidak ada catatan temuan.</div>
+                                @endif
                             </div>
                         </td>
 
@@ -117,9 +116,9 @@
                         <td colspan="4" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center">
                                 <svg class="w-12 h-12 text-gray-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                <p class="text-gray-400 text-sm font-medium">Belum ada bukti audit yang diunggah.</p>
+                                <p class="text-gray-400 text-sm font-medium">Belum ada catatan temuan audit.</p>
                             </div>
                         </td>
                     </tr>
@@ -129,9 +128,9 @@
         </div>
         
         {{-- Pagination --}}
-        @if($evidences->hasPages())
+        @if($findings->hasPages())
         <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-            {{ $evidences->links() }}
+            {{ $findings->links() }}
         </div>
         @endif
     </div>
@@ -140,10 +139,5 @@
 <style>
     .pagination svg { width: 1.5rem; display: inline; }
     .pagination nav p { margin-bottom: 0; }
-
-    /* Optional: enhance image loading */
-    img[alt="Evidence"] {
-        background-color: #f9fafb;
-    }
 </style>
 @endsection

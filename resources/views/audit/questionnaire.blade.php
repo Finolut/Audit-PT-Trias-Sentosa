@@ -30,8 +30,7 @@
 
         <form method="POST" 
               action="{{ route('audit.store', ['id' => $auditId, 'clause' => $currentMain]) }}" 
-              id="form" 
-              enctype="multipart/form-data">
+              id="form">
             @csrf
 
             @foreach ($subClauses as $subCode)
@@ -67,75 +66,62 @@
                                             </button>
                                         @endif
 
-                                        <div id="hidden_inputs_{{ $item->id }}"></div>
+                                        {{-- Hidden input jawaban --}}
+                                        <input type="hidden" 
+                                               name="answers[{{ $item->id }}][{{ $auditorName }}][val]" 
+                                               value="{{ ($existingAnswers[$item->id][$auditorName] ?? null)?->answer ?? '' }}">
 
- {{-- === INPUT FINDING + EVIDENCE PER AUDITOR === --}}
-<div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
-    <div class="flex flex-wrap gap-4 items-end">
-        {{-- FINDING LEVEL --}}
-        <div class="flex-1 min-w-[160px]">
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                Finding Level
-            </label>
-            <select 
-                name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
-                class="w-full text-sm border-gray-300 rounded focus:ring-blue-500">
-                <option value="">-- No Finding --</option>
-                <option value="observed"
-                    {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'observed' ? 'selected' : '' }}>
-                    Observed (OFI)
-                </option>
-                <option value="minor"
-                    {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'minor' ? 'selected' : '' }}>
-                    Minor NC
-                </option>
-                <option value="major"
-                    {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'major' ? 'selected' : '' }}>
-                    Major NC
-                </option>
-            </select>
-        </div>
+                                        {{-- === INPUT FINDING + CATATAN TEMUAN PER AUDITOR === --}}
+                                        <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
+                                            <div class="flex flex-wrap gap-4 items-end">
+                                                {{-- FINDING LEVEL --}}
+                                                <div class="flex-1 min-w-[160px]">
+                                                    <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                                                        Finding Level
+                                                    </label>
+                                                    <select 
+                                                        name="finding_level[{{ $item->id }}][{{ $auditorName }}]" 
+                                                        class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
+                                                        onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
+                                                        <option value="">-- No Finding --</option>
+                                                        <option value="observed"
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'observed' ? 'selected' : '' }}>
+                                                            Observed (OFI)
+                                                        </option>
+                                                        <option value="minor"
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'minor' ? 'selected' : '' }}>
+                                                            Minor NC
+                                                        </option>
+                                                        <option value="major"
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'major' ? 'selected' : '' }}>
+                                                            Major NC
+                                                        </option>
+                                                    </select>
+                                                </div>
 
-        {{-- ✅ HIDDEN ANSWER ID — GENERATE DI SERVER --}}
-        @php
-            $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-            $answerId = $existingAnswer ? $existingAnswer->id : \Illuminate\Support\Str::uuid();
-        @endphp
+                                                {{-- HIDDEN ANSWER ID --}}
+                                                @php
+                                                    $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+                                                    $answerId = $existingAnswer ? $existingAnswer->id : \Illuminate\Support\Str::uuid();
+                                                @endphp
+                                                <input type="hidden"
+                                                       name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+                                                       value="{{ $answerId }}">
+                                            </div>
 
-        <input type="hidden"
-               name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
-               value="{{ $answerId }}">
-
-        {{-- ✅ INPUT FILE LANGSUNG PAKAI answerId --}}
-        <div class="flex-1 min-w-[200px]">
-            <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                Evidence Photo
-            </label>
-            <input
-                type="file"
-                name="evidence[{{ $answerId }}][]"
-                accept="image/*"
-                multiple
-                class="block w-full text-xs text-gray-500
-                       file:mr-2 file:py-1 file:px-2
-                       file:rounded file:border-0
-                       file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100">
-        </div>
-    </div>
-
-    {{-- OPSIONAL: Tampilkan evidence yang sudah ada --}}
-    @if($existingAnswer && $existingAnswer->evidence_path)
-        <div class="mt-1">
-            <a href="{{ Storage::disk('s3')->temporaryUrl('storage/' . $existingAnswer->evidence_path, now()->addMinutes(5)) }}" 
-               target="_blank" 
-               class="text-[10px] text-blue-600 underline">
-                <i class="fa fa-image"></i> View Current Evidence
-            </a>
-        </div>
-    @endif
-</div>
-{{-- === AKHIR FINDING + EVIDENCE === --}}
+                                            {{-- TEXTAREA CATATAN TEMUAN --}}
+                                            <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="display: none;">
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                                    Catatan Temuan
+                                                </label>
+                                                <textarea 
+                                                    name="finding_note[{{ $item->id }}][{{ $auditorName }}]" 
+                                                    rows="3" 
+                                                    class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
+                                                    placeholder="Jelaskan temuan secara detail...">{{ $existingAnswer?->finding_note ?? '' }}</textarea>
+                                            </div>
+                                        </div>
+                                        {{-- === AKHIR FINDING + CATATAN === --}}
                                     </div>
                                 </div>
                             @endforeach
@@ -174,7 +160,47 @@
 <script>
     const auditorName = "{{ $auditorName }}";
     const responders = @json($responders);
-    const dbAnswers = @json($existingAnswers ?? []);
+ const dbAnswers = @json($existingAnswers);
+
+    // Toggle visibility catatan temuan
+    function toggleFindingNote(itemId, auditorName, value) {
+        const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
+        if (wrapper) {
+            wrapper.style.display = (value === '' || value === null) ? 'none' : 'block';
+        }
+    }
+
+    // Inisialisasi saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        @foreach ($itemsGrouped as $subCode => $items)
+            @foreach ($items as $item)
+                @php
+                    $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+                    $findingLevel = $existingAnswer?->finding_level ?? '';
+                @endphp
+                toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', '{{ $findingLevel }}');
+                
+                // Set active button berdasarkan jawaban yang sudah ada
+                const existingAns = '{{ $existingAnswer?->answer ?? '' }}';
+                if (existingAns) {
+                    const btnGroup = document.getElementById('btn_group_{{ $item->id }}');
+                    if (btnGroup) {
+                        const btns = btnGroup.querySelectorAll('.answer-btn');
+                        btns.forEach(btn => {
+                            if (btn.textContent.trim() === 
+                                (existingAns === 'YES' ? 'Iya' : 
+                                 existingAns === 'NO' ? 'Tidak' : 'N/A')) {
+                                btn.classList.add(
+                                    existingAns === 'YES' ? 'active-yes' :
+                                    existingAns === 'NO' ? 'active-no' : 'active-na'
+                                );
+                            }
+                        });
+                    }
+                }
+            @endforeach
+        @endforeach
+    });
 
     function setVal(itemId, auditor, val, btn) {
         // Reset active classes
@@ -182,7 +208,7 @@
             el.classList.remove('active-yes', 'active-no', 'active-na');
         });
 
-        // Set active class berdasarkan nilai
+        // Set active class
         if (val === 'YES') {
             btn.classList.add('active-yes');
         } else if (val === 'NO') {
@@ -191,8 +217,8 @@
             btn.classList.add('active-na');
         }
 
-        // Simpan nilai jawaban ke hidden input (pastikan input ini ada di form)
-        const answerInput = document.querySelector(`input[name='answers[${itemId}][${auditor}]']`);
+        // Update hidden input
+        const answerInput = document.querySelector(`input[name='answers[${itemId}][${auditor}][val]']`);
         if (answerInput) {
             answerInput.value = val;
         }
@@ -232,6 +258,8 @@
         });
     @endif
 </script>
-    <script src="{{ asset('js/audit-script.js') }}"></script>
+
+<!-- Pastikan script eksternal dimuat setelah inline script -->
+<script src="{{ asset('js/audit-script.js') }}"></script>
 </body>
 </html>

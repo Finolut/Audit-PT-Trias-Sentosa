@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\UnableToReadFile;
+use App\Http\Controllers\AuditFindingLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -174,8 +175,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
          Route::get('/admin/items/create', [ItemController::class, 'create'])->name('admin.items.create');
 Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
 
-Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
-    ->name('evidence.log');
+Route::get('/admin/audit/findings', [AuditFindingLogController::class, 'index'])
+         ->name('admin.audit.finding-logs');
 
 
 });

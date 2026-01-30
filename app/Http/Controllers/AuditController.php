@@ -631,14 +631,20 @@ public function menu($auditId)
             ->pluck('question_text', 'clause_code');
 
         // Ambil jawaban yang sudah tersimpan
-        $existingAnswers = [];
-        $rawAnswers = DB::table('answers')
-            ->where('audit_id', $auditId)
-            ->get();
+// ✅ BENAR: simpan seluruh record sebagai objek
+$existingAnswers = [];
+$rawAnswers = DB::table('answers')
+    ->where('audit_id', $auditId)
+    ->get();
 
-        foreach ($rawAnswers as $ans) {
-            $existingAnswers[$ans->item_id][$ans->auditor_name] = $ans->answer;
-        }
+foreach ($rawAnswers as $ans) {
+    // Simpan seluruh data yang dibutuhkan
+    $existingAnswers[$ans->item_id][$ans->auditor_name] = [
+        'answer' => $ans->answer,
+        'finding_level' => $ans->finding_level,
+        'finding_note' => $ans->finding_note,
+    ];
+}
 
         $mainKeys = array_keys($this->mainClauses);
         $nextMain = $mainKeys[array_search($mainClause, $mainKeys) + 1] ?? null;
@@ -662,11 +668,12 @@ public function menu($auditId)
 public function store(Request $request, $auditId, $mainClause)
 {
     $answers = $request->input('answers', []);
-    $notes   = $request->input('audit_notes', []);
+    $notes = $request->input('audit_notes', []);
     $findingLevels = $request->input('finding_level', []);
-    $answerIdMap = $request->input('answer_id_map', []); // ✅ BARU: ambil mapping dari frontend
+    $findingNotes = $request->input('finding_note', []); // ✅ Catatan temuan
+    $answerIdMap = $request->input('answer_id_map', []);
 
-    DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels, $answerIdMap) {
+    DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels, $findingNotes, $answerIdMap) {
         $audit = DB::table('audits')->where('id', $auditId)->first();
         if (!$audit) {
             throw new \Exception("Audit tidak ditemukan");
@@ -674,7 +681,7 @@ public function store(Request $request, $auditId, $mainClause)
 
         $departmentId = $audit->department_id;
 
-        // 1. UPSERT NOTES (tetap sama)
+        // 1. UPSERT NOTES (audit_notes per klausul)
         $noteRecords = [];
         foreach ($notes as $clauseCode => $text) {
             if (!trim($text)) continue;
@@ -698,9 +705,9 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
 
-        // 2. INSERT ANSWERS — 🔑 PERBAIKAN UTAMA
+        // 2. INSERT/UPDATE ANSWERS — termasuk finding_level dan finding_note
         $answerRecords = [];
-        $finalRecords  = [];
+        $finalRecords = [];
 
         foreach ($answers as $itemId => $people) {
             $yes = $no = $na = 0;
@@ -710,20 +717,20 @@ public function store(Request $request, $auditId, $mainClause)
                 if (!empty($data['val'])) {
                     $hasAnswer = true;
 
-                    // ✅ AMBIL answer_id DARI FRONTEND (bukan buat baru!)
                     $answerId = $answerIdMap[$itemId][$name] ?? null;
                     if (!$answerId) {
                         throw new \Exception("Missing answer_id for item {$itemId}, auditor {$name}");
                     }
 
                     $answerRecords[] = [
-                        'id' => $answerId, // ✅ PAKAI ID YANG DIKIRIM FRONTEND
+                        'id' => $answerId,
                         'audit_id' => $auditId,
                         'item_id' => $itemId,
                         'auditor_name' => $name,
                         'department_id' => $departmentId,
                         'answer' => $data['val'],
                         'finding_level' => $findingLevels[$itemId][$name] ?? null,
+                        'finding_note' => $findingNotes[$itemId][$name] ?? null, // ✅ SIMPAN CATATAN TEMUAN
                         'answered_at' => now(),
                         'created_at' => now(),
                         'updated_at' => now(),
@@ -754,21 +761,23 @@ public function store(Request $request, $auditId, $mainClause)
             }
         }
 
+        // Upsert answers dengan finding_note
         if ($answerRecords) {
             DB::table('answers')->upsert(
-    $answerRecords,
-    ['id'], // PRIMARY KEY
-    [
-        'answer',
-        'finding_level',
-        'answered_at',
-        'updated_at',
-        'department_id',
-    ]
-);
-
+                $answerRecords,
+                ['id'],
+                [
+                    'answer',
+                    'finding_level',
+                    'finding_note', // ✅ TERMASUK DI UPDATE FIELD
+                    'answered_at',
+                    'updated_at',
+                    'department_id',
+                ]
+            );
         }
 
+        // Upsert final answers
         if ($finalRecords) {
             DB::table('answer_finals')->upsert(
                 $finalRecords,
@@ -778,56 +787,7 @@ public function store(Request $request, $auditId, $mainClause)
         }
     });
 
-    // === UPLOAD EVIDENCE — SEKARANG AKAN JALAN KARENA ID SESUAI ===
-   $evidenceFiles = $request->file('evidence', []);
-
-foreach ($evidenceFiles as $answerId => $files) {
-
-    // ⛔ WAJIB: ambil parent answer
-    $answer = DB::table('answers')
-        ->select('item_id', 'auditor_name')
-        ->where('id', $answerId)
-        ->first();
-
-    if (!$answer) {
-        throw new \Exception("Answer {$answerId} not found");
-    }
-
-foreach ($files as $file) {
-    if (!$file->isValid()) continue;
-
-    $relativePath = "audit/{$auditId}/{$answerId}/" .
-        Str::uuid() . '.' . $file->extension();
-
-    // ✅ UPLOAD SEBAGAI PUBLIC
-    Storage::disk('s3')->put(
-        $relativePath,
-        file_get_contents($file),
-        'public'
-    );
-
-    // ✅ BENTUK URL PUBLIK
-    $publicUrl =
-        'https://gzdzkossgflboffnkbbq.supabase.co' .
-        '/storage/v1/object/public/pttrias/' .
-        $relativePath;
-
-    DB::table('answer_evidences')->insert([
-        'id'           => Str::uuid(),
-        'answer_id'    => $answerId,
-        'audit_id'     => $auditId,
-        'item_id'      => $answer->item_id,
-        'auditor_name' => $answer->auditor_name,
-        'file_path'    => $publicUrl, // ✅ SIMPAN URL, BUKAN PATH
-        'file_name'    => $file->getClientOriginalName(),
-        'mime_type'    => $file->getMimeType(),
-        'file_size'    => $file->getSize(),
-        'created_at'   => now(),
-    ]);
-}
-
-}
-
+    // === ❌ BAGIAN UPLOAD EVIDENCE DIHAPUS SEPENUHNYA ===
 
     // === REDIRECT LOGIC (tetap sama)
     $mainKeys = array_keys($this->mainClauses);
@@ -845,9 +805,9 @@ foreach ($files as $file) {
             ->where('audit_id', $auditId)
             ->whereIn('item_id', function ($q) use ($subCodes) {
                 $q->select('items.id')
-                  ->from('items')
-                  ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                  ->whereIn('clauses.clause_code', $subCodes);
+                    ->from('items')
+                    ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                    ->whereIn('clauses.clause_code', $subCodes);
             })
             ->count();
 
@@ -857,10 +817,10 @@ foreach ($files as $file) {
         }
     }
 
-if ($allFinished) {
-    DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE', 'updated_at' => now()]);
-    return redirect()->route('audit.menu', $auditId)->with('success', 'Audit untuk departemen ini telah selesai!');
-}
+    if ($allFinished) {
+        DB::table('audits')->where('id', $auditId)->update(['status' => 'COMPLETE', 'updated_at' => now()]);
+        return redirect()->route('audit.menu', $auditId)->with('success', 'Audit untuk departemen ini telah selesai!');
+    }
 
     if ($nextMain) {
         return redirect()->route('audit.show', ['id' => $auditId, 'clause' => $nextMain])
@@ -869,50 +829,6 @@ if ($allFinished) {
 
     return redirect()->route('audit.menu', $auditId)->with('success', 'Data berhasil disimpan.');
 }
-public function uploadEvidence(Request $request, $answerId)
-{
-    $request->validate([
-        'image' => 'required|image|max:5120',
-    ]);
-
-    $answer = DB::table('answers')->where('id', $answerId)->first();
-    if (!$answer) {
-        abort(404, 'Answer tidak ditemukan');
-    }
-
-    $file = $request->file('image');
-
-    // 🔑 PATH RELATIF KE BUCKET pttrias (JANGAN TAMBAH pttrias/)
-    $path = "audit/{$answer->audit_id}/{$answerId}/" 
-          . \Illuminate\Support\Str::uuid() . '.' . $file->extension();
-
-    // ✅ UPLOAD SEBAGAI PUBLIC OBJECT
-    Storage::disk('s3')->put(
-        $path,
-        file_get_contents($file),
-        'public'
-    );
-
-    DB::table('answer_evidences')->insert([
-        'id'         => \Illuminate\Support\Str::uuid(),
-        'answer_id'  => $answerId,
-        'audit_id'   => $answer->audit_id,
-        'file_path'  => $path, // contoh: audit/xxx/yyy/file.jpg
-        'file_name'  => $file->getClientOriginalName(),
-        'mime_type'  => $file->getMimeType(),
-        'file_size'  => $file->getSize(),
-        'created_at' => now(),
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'path'    => $path,
-        'public_url' => config('filesystems.disks.s3.url')
-            . '/storage/v1/object/public/pttrias/' . $path
-    ]);
-}
-
-
 
     public function clauseDetail($auditId, $mainClause)
     {
