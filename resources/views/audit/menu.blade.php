@@ -57,13 +57,15 @@
                         <i class="fas fa-key text-xl text-blue-600"></i>
                     </div>
                     <div class="ml-3">
-                        <h2 class="text-lg font-bold text-gray-800 mb-1">Kode Audit (Resume Token)</h2>
+                        <h2 class="text-lg font-bold text-gray-800 mb-1">Token Audit</h2>
                         <p class="text-sm text-gray-600 mb-2">
-                            <span class="font-semibold text-gray-800">⚠️ Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
-                            Tanpa kode ini, progress audit <span class="font-medium text-gray-800">tidak dapat dipulihkan</span>.
+                            <span class="font-semibold text-gray-800">Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
+                            Dengan kode ini, progress audit <span class="font-medium text-blue-800">dapat dipulihkan</span>.
+                            jika ada kendala dengan token audit bisa menghubungi Admin 
+                            Brahmanto Anggoro Laksono - SSSE
                         </p>
                         <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                            💡 <span class="font-medium">Tips:</span> Catat di buku, screenshot, atau simpan token di tempat yang kita ingat
+                            <span class="font-medium">Tips:</span> Catat di buku, screenshot, atau simpan token di tempat yang kita ingat
                         </p>
                     </div>
                 </div>
