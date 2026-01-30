@@ -79,7 +79,7 @@
 
                             <div class="flex flex-wrap gap-3 items-start">
 <img
-    src="{{ route('admin.evidence.view', $row->evidence_id) }}"
+   src="{{ route('evidence.image', $row->evidence_id) }}"
     alt="Evidence"
     class="w-24 h-24 object-cover rounded-xl border shadow-sm"
 />

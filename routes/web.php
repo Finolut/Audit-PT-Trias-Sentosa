@@ -178,46 +178,34 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
     ->name('evidence.log');
 
 
-Route::get('/evidence/{id}', function ($id) {
-
-            $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-            abort_if(!$evidence, 404);
-
-            $disk = Storage::disk('s3');
-
-            // Normalisasi path
-            $path = ltrim($evidence->file_path, '/');
-            if (!str_starts_with($path, 'pttrias/')) {
-                $path = 'pttrias/' . $path;
-            }
-
-            try {
-                // 1️⃣ Coba stream
-                $stream = $disk->readStream($path);
-
-                if (is_resource($stream)) {
-                    return response()->stream(function () use ($stream) {
-                        fpassthru($stream);
-                    }, 200, [
-                        'Content-Type' => 'image/jpeg', // cukup aman untuk test
-                        'Content-Disposition' => 'inline',
-                    ]);
-                }
-
-                // 2️⃣ Fallback GET
-                $contents = $disk->get($path);
-
-                return response($contents, 200, [
-                    'Content-Type' => 'image/jpeg',
-                    'Content-Disposition' => 'inline',
-                ]);
-
-            } catch (\Throwable $e) {
-                abort(404);
-            }
-
-        })->name('evidence.view');
 });
+
+Route::get('/evidence/image/{id}', function ($id) {
+
+    $evidence = DB::table('answer_evidences')->where('id', $id)->first();
+    abort_if(!$evidence, 404);
+
+    $disk = Storage::disk('s3');
+
+    $path = ltrim($evidence->file_path, '/');
+    if (!str_starts_with($path, 'pttrias/')) {
+        $path = 'pttrias/' . $path;
+    }
+
+    try {
+        $data = $disk->get($path);
+    } catch (\Throwable $e) {
+        abort(404);
+    }
+
+    return response($data, 200, [
+        'Content-Type' => 'image/jpeg',
+        'Content-Disposition' => 'inline',
+        'Cache-Control' => 'private, max-age=3600',
+    ]);
+
+})->name('evidence.image');
+
 
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
