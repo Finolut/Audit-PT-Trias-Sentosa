@@ -183,40 +183,27 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 // Di file routes/web.php
 
 Route::get('/evidence/image/{id}', function ($id) {
-    // 1. Ambil data dari database
     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-    
-    if (!$evidence) {
-        return response("Data evidence tidak ditemukan di database.", 404);
-    }
+    if (!$evidence) return response("Data tidak ditemukan", 404);
 
-    // 2. Ambil path murni dari kolom file_path (Contoh: audit/59ed3225-...)
-    // Jangan tambahkan 'pttrias/' secara manual di sini
-    $path = ltrim($evidence->file_path, '/');
+    $disk = Storage::disk('s3');
+    $path = ltrim($evidence->file_path, '/'); 
 
     try {
-        $disk = Storage::disk('s3');
-
-        // 3. Langsung ambil file. Laravel akan menggunakan credentials dari .env
-        // untuk mengakses bucket 'pttrias' secara internal.
-        if (!$disk->exists($path)) {
-            return response("File tidak ditemukan di bucket pttrias pada path: " . $path, 404);
-        }
-
+        // LANGSUNG ambil filenya tanpa $disk->exists($path)
+        // Jika file tidak ada, Laravel/S3 akan melempar exception secara otomatis
         $fileContent = $disk->get($path);
         
-        // Gunakan mime_type dari DB agar konsisten
         $contentType = $evidence->mime_type ?? 'image/jpeg';
 
         return response($fileContent, 200, [
             'Content-Type' => $contentType,
             'Content-Disposition' => 'inline',
-            'Cache-Control' => 'public, max-age=86400',
         ]);
 
     } catch (\Exception $e) {
-        // Tampilkan error asli jika gagal konek ke Supabase
-        return response("Koneksi S3 Gagal: " . $e->getMessage(), 500);
+        // Jika gagal, tampilkan pesan detail untuk debug
+        return response("Gagal mengambil file S3. Error: " . $e->getMessage(), 500);
     }
 })->name('evidence.image');
 // Preserved special routes (public)
