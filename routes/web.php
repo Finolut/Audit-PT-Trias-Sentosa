@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\UnableToReadFile;
-use App\Http\Controllers\AuditFindingLogController;
+use App\Http\Controllers\Admin\AuditFindingLogController; // ✅ Tambahkan ini
 
 /*
 |--------------------------------------------------------------------------
@@ -147,7 +147,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('question_log');
     Route::get('/audit/search', [DashboardController::class, 'searchAudit'])->name('audit.search');
     Route::get('audit/day-details', [DashboardController::class, 'getDayDetails'])
-    ->name('audit.day-details'); // tetap seperti ini
+        ->name('audit.day-details');
     Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
     Route::get('/audit/{auditId}/clause/{mainClause}', [DashboardController::class, 'showClauseDetail'])->name('audit.clause_detail');
     Route::get('/department-status', [DashboardController::class, 'departmentStatusIndex'])->name('dept_status');
@@ -164,23 +164,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // ITEMS MANAGEMENT
     Route::resource('items', ItemController::class);
 
-      Route::get('/cari-laporan', function () {
+    Route::get('/cari-laporan', function () {
         return view('admin.search-report');
     })->name('search.report');
 
     // Pastikan route search tetap ada
-    Route::get('/admin/audit/search', [AuditController::class, 'search'])
+    Route::get('/admin/audit/search', [\App\Http\Controllers\AuditController::class, 'search'])
          ->name('admin.audit.search');
 
-         Route::get('/admin/items/create', [ItemController::class, 'create'])->name('admin.items.create');
-Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
+    Route::get('/admin/items/create', [ItemController::class, 'create'])->name('admin.items.create');
+    Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
 
-Route::get('/admin/audit/findings', [AuditFindingLogController::class, 'index'])
-         ->name('admin.audit.finding-logs');
-
-
+    // ✅ ROUTE BARU: Catatan Temuan Audit
+    Route::get('/audit/findings', [AuditFindingLogController::class, 'index'])
+         ->name('audit.finding-logs');
 });
-
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');

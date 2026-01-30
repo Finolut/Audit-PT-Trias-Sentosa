@@ -69,7 +69,7 @@
                                         {{-- Hidden input jawaban --}}
                                         <input type="hidden" 
                                                name="answers[{{ $item->id }}][{{ $auditorName }}][val]" 
-                                               value="{{ ($existingAnswers[$item->id][$auditorName] ?? null)?->answer ?? '' }}">
+                                               value="{{ ($existingAnswers[$item->id][$auditorName] ?? null)['answer'] ?? '' }}">
 
                                         {{-- === INPUT FINDING + CATATAN TEMUAN PER AUDITOR === --}}
                                         <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
@@ -85,15 +85,15 @@
                                                         onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
                                                         <option value="">-- No Finding --</option>
                                                         <option value="observed"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'observed' ? 'selected' : '' }}>
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)['finding_level'] ?? '' === 'observed' ? 'selected' : '' }}>
                                                             Observed (OFI)
                                                         </option>
                                                         <option value="minor"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'minor' ? 'selected' : '' }}>
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)['finding_level'] ?? '' === 'minor' ? 'selected' : '' }}>
                                                             Minor NC
                                                         </option>
                                                         <option value="major"
-                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)?->finding_level === 'major' ? 'selected' : '' }}>
+                                                            {{ ($existingAnswers[$item->id][$auditorName] ?? null)['finding_level'] ?? '' === 'major' ? 'selected' : '' }}>
                                                             Major NC
                                                         </option>
                                                     </select>
@@ -102,7 +102,7 @@
                                                 {{-- HIDDEN ANSWER ID --}}
                                                 @php
                                                     $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                                                    $answerId = $existingAnswer ? $existingAnswer->id : \Illuminate\Support\Str::uuid();
+                                                    $answerId = $existingAnswer ? ($existingAnswer['id'] ?? \Illuminate\Support\Str::uuid()) : \Illuminate\Support\Str::uuid();
                                                 @endphp
                                                 <input type="hidden"
                                                        name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
@@ -118,7 +118,7 @@
                                                     name="finding_note[{{ $item->id }}][{{ $auditorName }}]" 
                                                     rows="3" 
                                                     class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
-                                                    placeholder="Jelaskan temuan secara detail...">{{ $existingAnswer?->finding_note ?? '' }}</textarea>
+                                                    placeholder="Jelaskan temuan secara detail...">{{ $existingAnswer['finding_note'] ?? '' }}</textarea>
                                             </div>
                                         </div>
                                         {{-- === AKHIR FINDING + CATATAN === --}}
@@ -159,8 +159,8 @@
 
 <script>
     const auditorName = "{{ $auditorName }}";
-    const responders = @json($responders);
- const dbAnswers = @json($existingAnswers);
+    const responders = {!! json_encode($responders) !!};
+    const dbAnswers = {!! json_encode($existingAnswers) !!};
 
     // Toggle visibility catatan temuan
     function toggleFindingNote(itemId, auditorName, value) {
@@ -176,12 +176,12 @@
             @foreach ($items as $item)
                 @php
                     $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                    $findingLevel = $existingAnswer?->finding_level ?? '';
+                    $findingLevel = $existingAnswer['finding_level'] ?? '';
                 @endphp
                 toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', '{{ $findingLevel }}');
                 
                 // Set active button berdasarkan jawaban yang sudah ada
-                const existingAns = '{{ $existingAnswer?->answer ?? '' }}';
+                const existingAns = '{{ $existingAnswer['answer'] ?? '' }}';
                 if (existingAns) {
                     const btnGroup = document.getElementById('btn_group_{{ $item->id }}');
                     if (btnGroup) {
