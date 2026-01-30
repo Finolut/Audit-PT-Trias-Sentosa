@@ -6,18 +6,14 @@
 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
 
 <!-- HEADER / INSTRUCTION - DIPERKAYA DENGAN INFORMASI LENGKAP -->
-<div class="p-6 text-center">
-    <div class="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
-        <i class="fas fa-shield-alt text-3xl"></i>
-    </div>
 
     <h1 class="text-3xl font-bold text-gray-900 mb-4">
-        Sistem Audit ISO: Persiapan & Panduan Lengkap
+        Persiapan & Panduan Lengkap
     </h1>
 
     <div class="max-w-4xl mx-auto mb-8">
         <p class="text-lg text-gray-700 mb-4">
-            Selamat datang di sistem audit internal. Ikuti langkah berikut untuk memastikan proses audit berjalan efektif:
+            Selamat datang di sistem audit internal. Berikut langkah langkah untuk memastikan proses audit berjalan efektif:
         </p>
         <div class="bg-white border border-blue-100 rounded-2xl p-6 text-left shadow-sm">
             <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
@@ -25,21 +21,24 @@
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">1</span>
                     <div>
                         <h4 class="font-bold text-gray-800">Pilih Klausul</h4>
-                        <p class="text-sm text-gray-600 mt-1">Gunakan sidebar kiri untuk memilih klausul sesuai standar ISO yang berlaku (misal: Klausul 4-10 untuk ISO 9001:2015)</p>
+                        <p class="text-sm text-gray-600 mt-1">Gunakan sidebar kiri untuk memilih klausul yang akan di arahkan ke pertanyaan sesuai dengan standar ISO 14001</p>
                     </div>
                 </li>
                 <li class="flex items-start">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">2</span>
                     <div>
                         <h4 class="font-bold text-gray-800">Jawab Pertanyaan</h4>
-                        <p class="text-sm text-gray-600 mt-1">Isi semua pertanyaan berdasarkan kondisi aktual departemen. Lampirkan bukti dokumen jika diperlukan</p>
+                        <p class="text-sm text-gray-600 mt-1">Isi semua pertanyaan berdasarkan kondisi aktual departemen. jawaban dibagi 3 jenis ada <span class="font-semibold text-green-600">YES</span>,
+    <span class="font-semibold text-red-600">NO</span>,
+    dan
+    <span class="font-semibold text-gray-500">N/A</span> (jika klausul tersebut tidak relevan dengan departemen yang di audit) Lampirkan catatan temuan jika diperlukan</p>
                     </div>
                 </li>
                 <li class="flex items-start">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">3</span>
                     <div>
-                        <h4 class="font-bold text-gray-800">Simpan Progress</h4>
-                        <p class="text-sm text-gray-600 mt-1">Sistem menyimpan otomatis setiap perubahan. <span class="font-semibold text-amber-700">Pastikan simpan Kode Audit</span> untuk akses lanjutan</p>
+                        <h4 class="font-bold text-gray-800">Simpan klausul</h4>
+                        <p class="text-sm text-gray-600 mt-1">Sistem akan menyimpan otomatis semua jawaban yang user input. Semua jawaban user akan terekam dan pastikan semua pertanyaan terisi penuh</p>
                     </div>
                 </li>
             </ol>
