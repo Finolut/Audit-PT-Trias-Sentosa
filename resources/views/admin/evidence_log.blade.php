@@ -78,12 +78,12 @@
                             </div>
 
                             <div class="flex flex-wrap gap-3 items-start">
-                                <img
-                                    src="{{ route('admin.evidence.view', $row->evidence_id) }}"
-                                    alt="Evidence"
-                                    class="w-24 h-24 object-cover rounded-xl border shadow-sm"
-                                    onerror="this.src='{{ asset('images/placeholder-image.png') }}'"
-                                />
+<img
+    src="{{ route('admin.evidence.view', $row->evidence_id) }}"
+    alt="Evidence"
+    class="w-24 h-24 object-cover rounded-xl border shadow-sm"
+/>
+
 
                                 <div class="text-xs space-y-1">
                                     @if($row->finding_level)
