@@ -178,16 +178,31 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 
 
 Route::get('/evidence/{id}', function ($id) {
+
     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
     abort_if(!$evidence, 404);
 
-    $path = $evidence->file_path;
     $disk = Storage::disk('s3');
 
-    abort_unless($disk->exists($path), 404);
+    // 🔑 NORMALISASI PATH (INI KUNCI UTAMA)
+    $path = ltrim($evidence->file_path, '/');
 
-    // 🔑 INI KUNCINYA
-    return $disk->response($path);
+    if (!str_starts_with($path, 'pttrias/')) {
+        $path = 'pttrias/' . $path;
+    }
+
+    abort_unless($disk->exists($path), 404, 'File tidak ditemukan di storage');
+
+    $stream = $disk->readStream($path);
+    abort_if(!$stream, 500, 'Gagal membaca file');
+
+    return response()->stream(function () use ($stream) {
+        fpassthru($stream);
+    }, 200, [
+        'Content-Type'        => $disk->mimeType($path),
+        'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
+        'Cache-Control'       => 'private, max-age=3600',
+    ]);
 })->name('evidence.view');
 
 });
