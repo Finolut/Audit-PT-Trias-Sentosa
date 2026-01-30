@@ -15,6 +15,7 @@ use App\Http\Controllers\EvidencesController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
+use League\Flysystem\UnableToReadFile;
 
 /*
 |--------------------------------------------------------------------------
@@ -184,25 +185,33 @@ Route::get('/evidence/{id}', function ($id) {
 
     $disk = Storage::disk('s3');
 
-    // 🔑 NORMALISASI PATH (INI KUNCI UTAMA)
+    // Normalisasi path
     $path = ltrim($evidence->file_path, '/');
-
     if (!str_starts_with($path, 'pttrias/')) {
         $path = 'pttrias/' . $path;
     }
 
-    abort_unless($disk->exists($path), 404, 'File tidak ditemukan di storage');
+    try {
+        $stream = $disk->readStream($path);
 
-    $stream = $disk->readStream($path);
-    abort_if(!$stream, 500, 'Gagal membaca file');
+        if ($stream === false) {
+            abort(404, 'File tidak ditemukan');
+        }
 
-    return response()->stream(function () use ($stream) {
-        fpassthru($stream);
-    }, 200, [
-        'Content-Type'        => $disk->mimeType($path),
-        'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
-        'Cache-Control'       => 'private, max-age=3600',
-    ]);
+        return response()->stream(function () use ($stream) {
+            fpassthru($stream);
+        }, 200, [
+            // JANGAN pakai mimeType() → bisa error juga
+            'Content-Type'        => 'image/jpeg',
+            'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
+            'Cache-Control'       => 'private, max-age=3600',
+        ]);
+
+    } catch (\Throwable $e) {
+        // Supabase akan lempar exception kalau object tidak bisa diakses
+        abort(404, 'Evidence tidak dapat dibaca');
+    }
+
 })->name('evidence.view');
 
 });
