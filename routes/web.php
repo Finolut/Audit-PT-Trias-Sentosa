@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+
 use Illuminate\Support\Str;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\ItemController;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\UnableToReadFile;
 use App\Http\Controllers\Admin\AuditFindingLogController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -188,4 +190,58 @@ Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
 
-Route::get('/api/audit/{auditId}/progress', [AuditController::class, 'getProgress']);
+Route::get('/api/audit/{auditId}/progress', function ($auditId) {
+    try {
+        // Validasi audit exists
+        $audit = DB::table('audits')->where('id', $auditId)->first();
+        if (!$audit) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Audit tidak ditemukan'
+            ], 404);
+        }
+
+        // Ambil progress per klausul
+        $clauses = [4, 5, 6, 7, 8, 9, 10];
+        $progressData = [];
+
+        foreach ($clauses as $clauseNum) {
+            // Sesuaikan dengan struktur tabel Anda:
+            // Contoh untuk tabel 'audit_answers' dengan kolom 'clause' dan 'answer'
+            $total = DB::table('audit_questions')
+                        ->where('clause', $clauseNum)
+                        ->where('audit_template_id', $audit->audit_template_id)
+                        ->count();
+            
+            $answered = DB::table('audit_answers')
+                         ->where('audit_id', $auditId)
+                         ->where('clause', $clauseNum)
+                         ->whereNotNull('answer')
+                         ->where('answer', '!=', '')
+                         ->count();
+
+            $percentage = $total > 0 ? round(($answered / $total) * 100) : 0;
+            
+            $progressData[$clauseNum] = [
+                'percentage' => $percentage,
+                'count' => $answered,
+                'total' => $total
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'progress' => $progressData,
+            'audit_id' => $auditId
+        ]);
+
+    } catch (\Exception $e) {
+        // Gunakan helper logger() yang aman tanpa import
+        logger('Error fetching audit progress: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan sistem'
+        ], 500);
+    }
+})->middleware('auth:sanctum');
