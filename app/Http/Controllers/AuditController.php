@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use App\Models\Audit;
 
 
 class AuditController extends Controller
@@ -1134,5 +1135,29 @@ private function getDepartmentStatus($auditId, $departmentId)
         return 'in_progress';
     }
     return 'pending';
+}
+
+public function getProgress($auditId)
+{
+    try {
+        // Validasi audit ID
+        $audit = Audit::findOrFail($auditId);
+        
+        // Ambil progress untuk setiap klausul
+        $clauses = [4, 5, 6, 7, 8, 9, 10];
+        $progressData = [];
+        
+        return response()->json([
+            'success' => true,
+            'progress' => $progressData,
+            'audit_id' => $auditId
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Audit tidak ditemukan'
+        ], 404);
+    }
 }
 }

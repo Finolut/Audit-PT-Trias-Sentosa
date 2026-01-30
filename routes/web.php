@@ -187,3 +187,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
+
+Route::get('/api/audit/{auditId}/progress', [AuditController::class, 'getProgress']);

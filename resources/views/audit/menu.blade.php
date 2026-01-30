@@ -102,16 +102,16 @@
     
 </div>
 
-<!-- AUDIT SWITCHER - DIPERBAIKI VISUALNYA -->
+<!-- AUDIT SWITCHER - DENGAN INTERAKTIF PROGRESS -->
 @if(isset($relatedAudits) && count($relatedAudits) > 1)
 <div class="border-t border-gray-200 bg-gray-50 p-6">
     <div class="max-w-4xl mx-auto">
         <div class="flex items-center gap-3 mb-5">
-            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                <i class="fas fa-exchange-alt text-indigo-600"></i>
+            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                <i class="fas fa-building text-indigo-600"></i>
             </div>
             <h3 class="text-xl font-bold text-gray-800">
-                Audit Aktif oleh <span class="text-indigo-600">{{ $auditorName }}</span>
+                Departemen Yang Di Audit Oleh <span class="text-indigo-600">{{ $auditorName }}</span>
             </h3>
         </div>
 
@@ -122,135 +122,97 @@
                     $isCurrent = $auditInfo['id'] === $currentAuditId;
                     $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
                     $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
-                    $statusColor = $isCompleted ? 'border-green-500/50 bg-green-50' : ($isCurrent ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-300 hover:border-blue-300');
                 @endphp
 
-                <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}"
-                   class="block p-4 rounded-xl border-2 transition-all {{ $statusColor }} 
-                          hover:shadow-md hover:-translate-y-0.5 {{ $isCurrent ? 'scale-[1.02]' : '' }}"
-                   title="{{ $isCompleted ? 'Audit selesai' : ($isCurrent ? 'Audit sedang dikerjakan' : 'Beralih ke audit departemen ini') }}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-building text-indigo-600"></i>
+                <div class="audit-department-card" 
+                     data-audit-id="{{ $auditInfo['id'] }}"
+                     data-dept-name="{{ $deptNameTab }}"
+                     data-is-current="{{ $isCurrent ? 'true' : 'false' }}">
+                    <div class="block p-4 rounded-xl border-2 transition-all cursor-pointer
+                               {{ $isCurrent ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 scale-[1.02]' : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50' }}
+                               hover:shadow-md hover:-translate-y-0.5 department-card"
+                         title="{{ $isCompleted ? 'Audit selesai' : ($isCurrent ? 'Audit sedang dikerjakan' : 'Klik untuk lihat progress audit departemen ini') }}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-building text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800">{{ $deptNameTab }}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">
+                                        @if($isCompleted)
+                                            <span class="text-green-600 flex items-center gap-1"><i class="fas fa-check-circle"></i> Selesai</span>
+                                        @elseif($isCurrent)
+                                            <span class="text-blue-600 flex items-center gap-1"><i class="fas fa-spinner fa-spin"></i> Sedang Dikerjakan</span>
+                                        @else
+                                            <span class="text-gray-500 flex items-center gap-1"><i class="far fa-clock"></i> Belum Dimulai</span>
+                                        @endif
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-bold text-gray-800">{{ $deptNameTab }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">
-                                    @if($isCompleted)
-                                        <span class="text-green-600 flex items-center gap-1"><i class="fas fa-check-circle"></i> Selesai</span>
-                                    @elseif($isCurrent)
-                                        <span class="text-blue-600 flex items-center gap-1"><i class="fas fa-spinner fa-spin"></i> Sedang Dikerjakan</span>
-                                    @else
-                                        <span class="text-amber-600 flex items-center gap-1"><i class="far fa-clock"></i> Belum Selesai</span>
-                                    @endif
-                                </p>
-                            </div>
+                            @if($isCurrent)
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                                    AKTIF
+                                </span>
+                            @endif
                         </div>
-                        @if($isCurrent)
-                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full animate-pulse">
-                                AKTIF
-                            </span>
-                        @endif
                     </div>
-                </a>
+                </div>
             @endforeach
         </div>
         
+        <p class="mt-4 text-center text-sm text-gray-500">
+            <i class="fas fa-info-circle mr-1"></i> Klik pada departemen untuk melihat progress audit terkait
+        </p>
     </div>
 </div>
 @endif
 
-    <!-- HEADER -->
-    <div class="header-card">
-        <h1 class="header-title">Audit Session – {{ $deptName }}</h1>
-        <p class="header-subtitle">Sesi audit internal untuk departemen {{ $deptName }} tahun {{ date('Y') }}</p>
-        
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div>
-                    <div class="info-label">Auditor</div>
-                    <div class="info-text">{{ $auditorName }}</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-icon">
-                    <i class="fas fa-building"></i>
-                </div>
-                <div>
-                    <div class="info-label">Departemen</div>
-                    <div class="info-text">{{ $deptName }}</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-icon">
-                    <i class="fas fa-calendar"></i>
-                </div>
-                <div>
-                    <div class="info-label">Tahun Audit</div>
-                    <div class="info-text">{{ date('Y') }}</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-icon">
-                    <i class="fas fa-circle-dot"></i>
-                </div>
-                <div>
-                    <div class="info-label">Status</div>
-                    <div class="info-text">
-                        <span class="status-badge status-in-progress">
-                            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
-                            In Progress
-                        </span>
-                    </div>
-                </div>
-            </div>
+<!-- QUICK ACCESS GRID - DENGAN LOADING STATE -->
+<div class="mt-6">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+            <h3 class="text-lg font-bold text-gray-900">Progress Audit</h3>
         </div>
-
-        <!-- Progress Section -->
-        <div class="progress-section">
-            <div class="progress-header">
-                <span class="progress-title">Progress Audit</span>
-                <span class="progress-value">Step {{ $completedCount ?? 0 }} of {{ count($mainClauses) }}</span>
-            </div>
-            <div class="progress-bar-wrapper">
-                <div class="progress-fill" style="width: {{ round(($completedCount ?? 0) / count($mainClauses) * 100) }}%;"></div>
-            </div>
+        <div id="current-dept-display" class="text-sm text-gray-600">
+            <i class="fas fa-building mr-1"></i>
+            <span id="dept-name">{{ $currentDeptName ?? 'Departemen' }}</span>
         </div>
-
-
-    <!-- QUICK ACCESS GRID -->
-    <div class="mt-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">Akses Cepat Klausul</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            @php
-                $clauses = [4,5,6,7,8,9,10];
-            @endphp
-            @foreach($clauses as $clauseNum)
-                @php
-                    $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
-                    $isCompleted = $progress['percentage'] >= 100;
-                    $badgeClass = $isCompleted ? 'completed' : ($progress['count'] > 0 ? 'in-progress' : '');
-                @endphp
-                <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $clauseNum]) }}"
-                   class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all hover:-translate-y-1 {{ $isCompleted ? 'border-green-400' : 'border-blue-200' }}">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
-                            @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
-                        </div>
-                        <div class="text-xs font-medium text-gray-600 mb-1">Klausul {{ $clauseNum }}</div>
-                        <div class="clause-badge {{ $badgeClass }} inline-block text-[10px]">
-                            {{ $progress['count'] }}/{{ $progress['total'] }}
-                        </div>
-                    </div>
-                </a>
-            @endforeach
+    </div>
+    
+    <div id="progress-loading" class="hidden">
+        <div class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+            <span class="text-gray-600">Memuat progress audit...</span>
         </div>
     </div>
 
+    <div id="progress-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        @php
+            $clauses = [4,5,6,7,8,9,10];
+        @endphp
+        @foreach($clauses as $clauseNum)
+            @php
+                $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
+                $isCompleted = $progress['percentage'] >= 100;
+                $badgeClass = $isCompleted ? 'completed' : ($progress['count'] > 0 ? 'in-progress' : '');
+            @endphp
+            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $clauseNum]) }}"
+               class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all hover:-translate-y-1 {{ $isCompleted ? 'border-green-400' : 'border-blue-200' }}">
+                <div class="text-center">
+                    <div class="text-2xl font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
+                        @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
+                    </div>
+                    <div class="text-xs font-medium text-gray-600 mb-1">Klausul {{ $clauseNum }}</div>
+                    <div class="clause-badge {{ $badgeClass }} inline-block text-[10px]">
+                        {{ $progress['count'] }}/{{ $progress['total'] }}
+                    </div>
+                </div>
+            </a>
+        @endforeach
+    </div>
+</div>
     <!-- FINISH BANNER -->
     @if(isset($allFinished) && $allFinished)
         <div class="finish-banner mt-6">
@@ -697,6 +659,164 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const departmentCards = document.querySelectorAll('.audit-department-card');
+    const progressGrid = document.getElementById('progress-grid');
+    const progressLoading = document.getElementById('progress-loading');
+    const deptNameDisplay = document.getElementById('dept-name');
+    const currentDeptName = '{{ $currentDeptName ?? '' }}';
+    const currentAuditId = '{{ $currentAuditId }}';
+
+    // Set initial department name
+    if (currentDeptName && deptNameDisplay) {
+        deptNameDisplay.textContent = currentDeptName;
+    }
+
+    // Add click event to each department card
+    departmentCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if clicking on actual link
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                return;
+            }
+
+            const auditId = this.dataset.auditId;
+            const deptName = this.dataset.deptName;
+            const isCurrent = this.dataset.isCurrent === 'true';
+
+            // If already active, don't reload
+            if (isCurrent) {
+                return;
+            }
+
+            // Update UI immediately for better UX
+            updateActiveDepartment(this);
+            
+            // Load progress data
+            loadAuditProgress(auditId, deptName);
+        });
+    });
+
+    function updateActiveDepartment(clickedCard) {
+        // Remove active state from all cards
+        document.querySelectorAll('.department-card').forEach(el => {
+            el.classList.remove('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-200', 'scale-[1.02]');
+            el.classList.add('border-gray-300', 'bg-white');
+            
+            // Remove AKTIF badge from all
+            const badge = el.querySelector('.bg-blue-100');
+            if (badge) badge.remove();
+        });
+
+        // Add active state to clicked card
+        const card = clickedCard.querySelector('.department-card');
+        card.classList.remove('border-gray-300', 'bg-white');
+        card.classList.add('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-200', 'scale-[1.02]');
+
+        // Add AKTIF badge
+        const badgeContainer = clickedCard.querySelector('.flex.items-center.justify-between');
+        if (badgeContainer) {
+            const badgeHTML = '<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">AKTIF</span>';
+            badgeContainer.insertAdjacentHTML('beforeend', badgeHTML);
+        }
+    }
+
+    function loadAuditProgress(auditId, deptName) {
+        // Show loading state
+        progressGrid.classList.add('hidden');
+        progressLoading.classList.remove('hidden');
+
+        // Update department name display
+        if (deptNameDisplay) {
+            deptNameDisplay.textContent = deptName;
+        }
+
+        // Fetch progress data from server
+        fetch(`/api/audit/${auditId}/progress`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateProgressGrid(data.progress, auditId);
+                } else {
+                    showError('Gagal memuat progress audit');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading progress:', error);
+                showError('Terjadi kesalahan saat memuat data');
+            })
+            .finally(() => {
+                // Hide loading state
+                progressLoading.classList.add('hidden');
+                progressGrid.classList.remove('hidden');
+            });
+    }
+
+    function updateProgressGrid(progressData, auditId) {
+        let gridHTML = '';
+        const clauses = [4, 5, 6, 7, 8, 9, 10];
+
+        clauses.forEach(clauseNum => {
+            const progress = progressData[clauseNum] || { percentage: 0, count: 0, total: 5 };
+            const isCompleted = progress.percentage >= 100;
+            const badgeClass = isCompleted ? 'completed' : (progress.count > 0 ? 'in-progress' : '');
+
+            gridHTML += `
+                <a href="/audit/${auditId}/clause/${clauseNum}"
+                   class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all hover:-translate-y-1 ${isCompleted ? 'border-green-400' : 'border-blue-200'}">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold mb-1 ${isCompleted ? 'text-green-600' : 'text-blue-600'}">
+                            ${isCompleted ? '✅' : clauseNum}
+                        </div>
+                        <div class="text-xs font-medium text-gray-600 mb-1">Klausul ${clauseNum}</div>
+                        <div class="clause-badge ${badgeClass} inline-block text-[10px]">
+                            ${progress.count}/${progress.total}
+                        </div>
+                    </div>
+                </a>
+            `;
+        });
+
+        progressGrid.innerHTML = gridHTML;
+    }
+
+    function showError(message) {
+        // Create error notification
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg mb-4';
+        errorDiv.innerHTML = `
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-red-400 mt-0.5 mr-3"></i>
+                <div>
+                    <p class="text-sm text-red-700 font-medium">${message}</p>
+                </div>
+            </div>
+        `;
+        
+        // Insert before progress grid
+        progressGrid.parentNode.insertBefore(errorDiv, progressGrid);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+
+    // Optional: Add keyboard navigation support
+    departmentCards.forEach((card, index) => {
+        const deptCard = card.querySelector('.department-card');
+        if (deptCard) {
+            deptCard.tabIndex = 0;
+            deptCard.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    card.click();
+                }
+            });
+        }
+    });
 });
 </script>
 
