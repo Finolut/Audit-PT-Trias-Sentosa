@@ -183,49 +183,42 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 // Di file routes/web.php
 
 Route::get('/evidence/image/{id}', function ($id) {
-    // 1. Ambil data dari DB
+    // 1. Ambil data dari database
     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
     
     if (!$evidence) {
-        abort(404, 'Data tidak ditemukan di DB');
+        return response("Data evidence tidak ditemukan di database.", 404);
     }
 
-    // 2. Bersihkan path (Hapus 'pttrias/' jika kode lama sempat menyimpannya, atau gunakan path murni)
-    // Berdasarkan screenshot Anda, path di DB diawali dengan "audit/...", itu SUDAH BENAR.
-    // Hapus slash di depan jika ada.
-    $path = ltrim($evidence->file_path, '/'); 
-
-    // 3. Inisialisasi Disk S3
-    $disk = Storage::disk('s3');
-
-    // 4. Cek file (Opsional, bisa langsung try-catch)
-    if (!$disk->exists($path)) {
-        // Debugging: Jika file dibilang tidak ada, uncomment baris ini untuk lihat path apa yang sedang dibaca sistem
-        // dd("Sistem mencari file di path ini: " . $path);
-        abort(404, 'File fisik tidak ditemukan di S3.');
-    }
+    // 2. Ambil path murni dari kolom file_path (Contoh: audit/59ed3225-...)
+    // Jangan tambahkan 'pttrias/' secara manual di sini
+    $path = ltrim($evidence->file_path, '/');
 
     try {
-        // 5. Ambil konten file (Laravel akan pakai Access Key di .env untuk bypass AccessDenied)
+        $disk = Storage::disk('s3');
+
+        // 3. Langsung ambil file. Laravel akan menggunakan credentials dari .env
+        // untuk mengakses bucket 'pttrias' secara internal.
+        if (!$disk->exists($path)) {
+            return response("File tidak ditemukan di bucket pttrias pada path: " . $path, 404);
+        }
+
         $fileContent = $disk->get($path);
         
-        // 6. Gunakan Mime Type dari Database (Anda punya kolom mime_type 'image/jpeg')
-        $type = $evidence->mime_type ?? 'image/jpeg';
+        // Gunakan mime_type dari DB agar konsisten
+        $contentType = $evidence->mime_type ?? 'image/jpeg';
+
+        return response($fileContent, 200, [
+            'Content-Type' => $contentType,
+            'Content-Disposition' => 'inline',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
 
     } catch (\Exception $e) {
-        // Jika error connection atau permission
-        abort(404, 'Gagal mengambil file: ' . $e->getMessage());
+        // Tampilkan error asli jika gagal konek ke Supabase
+        return response("Koneksi S3 Gagal: " . $e->getMessage(), 500);
     }
-
-    // 7. Tampilkan Gambar
-    return response($fileContent, 200, [
-        'Content-Type' => $type,
-        'Content-Disposition' => 'inline', // 'inline' agar tampil di browser, 'attachment' untuk download
-        'Cache-Control' => 'public, max-age=86400',
-    ]);
-
 })->name('evidence.image');
-
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
