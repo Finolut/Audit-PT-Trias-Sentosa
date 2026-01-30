@@ -79,12 +79,11 @@
 
                             <div class="flex flex-wrap gap-3 items-start">
 <img
-   src="https://gzdzkossgflboffnkbbq.storage.supabase.co/storage/v1/s3/pttrias/{{ ltrim($row->file_path, '/') }}"
-   alt="Evidence"
-   class="w-24 h-24 object-cover rounded-xl border shadow-sm bg-gray-100"
-   loading="lazy" 
-   onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=Error+Foto';"
+    src="{{ $row->file_path }}"
+    alt="Evidence"
+    class="w-24 h-24 object-cover rounded-xl border shadow-sm"
 />
+
 
 
                                 <div class="text-xs space-y-1">

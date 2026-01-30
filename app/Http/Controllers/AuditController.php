@@ -793,31 +793,39 @@ foreach ($evidenceFiles as $answerId => $files) {
         throw new \Exception("Answer {$answerId} not found");
     }
 
-    foreach ($files as $file) {
-        if (!$file->isValid()) continue;
+foreach ($files as $file) {
+    if (!$file->isValid()) continue;
 
-        $path = "audit/{$auditId}/{$answerId}/" .
-            Str::uuid() . '.' . $file->extension();
+    $relativePath = "audit/{$auditId}/{$answerId}/" .
+        Str::uuid() . '.' . $file->extension();
 
-        Storage::disk('s3')->put(
-            $path,
-            file_get_contents($file),
-            'private'
-        );
+    // ✅ UPLOAD SEBAGAI PUBLIC
+    Storage::disk('s3')->put(
+        $relativePath,
+        file_get_contents($file),
+        'public'
+    );
 
-        DB::table('answer_evidences')->insert([
-            'id'           => Str::uuid(),
-            'answer_id'    => $answerId,
-            'audit_id'     => $auditId,
-            'item_id'      => $answer->item_id,      // ✅ INI WAJIB
-            'auditor_name' => $answer->auditor_name, // ✅ INI WAJIB
-            'file_path'    => $path,
-            'file_name'    => $file->getClientOriginalName(),
-            'mime_type'    => $file->getMimeType(),
-            'file_size'    => $file->getSize(),
-            'created_at'   => now(),
-        ]);
-    }
+    // ✅ BENTUK URL PUBLIK
+    $publicUrl =
+        'https://gzdzkossgflboffnkbbq.supabase.co' .
+        '/storage/v1/object/public/pttrias/' .
+        $relativePath;
+
+    DB::table('answer_evidences')->insert([
+        'id'           => Str::uuid(),
+        'answer_id'    => $answerId,
+        'audit_id'     => $auditId,
+        'item_id'      => $answer->item_id,
+        'auditor_name' => $answer->auditor_name,
+        'file_path'    => $publicUrl, // ✅ SIMPAN URL, BUKAN PATH
+        'file_name'    => $file->getClientOriginalName(),
+        'mime_type'    => $file->getMimeType(),
+        'file_size'    => $file->getSize(),
+        'created_at'   => now(),
+    ]);
+}
+
 }
 
 
