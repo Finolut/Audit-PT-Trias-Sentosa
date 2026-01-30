@@ -184,16 +184,10 @@ Route::get('/evidence/{id}', function ($id) {
     $path = $evidence->file_path;
     $disk = Storage::disk('s3');
 
-    abort_unless($disk->exists($path), 404, 'File tidak ditemukan di S3');
+    abort_unless($disk->exists($path), 404);
 
-    return response(
-        $disk->get($path),
-        200,
-        [
-            'Content-Type' => $disk->mimeType($path),
-            'Content-Disposition' => 'inline; filename="'.basename($path).'"'
-        ]
-    );
+    // 🔑 INI KUNCINYA
+    return $disk->response($path);
 })->name('evidence.view');
 
 });
