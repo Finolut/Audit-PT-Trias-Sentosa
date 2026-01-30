@@ -9,14 +9,14 @@
 
 <div class="p-6 text-center">
     <div class="inline-flex items-center justify-center rounded-full p-4 mb-4" 
-         style="background-color: #1a365d; color: white;">
+         style="background-color: #edea18fd; color: white;">
         <i class="fas fa-book-open text-3xl"></i>
     </div>
 </div>
 
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">
-        Persiapan & Panduan Lengkap
-    </h1>
+<h1 class="text-3xl font-bold text-gray-900 mb-4 text-center">
+    Persiapan & Panduan Lengkap
+</h1>
 
 <div class="max-w-4xl mx-auto mb-8">
     <p class="text-lg text-gray-700 mb-4">
@@ -52,7 +52,6 @@
     </div>
 </div>
 
-    <!-- CRITICAL TOKEN SECTION - DENGAN COPY BUTTON & INSTRUKSI JELAS -->
 <!-- CRITICAL TOKEN SECTION - VERSI POLos & CLEAN -->
 <div class="max-w-4xl mx-auto mb-10">
     <div class="bg-white border rounded-2xl p-6 shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
