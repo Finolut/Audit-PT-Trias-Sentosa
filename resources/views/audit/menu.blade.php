@@ -2,6 +2,97 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto">
+
+<div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+
+    <!-- HEADER / INSTRUCTION -->
+    <div class="p-6 text-center">
+        <div class="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
+            <i class="fas fa-info-circle text-3xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">
+            Pilih Klausul untuk Memulai Audit
+        </h2>
+
+        <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+            Gunakan sidebar di sebelah kiri untuk memilih klausul audit.
+            Setiap klausul berisi pertanyaan yang harus diisi sesuai kondisi aktual departemen.
+        </p>
+
+        <!-- TIPS -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left max-w-2xl mx-auto">
+            <div class="flex gap-3">
+                <i class="fas fa-lightbulb text-yellow-500 text-xl mt-1"></i>
+                <div>
+                    <p class="font-semibold text-gray-900 mb-1">Tips Audit:</p>
+                    <ul class="text-sm text-gray-700 space-y-1">
+                        <li>• Pantau progress klausul melalui badge di sidebar</li>
+                        <li>• Klausul selesai akan ditandai ikon ✅</li>
+                        <li>• Simpan token untuk melanjutkan audit di lain waktu</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}"
+           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+            <i class="fas fa-play-circle"></i>
+            Mulai dari Klausul 4
+        </a>
+    </div>
+
+    <!-- RESUME TOKEN -->
+    <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex items-center gap-2 text-gray-700 font-medium">
+            <span class="text-lg">🔑</span>
+            Resume Token
+        </div>
+
+        <div class="bg-white border border-dashed border-blue-300 text-blue-700 font-mono px-4 py-2 rounded-lg text-sm break-all">
+            {{ $resumeToken ?? 'TOKEN TIDAK TERSEDIA' }}
+        </div>
+    </div>
+
+    <!-- AUDIT SWITCHER -->
+    @if(isset($relatedAudits) && count($relatedAudits) > 1)
+    <div class="border-t border-gray-200 p-6">
+        <div class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+            <i class="fas fa-list"></i>
+            Audit Lainnya oleh {{ $auditorName }}
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            @foreach($relatedAudits as $auditInfo)
+                @php
+                    $deptNameTab = DB::table('departments')->where('id', $auditInfo['dept_id'])->value('name');
+                    $isCurrent = $auditInfo['id'] === $currentAuditId;
+                    $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
+                    $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
+                @endphp
+
+                <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}"
+                   class="
+                        flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition
+                        {{ $isCurrent ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400' }}
+                        {{ $isCompleted ? 'ring-2 ring-green-400' : '' }}
+                   "
+                   title="{{ $isCompleted ? 'Selesai' : ($isCurrent ? 'Sedang dikerjakan' : 'Beralih audit') }}">
+                    <i class="fas fa-building"></i>
+                    {{ $deptNameTab }}
+                    @if($isCompleted)
+                        <i class="fas fa-check-circle text-green-500"></i>
+                    @endif
+                </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+</div>
+
+
     <!-- HEADER -->
     <div class="header-card">
         <h1 class="header-title">Audit Session – {{ $deptName }}</h1>
@@ -62,82 +153,6 @@
             </div>
         </div>
 
-        <!-- TOKEN BANNER -->
-        <div class="token-banner">
-            <div class="token-label">🔑 Resume Token</div>
-            <div class="token-value">{{ $resumeToken ?? 'TOKEN TIDAK TERSEDIA' }}</div>
-        </div>
-    </div>
-
-    <!-- AUDIT SWITCHER (if multiple audits) -->
-    @if(isset($relatedAudits) && count($relatedAudits) > 1)
-    <div class="audit-switcher">
-        <div class="switcher-title">
-            <i class="fas fa-list"></i> Audit Lainnya oleh {{ $auditorName }}
-        </div>
-        <div class="audit-tabs">
-            @foreach($relatedAudits as $auditInfo)
-                @php
-                    $deptNameTab = DB::table('departments')->where('id', $auditInfo['dept_id'])->value('name');
-                    $isCurrent = $auditInfo['id'] === $currentAuditId;
-                    $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
-                    $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
-                @endphp
-                
-                <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}" 
-                   class="audit-tab {{ $isCurrent ? 'active' : '' }} {{ $isCompleted ? 'completed' : '' }}"
-                   title="{{ $isCompleted ? '✅ Selesai' : ($isCurrent ? '📋 Sedang dikerjakan' : 'Klik untuk beralih') }}">
-                    <i class="fas fa-building"></i>
-                    {{ $deptNameTab }}
-                    @if($isCompleted)
-                        <i class="fas fa-check-circle"></i>
-                    @endif
-                </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    <!-- INSTRUCTION SECTION -->
-    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <div class="text-center">
-            <div class="inline-block bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
-                <i class="fas fa-info-circle text-3xl"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-3">Pilih Klausul untuk Memulai Audit</h2>
-            <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Gunakan sidebar di sebelah kiri untuk memilih klausul yang ingin diaudit. 
-                Setiap klausul berisi pertanyaan-pertanyaan audit yang harus diisi sesuai dengan kondisi departemen.
-            </p>
-            
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-lightbulb text-yellow-500 text-xl mt-1"></i>
-                    <div class="text-left">
-                        <p class="font-semibold text-gray-900 mb-1">Tips:</p>
-                        <ul class="text-sm text-gray-700 space-y-1">
-                            <li>• Lihat progress badge di sidebar untuk mengetahui status setiap klausul</li>
-                            <li>• Klausul yang sudah selesai akan ditandai dengan icon ✅</li>
-                            <li>• Gunakan token untuk melanjutkan sesi audit di lain waktu</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}" 
-                   class="btn btn-primary">
-                    <i class="fas fa-play-circle"></i> Mulai dari Klausul 4
-                </a>
-                @if(isset($relatedAudits) && count($relatedAudits) > 1)
-                <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
-                   class="btn btn-outline">
-                    <i class="fas fa-list"></i> Lihat Audit Lain
-                </a>
-                @endif
-            </div>
-        </div>
-    </div>
 
     <!-- QUICK ACCESS GRID -->
     <div class="mt-6">
