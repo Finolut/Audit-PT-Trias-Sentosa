@@ -90,34 +90,6 @@
         </div>
     </div>
 
-    <!-- ENHANCED TIPS SECTION -->
-    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-8 max-w-3xl mx-auto text-left">
-        <div class="flex gap-3">
-            <i class="fas fa-lightbulb text-yellow-500 text-2xl mt-1 flex-shrink-0"></i>
-            <div>
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Panduan Optimalisasi Audit</h3>
-                <ul class="space-y-2 text-gray-700">
-                    <li class="flex items-start">
-                        <span class="font-bold text-blue-600 mr-2">✓</span>
-                        <span>Progress real-time: Badge di sidebar menunjukkan status (<span class="text-green-600">✅ Selesai</span>, <span class="text-amber-600">🟡 Sedang Dikerjakan</span>, <span class="text-gray-400">⚪ Belum Dimulai</span>)</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="font-bold text-blue-600 mr-2">✓</span>
-                        <span>Setiap jawaban tersimpan otomatis saat berpindah klausul - tidak perlu khawatir kehilangan data</span>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="font-bold text-blue-600 mr-2">✓</span>
-                        <span>Gunakan fitur "Audit Lainnya" di bawah untuk beralih antar departemen yang sedang diaudit</span>
-                    </li>
-                    <li class="flex items-start bg-blue-100/50 p-2 rounded-lg mt-1">
-                        <span class="font-bold text-amber-700 mr-2">❗</span>
-                        <span class="font-medium">Kode Audit hanya ditampilkan di halaman ini. Simpan sebelum memulai audit!</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
     <!-- CTA DIPERKUAT DENGAN KONTEKS -->
     <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}"
        class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
@@ -125,9 +97,6 @@
         <span>Mulai Audit dari Klausul 4 (Konteks Organisasi)</span>
     </a>
     
-    <p class="mt-4 text-gray-500 text-sm max-w-2xl mx-auto">
-        <i class="fas fa-clock mr-1"></i> Perkiraan waktu: 15-20 menit per klausul tergantung kompleksitas departemen
-    </p>
 </div>
 
 <!-- AUDIT SWITCHER - DIPERBAIKI VISUALNYA -->
@@ -185,9 +154,6 @@
             @endforeach
         </div>
         
-        <p class="mt-4 text-center text-sm text-gray-500 max-w-2xl mx-auto">
-            <i class="fas fa-info-circle mr-1"></i> Klik kartu departemen untuk melanjutkan audit terkait. Progress tersimpan otomatis berdasarkan Kode Audit masing-masing sesi.
-        </p>
     </div>
 </div>
 @endif
