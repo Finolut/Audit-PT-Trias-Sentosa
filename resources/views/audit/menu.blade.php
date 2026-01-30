@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Dashboard - {{ $deptName }}</title>
+    <title>Audit Session – {{ $deptName }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,9 +11,15 @@
             --success: #10b981;
             --warning: #f59e0b;
             --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
             --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
             --slate-600: #475569;
+            --slate-700: #334155;
             --slate-900: #0f172a;
+            --border-radius: 16px;
+            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05);
         }
 
         * {
@@ -24,59 +30,131 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background-color: var(--slate-100);
             color: var(--slate-900);
-            line-height: 1.5;
+            line-height: 1.6;
             min-height: 100vh;
             padding: 2rem 1rem;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
+        /* === HEADER === */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             background: white;
             padding: 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-            border-bottom: 4px solid var(--slate-200);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .header-left h1 {
-            font-size: 1.5rem;
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, #3b82f6 100%);
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.875rem;
             font-weight: 800;
+            color: var(--slate-900);
+            letter-spacing: -0.02em;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--slate-600);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-icon {
+            color: var(--slate-400);
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-draft { background: #f0f9ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+        .status-in-progress { background: #fef3c7; color: #92400e; border: 1px solid #fed7aa; }
+        .status-submitted { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; }
+
+        .progress-bar-wrapper {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--slate-200);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content space-between;
+            font-size: 0.875rem;
+            color: var(--slate-600);
             margin-bottom: 0.5rem;
         }
 
-        .header-left p {
-            color: var(--slate-600);
-            font-size: 0.9rem;
+        .progress-track {
+            height: 8px;
+            background: var(--slate-200);
+            border-radius: 4px;
+            overflow: hidden;
         }
 
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.6s ease-out;
+        }
+
+        /* === TOKEN BANNER === */
         .token-banner {
             background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 1rem;
+            border-radius: 12px;
             border: 1px solid #bae6fd;
-            margin-top: 12px;
+            margin-top: 1.5rem;
             font-family: 'Courier New', monospace;
-            font-weight: bold;
+            font-weight: 700;
             color: #0c4a6e;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
         }
 
         .token-label {
             font-size: 0.75rem;
             color: #3b82f6;
-            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
         }
 
         .token-value {
@@ -85,18 +163,19 @@
             letter-spacing: 2px;
         }
 
+        /* === AUDIT SWITCHER (Optional) === */
         .audit-switcher {
             background: var(--slate-50);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2.5rem;
         }
 
         .switcher-title {
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             font-weight: 700;
-            color: var(--slate-600);
-            margin-bottom: 0.75rem;
+            color: var(--slate-700);
+            margin-bottom: 1rem;
         }
 
         .audit-tabs {
@@ -106,18 +185,20 @@
         }
 
         .audit-tab {
-            padding: 0.75rem 1.25rem;
+            padding: 0.625rem 1.125rem;
             border-radius: 8px;
             font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid var(--slate-200);
+            border: 1px solid var(--slate-200);
             background: white;
+            white-space: nowrap;
         }
 
         .audit-tab:hover {
-            background: var(--slate-50);
+            background: var(--slate-100);
+            border-color: var(--slate-300);
         }
 
         .audit-tab.active {
@@ -133,142 +214,90 @@
             border-color: var(--success);
         }
 
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: inherit;
-            border: 1px solid var(--slate-200);
-            transition: all 0.3s;
+        /* === VERTICAL CLAUSE LIST (TIMELINE STYLE) === */
+        .clause-list {
             display: flex;
             flex-direction: column;
-            position: relative;
+            gap: 1.75rem;
+        }
+
+        .clause-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 4px;
-            background: var(--primary);
-            transition: width 0.3s;
+        .clause-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -6px rgba(0,0,0,0.06);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.1);
-            border-color: var(--primary);
-        }
-
-        .card:hover::before {
-            width: 8px;
-        }
-
-        .card-number {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--slate-900);
-            margin-bottom: 2rem;
-            padding-right: 1.5rem;
-        }
-
-        .status-area {
-            margin-top: auto;
+        .clause-header {
+            padding: 1.5rem 2rem;
+            background: var(--slate-50);
+            border-bottom: 1px solid var(--slate-200);
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status-badge {
-            display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 20px;
         }
 
-        .card.completed::before { background: var(--success); }
-        .card.completed { background: #f0fdf4; border-color: #bbf7d0; }
-        .card.completed .card-number { color: var(--success); }
-
-        .badge-completed { background: #dcfce7; color: var(--success); }
-        .badge-pending { background: #f1f5f9; color: var(--slate-600); }
-        .badge-inprogress { background: #fef3c7; color: var(--warning); }
-
-        .arrow {
-            color: var(--primary);
-            transition: transform 0.3s;
-        }
-        .card:hover .arrow { transform: translateX(5px); }
-
-        .finish-banner {
-            margin-top: 3rem;
-            padding: 2.5rem;
-            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-            border-radius: 16px;
-            text-align: center;
-            border: 2px solid var(--success);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .finish-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            color: var(--success);
-        }
-
-        .finish-message {
-            font-size: 1.4rem;
-            font-weight: 800;
+        .clause-title {
+            font-size: 1.375rem;
+            font-weight: 700;
             color: var(--slate-900);
-            margin: 0 0 1rem;
         }
 
-        .finish-subtext {
-            color: var(--slate-600);
-            font-size: 1rem;
-            max-width: 600px;
-            margin: 0 auto 1.5rem;
-        }
-
-        .banner-actions {
+        .clause-meta {
             display: flex;
-            justify-content: center;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--slate-600);
+        }
+
+        .clause-progress {
+            display: flex;
+            align-items: center;
             gap: 1rem;
-            margin-top: 1.5rem;
+        }
+
+        .progress-count {
+            font-weight: 600;
+            color: var(--slate-900);
+        }
+
+        .progress-percent {
+            font-size: 0.875rem;
+            color: var(--slate-600);
+        }
+
+        .clause-body {
+            padding: 1.5rem 2rem;
+        }
+
+        .clause-description {
+            font-size: 1rem;
+            color: var(--slate-700);
+            margin-bottom: 1.25rem;
+            line-height: 1.6;
+        }
+
+        .clause-cta {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
         }
 
         .btn {
-            padding: 12px 32px;
+            padding: 0.75rem 2rem;
             border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
             text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             transition: all 0.3s;
             border: 2px solid;
         }
@@ -286,38 +315,98 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
+        .btn-outline {
+            background: transparent;
+            color: var(--slate-700);
+            border-color: var(--slate-300);
         }
 
-        .btn-success:hover {
-            background: white;
+        .btn-outline:hover {
+            background: var(--slate-100);
+            border-color: var(--slate-400);
+        }
+
+        /* === FINISH BANNER === */
+        .finish-banner {
+            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            text-align: center;
+            border: 2px solid var(--success);
+            margin-top: 3rem;
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .finish-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
             color: var(--success);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
+        .finish-message {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            margin-bottom: 1rem;
+        }
+
+        .finish-subtext {
+            color: var(--slate-600);
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto 1.75rem;
+        }
+
+        .banner-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        /* === RESPONSIVE === */
         @media (max-width: 768px) {
             .header {
+                padding: 1.5rem;
+            }
+
+            .header-title {
+                font-size: 1.5rem;
+            }
+
+            .header-meta {
                 flex-direction: column;
-                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .clause-header {
+                flex-direction: column;
                 gap: 1rem;
+                text-align: center;
             }
-            
-            .grid-container {
-                grid-template-columns: 1fr;
+
+            .clause-meta {
+                justify-content: center;
             }
-            
+
+            .clause-cta {
+                justify-content: center;
+            }
+
             .banner-actions {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .btn {
                 width: 100%;
-                max-width: 300px;
+                max-width: 320px;
             }
         }
     </style>
@@ -325,53 +414,66 @@
 <body>
 
 <div class="container">
+    <!-- HEADER -->
     <div class="header">
-        <div class="header-left">
-            <h1>Audit Dashboard - {{ $deptName }}</h1>
-            <p>Auditor: <strong>{{ $auditorName }}</strong> • Dept: <strong>{{ $deptName }}</strong></p>
+        <div class="header-content">
+            <h1 class="header-title">Audit Session – {{ $deptName }}</h1>
             
-            <!-- ✅ TOKEN RESUME BANNER -->
-            <div class="token-banner">
-                <div class="token-label">🔑 TOKEN</div>
-                <div class="token-value">{{ $resumeToken ?? 'TOKEN TIDAK TERSEDIA' }}</div>
-            </div>
-            
-            @if(isset($showReturnButton) && $showReturnButton)
-                <div style="margin-top: 15px;">
-                    <a href="{{ route('audit.select_department', ['id' => $auditId]) }}" 
-                       style="display: inline-block; background: var(--primary); color: white; padding: 8px 20px; border-radius: 6px; text-decoration: none; font-size: 14px;">
-                        ← Kembali Pilih Departemen Lain
-                    </a>
+            <div class="header-meta">
+                <div class="meta-item">
+                    <i class="fas fa-user-check meta-icon"></i>
+                    <span><strong>{{ $auditorName }}</strong></span>
                 </div>
-            @endif
+                <div class="meta-item">
+                    <i class="fas fa-building meta-icon"></i>
+                    <span>{{ $deptName }}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar meta-icon"></i>
+                    <span>{{ date('Y') }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="status-badge status-in-progress">
+                        <i class="fas fa-circle-dot" style="font-size: 0.75rem;"></i>
+                        In Progress
+                    </span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar-wrapper">
+                <div class="progress-label">
+                    <span>Step {{ $completedCount ?? 0 }} of {{ count($mainClauses) }}</span>
+                    <span>{{ round(($completedCount ?? 0) / count($mainClauses) * 100) }}%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: {{ $completedCount ?? 0 }}%;"></div>
+                </div>
+            </div>
         </div>
-        
-        <div style="text-align: right;">
-            @php
-                $completedCount = collect($clauseProgress)->filter(fn($p) => $p['percentage'] >= 100)->count();
-            @endphp
-            <span style="font-size: 0.85rem; font-weight: 700; color: var(--slate-600);">
-                PROGRES: {{ $completedCount }} / {{ count($mainClauses) }} Klausul
-            </span>
+
+        <!-- TOKEN BANNER -->
+        <div class="token-banner">
+            <div class="token-label">🔑 Resume Token</div>
+            <div class="token-value">{{ $resumeToken ?? 'TOKEN TIDAK TERSEDIA' }}</div>
         </div>
     </div>
 
-    <!-- Audit Switcher -->
+    <!-- AUDIT SWITCHER (if multiple audits) -->
     @if(isset($relatedAudits) && count($relatedAudits) > 1)
     <div class="audit-switcher">
-        <div class="switcher-title">📋 Audit Lainnya oleh {{ $auditorName }}:</div>
+        <div class="switcher-title">📋 Audit Lainnya oleh {{ $auditorName }}</div>
         <div class="audit-tabs">
             @foreach($relatedAudits as $auditInfo)
                 @php
                     $deptNameTab = DB::table('departments')->where('id', $auditInfo['dept_id'])->value('name');
-                    $isCurrent = $auditInfo['id'] === ($currentAuditId ?? $auditId);
+                    $isCurrent = $auditInfo['id'] === $currentAuditId;
                     $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
                     $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
                 @endphp
                 
                 <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}" 
                    class="audit-tab {{ $isCurrent ? 'active' : '' }} {{ $isCompleted ? 'completed' : '' }}"
-                   style="{{ $isCompleted ? 'opacity: 0.8;' : '' }}"
                    title="{{ $isCompleted ? '✅ Selesai' : ($isCurrent ? '📋 Sedang dikerjakan' : 'Klik untuk beralih') }}">
                     {{ $deptNameTab }}
                     @if($isCompleted)
@@ -383,68 +485,84 @@
     </div>
     @endif
 
-    <div class="grid-container">
+    <!-- VERTICAL CLAUSE LIST -->
+    <div class="clause-list">
         @foreach($mainClauses as $code)
             @php
                 $prog = $clauseProgress[$code] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
                 $isDone = $prog['percentage'] >= 100;
                 $inProgress = $prog['count'] > 0 && !$isDone;
+                $title = $titles[$code] ?? "Klausul {$code}";
             @endphp
 
-            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
-                class="card {{ $isDone ? 'completed' : '' }}">
+            <div class="clause-section">
+                <div class="clause-header">
+                    <h2 class="clause-title">Klausul {{ $code }} – {{ $title }}</h2>
+                    <div class="clause-meta">
+                        <div class="clause-progress">
+                            <span class="progress-count">{{ $prog['count'] }} / {{ $prog['total'] }} soal</span>
+                            <span class="progress-percent">{{ $prog['percentage'] }}%</span>
+                        </div>
+                    </div>
+                </div>
                 
-                <span class="card-number">Klausul {{ $code }}</span>
-                <span class="card-title">{{ $titles[$code] ?? 'Detail Klausul ' . $code }}</span>
+                <div class="clause-body">
+                    <p class="clause-description">
+                        @if($code === '4-1')
+                            Evaluasi sistem manajemen mutu terhadap persyaratan standar ISO 9001:2015.
+                        @elseif($code === '4-2')
+                            Penilaian kesiapan dokumentasi dan prosedur operasional.
+                        @elseif($code === '5-1')
+                            Pengawasan terhadap pelaksanaan tugas dan tanggung jawab manajemen.
+                        @elseif($code === '6-1')
+                            Analisis risiko dan peluang dalam konteks sistem manajemen.
+                        @elseif($code === '7-1')
+                            Ketersediaan sumber daya manusia, infrastruktur, dan lingkungan kerja.
+                        @elseif($code === '8-1')
+                            Pengendalian proses operasional dan perubahan.
+                        @elseif($code === '9-1')
+                            Pemantauan, pengukuran, analisis, dan evaluasi kinerja.
+                        @else
+                            Deskripsi klausul ini akan ditampilkan berdasarkan data sistem.
+                        @endif
+                    </p>
 
-                <div style="margin-top: auto; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; font-weight: 700;">
-                        <span>{{ $prog['count'] }} / {{ $prog['total'] }} Soal</span>
-                        <span>{{ $prog['percentage'] }}%</span>
-                    </div>
-                    <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 10px; overflow: hidden;">
-                        <div style="width: {{ $prog['percentage'] }}%; background: {{ $isDone ? 'var(--success)' : ($inProgress ? 'var(--warning)' : 'var(--primary)') }}; height: 100%; transition: width 0.5s;"></div>
+                    <div class="clause-cta">
+                        @if($isDone)
+                            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+                               class="btn btn-outline">
+                                <i class="fas fa-eye"></i> Lihat Detail
+                            </a>
+                        @else
+                            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $code]) }}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-arrow-right"></i> Lanjutkan Audit
+                            </a>
+                        @endif
                     </div>
                 </div>
-
-                <div class="status-area">
-                    @if($isDone)
-                        <div class="status-badge badge-completed">
-                            <span>✅ Selesai</span>
-                        </div>
-                    @elseif($inProgress)
-                        <div class="status-badge badge-inprogress">
-                            <span>📝 Dikerjakan</span>
-                        </div>
-                        <span class="arrow">→</span>
-                    @else
-                        <div class="status-badge badge-pending">Belum Dimulai</div>
-                        <span class="arrow">→</span>
-                    @endif
-                </div>
-            </a>
+            </div>
         @endforeach
     </div>
 
+    <!-- FINISH BANNER -->
     @if(isset($allFinished) && $allFinished)
         <div class="finish-banner">
             <div class="finish-icon">🎉</div>
             <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
-            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap.</p>
+            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview.</p>
             
-            @if(isset($relatedAudits) && count($relatedAudits) > 1)
-                <div class="banner-actions">
-                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
-                        ✅ Selesai Semua Audit
+            <div class="banner-actions">
+                <a href="{{ route('audit.finish') }}" class="btn btn-success">
+                    <i class="fas fa-check-circle"></i> Selesaikan Audit
+                </a>
+                @if(isset($relatedAudits) && count($relatedAudits) > 1)
+                    <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
+                       class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Audit Lainnya
                     </a>
-                </div>
-            @else
-                <div class="banner-actions">
-                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
-                        ✅ Selesai Audit
-                    </a>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     @endif
 </div>
