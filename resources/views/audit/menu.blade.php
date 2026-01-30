@@ -7,61 +7,68 @@
 
 <!-- HEADER / INSTRUCTION - DIPERKAYA DENGAN INFORMASI LENGKAP -->
 
+<div class="p-6 text-center">
+    <div class="inline-flex items-center justify-center rounded-full p-4 mb-4" 
+         style="background-color: #1a365d; color: white;">
+        <i class="fas fa-book-open text-3xl"></i>
+    </div>
+</div>
+
     <h1 class="text-3xl font-bold text-gray-900 mb-4">
         Persiapan & Panduan Lengkap
     </h1>
 
-    <div class="max-w-4xl mx-auto mb-8">
-        <p class="text-lg text-gray-700 mb-4">
-            Selamat datang di sistem audit internal. Berikut langkah langkah untuk memastikan proses audit berjalan efektif:
-        </p>
-        <div class="bg-white border border-blue-100 rounded-2xl p-6 text-left shadow-sm">
-            <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">1</span>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Pilih Klausul</h4>
-                        <p class="text-sm text-gray-600 mt-1">Gunakan sidebar kiri untuk memilih klausul yang akan di arahkan ke pertanyaan sesuai dengan standar ISO 14001</p>
-                    </div>
-                </li>
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">2</span>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Jawab Pertanyaan</h4>
-                        <p class="text-sm text-gray-600 mt-1">Isi semua pertanyaan berdasarkan kondisi aktual departemen. jawaban dibagi 3 jenis ada <span class="font-semibold text-green-600">YES</span>,
-    <span class="font-semibold text-red-600">NO</span>,
-    dan
-    <span class="font-semibold text-gray-500">N/A</span> (jika klausul tersebut tidak relevan dengan departemen yang di audit) Lampirkan catatan temuan jika diperlukan</p>
-                    </div>
-                </li>
-                <li class="flex items-start">
-                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">3</span>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Simpan klausul</h4>
-                        <p class="text-sm text-gray-600 mt-1">Sistem akan menyimpan otomatis semua jawaban yang user input. Semua jawaban user akan terekam dan pastikan semua pertanyaan terisi penuh</p>
-                    </div>
-                </li>
-            </ol>
-        </div>
+<div class="max-w-4xl mx-auto mb-8">
+    <p class="text-lg text-gray-700 mb-4">
+        Selamat datang di sistem audit internal. Berikut langkah-langkah untuk memastikan proses audit berjalan efektif:
+    </p>
+    <div class="bg-white border rounded-2xl p-6 text-left shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
+        <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+            <li class="flex items-start">
+                <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
+                      style="background-color: #1a365d;">1</span>
+                <div>
+                    <h4 class="font-bold text-gray-800">Pilih Klausul</h4>
+                    <p class="text-sm text-gray-600 mt-1">Gunakan sidebar kiri untuk memilih klausul yang akan diarahkan ke pertanyaan sesuai dengan standar ISO 14001</p>
+                </div>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
+                      style="background-color: #1a365d;">2</span>
+                <div>
+                    <h4 class="font-bold text-gray-800">Jawab Pertanyaan</h4>
+                    <p class="text-sm text-gray-600 mt-1">Isi semua pertanyaan berdasarkan kondisi aktual departemen. Jawaban dibagi 3 jenis: <span class="font-semibold text-green-600">YES</span>, <span class="font-semibold text-red-600">NO</span>, dan <span class="font-semibold text-gray-500">N/A</span>. Lampirkan catatan temuan jika diperlukan.</p>
+                </div>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
+                      style="background-color: #1a365d;">3</span>
+                <div>
+                    <h4 class="font-bold text-gray-800">Simpan Klausul</h4>
+                    <p class="text-sm text-gray-600 mt-1">Sistem akan menyimpan otomatis semua jawaban yang user input. Semua jawaban user akan terekam dan pastikan semua pertanyaan terisi penuh.</p>
+                </div>
+            </li>
+        </ol>
     </div>
+</div>
 
     <!-- CRITICAL TOKEN SECTION - DENGAN COPY BUTTON & INSTRUKSI JELAS -->
 <!-- CRITICAL TOKEN SECTION - VERSI POLos & CLEAN -->
 <div class="max-w-4xl mx-auto mb-10">
-    <div class="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm">
+    <div class="bg-white border rounded-2xl p-6 shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="flex-1">
                 <div class="flex items-start">
                     <div class="shrink-0 mt-0.5">
-                        <i class="fas fa-key text-xl text-blue-600"></i>
+                        <i class="fas fa-key text-xl" style="color: #1a365d;"></i>
                     </div>
                     <div class="ml-3">
                         <h2 class="text-lg font-bold text-gray-800 mb-1">Token Audit</h2>
                         <p class="text-sm text-gray-600 mb-2">
                             <span class="font-semibold text-gray-800">Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
-                            Dengan kode ini, progress audit <span class="font-medium text-blue-800">dapat dipulihkan</span>.
-                            jika ada kendala dengan token audit bisa menghubungi Admin 
-                            Brahmanto Anggoro Laksono - SSSE
+                            Dengan kode ini, progress audit <span class="font-medium" style="color: #1a365d;">dapat dipulihkan</span>.
+                            Jika ada kendala dengan token audit bisa menghubungi Admin 
+                            <span class="font-semibold text-gray-700">Brahmanto Anggoro Laksono - SSSE</span>
                         </p>
                         <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
                             <span class="font-medium">Tips:</span> Catat di buku, screenshot, atau simpan token di tempat yang kita ingat
@@ -76,7 +83,9 @@
                         <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-l-lg break-all min-w-[250px]">
                             {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
                         </div>
-                        <button id="copy-token-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-colors duration-200 whitespace-nowrap {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+                        <button id="copy-token-btn" 
+                                class="text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-opacity duration-200 whitespace-nowrap {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90' }}"
+                                style="background-color: #1a365d;"
                                 {{ !$resumeToken ? 'disabled' : '' }}
                                 aria-label="Salin Kode Audit">
                             <i class="fas fa-copy"></i>
