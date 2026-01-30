@@ -180,45 +180,43 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 
 Route::get('/evidence/{id}', function ($id) {
 
-    $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-    abort_if(!$evidence, 404);
+            $evidence = DB::table('answer_evidences')->where('id', $id)->first();
+            abort_if(!$evidence, 404);
 
-    $disk = Storage::disk('s3');
+            $disk = Storage::disk('s3');
 
-    // Normalisasi path
-    $path = ltrim($evidence->file_path, '/');
-    if (!str_starts_with($path, 'pttrias/')) {
-        $path = 'pttrias/' . $path;
-    }
+            // Normalisasi path
+            $path = ltrim($evidence->file_path, '/');
+            if (!str_starts_with($path, 'pttrias/')) {
+                $path = 'pttrias/' . $path;
+            }
 
-    try {
-        // Coba stream dulu
-        $stream = $disk->readStream($path);
+            try {
+                // 1️⃣ Coba stream
+                $stream = $disk->readStream($path);
 
-        if (is_resource($stream)) {
-            return response()->stream(function () use ($stream) {
-                fpassthru($stream);
-            }, 200, [
-                'Content-Type'        => 'image/jpeg',
-                'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
-                'Cache-Control'       => 'private, max-age=3600',
-            ]);
-        }
+                if (is_resource($stream)) {
+                    return response()->stream(function () use ($stream) {
+                        fpassthru($stream);
+                    }, 200, [
+                        'Content-Type' => 'image/jpeg', // cukup aman untuk test
+                        'Content-Disposition' => 'inline',
+                    ]);
+                }
 
-        // 🔁 FALLBACK: GET LANGSUNG (kalau stream gagal)
-        $contents = $disk->get($path);
+                // 2️⃣ Fallback GET
+                $contents = $disk->get($path);
 
-        return response($contents, 200, [
-            'Content-Type'        => 'image/jpeg',
-            'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
-            'Cache-Control'       => 'private, max-age=3600',
-        ]);
+                return response($contents, 200, [
+                    'Content-Type' => 'image/jpeg',
+                    'Content-Disposition' => 'inline',
+                ]);
 
-    } catch (\Throwable $e) {
-        abort(404, 'Evidence tidak dapat dibaca');
-    }
+            } catch (\Throwable $e) {
+                abort(404);
+            }
 
-})->name('evidence.view');
+        })->name('evidence.view');
 });
 
 // Preserved special routes (public)
