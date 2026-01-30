@@ -5,93 +5,192 @@
 
 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
 
-    <!-- HEADER / INSTRUCTION -->
-    <div class="p-6 text-center">
-        <div class="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
-            <i class="fas fa-info-circle text-3xl"></i>
-        </div>
+<!-- HEADER / INSTRUCTION - DIPERKAYA DENGAN INFORMASI LENGKAP -->
+<div class="p-6 text-center">
+    <div class="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full p-4 mb-4">
+        <i class="fas fa-shield-alt text-3xl"></i>
+    </div>
 
-        <h2 class="text-2xl font-bold text-gray-900 mb-3">
-            Pilih Klausul untuk Memulai Audit
-        </h2>
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">
+        Sistem Audit ISO: Persiapan & Panduan Lengkap
+    </h1>
 
-        <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Gunakan sidebar di sebelah kiri untuk memilih klausul audit.
-            Setiap klausul berisi pertanyaan yang harus diisi sesuai kondisi aktual departemen.
+    <div class="max-w-4xl mx-auto mb-8">
+        <p class="text-lg text-gray-700 mb-4">
+            Selamat datang di sistem audit internal. Ikuti langkah berikut untuk memastikan proses audit berjalan efektif:
         </p>
+        <div class="bg-white border border-blue-100 rounded-2xl p-6 text-left shadow-sm">
+            <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">1</span>
+                    <div>
+                        <h4 class="font-bold text-gray-800">Pilih Klausul</h4>
+                        <p class="text-sm text-gray-600 mt-1">Gunakan sidebar kiri untuk memilih klausul sesuai standar ISO yang berlaku (misal: Klausul 4-10 untuk ISO 9001:2015)</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">2</span>
+                    <div>
+                        <h4 class="font-bold text-gray-800">Jawab Pertanyaan</h4>
+                        <p class="text-sm text-gray-600 mt-1">Isi semua pertanyaan berdasarkan kondisi aktual departemen. Lampirkan bukti dokumen jika diperlukan</p>
+                    </div>
+                </li>
+                <li class="flex items-start">
+                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1">3</span>
+                    <div>
+                        <h4 class="font-bold text-gray-800">Simpan Progress</h4>
+                        <p class="text-sm text-gray-600 mt-1">Sistem menyimpan otomatis setiap perubahan. <span class="font-semibold text-amber-700">Pastikan simpan Kode Audit</span> untuk akses lanjutan</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </div>
 
-        <!-- TIPS -->
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left max-w-2xl mx-auto">
-            <div class="flex gap-3">
-                <i class="fas fa-lightbulb text-yellow-500 text-xl mt-1"></i>
-                <div>
-                    <p class="font-semibold text-gray-900 mb-1">Tips Audit:</p>
-                    <ul class="text-sm text-gray-700 space-y-1">
-                        <li>• Pantau progress klausul melalui badge di sidebar</li>
-                        <li>• Klausul selesai akan ditandai ikon ✅</li>
-                        <li>• Simpan token untuk melanjutkan audit di lain waktu</li>
-                    </ul>
+    <!-- CRITICAL TOKEN SECTION - DENGAN COPY BUTTON & INSTRUKSI JELAS -->
+    <div class="max-w-4xl mx-auto mb-10">
+        <div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-5 shadow-md">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-start mb-3">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-key text-2xl text-amber-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h2 class="text-xl font-bold text-amber-800">KODE AUDIT WAJIB DISIMPAN</h2>
+                            <p class="text-amber-700 mt-1">
+                                <span class="font-semibold">⚠️ Penting:</span> Kode ini adalah satu-satunya kunci untuk melanjutkan audit yang belum selesai. 
+                                Tanpa kode ini, progress audit <span class="font-bold">tidak dapat dipulihkan</span>.
+                            </p>
+                            <p class="text-amber-800 font-medium mt-2 bg-amber-100/70 border-l-2 border-amber-400 pl-3 py-1">
+                                💡 Simpan di tempat aman: Catat di buku, screenshot, atau simpan di password manager
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full sm:w-auto">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-stretch">
+                            <div id="audit-token" class="flex-1 bg-white border border-amber-300 text-amber-900 font-mono font-semibold text-sm md:text-base px-4 py-3 rounded-l-lg break-all min-w-[250px]">
+                                {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                            </div>
+                            <button id="copy-token-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-all duration-200 whitespace-nowrap shadow hover:shadow-md {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}" 
+                                    {{ !$resumeToken ? 'disabled' : '' }}
+                                    aria-label="Salin Kode Audit">
+                                <i class="fas fa-copy"></i>
+                                <span class="hidden sm:inline">Salin Kode</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-amber-700 text-right mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>Klik tombol Salin untuk menyalin ke clipboard
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- CTA -->
-        <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}"
-           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">
-            <i class="fas fa-play-circle"></i>
-            Mulai dari Klausul 4
-        </a>
     </div>
 
-    <!-- RESUME TOKEN -->
-    <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-center gap-2 text-gray-700 font-medium">
-            <span class="text-lg">🔑</span>
-            Resume Token
-        </div>
-
-        <div class="bg-white border border-dashed border-blue-300 text-blue-700 font-mono px-4 py-2 rounded-lg text-sm break-all">
-            {{ $resumeToken ?? 'TOKEN TIDAK TERSEDIA' }}
+    <!-- ENHANCED TIPS SECTION -->
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-8 max-w-3xl mx-auto text-left">
+        <div class="flex gap-3">
+            <i class="fas fa-lightbulb text-yellow-500 text-2xl mt-1 flex-shrink-0"></i>
+            <div>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">Panduan Optimalisasi Audit</h3>
+                <ul class="space-y-2 text-gray-700">
+                    <li class="flex items-start">
+                        <span class="font-bold text-blue-600 mr-2">✓</span>
+                        <span>Progress real-time: Badge di sidebar menunjukkan status (<span class="text-green-600">✅ Selesai</span>, <span class="text-amber-600">🟡 Sedang Dikerjakan</span>, <span class="text-gray-400">⚪ Belum Dimulai</span>)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="font-bold text-blue-600 mr-2">✓</span>
+                        <span>Setiap jawaban tersimpan otomatis saat berpindah klausul - tidak perlu khawatir kehilangan data</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="font-bold text-blue-600 mr-2">✓</span>
+                        <span>Gunakan fitur "Audit Lainnya" di bawah untuk beralih antar departemen yang sedang diaudit</span>
+                    </li>
+                    <li class="flex items-start bg-blue-100/50 p-2 rounded-lg mt-1">
+                        <span class="font-bold text-amber-700 mr-2">❗</span>
+                        <span class="font-medium">Kode Audit hanya ditampilkan di halaman ini. Simpan sebelum memulai audit!</span>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 
-    <!-- AUDIT SWITCHER -->
-    @if(isset($relatedAudits) && count($relatedAudits) > 1)
-    <div class="border-t border-gray-200 p-6">
-        <div class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
-            <i class="fas fa-list"></i>
-            Audit Lainnya oleh {{ $auditorName }}
+    <!-- CTA DIPERKUAT DENGAN KONTEKS -->
+    <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => 4]) }}"
+       class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
+        <i class="fas fa-play-circle text-2xl"></i>
+        <span>Mulai Audit dari Klausul 4 (Konteks Organisasi)</span>
+    </a>
+    
+    <p class="mt-4 text-gray-500 text-sm max-w-2xl mx-auto">
+        <i class="fas fa-clock mr-1"></i> Perkiraan waktu: 15-20 menit per klausul tergantung kompleksitas departemen
+    </p>
+</div>
+
+<!-- AUDIT SWITCHER - DIPERBAIKI VISUALNYA -->
+@if(isset($relatedAudits) && count($relatedAudits) > 1)
+<div class="border-t border-gray-200 bg-gray-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                <i class="fas fa-exchange-alt text-indigo-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">
+                Audit Aktif oleh <span class="text-indigo-600">{{ $auditorName }}</span>
+            </h3>
         </div>
 
-        <div class="flex flex-wrap gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($relatedAudits as $auditInfo)
                 @php
                     $deptNameTab = DB::table('departments')->where('id', $auditInfo['dept_id'])->value('name');
                     $isCurrent = $auditInfo['id'] === $currentAuditId;
                     $auditStatus = DB::table('audits')->where('id', $auditInfo['id'])->value('status');
                     $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
+                    $statusColor = $isCompleted ? 'border-green-500/50 bg-green-50' : ($isCurrent ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-300 hover:border-blue-300');
                 @endphp
 
                 <a href="{{ route('audit.menu', ['id' => $auditInfo['id']]) }}"
-                   class="
-                        flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition
-                        {{ $isCurrent ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400' }}
-                        {{ $isCompleted ? 'ring-2 ring-green-400' : '' }}
-                   "
-                   title="{{ $isCompleted ? 'Selesai' : ($isCurrent ? 'Sedang dikerjakan' : 'Beralih audit') }}">
-                    <i class="fas fa-building"></i>
-                    {{ $deptNameTab }}
-                    @if($isCompleted)
-                        <i class="fas fa-check-circle text-green-500"></i>
-                    @endif
+                   class="block p-4 rounded-xl border-2 transition-all {{ $statusColor }} 
+                          hover:shadow-md hover:-translate-y-0.5 {{ $isCurrent ? 'scale-[1.02]' : '' }}"
+                   title="{{ $isCompleted ? 'Audit selesai' : ($isCurrent ? 'Audit sedang dikerjakan' : 'Beralih ke audit departemen ini') }}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-building text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">{{ $deptNameTab }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    @if($isCompleted)
+                                        <span class="text-green-600 flex items-center gap-1"><i class="fas fa-check-circle"></i> Selesai</span>
+                                    @elseif($isCurrent)
+                                        <span class="text-blue-600 flex items-center gap-1"><i class="fas fa-spinner fa-spin"></i> Sedang Dikerjakan</span>
+                                    @else
+                                        <span class="text-amber-600 flex items-center gap-1"><i class="far fa-clock"></i> Belum Selesai</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        @if($isCurrent)
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full animate-pulse">
+                                AKTIF
+                            </span>
+                        @endif
+                    </div>
                 </a>
             @endforeach
         </div>
+        
+        <p class="mt-4 text-center text-sm text-gray-500 max-w-2xl mx-auto">
+            <i class="fas fa-info-circle mr-1"></i> Klik kartu departemen untuk melanjutkan audit terkait. Progress tersimpan otomatis berdasarkan Kode Audit masing-masing sesi.
+        </p>
     </div>
-    @endif
-
 </div>
-
+@endif
 
     <!-- HEADER -->
     <div class="header-card">
@@ -586,6 +685,51 @@
         }
     }
 </style>
+
+<!-- COPY FUNCTIONALITY SCRIPT -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const copyBtn = document.getElementById('copy-token-btn');
+    const tokenElement = document.getElementById('audit-token');
+    const originalBtnHTML = copyBtn.innerHTML;
+    
+    if (copyBtn && tokenElement && !copyBtn.disabled) {
+        copyBtn.addEventListener('click', async () => {
+            try {
+                // Clean token value (remove extra spaces)
+                const tokenValue = tokenElement.textContent.trim();
+                
+                // Copy to clipboard
+                await navigator.clipboard.writeText(tokenValue);
+                
+                // Visual feedback
+                copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
+                copyBtn.classList.replace('bg-amber-500', 'bg-green-500');
+                copyBtn.classList.replace('hover:bg-amber-600', 'hover:bg-green-600');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalBtnHTML;
+                    copyBtn.classList.replace('bg-green-500', 'bg-amber-500');
+                    copyBtn.classList.replace('hover:bg-green-600', 'hover:bg-amber-600');
+                }, 2000);
+                
+                // Optional: Show toast notification
+                if (typeof showToast !== 'undefined') {
+                    showToast('Kode Audit berhasil disalin ke clipboard!', 'success');
+                }
+            } catch (err) {
+                console.error('Gagal menyalin token:', err);
+                if (typeof showToast !== 'undefined') {
+                    showToast('Gagal menyalin kode. Silakan salin manual.', 'error');
+                } else {
+                    alert('Berhasil disalin! Pastikan untuk menyimpan kode ini di tempat aman.');
+                }
+            }
+        });
+    }
+});
+</script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 @endsection
