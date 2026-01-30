@@ -180,33 +180,8 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 
 });
 
-Route::get('/evidence/image/{id}', function ($id) {
-
-    $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-    abort_if(!$evidence, 404);
-
-    $disk = Storage::disk('s3');
-
-    $path = ltrim($evidence->file_path, '/');
-    if (!str_starts_with($path, 'pttrias/')) {
-        $path = 'pttrias/' . $path;
-    }
-
-    try {
-        $data = $disk->get($path);
-    } catch (\Throwable $e) {
-        abort(404);
-    }
-
-    return response($data, 200, [
-        'Content-Type' => 'image/jpeg',
-        'Content-Disposition' => 'inline',
-        'Cache-Control' => 'private, max-age=3600',
-    ]);
-
-})->name('evidence.image');
-
-
+Route::get('/evidence/image/{id}', [EvidencesController::class, 'showImage'])
+    ->name('evidence.image');
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');

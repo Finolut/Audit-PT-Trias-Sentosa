@@ -79,9 +79,11 @@
 
                             <div class="flex flex-wrap gap-3 items-start">
 <img
-   src="{{ route('evidence.image', $row->evidence_id) }}"
+    src="{{ route('evidence.image', $row->evidence_id) }}"
     alt="Evidence"
-    class="w-24 h-24 object-cover rounded-xl border shadow-sm"
+    class="w-24 h-24 object-cover rounded-xl border shadow-sm bg-gray-100"
+    loading="lazy"
+    onerror="this.onerror=null;this.src='https://via.placeholder.com/150?text=No+Image';"
 />
 
 
