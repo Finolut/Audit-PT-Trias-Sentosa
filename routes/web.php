@@ -192,28 +192,33 @@ Route::get('/evidence/{id}', function ($id) {
     }
 
     try {
+        // Coba stream dulu
         $stream = $disk->readStream($path);
 
-        if ($stream === false) {
-            abort(404, 'File tidak ditemukan');
+        if (is_resource($stream)) {
+            return response()->stream(function () use ($stream) {
+                fpassthru($stream);
+            }, 200, [
+                'Content-Type'        => 'image/jpeg',
+                'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
+                'Cache-Control'       => 'private, max-age=3600',
+            ]);
         }
 
-        return response()->stream(function () use ($stream) {
-            fpassthru($stream);
-        }, 200, [
-            // JANGAN pakai mimeType() → bisa error juga
+        // 🔁 FALLBACK: GET LANGSUNG (kalau stream gagal)
+        $contents = $disk->get($path);
+
+        return response($contents, 200, [
             'Content-Type'        => 'image/jpeg',
             'Content-Disposition'=> 'inline; filename="'.basename($path).'"',
             'Cache-Control'       => 'private, max-age=3600',
         ]);
 
     } catch (\Throwable $e) {
-        // Supabase akan lempar exception kalau object tidak bisa diakses
         abort(404, 'Evidence tidak dapat dibaca');
     }
 
 })->name('evidence.view');
-
 });
 
 // Preserved special routes (public)
