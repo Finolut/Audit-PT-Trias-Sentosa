@@ -174,7 +174,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
 
 Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
-        ->name('admin.evidence.log');
+    ->name('evidence.log');
+
 
 // Route::get('/admin/evidence/{id}', function ($id) {
 //     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
