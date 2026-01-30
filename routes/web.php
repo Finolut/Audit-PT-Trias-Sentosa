@@ -180,8 +180,52 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 
 });
 
-Route::get('/evidence/image/{id}', [EvidencesController::class, 'showImage'])
-    ->name('evidence.image');
+// Di file routes/web.php
+
+Route::get('/evidence/image/{id}', function ($id) {
+    // 1. Ambil data dari DB
+    $evidence = DB::table('answer_evidences')->where('id', $id)->first();
+    
+    if (!$evidence) {
+        abort(404, 'Data tidak ditemukan di DB');
+    }
+
+    // 2. Bersihkan path (Hapus 'pttrias/' jika kode lama sempat menyimpannya, atau gunakan path murni)
+    // Berdasarkan screenshot Anda, path di DB diawali dengan "audit/...", itu SUDAH BENAR.
+    // Hapus slash di depan jika ada.
+    $path = ltrim($evidence->file_path, '/'); 
+
+    // 3. Inisialisasi Disk S3
+    $disk = Storage::disk('s3');
+
+    // 4. Cek file (Opsional, bisa langsung try-catch)
+    if (!$disk->exists($path)) {
+        // Debugging: Jika file dibilang tidak ada, uncomment baris ini untuk lihat path apa yang sedang dibaca sistem
+        // dd("Sistem mencari file di path ini: " . $path);
+        abort(404, 'File fisik tidak ditemukan di S3.');
+    }
+
+    try {
+        // 5. Ambil konten file (Laravel akan pakai Access Key di .env untuk bypass AccessDenied)
+        $fileContent = $disk->get($path);
+        
+        // 6. Gunakan Mime Type dari Database (Anda punya kolom mime_type 'image/jpeg')
+        $type = $evidence->mime_type ?? 'image/jpeg';
+
+    } catch (\Exception $e) {
+        // Jika error connection atau permission
+        abort(404, 'Gagal mengambil file: ' . $e->getMessage());
+    }
+
+    // 7. Tampilkan Gambar
+    return response($fileContent, 200, [
+        'Content-Type' => $type,
+        'Content-Disposition' => 'inline', // 'inline' agar tampil di browser, 'attachment' untuk download
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+
+})->name('evidence.image');
+
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
