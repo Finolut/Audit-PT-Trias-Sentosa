@@ -183,26 +183,35 @@ Route::get('/evidences', [EvidencesController::class, 'evidenceLog'])
 // Di file routes/web.php
 
 Route::get('/evidence/image/{id}', function ($id) {
+    // 1. Ambil data dari database
     $evidence = DB::table('answer_evidences')->where('id', $id)->first();
-    if (!$evidence) return response("Data tidak ditemukan", 404);
+    
+    if (!$evidence) {
+        return response("Data evidence tidak ditemukan.", 404);
+    }
 
-    $disk = Storage::disk('s3');
-    $path = ltrim($evidence->file_path, '/'); 
+    // 2. Gunakan path murni dari database (audit/...)
+    // Jangan lagi gunakan prefix 'pttrias/' karena itu nama bucket
+    $path = ltrim($evidence->file_path, '/');
 
     try {
-        // LANGSUNG ambil filenya tanpa $disk->exists($path)
-        // Jika file tidak ada, Laravel/S3 akan melempar exception secara otomatis
+        $disk = Storage::disk('s3');
+
+        // 3. LANGSUNG ambil konten file tanpa $disk->exists() 
+        // Ini adalah trik untuk bypass error "Unable to check existence" di Supabase
         $fileContent = $disk->get($path);
         
+        // 4. Gunakan mime_type dari database agar tidak error di lokal
         $contentType = $evidence->mime_type ?? 'image/jpeg';
 
         return response($fileContent, 200, [
             'Content-Type' => $contentType,
             'Content-Disposition' => 'inline',
+            'Cache-Control' => 'public, max-age=86400',
         ]);
 
     } catch (\Exception $e) {
-        // Jika gagal, tampilkan pesan detail untuk debug
+        // Jika tetap gagal, kita akan tahu alasan sebenarnya (misal: Key Salah)
         return response("Gagal mengambil file S3. Error: " . $e->getMessage(), 500);
     }
 })->name('evidence.image');
