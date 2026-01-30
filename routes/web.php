@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\UnableToReadFile;
-use App\Http\Controllers\Admin\AuditFindingLogController; // ✅ Tambahkan ini
+use App\Http\Controllers\Admin\AuditFindingLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,9 +87,7 @@ Route::post('/test-form', function (Request $request) {
 |--------------------------------------------------------------------------
 | AUDIT PROCESS ROUTES (Public / Khusus Auditor lapangan)
 |--------------------------------------------------------------------------
-
 */
-// 1. Route untuk MENAMPILKAN halaman konfirmasi resume (pakai GET)
 // 1. Halaman Input Token (GET)
 Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
     ->name('audit.resume.form');
@@ -98,20 +96,25 @@ Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
 Route::post('/audit/resume/validate', [AuditController::class, 'processTokenInput'])
     ->name('audit.resume.validate');
 
-// 3. Tampilkan Halaman Keputusan (GET) - INI YANG ANDA BUTUHKAN
+// 3. Tampilkan Halaman Keputusan (GET)
 Route::get('/audit/resume/decision/{token}', [AuditController::class, 'showDecisionPage'])
     ->name('audit.resume.decision');
 
 // 4. Eksekusi Keputusan (Lanjut/Batal) (POST)
 Route::post('/audit/resume/action', [AuditController::class, 'handleResumeDecision'])
     ->name('audit.resume.action');
+
 Route::get('/audit/setup', [AuditController::class, 'setup'])->name('audit.setup');
 Route::get('/audit/create', [AuditController::class, 'createAudit'])->name('audit.create');
 Route::post('/audit/start', [AuditController::class, 'startAudit'])->name('audit.start');
 Route::post('/audit/check-resume', [AuditController::class, 'checkPendingAudit'])->name('audit.check_resume');
+
+// ✅ HAPUS ROUTE SELECT-DEPARTMENT
+// Route::get('/audit/{id}/select-department', [AuditController::class, 'selectDepartment'])->name('audit.select_department');
+// Route::post('/audit/{id}/set-department', [AuditController::class, 'setActiveDepartment'])->name('audit.set_department');
+
+// Menu langsung
 Route::get('/audit/menu/{id}', [AuditController::class, 'menu'])->name('audit.menu');
-Route::get('/audit/{id}/select-department', [AuditController::class, 'selectDepartment'])->name('audit.select_department');
-Route::post('/audit/{id}/set-department', [AuditController::class, 'setActiveDepartment'])->name('audit.set_department');
 
 // Dynamic Clause Routes (UUID validation)
 Route::get('/audit/{id}/{clause}', [AuditController::class, 'show'])
@@ -179,8 +182,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::get('/audit/findings', [AuditFindingLogController::class, 'index'])
          ->name('audit.finding-logs');
 });
+
 // Preserved special routes (public)
 Route::get('/audit/thanks', function () {
     return view('audit.thanks');
 })->name('audit.thanks');
-
