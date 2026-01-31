@@ -25,8 +25,74 @@
         .sidebar-mini .logo-expanded { display: none; }
         .sidebar-mini .logo-collapsed { display: block; }
         .sidebar-mini .logo-container { padding: 0.5rem 0; }
+        
+        /* Department-specific styling */
+        .department-item { 
+            position: relative; 
+            transition: all 0.3s ease;
+        }
+        .department-item.expanded { 
+            background-color: #f3f4f6;
+        }
+        .department-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            width: 100%;
+            padding: 0.75rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .department-toggle:hover {
+            background-color: #f9fafb;
+        }
+        .department-toggle.active {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        .department-icon {
+            transition: transform 0.3s ease;
+            min-width: 24px;
+            text-align: center;
+            margin-right: 0.75rem;
+        }
+        .department-icon.expanded {
+            transform: rotate(90deg);
+        }
+        .department-name {
+            flex: 1;
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        .department-badge {
+            min-width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        
         /* Clause-specific styling */
-        .clause-link { position: relative; overflow: hidden; }
+        .clause-link { 
+            position: relative; 
+            overflow: hidden;
+            padding-left: 3.5rem !important;
+            margin-left: 1.5rem;
+            border-left: 2px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        .clause-link:hover {
+            background-color: #f9fafb;
+            border-left-color: #3b82f6;
+        }
         .clause-link::after {
             content: '';
             position: absolute;
@@ -36,7 +102,9 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .clause-link.active-link::after { opacity: 1; }
+        .clause-link.active-link::after { 
+            opacity: 1; 
+        }
         .clause-badge {
             min-width: 20px;
             height: 20px;
@@ -50,6 +118,20 @@
         }
         .clause-badge.in-progress { background: #dbeafe; color: #1d4ed8; }
         .clause-badge.completed { background: #dcfce7; color: #15803d; }
+        
+        /* Nested clause visibility */
+        .clauses-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+        .clauses-container.hidden {
+            max-height: 0;
+            opacity: 0;
+        }
+        .clauses-container.visible {
+            max-height: 500px;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
@@ -74,7 +156,7 @@
                 </div>
             </div>
 
-            <!-- Navigation: Auditor Menu + Clauses 4-10 -->
+            <!-- Navigation: Auditor Menu + Departments with Clauses -->
             <nav class="flex-1 overflow-y-auto py-4 no-scrollbar flex flex-col gap-1 px-3">
                 <!-- Dashboard Link -->
                 <a href="{{ route('audit.menu', ['id' => $auditId ?? 1]) }}"
@@ -83,31 +165,70 @@
                     <span class="hide-on-mini whitespace-nowrap">Dashboard Audit</span>
                 </a>
 
-                <!-- Clause Links (4 to 10) -->
+                <!-- Department Links with Expandable Clauses -->
                 @php
-                    $clauses = [4,5,6,7,8,9,10];
+                    // Sample department data - replace with actual data from your database
+                    $departments = [
+                        [
+                            'id' => 1,
+                            'name' => 'Produksi',
+                            'clauses' => [4, 5, 6],
+                            'active' => request()->route('dept') == 1
+                        ],
+                        [
+                            'id' => 2,
+                            'name' => 'Quality Control',
+                            'clauses' => [7, 8, 9, 10],
+                            'active' => request()->route('dept') == 2
+                        ],
+                        // Add more departments as needed
+                    ];
+                    $currentDept = request()->route('dept');
                     $currentClause = request()->route('clause');
                 @endphp
 
-                @foreach($clauses as $clauseNum)
+                @foreach($departments as $dept)
                     @php
-                        $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
-                        $isCurrent = $currentClause == $clauseNum;
-                        $isCompleted = $progress['percentage'] >= 100;
-                        $badgeClass = $isCompleted ? 'completed' : ($progress['count'] > 0 ? 'in-progress' : '');
+                        $isDeptActive = $currentDept == $dept['id'];
+                        $deptClauses = $dept['clauses'];
                     @endphp
-                    <a href="{{ route('audit.show', ['id' => $auditId ?? 1, 'clause' => $clauseNum]) }}"
-                       class="clause-link flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ $isCurrent ? 'active-link' : '' }}">
-                        <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">
-                            @if($isCompleted) ✅ @else 📋 @endif
-                        </span> 
-                        <span class="hide-on-mini whitespace-nowrap mr-2">Klausul {{ $clauseNum }}</span>
-                        @if($progress['total'] > 0)
-                            <span class="clause-badge {{ $badgeClass }} hide-on-mini">
-                                {{ $progress['count'] }}/{{ $progress['total'] }}
-                            </span>
-                        @endif
-                    </a>
+                    
+                    <div class="department-item {{ $isDeptActive ? 'expanded' : '' }}" data-dept-id="{{ $dept['id'] }}">
+                        <div class="department-toggle {{ $isDeptActive ? 'active' : '' }}">
+                            <div class="flex items-center w-full">
+                                <span class="department-icon {{ $isDeptActive ? 'expanded' : '' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                                <span class="department-name hide-on-mini">{{ $dept['name'] }}</span>
+                                <span class="department-badge hide-on-mini">{{ count($deptClauses) }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="clauses-container {{ $isDeptActive ? 'visible' : 'hidden' }}" id="clauses-{{ $dept['id'] }}">
+                            @foreach($deptClauses as $clauseNum)
+                                @php
+                                    $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
+                                    $isCurrent = $currentClause == $clauseNum && $isDeptActive;
+                                    $isCompleted = $progress['percentage'] >= 100;
+                                    $badgeClass = $isCompleted ? 'completed' : ($progress['count'] > 0 ? 'in-progress' : '');
+                                @endphp
+                                <a href="{{ route('audit.show', ['id' => $auditId ?? 1, 'dept' => $dept['id'], 'clause' => $clauseNum]) }}"
+                                   class="clause-link flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ $isCurrent ? 'active-link' : '' }}">
+                                    <span class="text-lg min-w-[20px] text-center mr-2">
+                                        @if($isCompleted) ✅ @else 📋 @endif
+                                    </span> 
+                                    <span class="hide-on-mini whitespace-nowrap mr-2">Klausul {{ $clauseNum }}</span>
+                                    @if($progress['total'] > 0)
+                                        <span class="clause-badge {{ $badgeClass }} hide-on-mini">
+                                            {{ $progress['count'] }}/{{ $progress['total'] }}
+                                        </span>
+                                    @endif
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 @endforeach
 
                 <!-- User Profile Section (Bottom) -->
@@ -220,6 +341,47 @@
             const logoutModal = document.getElementById('logout-modal');
             const cancelLogout = document.getElementById('cancel-logout');
             const modalContent = document.querySelector('.modal-content');
+
+            // Department toggle functionality
+            const departmentItems = document.querySelectorAll('.department-item');
+            departmentItems.forEach(item => {
+                const toggleBtn = item.querySelector('.department-toggle');
+                const clausesContainer = item.querySelector('.clauses-container');
+                const icon = item.querySelector('.department-icon');
+                
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Toggle current department
+                    const isExpanded = item.classList.contains('expanded');
+                    
+                    // Close all other departments
+                    departmentItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.classList.remove('expanded');
+                            otherItem.querySelector('.clauses-container').classList.remove('visible');
+                            otherItem.querySelector('.clauses-container').classList.add('hidden');
+                            otherItem.querySelector('.department-icon').classList.remove('expanded');
+                            otherItem.querySelector('.department-toggle').classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current department
+                    if (isExpanded) {
+                        item.classList.remove('expanded');
+                        clausesContainer.classList.remove('visible');
+                        clausesContainer.classList.add('hidden');
+                        icon.classList.remove('expanded');
+                        toggleBtn.classList.remove('active');
+                    } else {
+                        item.classList.add('expanded');
+                        clausesContainer.classList.remove('hidden');
+                        clausesContainer.classList.add('visible');
+                        icon.classList.add('expanded');
+                        toggleBtn.classList.add('active');
+                    }
+                });
+            });
 
             // Mobile menu toggle
             if (menuToggle) {
