@@ -660,7 +660,7 @@ $rawAnswers = DB::table('answers')
     ->where('audit_id', $auditId)
     ->get();
 foreach ($rawAnswers as $ans) {
-    // ✅ SIMPAN SELURUH DATA TERMASUK ID
+    // ✅ SIMPAN ID JUGA!
     $existingAnswers[$ans->item_id][$ans->auditor_name] = [
         'id' => $ans->id,  // ✅ PENTING: ID untuk update
         'answer' => $ans->answer,
