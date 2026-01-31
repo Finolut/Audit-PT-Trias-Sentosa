@@ -267,26 +267,19 @@
                         $isDeptActive = $dept['dept_id'] == $currentDeptId && $dept['id'] == $currentAuditId;
                         $status = $deptProgress['percentage'] == 100 ? 'completed' : ($deptProgress['completed'] > 0 ? 'active' : 'pending');
                         $statusClass = $status === 'completed' ? 'status-completed' : ($status === 'active' ? 'status-active' : 'status-pending');
-                        $statusText = $status === 'completed' ? 'SELESAI' : ($status === 'active' ? 'AKTIF' : 'Belum Dimulai');
-                        $statusDesc = $status === 'completed' ? 'Audit Selesai' : ($status === 'active' ? 'Sedang Dikerjakan' : 'Belum Dimulai');
                     @endphp
                     
                     <div class="department-item {{ $isDeptActive ? 'expanded' : '' }}" data-dept-id="{{ $dept['dept_id'] }}">
                         <div class="department-toggle {{ $isDeptActive ? 'active' : '' }}">
                             <div class="flex items-center w-full">
                                 <span class="department-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-2m-2 0h-5m-9 0H3m2 0l6.01-6.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1" />
+</svg>
                                 </span>
                                 <div class="department-content flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="department-name hide-on-mini">{{ $dept['dept_name'] }}</span>
-                                        @if($deptProgress['total'] > 0)
-                                            <span class="text-xs font-semibold text-blue-600 hide-on-mini">
-                                                {{ $deptProgress['completed'] }}/{{ $deptProgress['total'] }} Klausul
-                                            </span>
-                                        @endif
                                     </div>
                                     <div class="department-status mt-1">
                                         <span class="status-badge {{ $statusClass }} hide-on-mini">{{ $statusText }}</span>
