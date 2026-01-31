@@ -662,8 +662,9 @@ $rawAnswers = DB::table('answers')
     ->get();
 
 foreach ($rawAnswers as $ans) {
-    // Simpan seluruh data yang dibutuhkan
+    // ✅ SIMPAN SEMUA DATA TERMASUK ID
     $existingAnswers[$ans->item_id][$ans->auditor_name] = [
+        'id' => $ans->id,  // ✅ PENTING: ID untuk update
         'answer' => $ans->answer,
         'finding_level' => $ans->finding_level,
         'finding_note' => $ans->finding_note,
@@ -694,7 +695,7 @@ public function store(Request $request, $auditId, $mainClause)
     $answers = $request->input('answers', []);
     $notes = $request->input('audit_notes', []);
     $findingLevels = $request->input('finding_level', []);
-    $findingNotes = $request->input('finding_note', []); // ✅ Catatan temuan
+    $findingNotes = $request->input('finding_note', []);
     $answerIdMap = $request->input('answer_id_map', []);
 
     DB::transaction(function () use ($answers, $notes, $auditId, $findingLevels, $findingNotes, $answerIdMap) {
@@ -705,7 +706,7 @@ public function store(Request $request, $auditId, $mainClause)
 
         $departmentId = $audit->department_id;
 
-        // 1. UPSERT NOTES (audit_notes per klausul)
+        // 1. UPSERT NOTES (audit_questions per klausul)
         $noteRecords = [];
         foreach ($notes as $clauseCode => $text) {
             if (!trim($text)) continue;
@@ -729,7 +730,7 @@ public function store(Request $request, $auditId, $mainClause)
             );
         }
 
-        // 2. INSERT/UPDATE ANSWERS — termasuk finding_level dan finding_note
+        // 2. UPSERT ANSWERS — termasuk finding_level dan finding_note
         $answerRecords = [];
         $finalRecords = [];
 
@@ -738,34 +739,32 @@ public function store(Request $request, $auditId, $mainClause)
             $hasAnswer = false;
 
             foreach ($people as $name => $data) {
-                if (!empty($data['val'])) {
-                    $hasAnswer = true;
+                if (empty($data['val'])) continue;
 
-                    $answerId = $answerIdMap[$itemId][$name] ?? null;
-                    if (!$answerId) {
-                        throw new \Exception("Missing answer_id for item {$itemId}, auditor {$name}");
-                    }
+                $hasAnswer = true;
 
-                    $answerRecords[] = [
-                        'id' => $answerId,
-                        'audit_id' => $auditId,
-                        'item_id' => $itemId,
-                        'auditor_name' => $name,
-                        'department_id' => $departmentId,
-                        'answer' => $data['val'],
-                        'finding_level' => $findingLevels[$itemId][$name] ?? null,
-                        'finding_note' => $findingNotes[$itemId][$name] ?? null, // ✅ SIMPAN CATATAN TEMUAN
-                        'answered_at' => now(),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                // ✅ AMBIL answer_id dari map, atau generate baru jika belum ada
+                $answerId = $answerIdMap[$itemId][$name] ?? (string) Str::uuid();
 
-                    match ($data['val']) {
-                        'YES' => $yes++,
-                        'NO' => $no++,
-                        'N/A' => $na++,
-                    };
-                }
+                $answerRecords[] = [
+                    'id' => $answerId,
+                    'audit_id' => $auditId,
+                    'item_id' => $itemId,
+                    'auditor_name' => $name,
+                    'department_id' => $departmentId,
+                    'answer' => $data['val'],
+                    'finding_level' => $findingLevels[$itemId][$name] ?? null,
+                    'finding_note' => $findingNotes[$itemId][$name] ?? null,
+                    'answered_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+
+                match ($data['val']) {
+                    'YES' => $yes++,
+                    'NO' => $no++,
+                    'N/A' => $na++,
+                };
             }
 
             if ($hasAnswer) {
@@ -785,15 +784,15 @@ public function store(Request $request, $auditId, $mainClause)
             }
         }
 
-        // Upsert answers dengan finding_note
+        // Upsert answers ke tabel 'answers'
         if ($answerRecords) {
             DB::table('answers')->upsert(
                 $answerRecords,
-                ['id'],
+                ['id'], // unique key
                 [
                     'answer',
                     'finding_level',
-                    'finding_note', // ✅ TERMASUK DI UPDATE FIELD
+                    'finding_note',
                     'answered_at',
                     'updated_at',
                     'department_id',
@@ -811,9 +810,7 @@ public function store(Request $request, $auditId, $mainClause)
         }
     });
 
-    // === ❌ BAGIAN UPLOAD EVIDENCE DIHAPUS SEPENUHNYA ===
-
-    // === REDIRECT LOGIC (tetap sama)
+    // === REDIRECT LOGIC (tidak berubah) ===
     $mainKeys = array_keys($this->mainClauses);
     $currentIndex = array_search($mainClause, $mainKeys);
     $nextMain = $mainKeys[$currentIndex + 1] ?? null;

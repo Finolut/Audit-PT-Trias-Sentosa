@@ -380,18 +380,19 @@ function setValFromModal(itemId, userName, value, btnElement) {
 }
 
 /**
- * Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
- */
+Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
+*/
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof dbAnswers !== 'undefined' && dbAnswers !== null) {
         // 1. Looping setiap jawaban dari database
         Object.keys(dbAnswers).forEach(itemId => {
-            const userAnswers = dbAnswers[itemId]; // Berisi { "NamaUser": "YES", ... }
+            const userAnswers = dbAnswers[itemId]; // Berisi { "NamaUser": { answer, finding_level, finding_note, id } }
             
             Object.keys(userAnswers).forEach(userName => {
-                const value = userAnswers[userName];
-                
-                // 2. Masukkan ke state sessionAnswers agar logika JS tetap jalan
+                const answerData = userAnswers[userName];
+                const value = answerData.answer;
+
+                // 2. Masukkan ke state sessionAnswers
                 const key = `${itemId}_${userName}`;
                 sessionAnswers[key] = value;
 
@@ -400,17 +401,42 @@ document.addEventListener('DOMContentLoaded', function() {
                     const group = document.getElementById(`btn_group_${itemId}`);
                     if (group) {
                         const buttons = group.querySelectorAll('.answer-btn');
-                        if (value === 'YES') buttons[0].classList.add('active-yes');
-                        else if (value === 'NO') buttons[1].classList.add('active-no');
-                        else if (value === 'N/A') buttons[2].classList.add('active-na');
+                        buttons.forEach(b => {
+                            b.classList.remove('active-yes', 'active-no', 'active-na');
+                        });
+                        
+                        if (value === 'YES') buttons[0]?.classList.add('active-yes');
+                        else if (value === 'NO') buttons[1]?.classList.add('active-no');
+                        else if (value === 'N/A') buttons[2]?.classList.add('active-na');
                     }
                 }
 
-                // 4. Update input hidden agar jika di-save lagi data tidak hilang
+                // 4. Update input hidden
                 updateHiddenInputs(itemId);
-                
-                // 5. Munculkan info perbedaan jika ada
+
+                // 5. Update info box perbedaan
                 updateInfoBox(itemId);
+
+                // 6. Isi Finding Level dan Finding Note jika ada
+                if (answerData.finding_level) {
+                    const findingSelect = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
+                    if (findingSelect) {
+                        findingSelect.value = answerData.finding_level;
+                    }
+                }
+                
+                if (answerData.finding_note) {
+                    const findingTextarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
+                    if (findingTextarea) {
+                        findingTextarea.value = answerData.finding_note;
+                    }
+                }
+                
+                // 7. Set Answer ID untuk update (bukan insert baru)
+                const answerIdInput = document.querySelector(`input[name="answer_id_map[${itemId}][${userName}]"]`);
+                if (answerIdInput && answerData.id) {
+                    answerIdInput.value = answerData.id;
+                }
             });
         });
     }
