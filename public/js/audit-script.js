@@ -384,6 +384,8 @@ Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
 */
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof dbAnswers !== 'undefined' && dbAnswers !== null) {
+        console.log('✅ Loading saved answers:', dbAnswers); // ✅ DEBUG LOG
+        
         // 1. Looping setiap jawaban dari database
         Object.keys(dbAnswers).forEach(itemId => {
             const userAnswers = dbAnswers[itemId]; // Berisi { "NamaUser": { answer, finding_level, finding_note, id } }
@@ -391,6 +393,8 @@ document.addEventListener('DOMContentLoaded', function() {
             Object.keys(userAnswers).forEach(userName => {
                 const answerData = userAnswers[userName];
                 const value = answerData.answer;
+
+                console.log(`  - Item ${itemId}, User ${userName}: ${value}`); // ✅ DEBUG LOG
 
                 // 2. Masukkan ke state sessionAnswers
                 const key = `${itemId}_${userName}`;
@@ -439,6 +443,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+        
+        console.log('✅ Answers loaded successfully!'); // ✅ DEBUG LOG
+    } else {
+        console.log('⚠️ No saved answers found'); // ✅ DEBUG LOG
     }
 });
-

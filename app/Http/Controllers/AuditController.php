@@ -654,15 +654,13 @@ foreach ($siblings as $sibling) {
             ->whereIn('clause_code', $subCodes)
             ->pluck('question_text', 'clause_code');
 
-        // Ambil jawaban yang sudah tersimpan
-// ✅ BENAR: simpan seluruh record sebagai objek
+// Ambil jawaban yang sudah tersimpan
 $existingAnswers = [];
 $rawAnswers = DB::table('answers')
     ->where('audit_id', $auditId)
     ->get();
-
 foreach ($rawAnswers as $ans) {
-    // ✅ SIMPAN SEMUA DATA TERMASUK ID
+    // ✅ SIMPAN SELURUH DATA TERMASUK ID
     $existingAnswers[$ans->item_id][$ans->auditor_name] = [
         'id' => $ans->id,  // ✅ PENTING: ID untuk update
         'answer' => $ans->answer,

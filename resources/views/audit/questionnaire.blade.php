@@ -47,7 +47,7 @@
                             @endphp
                             
 @foreach ($items->where('maturity_level_id', $level->id) as $item)
-                            
+    
     <div class="item-row" id="row_{{ $item->id }}">
         <div class="item-content-col">
             <p class="item-text">{{ $item->item_text }}</p>
@@ -67,9 +67,8 @@
                 </button>
             @endif
 
-            {{-- ✅ Hidden input untuk jawaban dan answer ID mapping --}}
+            {{-- ✅ HIDDEN INPUT UNTUK ANSWER ID --}}
             @php
-                // ✅ PERBAIKAN TYPO: hapus spasi di 'answer ' dan 'existingAn swer'
                 $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
                 $answerValue = $existingAnswer['answer'] ?? '';
                 $findingLevel = $existingAnswer['finding_level'] ?? '';
@@ -77,7 +76,7 @@
                 $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
             @endphp
 
-            {{-- ✅ HIDDEN INPUT UNTUK ANSWER ID - DI LUAR FINDING CONTAINER --}}
+            {{-- ✅ HIDDEN INPUT UNTUK ANSWER ID - WAJIB ADA --}}
             <input type="hidden" 
                    name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]" 
                    value="{{ $answerId }}">
