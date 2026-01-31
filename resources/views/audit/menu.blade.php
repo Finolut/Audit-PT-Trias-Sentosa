@@ -53,7 +53,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
         }
 
         .section-title {
@@ -100,19 +99,19 @@
             word-break: break-all;
         }
 
-        /* Department cards */
+        /* Department cards - TANPA BORDER */
         .department-card {
             background: white;
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
 
         .department-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
         }
 
         .department-header {
@@ -133,25 +132,25 @@
 
         .clause-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1rem;
         }
 
         .clause-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
             padding: 1rem;
             text-align: center;
             transition: all 0.3s;
+            background: #f8fafc;
+            border-radius: 8px;
         }
 
         .clause-card:hover {
-            border-color: #2563eb;
-            background: #f0f9ff;
+            background: #eef6ff;
+            transform: scale(1.02);
         }
 
         .clause-number {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: #2563eb;
             margin-bottom: 0.5rem;
@@ -206,7 +205,7 @@
         .finish-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
-            color: #10b981;
+            color: #0b981;
         }
 
         .finish-message {
@@ -295,89 +294,141 @@
                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             }
         }
+
+        /* Instruksi vertikal dengan token di samping */
+        .instructions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .instruction-number {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: #1a365d;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .instruction-content {
+            flex: 1;
+        }
+
+        .instruction-title {
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 0.5rem;
+        }
+
+        .instruction-text {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Token di samping instruksi */
+        .token-side {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+            flex-shrink: 0;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        @media (min-width: 768px) {
+            .instructions-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            
+            .token-side {
+                margin-top: 0;
+                margin-left: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
 
     <!-- Header Section -->
     <header class="header-section">
-        <div class="max-w-7xl mx-auto px-4 lg:px-6">
+        <div class="max-w-7xl mx-auto px-4">
             <h1 class="header-title">MULAI AUDIT INTERNAL</h1>
             <p class="header-subtitle">Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.</p>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <!-- Instructions Section -->
+        <!-- Instructions Section with Token on the side -->
         <div class="section-card">
             <h2 class="section-title">Instruksi Pengisian</h2>
             <p class="section-description">Setiap klausul berisi pertanyaan yang wajib dijawab sesuai kondisi aktual departemen.</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
-                          style="background-color: #1a365d;">1</span>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Pilih Klausul Audit</h4>
-                        <p class="text-sm text-gray-600 mt-1">Setiap klausul berisi pertanyaan yang wajib dijawab sesuai kondisi aktual departemen.</p>
+            <div class="instructions-container">
+                <div class="flex-1">
+                    <div class="instruction-item">
+                        <div class="instruction-number">1</div>
+                        <div class="instruction-content">
+                            <h3 class="instruction-title">Pilih Klausul Audit</h3>
+                            <p class="instruction-text">Setiap klausul berisi pertanyaan yang wajib dijawab sesuai kondisi aktual departemen.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="instruction-item">
+                        <div class="instruction-number">2</div>
+                        <div class="instruction-content">
+                            <h3 class="instruction-title">Jawab Pertanyaan Audit</h3>
+                            <p class="instruction-text">Jawaban harus mencerminkan kondisi aktual departemen.<br>
+                                <span class="font-medium text-blue-600">YES:</span> Klausul telah diterapkan<br>
+                                <span class="font-medium text-red-600">NO:</span> Klausul tidak diterapkan (wajib isi catatan)<br>
+                                <span class="font-medium text-gray-600">N/A:</span> Tidak relevan dengan departemen</p>
+                        </div>
+                    </div>
+                    
+                    <div class="instruction-item">
+                        <div class="instruction-number">3</div>
+                        <div class="instruction-content">
+                            <h3 class="instruction-title">Penyimpanan Otomatis</h3>
+                            <p class="instruction-text">Jawaban disimpan otomatis. Pastikan seluruh pertanyaan dalam satu klausul telah terisi sebelum berpindah.</p>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
-                          style="background-color: #1a365d;">2</span>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Jawab Pertanyaan Audit</h4>
-                        <p class="text-sm text-gray-600 mt-1">Jawaban harus mencerminkan kondisi aktual departemen.<br>
-                            YES: Klausul telah diterapkan<br>
-                            NO: Klausul tidak diterapkan (wajib isi catatan)<br>
-                            N/A: Tidak relevan dengan departemen</p>
+                
+                <!-- Token section on the side -->
+                <div class="token-side">
+                    <div class="flex items-start mb-3">
+                        <i class="fas fa-key text-xl mr-3" style="color: #1a365d;"></i>
+                        <h3 class="font-bold text-lg text-gray-800">Token Audit (WAJIB DISIMPAN)</h3>
                     </div>
-                </div>
-                <div class="flex items-start">
-                    <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
-                          style="background-color: #1a365d;">3</span>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Penyimpanan Otomatis</h4>
-                        <p class="text-sm text-gray-600 mt-1">Jawaban disimpan otomatis. Pastikan seluruh pertanyaan dalam satu klausul telah terisi sebelum berpindah.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-<!-- CRITICAL TOKEN SECTION - VERSI POLos & CLEAN -->
-<div class="max-w-4xl mx-auto mb-10">
-    <div class="bg-white border rounded-2xl p-6 shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
-        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div class="flex-1">
-                <div class="flex items-start">
-                    <div class="shrink-0 mt-0.5">
-                        <i class="fas fa-key text-xl" style="color: #1a365d;"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h2 class="text-lg font-bold text-gray-800 mb-1">Token Audit (WAJIB DISIMPAN)</h2>
-                        <p class="text-sm text-gray-600 mb-2">
-                            <span class="font-semibold text-gray-800">Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
-                            Dengan kode ini, progress audit <span class="font-medium" style="color: #1a365d;">dapat dipulihkan</span>.
-                            Jika ada kendala dengan token audit bisa menghubungi Admin 
-                            <span class="font-semibold text-gray-700">Brahmanto Anggoro Laksono - SSSE</span>
-                        </p>
-                        <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                            <span class="font-medium">Tips:</span>Simpan token di tempat aman (catatan kerja, dokumen internal, atau screenshot).
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="w-full sm:w-auto">
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-stretch">
-                        <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-l-lg break-all min-w-[250px]">
+                    <p class="text-sm text-gray-600 mb-3">
+                        <span class="font-semibold text-gray-800">Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
+                        Dengan kode ini, progress audit <span class="font-medium" style="color: #1a365d;">dapat dipulihkan</span>.
+                        Jika ada kendala dengan token audit bisa menghubungi Admin 
+                        <span class="font-semibold text-gray-700">Brahmanto Anggoro Laksono - SSSE</span>
+                    </p>
+                    <div class="flex items-center gap-2 mb-2">
+                        <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-lg break-all min-w-[250px]">
                             {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
                         </div>
                         <button id="copy-token-btn" 
-                                class="text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-opacity duration-200 whitespace-nowrap {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90' }}"
+                                class="text-white font-medium px-3 py-3 rounded-lg flex items-center gap-2 transition-opacity duration-200 whitespace-nowrap"
                                 style="background-color: #1a365d;"
-                                {{ !$resumeToken ? 'disabled' : '' }}
                                 aria-label="Salin Kode Audit">
                             <i class="fas fa-copy"></i>
                             <span class="hidden sm:inline">Salin</span>
@@ -386,11 +437,12 @@
                     <p class="text-xs text-gray-400 text-right">
                         Klik tombol Salin untuk menyalin ke clipboard
                     </p>
+                    <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2 mt-3">
+                        <span class="font-medium">Tips:</span> Simpan token di tempat aman (catatan kerja, dokumen internal, atau screenshot).
+                    </p>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
         <!-- Department Progress Section -->
         <div class="section-card">
@@ -398,169 +450,83 @@
             <p class="section-description">Pilih departemen dan klausul audit yang ingin Anda kerjakan</p>
             
             <div class="space-y-4">
-                <!-- Department 1 -->
+                <!-- Dynamically generated departments based on audit data -->
+                @foreach($relatedAudits as $dept)
                 <div class="department-card">
                     <div class="department-header">
                         <h3 class="department-title">
                             <i class="fas fa-building text-blue-600"></i>
-                            Produksi
+                            {{ $dept['dept_name'] }}
                         </h3>
                     </div>
                     
                     <div class="clause-grid">
-                        <div class="clause-card">
-                            <div class="clause-number">4</div>
-                            <div class="clause-status">Klausul 4</div>
-                            <div class="clause-progress progress-in-progress">3/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">5</div>
-                            <div class="clause-status">Klausul 5</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">6</div>
-                            <div class="clause-status">Klausul 6</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">7</div>
-                            <div class="clause-status">Klausul 7</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">8</div>
-                            <div class="clause-status">Klausul 8</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">9</div>
-                            <div class="clause-status">Klausul 9</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">10</div>
-                            <div class="clause-status">Klausul 10</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
+                        @php $clauses = [4,5,6,7,8,9,10]; @endphp
+                        @foreach($clauses as $clauseNum)
+                            @php
+                                $p = $dept['clauses'][$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
+                                $isCompleted = $p['percentage'] >= 100;
+                                $badgeClass = $isCompleted 
+                                    ? 'progress-completed' 
+                                    : ($p['count'] > 0 ? 'progress-in-progress' : 'progress-not-started');
+                            @endphp
+                            <div class="clause-card">
+                                <div class="clause-number">{{ $clauseNum }}</div>
+                                <div class="clause-status">Klausul {{ $clauseNum }}</div>
+                                <div class="clause-progress {{ $badgeClass }}">
+                                    {{ $p['count'] }}/{{ $p['total'] }}
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-                
-                <!-- Department 2 -->
-                <div class="department-card">
-                    <div class="department-header">
-                        <h3 class="department-title">
-                            <i class="fas fa-building text-blue-600"></i>
-                            Quality Control
-                        </h3>
-                    </div>
-                    
-                    <div class="clause-grid">
-                        <div class="clause-card">
-                            <div class="clause-number">4</div>
-                            <div class="clause-status">Klausul 4</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">5</div>
-                            <div class="clause-status">Klausul 5</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">6</div>
-                            <div class="clause-status">Klausul 6</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">7</div>
-                            <div class="clause-status">Klausul 7</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">8</div>
-                            <div class="clause-status">Klausul 8</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">9</div>
-                            <div class="clause-status">Klausul 9</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                        <div class="clause-card">
-                            <div class="clause-number">10</div>
-                            <div class="clause-status">Klausul 10</div>
-                            <div class="clause-progress progress-not-started">0/5</div>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
 
-     
-    </div>
-@push('scripts')
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const copyBtn = document.getElementById('copy-token-btn');
-    const tokenElement = document.getElementById('audit-token');
-    const originalBtnHTML = copyBtn.innerHTML;
-    
-    if (copyBtn && tokenElement && !copyBtn.disabled) {
-        copyBtn.addEventListener('click', async () => {
-            try {
-                // Clean token value (remove extra spaces)
-                const tokenValue = tokenElement.textContent.trim();
-                
-                // Copy to clipboard
-                await navigator.clipboard.writeText(tokenValue);
-                
-                // Visual feedback
-                copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
-                copyBtn.classList.replace('bg-amber-500', 'bg-green-500');
-                copyBtn.classList.replace('hover:bg-amber-600', 'hover:bg-green-600');
-                
-                // Reset after 2 seconds
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalBtnHTML;
-                    copyBtn.classList.replace('bg-green-500', 'bg-amber-500');
-                    copyBtn.classList.replace('hover:bg-green-600', 'hover:bg-amber-600');
-                }, 2000);
-                
-                // Optional: Show toast notification
-                if (typeof showToast !== 'undefined') {
-                    showToast('Kode Audit berhasil disalin ke clipboard!', 'success');
-                }
-            } catch (err) {
-                console.error('Gagal menyalin token:', err);
-                if (typeof showToast !== 'undefined') {
-                    showToast('Gagal menyalin kode. Silakan salin manual.', 'error');
-                } else {
-                    alert('Berhasil disalin! Pastikan untuk menyimpan kode ini di tempat aman.');
-                }
-            }
-        });
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const departmentCards = document.querySelectorAll('.audit-department-card');
-    const progressGrid = document.getElementById('progress-grid');
-    const progressLoading = document.getElementById('progress-loading');
-    const deptNameDisplay = document.getElementById('dept-name');
-
-    departmentCards.forEach(card => {
-        card.addEventListener('click', function(e) {
-            if (e.target.closest('a')) return;
+        <!-- Finish Banner -->
+        @if(isset($allFinished) && $allFinished)
+        <div class="finish-banner">
+            <div class="finish-icon">🎉</div>
+            <h2 class="finish-message">Audit Selesai!</h2>
+            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview. Silakan selesaikan proses audit untuk menghasilkan laporan final.</p>
             
-            const auditId = this.dataset.auditId;
-            const deptName = this.dataset.deptName;
-            const isCurrent = this.dataset.isCurrent === 'true';
-            if (isCurrent) return;
+            <div class="banner-actions">
+                <button class="btn btn-success">
+                    <i class="fas fa-check-circle"></i> Selesaikan Audit
+                </button>
+                <button class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Audit Lainnya
+                </button>
+            </div>
+        </div>
+        @endif
+    </div>
 
-            activateDepartmentCard(this, auditId, deptName);
-            fetchAuditProgress(auditId, deptName);
-        });
-    });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const copyBtn = document.getElementById('copy-token-btn');
+            const tokenElement = document.getElementById('audit-token');
+            
+            if (copyBtn && tokenElement) {
+                copyBtn.addEventListener('click', async () => {
+                    try {
+                        const tokenValue = tokenElement.textContent.trim();
+                        await navigator.clipboard.writeText(tokenValue);
+                        
+                        copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
+                        copyBtn.style.backgroundColor = '#10b981';
+                        
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<i class="fas fa-copy"></i><span class="hidden sm:inline">Salin</span>';
+                            copyBtn.style.backgroundColor = '#1a365d';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Gagal menyalin token:', err);
+                        alert('Gagal menyalin. Silakan salin manual.');
+                    }
+                });
+            }
         });
     </script>
 </body>
