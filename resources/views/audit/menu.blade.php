@@ -1,22 +1,21 @@
 @extends('layouts.menu')
 
 @section('content')
-<!-- JARAK ATAS DITAMBAHKAN DI SINI -->
-<div class="max-w-7xl mx-auto mt-10">
+<div class="max-w-7xl mx-auto">
 
-<!-- BORDER UTAMA: TEBA L 4PX, WARNA BIRU TUUA, SUDUT SIKU-SIKU (SAMPAI POJOK) -->
-<div class="bg-white shadow-lg overflow-hidden" style="border: 4px solid #1a365d; border-radius: 0;">
+<div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
 
 <!-- HEADER / INSTRUCTION - DIPERKAYA DENGAN INFORMASI LENGKAP -->
+
 <h1 class="text-3xl font-bold text-gray-900 mb-4 text-center">
     Mulai Audit Internal
 </h1>
 
-<div class="max-w-4xl mx-auto mb-8">
-    <p class="text-lg text-gray-700 mb-4">
+<div class="mb-8">
+    <p class="text-lg text-gray-700 mb-4 text-center">
        Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.
     </p>
-    <div class="bg-white border rounded-2xl p-6 text-left shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
+   <div class="bg-white border rounded-2xl p-6 text-left shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
         <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
             <li class="flex items-start">
                 <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
@@ -164,9 +163,7 @@ N/A: Tidak relevan dengan departemen</p>
             </div>
         </div>
     @endif
-</div> <!-- Penutup card utama dengan border tebal -->
-
-</div> <!-- Penutup container max-w-7xl dengan mt-10 -->
+</div>
 
 <style>
     /* === HEADER === */
