@@ -118,13 +118,10 @@
                             <i class="fas fa-building text-blue-600"></i>
                             {{ $dept['dept_name'] }}
                         </h4>
-                        {{-- Opsional: tampilkan progress total --}}
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
-                        @php
-                            $clauses = [4,5,6,7,8,9,10];
-                        @endphp
+                        @php $clauses = [4,5,6,7,8,9,10]; @endphp
                         @foreach($clauses as $clauseNum)
                             @php
                                 $p = $dept['clauses'][$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
