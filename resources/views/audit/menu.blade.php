@@ -288,26 +288,38 @@
                     </div>
                 </div>
 
-                <!-- Token -->
-                <div class="token-container">
-                    <div class="token-label">
-                        <i class="fas fa-key"></i>
-                        Token Audit (WAJIB DISIMPAN)
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <div id="audit-token" class="token-value">
-                            {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
-                        </div>
-                        <button id="copy-token-btn" 
-                                class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                {{ !$resumeToken ? 'disabled' : '' }}
-                                aria-label="Salin Kode Audit">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+ <!-- Token -->
+<div class="token-container">
+    <div class="token-label">
+        <i class="fas fa-key"></i>
+        Token Audit (WAJIB DISIMPAN)
+    </div>
+
+    <!-- TEXT TAMBAHAN (INFORMATIF, TANPA UBAH DESAIN) -->
+    <p class="text-xs text-gray-600 mt-1">
+        <strong>Penting:</strong> Simpan token ini untuk melanjutkan audit di kemudian hari.
+        Dengan token ini, progress audit dapat dipulihkan.
+        Jika terjadi kendala, hubungi Admin
+        <strong>Brahmanto Anggoro Laksono - SSSE</strong>.
+    </p>
+
+    <p class="text-xs text-gray-500 mt-1">
+        Tips: Simpan token di catatan kerja, dokumen internal, atau screenshot.
+    </p>
+
+    <div class="flex items-center gap-1 mt-2">
+        <div id="audit-token" class="token-value">
+            {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
         </div>
+        <button id="copy-token-btn" 
+                class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+                {{ !$resumeToken ? 'disabled' : '' }}
+                aria-label="Salin Kode Audit">
+            <i class="fas fa-copy"></i>
+        </button>
+    </div>
+</div>
+
 
         <!-- Progress Per Departemen -->
         <div class="mt-8">
