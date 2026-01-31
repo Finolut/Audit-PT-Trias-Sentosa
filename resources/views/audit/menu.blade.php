@@ -99,8 +99,7 @@
         </div>
     </div>
 </div>
-    
-</div>
+
 
 <!-- PROGRESS PER DEPARTEMEN -->
 <div class="mt-6">
@@ -152,74 +151,7 @@
     @endif
 </div>
 
-    @if(isset($relatedAudits) && count($relatedAudits) > 0)
-        <div class="space-y-6">
-            @foreach($relatedAudits as $deptAudit)
-                @php
-                    $deptId = $deptAudit['dept_id'];
-                    $auditId = $deptAudit['id'];
-                    $deptName = $deptAudit['dept_name'];
-                    $clauses = [4,5,6,7,8,9,10];
-
-                    // Hitung progress per klausul untuk departemen ini
-                    $deptClauseProgress = [];
-                    foreach ($clauses as $clauseNum) {
-                        $deptClauseProgress[$clauseNum] = getClauseProgress($auditId, $deptId, $clauseNum);
-                    }
-
-                    // Hitung total progress departemen (opsional, untuk judul)
-                    $deptOverall = getDeptProgress($auditId, $deptId);
-                @endphp
-
-                <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                            <i class="fas fa-building text-blue-600"></i>
-                            {{ $deptName }}
-                            @if($deptOverall['percentage'] == 100)
-                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full">Selesai</span>
-                            @elseif($deptOverall['completed'] > 0)
-                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">Aktif</span>
-                            @else
-                                <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">Belum Mulai</span>
-                            @endif
-                        </h4>
-                        <span class="text-sm font-medium text-gray-600">
-                            {{ $deptOverall['percentage'] }}% Selesai
-                        </span>
-                    </div>
-
-                    <!-- Grid Klausul per Departemen -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
-                        @foreach($clauses as $clauseNum)
-                            @php
-                                $p = $deptClauseProgress[$clauseNum];
-                                $isCompleted = $p['percentage'] >= 100;
-                                $badgeClass = $isCompleted 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : ($p['count'] > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
-                            @endphp
-                            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => $clauseNum]) }}"
-                               class="block p-3 bg-white border rounded-lg hover:shadow-sm transition-all text-center group">
-                                <div class="text-sm font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
-                                    @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
-                                </div>
-                                <div class="text-[9px] text-gray-500">Klausul {{ $clauseNum }}</div>
-                                <div class="mt-1 inline-block px-1.5 py-0.5 rounded text-[9px] font-medium {{ $badgeClass }}">
-                                    {{ $p['count'] }}/{{ $p['total'] }}
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @else
-        <div class="text-center py-6 text-gray-500">
-            Tidak ada departemen yang tersedia untuk diaudit.
-        </div>
-    @endif
-</div>
+    
     <!-- FINISH BANNER -->
     @if(isset($allFinished) && $allFinished)
         <div class="finish-banner mt-6">
