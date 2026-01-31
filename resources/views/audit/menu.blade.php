@@ -102,393 +102,278 @@
     
 </div>
 
-<!-- DEPARTMENT PROGRESS CARDS - MENAMPILKAN SEMUA DEPARTEMEN -->
-@if(isset($relatedAudits) && count($relatedAudits) > 0)
-    <div class="mt-8">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <i class="fas fa-tasks text-blue-600"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800">
-                Progress Audit Semua Departemen
-            </h3>
+<!-- QUICK ACCESS GRID - DENGAN LOADING STATE -->
+<div class="mt-6">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+            <h3 class="text-lg font-bold text-gray-900">Progress Audit</h3>
         </div>
+        <div id="current-dept-display" class="text-sm text-gray-600">
+            <i class="fas fa-building mr-1"></i>
+            <span id="dept-name">{{ $currentDeptName ?? 'Semua Departemen' }}</span>
+        </div>
+    </div>
+    
+    <div id="progress-loading" class="hidden py-6 flex justify-center items-center">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+        <span class="text-gray-600 text-sm">Memuat progress...</span>
+    </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div id="progress-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        @php
+            $clauses = [4,5,6,7,8,9,10];
+        @endphp
+        @foreach($clauses as $clauseNum)
             @php
-                $clauses = [4, 5, 6, 7, 8, 9, 10];
+                $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
+                $isCompleted = $progress['percentage'] >= 100;
+                $badgeClass = $isCompleted 
+                    ? 'bg-green-100 text-green-800' 
+                    : ($progress['count'] > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
             @endphp
-
-            @foreach($relatedAudits as $auditInfo)
-                @php
-                    // Ambil nama departemen
-                    $dept = \DB::table('departments')->where('id', $auditInfo['dept_id'])->first();
-                    $deptNameCard = $dept->name ?? 'Departemen #' . $auditInfo['dept_id'];
-                    
-                    $isCurrent = $auditInfo['id'] == ($currentAuditId ?? null);
-                    $audit = \DB::table('audits')->where('id', $auditInfo['id'])->first();
-                    $auditStatus = $audit->status ?? 'IN_PROGRESS';
-                    $isCompleted = in_array($auditStatus, ['COMPLETE', 'COMPLETED']);
-                    
-                    // Hitung progress total per departemen
-                    $totalClauses = count($clauses);
-                    $completedClauses = 0;
-                    $totalProgress = 0;
-                    
-                    foreach($clauses as $clauseNum) {
-                        $progress = \DB::table('answers')
-                            ->join('items', 'answers.item_id', '=', 'items.id')
-                            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                            ->where('answers.audit_id', $auditInfo['id'])
-                            ->where('answers.department_id', $auditInfo['dept_id'])
-                            ->whereIn('clauses.clause_code', function($query) use ($clauseNum) {
-                                $subCodes = [];
-                                switch($clauseNum) {
-                                    case 4: $subCodes = ['4.1', '4.2', '4.3', '4.4']; break;
-                                    case 5: $subCodes = ['5.1', '5.2', '5.3']; break;
-                                    case 6: $subCodes = ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2']; break;
-                                    case 7: $subCodes = ['7.1', '7.2', '7.3', '7.4', '7.5.1', '7.5.2', '7.5.3']; break;
-                                    case 8: $subCodes = ['8.1', '8.2']; break;
-                                    case 9: $subCodes = ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3']; break;
-                                    case 10: $subCodes = ['10.1', '10.2', '10.3']; break;
-                                }
-                                $query->whereIn('clause_code', $subCodes);
-                            })
-                            ->count();
-                        
-                        $totalItems = \DB::table('items')
-                            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                            ->whereIn('clauses.clause_code', function($query) use ($clauseNum) {
-                                $subCodes = [];
-                                switch($clauseNum) {
-                                    case 4: $subCodes = ['4.1', '4.2', '4.3', '4.4']; break;
-                                    case 5: $subCodes = ['5.1', '5.2', '5.3']; break;
-                                    case 6: $subCodes = ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2']; break;
-                                    case 7: $subCodes = ['7.1', '7.2', '7.3', '7.4', '7.5.1', '7.5.2', '7.5.3']; break;
-                                    case 8: $subCodes = ['8.1', '8.2']; break;
-                                    case 9: $subCodes = ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3']; break;
-                                    case 10: $subCodes = ['10.1', '10.2', '10.3']; break;
-                                }
-                                $query->whereIn('clause_code', $subCodes);
-                            })
-                            ->count();
-                        
-                        $clausePercentage = ($totalItems > 0) ? round(($progress / $totalItems) * 100) : 0;
-                        $totalProgress += $clausePercentage;
-                        
-                        if ($clausePercentage >= 100) {
-                            $completedClauses++;
-                        }
-                    }
-                    
-                    $overallPercentage = ($totalClauses > 0) ? round($totalProgress / $totalClauses) : 0;
-                    $overallStatus = $overallPercentage == 100 ? 'completed' : ($overallPercentage > 0 ? 'active' : 'pending');
-                    
-                    $statusColors = [
-                        'completed' => ['bg' => 'bg-green-50', 'text' => 'text-green-700', 'border' => 'border-green-200', 'icon' => 'fa-check-circle', 'label' => 'SELESAI'],
-                        'active' => ['bg' => 'bg-blue-50', 'text' => 'text-blue-700', 'border' => 'border-blue-200', 'icon' => 'fa-spinner', 'label' => 'SEDANG DIKERJAKAN'],
-                        'pending' => ['bg' => 'bg-gray-50', 'text' => 'text-gray-600', 'border' => 'border-gray-200', 'icon' => 'fa-clock', 'label' => 'BELUM DIMULAI']
-                    ];
-                    
-                    $status = $statusColors[$overallStatus];
-                @endphp
-
-                <div class="bg-white rounded-xl border-2 {{ $status['border'] }} overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <!-- Header Card -->
-                    <div class="p-5 border-b {{ $status['border'] }} bg-gradient-to-r from-white to-blue-50">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <div class="flex items-center gap-3 mb-2">
-                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                        <i class="fas fa-building text-blue-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-lg font-bold text-gray-800">{{ $deptNameCard }}</h4>
-                                        <p class="text-sm {{ $status['text'] }} flex items-center gap-1">
-                                            <i class="fas {{ $status['icon'] }}"></i>
-                                            {{ $status['label'] }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            @if($isCurrent)
-                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full">
-                                    AKTIF
-                                </span>
-                            @endif
-                        </div>
-                        
-                        <!-- Progress Bar -->
-                        <div class="mt-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-600">Progress Audit</span>
-                                <span class="text-sm font-bold {{ $status['text'] }}">{{ $overallPercentage }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                <div class="h-full {{ $overallPercentage == 100 ? 'bg-green-500' : 'bg-blue-500' }} transition-all duration-500" 
-                                     style="width: {{ $overallPercentage }}%"></div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">
-                                {{ $completedClauses }} dari {{ $totalClauses }} klausul selesai
-                            </p>
-                        </div>
+            <a href="{{ route('audit.show', ['id' => $auditId ?? 0, 'clause' => $clauseNum]) }}"
+               class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all hover:-translate-y-1 {{ $isCompleted ? 'border-green-400' : 'border-blue-200' }}">
+                <div class="text-center">
+                    <div class="text-2xl font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
+                        @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
                     </div>
-
-                    <!-- Klausul Grid -->
-                    <div class="p-4">
-                        <div class="grid grid-cols-3 md:grid-cols-7 gap-2">
-                            @foreach($clauses as $clauseNum)
-                                @php
-                                    $progress = \DB::table('answers')
-                                        ->join('items', 'answers.item_id', '=', 'items.id')
-                                        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                                        ->where('answers.audit_id', $auditInfo['id'])
-                                        ->where('answers.department_id', $auditInfo['dept_id'])
-                                        ->whereIn('clauses.clause_code', function($query) use ($clauseNum) {
-                                            $subCodes = [];
-                                            switch($clauseNum) {
-                                                case 4: $subCodes = ['4.1', '4.2', '4.3', '4.4']; break;
-                                                case 5: $subCodes = ['5.1', '5.2', '5.3']; break;
-                                                case 6: $subCodes = ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2']; break;
-                                                case 7: $subCodes = ['7.1', '7.2', '7.3', '7.4', '7.5.1', '7.5.2', '7.5.3']; break;
-                                                case 8: $subCodes = ['8.1', '8.2']; break;
-                                                case 9: $subCodes = ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3']; break;
-                                                case 10: $subCodes = ['10.1', '10.2', '10.3']; break;
-                                            }
-                                            $query->whereIn('clause_code', $subCodes);
-                                        })
-                                        ->count();
-                                    
-                                    $totalItems = \DB::table('items')
-                                        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-                                        ->whereIn('clauses.clause_code', function($query) use ($clauseNum) {
-                                            $subCodes = [];
-                                            switch($clauseNum) {
-                                                case 4: $subCodes = ['4.1', '4.2', '4.3', '4.4']; break;
-                                                case 5: $subCodes = ['5.1', '5.2', '5.3']; break;
-                                                case 6: $subCodes = ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2']; break;
-                                                case 7: $subCodes = ['7.1', '7.2', '7.3', '7.4', '7.5.1', '7.5.2', '7.5.3']; break;
-                                                case 8: $subCodes = ['8.1', '8.2']; break;
-                                                case 9: $subCodes = ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3']; break;
-                                                case 10: $subCodes = ['10.1', '10.2', '10.3']; break;
-                                            }
-                                            $query->whereIn('clause_code', $subCodes);
-                                        })
-                                        ->count();
-                                    
-                                    $clausePercentage = ($totalItems > 0) ? round(($progress / $totalItems) * 100) : 0;
-                                    $isClauseCompleted = $clausePercentage >= 100;
-                                    $badgeClass = $isClauseCompleted 
-                                        ? 'bg-green-100 text-green-700' 
-                                        : ($progress > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500');
-                                @endphp
-                                
-                                <a href="{{ route('audit.show', ['id' => $auditInfo['id'], 'clause' => $clauseNum]) }}"
-                                   class="block p-2 rounded-lg text-center hover:bg-gray-50 transition-colors {{ $isClauseCompleted ? 'bg-green-50' : ($progress > 0 ? 'bg-blue-50' : 'bg-gray-50') }}">
-                                    <div class="text-sm font-bold mb-0.5 {{ $isClauseCompleted ? 'text-green-600' : 'text-blue-600' }}">
-                                        @if($isClauseCompleted) ✅ @else {{ $clauseNum }} @endif
-                                    </div>
-                                    <div class="text-[10px] {{ $badgeClass }} px-1.5 py-0.5 rounded">
-                                        {{ $progress }}/{{ $totalItems }}
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- Footer Card -->
-                    <div class="p-4 bg-gray-50 border-t {{ $status['border'] }}">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs text-gray-500">
-                                    <i class="fas fa-calendar-alt mr-1"></i>
-                                    Audit ID: #{{ $auditInfo['id'] }}
-                                </p>
-                            </div>
-                            <a href="{{ route('audit.show', ['id' => $auditInfo['id'], 'clause' => 4]) }}"
-                               class="text-sm font-semibold {{ $status['text'] }} hover:underline flex items-center gap-1">
-                                Lihat Detail
-                                <i class="fas fa-arrow-right text-xs"></i>
-                            </a>
-                        </div>
+                    <div class="text-xs font-medium text-gray-600 mb-1">Klausul {{ $clauseNum }}</div>
+                    <div class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium {{ $badgeClass }}">
+                        {{ $progress['count'] }}/{{ $progress['total'] }}
                     </div>
                 </div>
-            @endforeach
-        </div>
-    </div>
-@endif
-
-<!-- FINISH BANNER -->
-@if(isset($allFinished) && $allFinished)
-    <div class="finish-banner mt-6">
-        <div class="finish-icon">🎉</div>
-        <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
-        <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview. Silakan selesaikan proses audit untuk menghasilkan laporan final.</p>
-        
-        <div class="banner-actions">
-            <a href="{{ route('audit.finish') }}" class="btn btn-success">
-                <i class="fas fa-check-circle"></i> Selesaikan Audit
             </a>
-            @if(isset($relatedAudits) && count($relatedAudits) > 1)
-                <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
-                   class="btn btn-outline">
-                    <i class="fas fa-arrow-left"></i> Audit Lainnya
-                </a>
-            @endif
-        </div>
+        @endforeach
     </div>
-@endif
+</div>
+    <!-- FINISH BANNER -->
+    @if(isset($allFinished) && $allFinished)
+        <div class="finish-banner mt-6">
+            <div class="finish-icon">🎉</div>
+            <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
+            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview. Silakan selesaikan proses audit untuk menghasilkan laporan final.</p>
+            
+            <div class="banner-actions">
+                <a href="{{ route('audit.finish') }}" class="btn btn-success">
+                    <i class="fas fa-check-circle"></i> Selesaikan Audit
+                </a>
+                @if(isset($relatedAudits) && count($relatedAudits) > 1)
+                    <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
+                       class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Audit Lainnya
+                    </a>
+                @endif
+            </div>
+        </div>
+    @endif
 </div>
 
 <style>
-    /* === DEPARTMENT PROGRESS CARD === */
-    .progress-card {
+    /* === HEADER === */
+    .header-card {
         background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .progress-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-    }
-
-    .card-header {
-        padding: 1.5rem;
-        border-bottom: 2px solid #e2e8f0;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    }
-
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0;
-    }
-
-    .card-subtitle {
-        font-size: 0.85rem;
-        color: #64748b;
-        margin: 0.25rem 0 0 0;
-    }
-
-    .progress-bar-container {
-        height: 8px;
-        background: #e2e8f0;
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 1rem 0;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-        transition: width 0.5s ease;
-        border-radius: 4px;
-    }
-
-    .progress-bar.completed {
-        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-    }
-
-    .clause-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 0.5rem;
-        padding: 1rem;
-    }
-
-    .clause-item {
-        padding: 0.75rem;
-        text-align: center;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-    }
-
-    .clause-item:hover {
-        background: #f1f5f9;
-        transform: scale(1.05);
-    }
-
-    .clause-number {
-        font-weight: 700;
-        font-size: 1rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .clause-badge {
-        font-size: 0.7rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 12px;
-        display: inline-block;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .status-in-progress {
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        color: #2563eb;
-        border: 1px solid #2563eb;
-    }
-
-    .status-completed {
-        background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-        color: #10b981;
-        border: 1px solid #10b981;
-    }
-
-    /* === FINISH BANNER === */
-    .finish-banner {
-        background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-        border-radius: 16px;
         padding: 2.5rem;
-        text-align: center;
-        border: 2px solid #10b981;
-        animation: fadeInUp 0.7s ease-out;
+        border-radius: 16px;
         box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
     }
 
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .header-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
     }
 
-    .finish-icon {
-        font-size: 4rem;
-        margin-bottom: 1.5rem;
-        display: block;
-        color: #10b981;
-    }
-
-    .finish-message {
-        font-size: 1.75rem;
+    .header-title {
+        font-size: 2rem;
         font-weight: 800;
         color: #0f172a;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+        color: #475569;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    /* === INFO GRID === */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .info-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2563eb;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .info-text {
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    /* === PROGRESS SECTION === */
+    .progress-section {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 2px solid #2563eb;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 1rem;
     }
 
-    .finish-subtext {
-        color: #475569;
-        font-size: 1.05rem;
-        max-width: 600px;
-        margin: 0 auto 1.75rem;
-        line-height: 1.7;
+    .progress-title {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 1.1rem;
     }
 
-    .banner-actions {
+    .progress-value {
+        font-weight: 700;
+        color: #2563eb;
+        font-size: 1.2rem;
+    }
+
+    .progress-bar-wrapper {
+        height: 12px;
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+        transition: width 0.5s ease;
+        border-radius: 6px;
+    }
+
+    /* === TOKEN BANNER === */
+    .token-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 2px solid #f59e0b;
+        margin-top: 1.5rem;
         display: flex;
-        justify-content: center;
-        gap: 1.25rem;
+        justify-content: space-between;
+        align-items: center;
         flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .token-label {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 0.95rem;
+    }
+
+    .token-value {
+        background: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        color: #0f172a;
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+        border: 2px solid #e2e8f0;
+    }
+
+    /* === AUDIT SWITCHER === */
+    .audit-switcher {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .switcher-title {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .audit-tabs {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .audit-tab {
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+        color: #334155;
+    }
+
+    .audit-tab:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+
+    .audit-tab.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .audit-tab.completed {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
     }
 
     /* === BUTTONS === */
@@ -542,6 +427,128 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
+
+    /* === STATUS BADGE === */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .status-in-progress {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        color: #2563eb;
+        border: 1px solid #2563eb;
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+        color: #10b981;
+        border: 1px solid #10b981;
+    }
+
+    /* === CLAUSE BADGE === */
+    .clause-badge {
+        min-width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 0.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .clause-badge.in-progress { 
+        background: #dbeafe; 
+        color: #1d4ed8; 
+    }
+
+    .clause-badge.completed { 
+        background: #dcfce7; 
+        color: #15803d; 
+    }
+
+    /* === FINISH BANNER === */
+    .finish-banner {
+        background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        text-align: center;
+        border: 2px solid #10b981;
+        animation: fadeInUp 0.7s ease-out;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .finish-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        display: block;
+        color: #10b981;
+    }
+
+    .finish-message {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .finish-subtext {
+        color: #475569;
+        font-size: 1.05rem;
+        max-width: 600px;
+        margin: 0 auto 1.75rem;
+        line-height: 1.7;
+    }
+
+    .banner-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .header-card {
+            padding: 1.5rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .audit-tabs {
+            flex-direction: column;
+        }
+
+        .audit-tab {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 
 <!-- COPY FUNCTIONALITY SCRIPT -->
@@ -586,6 +593,158 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const departmentCards = document.querySelectorAll('.audit-department-card');
+    const progressGrid = document.getElementById('progress-grid');
+    const progressLoading = document.getElementById('progress-loading');
+    const deptNameDisplay = document.getElementById('dept-name');
+
+    departmentCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.closest('a')) return;
+            
+            const auditId = this.dataset.auditId;
+            const deptName = this.dataset.deptName;
+            const isCurrent = this.dataset.isCurrent === 'true';
+            if (isCurrent) return;
+
+            activateDepartmentCard(this, auditId, deptName);
+            fetchAuditProgress(auditId, deptName);
+        });
+    });
+
+    function activateDepartmentCard(cardElement, auditId, deptName) {
+        // Reset semua kartu
+        document.querySelectorAll('.department-card').forEach(el => {
+            el.className = el.className.replace(/(border-blue-500|bg-blue-50|ring-2|ring-blue-200|scale-\[1\.02\]|border-gray-300|bg-white)/g, '').trim();
+            el.classList.add('border-gray-300', 'bg-white');
+            
+            const badge = el.querySelector('.bg-blue-100.text-blue-800');
+            if (badge) badge.remove();
+        });
+
+        // Aktifkan kartu terpilih
+        const card = cardElement.querySelector('.department-card');
+        card.classList.remove('border-gray-300', 'bg-white');
+        card.classList.add('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-200', 'scale-[1.02]');
+
+        const container = cardElement.querySelector('.flex.items-center.justify-between');
+        if (container) {
+            container.insertAdjacentHTML('beforeend', 
+                '<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full ml-2">AKTIF</span>'
+            );
+        }
+
+        document.querySelectorAll('.audit-department-card').forEach(el => {
+            el.dataset.isCurrent = 'false';
+        });
+        cardElement.dataset.isCurrent = 'true';
+
+        // Update URL tanpa reload
+        if (history.pushState) {
+            history.pushState({ auditId }, '', `/audit/menu/${auditId}`);
+        }
+    }
+
+    function fetchAuditProgress(auditId, deptName) {
+        progressGrid.classList.add('opacity-50', 'pointer-events-none');
+        progressLoading.classList.remove('hidden');
+        if (deptNameDisplay) deptNameDisplay.textContent = deptName;
+
+        fetch(`/api/audit/${auditId}/progress`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        })
+        .then(response => response.ok ? response.json() : Promise.reject('Response not ok'))
+        .then(data => {
+            if (data.success && data.progress) {
+                renderProgressGrid(data.progress, auditId);
+            } else {
+                throw new Error('Invalid progress data');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showNotification('Gagal memuat progress. Periksa koneksi internet Anda.', 'error');
+        })
+        .finally(() => {
+            progressLoading.classList.add('hidden');
+            progressGrid.classList.remove('opacity-50', 'pointer-events-none');
+        });
+    }
+
+    function renderProgressGrid(progressData, auditId) {
+        const clauses = [4, 5, 6, 7, 8, 9, 10];
+        let gridHTML = '';
+
+        clauses.forEach(clauseNum => {
+            const p = progressData[clauseNum] || { percentage: 0, count: 0, total: 5 };
+            const isCompleted = p.percentage >= 100;
+            const badgeClass = isCompleted 
+                ? 'bg-green-100 text-green-800' 
+                : (p.count > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
+
+            gridHTML += `
+            <a href="/audit/${auditId}/clause/${clauseNum}"
+               class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all hover:-translate-y-1 ${isCompleted ? 'border-green-400' : 'border-blue-200'}">
+                <div class="text-center">
+                    <div class="text-2xl font-bold mb-1 ${isCompleted ? 'text-green-600' : 'text-blue-600'}">
+                        ${isCompleted ? '✅' : clauseNum}
+                    </div>
+                    <div class="text-xs font-medium text-gray-600 mb-1">Klausul ${clauseNum}</div>
+                    <div class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${badgeClass}">
+                        ${p.count}/${p.total}
+                    </div>
+                </div>
+            </a>`;
+        });
+
+        progressGrid.innerHTML = gridHTML;
+    }
+
+    function showNotification(message, type = 'info') {
+        let container = document.getElementById('notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notification-container';
+            container.className = 'fixed top-4 right-4 z-50 max-w-md';
+            document.body.appendChild(container);
+        }
+
+        const color = type === 'error' ? 'red' : 'blue';
+        const icon = type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+        
+        const notification = document.createElement('div');
+        notification.className = `flex items-start bg-${color}-50 border-l-4 border-${color}-500 p-4 rounded-r-lg mb-3 shadow-lg animate-fade-in`;
+        notification.innerHTML = `
+            <i class="fas ${icon} text-${color}-400 mt-0.5 mr-3"></i>
+            <div class="text-sm text-${color}-700">${message}</div>
+        `;
+
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('animate-fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+
+    // Animasi CSS untuk notifikasi
+    if (!document.getElementById('notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+            @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+            .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+            .animate-fade-out { animation: fadeOut 0.3s ease-in; }
+        `;
+        document.head.appendChild(style);
     }
 });
 </script>
