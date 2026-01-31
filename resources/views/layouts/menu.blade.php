@@ -281,10 +281,6 @@
                                     <div class="flex items-center justify-between">
                                         <span class="department-name hide-on-mini">{{ $dept['dept_name'] }}</span>
                                     </div>
-                                    <div class="department-status mt-1">
-                                        <span class="status-badge {{ $statusClass }} hide-on-mini">{{ $statusText }}</span>
-                                        <span class="text-xs text-gray-500 hide-on-mini">{{ $statusDesc }}</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
