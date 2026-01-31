@@ -301,7 +301,7 @@
 
     <!-- Header Section -->
     <header class="header-section">
-        <div class="max-w-7xl mx-auto">
+        <div class="max-w-7xl mx-auto px-4 lg:px-6">
             <h1 class="header-title">MULAI AUDIT INTERNAL</h1>
             <p class="header-subtitle">Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.</p>
         </div>
@@ -344,55 +344,53 @@
             </div>
         </div>
 
-        <!-- Token Section -->
-        <div class="section-card">
-            <h2 class="section-title">Token Audit (WAJIB DISIMPAN)</h2>
-            <p class="section-description">Simpan kode ini untuk melanjutkan audit di kemudian hari. Dengan kode ini, progress audit dapat dipulihkan.</p>
-            
-            <div class="token-card">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div class="flex-1">
-                        <div class="flex items-start">
-                            <div class="shrink-0 mt-0.5">
-                                <i class="fas fa-key text-xl" style="color: #1a365d;"></i>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="font-bold text-gray-800 mb-1">Penting:</h3>
-                                <p class="text-sm text-gray-600 mb-2">
-                                    Simpan kode ini untuk melanjutkan audit di kemudian hari. 
-                                    Dengan kode ini, progress audit <span class="font-medium" style="color: #1a365d;">dapat dipulihkan</span>.
-                                    Jika ada kendala dengan token audit bisa menghubungi Admin 
-                                    <span class="font-semibold text-gray-700">Brahmanto Anggoro Laksono - SSSE</span>
-                                </p>
-                                <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                                    <span class="font-medium">Tips:</span> Simpan token di tempat aman (catatan kerja, dokumen internal, atau screenshot).
-                                </p>
-                            </div>
-                        </div>
+<!-- CRITICAL TOKEN SECTION - VERSI POLos & CLEAN -->
+<div class="max-w-4xl mx-auto mb-10">
+    <div class="bg-white border rounded-2xl p-6 shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div class="flex-1">
+                <div class="flex items-start">
+                    <div class="shrink-0 mt-0.5">
+                        <i class="fas fa-key text-xl" style="color: #1a365d;"></i>
                     </div>
-                    
-                    <div class="w-full sm:w-auto">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-stretch">
-                                <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-l-lg break-all min-w-[250px]">
-                                    A7B9C2D3E4F5
-                                </div>
-                                <button id="copy-token-btn" 
-                                        class="text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-opacity duration-200 whitespace-nowrap"
-                                        style="background-color: #1a365d;"
-                                        aria-label="Salin Kode Audit">
-                                    <i class="fas fa-copy"></i>
-                                    <span class="hidden sm:inline">Salin</span>
-                                </button>
-                            </div>
-                            <p class="text-xs text-gray-400 text-right">
-                                Klik tombol Salin untuk menyalin ke clipboard
-                            </p>
-                        </div>
+                    <div class="ml-3">
+                        <h2 class="text-lg font-bold text-gray-800 mb-1">Token Audit (WAJIB DISIMPAN)</h2>
+                        <p class="text-sm text-gray-600 mb-2">
+                            <span class="font-semibold text-gray-800">Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
+                            Dengan kode ini, progress audit <span class="font-medium" style="color: #1a365d;">dapat dipulihkan</span>.
+                            Jika ada kendala dengan token audit bisa menghubungi Admin 
+                            <span class="font-semibold text-gray-700">Brahmanto Anggoro Laksono - SSSE</span>
+                        </p>
+                        <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+                            <span class="font-medium">Tips:</span>Simpan token di tempat aman (catatan kerja, dokumen internal, atau screenshot).
+                        </p>
                     </div>
                 </div>
             </div>
+            
+            <div class="w-full sm:w-auto">
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-stretch">
+                        <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-l-lg break-all min-w-[250px]">
+                            {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                        </div>
+                        <button id="copy-token-btn" 
+                                class="text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-opacity duration-200 whitespace-nowrap {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90' }}"
+                                style="background-color: #1a365d;"
+                                {{ !$resumeToken ? 'disabled' : '' }}
+                                aria-label="Salin Kode Audit">
+                            <i class="fas fa-copy"></i>
+                            <span class="hidden sm:inline">Salin</span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 text-right">
+                        Klik tombol Salin untuk menyalin ke clipboard
+                    </p>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
         <!-- Department Progress Section -->
         <div class="section-card">
@@ -498,47 +496,71 @@
             </div>
         </div>
 
-        <!-- Finish Banner -->
-        <div class="finish-banner">
-            <div class="finish-icon">🎉</div>
-            <h2 class="finish-message">Audit Selesai!</h2>
-            <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview. Silakan selesaikan proses audit untuk menghasilkan laporan final.</p>
-            
-            <div class="banner-actions">
-                <button class="btn btn-success">
-                    <i class="fas-check-circle"></i> Selesaikan Audit
-                </button>
-                <button class="btn btn-outline">
-                    <i class="fas fa-arrow-left"></i> Audit Lainnya
-                </button>
-            </div>
-        </div>
+     
     </div>
-
+@push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const copyBtn = document.getElementById('copy-token-btn');
-            
-            if (copyBtn) {
-                copyBtn.addEventListener('click', async () => {
-                    try {
-                        const tokenElement = document.getElementById('audit-token');
-                        const tokenValue = tokenElement.textContent.trim();
-                        await navigator.clipboard.writeText(tokenValue);
-                        
-                        copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
-                        copyBtn.style.backgroundColor = '#10b981';
-                        
-                        setTimeout(() => {
-                            copyBtn.innerHTML = '<i class="fas fa-copy"></i><span class="hidden sm:inline">Salin</span>';
-                            copyBtn.style.backgroundColor = '#1a365d';
-                        }, 2000);
-                    } catch (err) {
-                        console.error('Gagal menyalin token:', err);
-                        alert('Gagal menyalin. Silakan salin manual.');
-                    }
-                });
+document.addEventListener('DOMContentLoaded', function() {
+    const copyBtn = document.getElementById('copy-token-btn');
+    const tokenElement = document.getElementById('audit-token');
+    const originalBtnHTML = copyBtn.innerHTML;
+    
+    if (copyBtn && tokenElement && !copyBtn.disabled) {
+        copyBtn.addEventListener('click', async () => {
+            try {
+                // Clean token value (remove extra spaces)
+                const tokenValue = tokenElement.textContent.trim();
+                
+                // Copy to clipboard
+                await navigator.clipboard.writeText(tokenValue);
+                
+                // Visual feedback
+                copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
+                copyBtn.classList.replace('bg-amber-500', 'bg-green-500');
+                copyBtn.classList.replace('hover:bg-amber-600', 'hover:bg-green-600');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalBtnHTML;
+                    copyBtn.classList.replace('bg-green-500', 'bg-amber-500');
+                    copyBtn.classList.replace('hover:bg-green-600', 'hover:bg-amber-600');
+                }, 2000);
+                
+                // Optional: Show toast notification
+                if (typeof showToast !== 'undefined') {
+                    showToast('Kode Audit berhasil disalin ke clipboard!', 'success');
+                }
+            } catch (err) {
+                console.error('Gagal menyalin token:', err);
+                if (typeof showToast !== 'undefined') {
+                    showToast('Gagal menyalin kode. Silakan salin manual.', 'error');
+                } else {
+                    alert('Berhasil disalin! Pastikan untuk menyimpan kode ini di tempat aman.');
+                }
             }
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const departmentCards = document.querySelectorAll('.audit-department-card');
+    const progressGrid = document.getElementById('progress-grid');
+    const progressLoading = document.getElementById('progress-loading');
+    const deptNameDisplay = document.getElementById('dept-name');
+
+    departmentCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.closest('a')) return;
+            
+            const auditId = this.dataset.auditId;
+            const deptName = this.dataset.deptName;
+            const isCurrent = this.dataset.isCurrent === 'true';
+            if (isCurrent) return;
+
+            activateDepartmentCard(this, auditId, deptName);
+            fetchAuditProgress(auditId, deptName);
+        });
+    });
         });
     </script>
 </body>
