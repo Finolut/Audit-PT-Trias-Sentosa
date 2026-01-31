@@ -86,6 +86,10 @@
             background: #f0f9ff;
             color: #0ea5e9;
         }
+        .status-completed {
+            background: #dcfce7;
+            color: #15803d;
+        }
         
         /* Clause-specific styling */
         .clause-link { 
@@ -137,7 +141,7 @@
             opacity: 0;
         }
         .clauses-container.visible {
-            max-height: 500px;
+            max-height: 800px;
             opacity: 1;
         }
     </style>
@@ -175,38 +179,99 @@
 
                 <!-- Department Links with Expandable Clauses -->
                 @php
-                    // Contoh data departemen yang sedang diaudit
-                    $departments = [
-                        [
-                            'id' => 1,
-                            'name' => 'Accounting & MIS - Tax Department',
-                            'clauses' => [4, 5, 6],
-                            'status' => 'active', // active/pending
-                            'active' => request()->route('dept') == 1
-                        ],
-                        [
-                            'id' => 2,
-                            'name' => 'BOPP#3 - Waru',
-                            'clauses' => [7, 8, 9],
-                            'status' => 'pending',
-                            'active' => request()->route('dept') == 2
-                        ],
-                        // Tambahkan departemen lain sesuai kebutuhan
-                    ];
-                    $currentDept = request()->route('dept');
+                    // Gunakan data relatedAudits dari controller
+                    $departments = $relatedAudits ?? [];
+                    $currentDeptId = $activeDepartmentId ?? null;
+                    $currentAuditId = $auditId ?? null;
                     $currentClause = request()->route('clause');
+                    
+                    // Hitung progress per departemen
+                    function getDeptProgress($auditId, $deptId) {
+                        $mainClauses = [4,5,6,7,8,9,10];
+                        $completed = 0;
+                        foreach ($mainClauses as $mainCode) {
+                            $subCodes = [];
+                            switch($mainCode) {
+                                case 4: $subCodes = ['4.1', '4.2', '4.3', '4.4']; break;
+                                case 5: $subCodes = ['5.1', '5.2', '5.3']; break;
+                                case 6: $subCodes = ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2']; break;
+                                case 7: $subCodes = ['7.1', '7.2', '7.3', '7.4', '7.5.1', '7.5.2', '7.5.3']; break;
+                                case 8: $subCodes = ['8.1', '8.2']; break;
+                                case 9: $subCodes = ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3']; break;
+                                case 10: $subCodes = ['10.1', '10.2', '10.3']; break;
+                            }
+                            
+                            $totalItems = \DB::table('items')
+                                ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                                ->whereIn('clauses.clause_code', $subCodes)
+                                ->count();
+                            
+                            $answeredItems = \DB::table('answers')
+                                ->join('items', 'answers.item_id', '=', 'items.id')
+                                ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                                ->where('answers.audit_id', $auditId)
+                                ->where('answers.department_id', $deptId)
+                                ->whereIn('clauses.clause_code', $subCodes)
+                                ->count();
+                            
+                            if ($answeredItems >= $totalItems && $totalItems > 0) {
+                                $completed++;
+                            }
+                        }
+                        return [
+                            'percentage' => count($mainClauses) > 0 ? round(($completed / count($mainClauses)) * 100) : 0,
+                            'completed' => $completed,
+                            'total' => count($mainClauses)
+                        ];
+                    }
+                    
+                    function getClauseProgress($auditId, $deptId, $mainCode) {
+                        $subCodes = [];
+                        switch($mainCode) {
+                            case 4: $subCodes = ['4.1', '4.2', '4.3', '4.4']; break;
+                            case 5: $subCodes = ['5.1', '5.2', '5.3']; break;
+                            case 6: $subCodes = ['6.1.1', '6.1.2', '6.1.3', '6.1.4', '6.2.1', '6.2.2']; break;
+                            case 7: $subCodes = ['7.1', '7.2', '7.3', '7.4', '7.5.1', '7.5.2', '7.5.3']; break;
+                            case 8: $subCodes = ['8.1', '8.2']; break;
+                            case 9: $subCodes = ['9.1.1', '9.1.2', '9.2.1 & 9.2.2', '9.3']; break;
+                            case 10: $subCodes = ['10.1', '10.2', '10.3']; break;
+                        }
+                        
+                        $totalItems = \DB::table('items')
+                            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                            ->whereIn('clauses.clause_code', $subCodes)
+                            ->count();
+                        
+                        $answeredItems = \DB::table('answers')
+                            ->join('items', 'answers.item_id', '=', 'items.id')
+                            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                            ->where('answers.audit_id', $auditId)
+                            ->where('answers.department_id', $deptId)
+                            ->whereIn('clauses.clause_code', $subCodes)
+                            ->count();
+                        
+                        $percentage = ($totalItems > 0) ? round(($answeredItems / $totalItems) * 100) : 0;
+                        
+                        return [
+                            'percentage' => $percentage,
+                            'count' => $answeredItems,
+                            'total' => $totalItems,
+                            'completed' => $percentage >= 100
+                        ];
+                    }
                 @endphp
 
                 @foreach($departments as $dept)
                     @php
-                        $isDeptActive = $currentDept == $dept['id'];
-                        $deptClauses = $dept['clauses'];
-                        $statusClass = $dept['status'] === 'active' ? 'status-active' : 'status-pending';
-                        $statusText = $dept['status'] === 'active' ? 'AKTIF' : 'Belum Dimulai';
-                        $statusDesc = $dept['status'] === 'active' ? 'Sedang Dikerjakan' : 'Belum Dimulai';
+                        $deptProgress = getDeptProgress($dept['id'], $dept['dept_id']);
+                        $isDeptActive = $dept['dept_id'] == $currentDeptId && $dept['id'] == $currentAuditId;
+                        $status = $deptProgress['percentage'] == 100 ? 'completed' : ($deptProgress['completed'] > 0 ? 'active' : 'pending');
+                        $statusClass = $status === 'completed' ? 'status-completed' : ($status === 'active' ? 'status-active' : 'status-pending');
+                        $statusText = $status === 'completed' ? 'SELESAI' : ($status === 'active' ? 'AKTIF' : 'Belum Dimulai');
+                        $statusDesc = $status === 'completed' ? 'Audit Selesai' : ($status === 'active' ? 'Sedang Dikerjakan' : 'Belum Dimulai');
                     @endphp
                     
-                    <div class="department-item {{ $isDeptActive ? 'expanded' : '' }}" data-dept-id="{{ $dept['id'] }}">
+                    <div class="department-item {{ $isDeptActive ? 'expanded' : '' }}" data-dept-id="{{ $dept['dept_id'] }}">
                         <div class="department-toggle {{ $isDeptActive ? 'active' : '' }}">
                             <div class="flex items-center w-full">
                                 <span class="department-icon">
@@ -214,9 +279,16 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-2m-2 0h-5m-9 0H3m2 0l6.01-6.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </span>
-                                <div class="department-content">
-                                    <span class="department-name hide-on-mini">{{ $dept['name'] }}</span>
-                                    <div class="department-status">
+                                <div class="department-content flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="department-name hide-on-mini">{{ $dept['dept_name'] }}</span>
+                                        @if($deptProgress['total'] > 0)
+                                            <span class="text-xs font-semibold text-blue-600 hide-on-mini">
+                                                {{ $deptProgress['completed'] }}/{{ $deptProgress['total'] }} Klausul
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="department-status mt-1">
                                         <span class="status-badge {{ $statusClass }} hide-on-mini">{{ $statusText }}</span>
                                         <span class="text-xs text-gray-500 hide-on-mini">{{ $statusDesc }}</span>
                                     </div>
@@ -224,23 +296,27 @@
                             </div>
                         </div>
                         
-                        <div class="clauses-container {{ $isDeptActive ? 'visible' : 'hidden' }}" id="clauses-{{ $dept['id'] }}">
-                            @foreach($deptClauses as $clauseNum)
+                        <div class="clauses-container {{ $isDeptActive ? 'visible' : 'hidden' }}" id="clauses-{{ $dept['dept_id'] }}">
+                            @php
+                                $clauses = [4,5,6,7,8,9,10];
+                            @endphp
+                            
+                            @foreach($clauses as $clauseNum)
                                 @php
-                                    $progress = $clauseProgress[$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 5];
+                                    $clauseProgressData = getClauseProgress($dept['id'], $dept['dept_id'], $clauseNum);
                                     $isCurrent = $currentClause == $clauseNum && $isDeptActive;
-                                    $isCompleted = $progress['percentage'] >= 100;
-                                    $badgeClass = $isCompleted ? 'completed' : ($progress['count'] > 0 ? 'in-progress' : '');
+                                    $isCompleted = $clauseProgressData['completed'];
+                                    $badgeClass = $isCompleted ? 'completed' : ($clauseProgressData['count'] > 0 ? 'in-progress' : '');
                                 @endphp
-                                <a href="{{ route('audit.show', ['id' => $auditId ?? 1, 'dept' => $dept['id'], 'clause' => $clauseNum]) }}"
+                                <a href="{{ route('audit.show', ['id' => $dept['id'], 'clause' => $clauseNum]) }}"
                                    class="clause-link flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ $isCurrent ? 'active-link' : '' }}">
                                     <span class="text-lg min-w-[20px] text-center mr-2">
                                         @if($isCompleted) ✅ @else 📋 @endif
                                     </span> 
                                     <span class="hide-on-mini whitespace-nowrap mr-2">Klausul {{ $clauseNum }}</span>
-                                    @if($progress['total'] > 0)
+                                    @if($clauseProgressData['total'] > 0)
                                         <span class="clause-badge {{ $badgeClass }} hide-on-mini">
-                                            {{ $progress['count'] }}/{{ $progress['total'] }}
+                                            {{ $clauseProgressData['count'] }}/{{ $clauseProgressData['total'] }}
                                         </span>
                                     @endif
                                 </a>
