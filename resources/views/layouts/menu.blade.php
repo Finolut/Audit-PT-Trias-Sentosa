@@ -30,9 +30,11 @@
         .department-item { 
             position: relative; 
             transition: all 0.3s ease;
+            margin-bottom: 0.25rem;
         }
         .department-item.expanded { 
-            background-color: #f3f4f6;
+            background-color: #f8fafc;
+            border-radius: 0.75rem;
         }
         .department-toggle {
             display: flex;
@@ -41,43 +43,48 @@
             cursor: pointer;
             width: 100%;
             padding: 0.75rem 0.75rem;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             transition: all 0.2s ease;
         }
         .department-toggle:hover {
-            background-color: #f9fafb;
+            background-color: #f1f5f9;
         }
         .department-toggle.active {
-            background-color: #eff6ff;
-            color: #1d4ed8;
+            background-color: #e0f2fe;
+            color: #0c4a6e;
             font-weight: 600;
         }
         .department-icon {
-            transition: transform 0.3s ease;
             min-width: 24px;
             text-align: center;
             margin-right: 0.75rem;
-        }
-        .department-icon.expanded {
-            transform: rotate(90deg);
+            color: #38bdf8;
         }
         .department-name {
             flex: 1;
             text-align: left;
-            font-weight: 500;
-            font-size: 0.875rem;
+            font-weight: 600;
+            font-size: 0.87rem;
         }
-        .department-badge {
-            min-width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            font-size: 0.75rem;
+        .department-status {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .status-active {
             background: #dbeafe;
             color: #1d4ed8;
-            font-weight: 600;
+        }
+        .status-pending {
+            background: #f0f9ff;
+            color: #0ea5e9;
         }
         
         /* Clause-specific styling */
@@ -90,7 +97,7 @@
             transition: all 0.2s ease;
         }
         .clause-link:hover {
-            background-color: #f9fafb;
+            background-color: #f8fafc;
             border-left-color: #3b82f6;
         }
         .clause-link::after {
@@ -123,6 +130,7 @@
         .clauses-container {
             overflow: hidden;
             transition: max-height 0.3s ease, opacity 0.3s ease;
+            padding-left: 1rem;
         }
         .clauses-container.hidden {
             max-height: 0;
@@ -167,21 +175,23 @@
 
                 <!-- Department Links with Expandable Clauses -->
                 @php
-                    // Sample department data - replace with actual data from your database
+                    // Contoh data departemen yang sedang diaudit
                     $departments = [
                         [
                             'id' => 1,
-                            'name' => 'Produksi',
+                            'name' => 'Accounting & MIS - Tax Department',
                             'clauses' => [4, 5, 6],
+                            'status' => 'active', // active/pending
                             'active' => request()->route('dept') == 1
                         ],
                         [
                             'id' => 2,
-                            'name' => 'Quality Control',
-                            'clauses' => [7, 8, 9, 10],
+                            'name' => 'BOPP#3 - Waru',
+                            'clauses' => [7, 8, 9],
+                            'status' => 'pending',
                             'active' => request()->route('dept') == 2
                         ],
-                        // Add more departments as needed
+                        // Tambahkan departemen lain sesuai kebutuhan
                     ];
                     $currentDept = request()->route('dept');
                     $currentClause = request()->route('clause');
@@ -191,18 +201,26 @@
                     @php
                         $isDeptActive = $currentDept == $dept['id'];
                         $deptClauses = $dept['clauses'];
+                        $statusClass = $dept['status'] === 'active' ? 'status-active' : 'status-pending';
+                        $statusText = $dept['status'] === 'active' ? 'AKTIF' : 'Belum Dimulai';
+                        $statusDesc = $dept['status'] === 'active' ? 'Sedang Dikerjakan' : 'Belum Dimulai';
                     @endphp
                     
                     <div class="department-item {{ $isDeptActive ? 'expanded' : '' }}" data-dept-id="{{ $dept['id'] }}">
                         <div class="department-toggle {{ $isDeptActive ? 'active' : '' }}">
                             <div class="flex items-center w-full">
-                                <span class="department-icon {{ $isDeptActive ? 'expanded' : '' }}">
+                                <span class="department-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-2m-2 0h-5m-9 0H3m2 0l6.01-6.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </span>
-                                <span class="department-name hide-on-mini">{{ $dept['name'] }}</span>
-                                <span class="department-badge hide-on-mini">{{ count($deptClauses) }}</span>
+                                <div class="department-content">
+                                    <span class="department-name hide-on-mini">{{ $dept['name'] }}</span>
+                                    <div class="department-status">
+                                        <span class="status-badge {{ $statusClass }} hide-on-mini">{{ $statusText }}</span>
+                                        <span class="text-xs text-gray-500 hide-on-mini">{{ $statusDesc }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -330,24 +348,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar & Mobile Menu Logic (Identical to Admin Layout)
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            const menuToggle = document.getElementById('menu-toggle');
-            const btnMinimize = document.getElementById('btn-minimize');
-            const iconCollapse = document.getElementById('icon-collapse');
-            const iconExpand = document.getElementById('icon-expand');
-            const logoutBtn = document.getElementById('logout-btn');
-            const logoutModal = document.getElementById('logout-modal');
-            const cancelLogout = document.getElementById('cancel-logout');
-            const modalContent = document.querySelector('.modal-content');
-
             // Department toggle functionality
             const departmentItems = document.querySelectorAll('.department-item');
             departmentItems.forEach(item => {
                 const toggleBtn = item.querySelector('.department-toggle');
                 const clausesContainer = item.querySelector('.clauses-container');
-                const icon = item.querySelector('.department-icon');
                 
                 toggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -361,7 +366,6 @@
                             otherItem.classList.remove('expanded');
                             otherItem.querySelector('.clauses-container').classList.remove('visible');
                             otherItem.querySelector('.clauses-container').classList.add('hidden');
-                            otherItem.querySelector('.department-icon').classList.remove('expanded');
                             otherItem.querySelector('.department-toggle').classList.remove('active');
                         }
                     });
@@ -371,17 +375,27 @@
                         item.classList.remove('expanded');
                         clausesContainer.classList.remove('visible');
                         clausesContainer.classList.add('hidden');
-                        icon.classList.remove('expanded');
                         toggleBtn.classList.remove('active');
                     } else {
                         item.classList.add('expanded');
                         clausesContainer.classList.remove('hidden');
                         clausesContainer.classList.add('visible');
-                        icon.classList.add('expanded');
                         toggleBtn.classList.add('active');
                     }
                 });
             });
+
+            // Sidebar & Mobile Menu Logic
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const menuToggle = document.getElementById('menu-toggle');
+            const btnMinimize = document.getElementById('btn-minimize');
+            const iconCollapse = document.getElementById('icon-collapse');
+            const iconExpand = document.getElementById('icon-expand');
+            const logoutBtn = document.getElementById('logout-btn');
+            const logoutModal = document.getElementById('logout-modal');
+            const cancelLogout = document.getElementById('cancel-logout');
+            const modalContent = document.querySelector('.modal-content');
 
             // Mobile menu toggle
             if (menuToggle) {
