@@ -566,19 +566,47 @@ $activeDeptId = $audit->department_id;
             ->where('is_parent', false)
             ->get();
         
-        foreach ($siblings as $sibling) {
-            $sibAudit = DB::table('audits')->where('audit_session_id', $sibling->id)->first();
-            if ($sibAudit) {
-                $sibDept = DB::table('departments')->where('id', $sibAudit->department_id)->value('name');
-                $relatedAudits[] = [
-                    'id' => $sibAudit->id,
-                    'dept_id' => $sibAudit->department_id,
-                    'dept_name' => $sibDept,
-                    'audit_code' => $sibAudit->audit_code,
-                    'status' => $sibAudit->status,
-                ];
-            }
+foreach ($siblings as $sibling) {
+    $sibAudit = DB::table('audits')->where('audit_session_id', $sibling->id)->first();
+    if ($sibAudit) {
+        $sibDept = DB::table('departments')->where('id', $sibAudit->department_id)->value('name');
+
+        // 🔥 Hitung progress per klausul untuk departemen ini
+        $clausesProgress = [];
+        foreach ($this->mainClauses as $mainCode => $subCodes) {
+            $totalItems = DB::table('items')
+                ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                ->whereIn('clauses.clause_code', $subCodes)
+                ->count();
+
+            $answeredItems = DB::table('answers')
+                ->join('items', 'answers.item_id', '=', 'items.id')
+                ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+                ->where('answers.audit_id', $sibAudit->id)
+                ->where('answers.department_id', $sibAudit->department_id)
+                ->whereIn('clauses.clause_code', $subCodes)
+                ->count();
+
+            $percentage = ($totalItems > 0) ? round(($answeredItems / $totalItems) * 100) : 0;
+
+            $clausesProgress[$mainCode] = [
+                'percentage' => $percentage,
+                'count'      => $answeredItems,
+                'total'      => $totalItems,
+                'completed'  => $percentage >= 100,
+            ];
         }
+
+        $relatedAudits[] = [
+            'id' => $sibAudit->id,
+            'dept_id' => $sibAudit->department_id,
+            'dept_name' => $sibDept,
+            'audit_code' => $sibAudit->audit_code,
+            'status' => $sibAudit->status,
+            'clauses' => $clausesProgress, // ✅ INI YANG DIBUTUHKAN DI BLADE
+        ];
+    }
+}
     }
 
     return view('audit.menu', [
@@ -1136,5 +1164,30 @@ private function getDepartmentStatus($auditId, $departmentId)
     return 'pending';
 }
 
+private function getClauseProgressForDept($auditId, $deptId, $mainCode)
+{
+    $subCodes = $this->mainClauses[$mainCode] ?? [];
+    
+    $totalItems = DB::table('items')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->whereIn('clauses.clause_code', $subCodes)
+        ->count();
 
+    $answeredItems = DB::table('answers')
+        ->join('items', 'answers.item_id', '=', 'items.id')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->where('answers.audit_id', $auditId)
+        ->where('answers.department_id', $deptId)
+        ->whereIn('clauses.clause_code', $subCodes)
+        ->count();
+
+    $percentage = ($totalItems > 0) ? round(($answeredItems / $totalItems) * 100) : 0;
+
+    return [
+        'percentage' => $percentage,
+        'count' => $answeredItems,
+        'total' => $totalItems,
+        'completed' => $percentage >= 100,
+    ];
+}
 }

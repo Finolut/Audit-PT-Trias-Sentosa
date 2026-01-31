@@ -102,13 +102,58 @@
     
 </div>
 
-<!-- QUICK ACCESS GRID - DENGAN LOADING STATE -->
 <!-- PROGRESS PER DEPARTEMEN -->
 <div class="mt-6">
     <div class="flex items-center gap-2 mb-4">
         <i class="fas fa-chart-line text-blue-600 text-xl"></i>
         <h3 class="text-lg font-bold text-gray-900">Progress Audit per Departemen</h3>
     </div>
+
+    @if($relatedAudits)
+        <div class="space-y-6">
+            @foreach($relatedAudits as $dept)
+                <div class="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                            <i class="fas fa-building text-blue-600"></i>
+                            {{ $dept['dept_name'] }}
+                        </h4>
+                        {{-- Opsional: tampilkan progress total --}}
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2">
+                        @php
+                            $clauses = [4,5,6,7,8,9,10];
+                        @endphp
+                        @foreach($clauses as $clauseNum)
+                            @php
+                                $p = $dept['clauses'][$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
+                                $isCompleted = $p['percentage'] >= 100;
+                                $badgeClass = $isCompleted 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : ($p['count'] > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
+                            @endphp
+                            <a href="{{ route('audit.show', ['id' => $dept['id'], 'clause' => $clauseNum]) }}"
+                               class="block p-3 bg-white border rounded-lg hover:shadow-sm transition-all text-center group">
+                                <div class="text-sm font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
+                                    @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
+                                </div>
+                                <div class="text-[9px] text-gray-500">Klausul {{ $clauseNum }}</div>
+                                <div class="mt-1 inline-block px-1.5 py-0.5 rounded text-[9px] font-medium {{ $badgeClass }}">
+                                    {{ $p['count'] }}/{{ $p['total'] }}
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <div class="text-center py-6 text-gray-500">
+            Tidak ada departemen yang tersedia.
+        </div>
+    @endif
+</div>
 
     @if(isset($relatedAudits) && count($relatedAudits) > 0)
         <div class="space-y-6">
