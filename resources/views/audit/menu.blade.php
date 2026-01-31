@@ -1,12 +1,13 @@
 @extends('layouts.menu')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
+<!-- JARAK ATAS DITAMBAHKAN DI SINI -->
+<div class="max-w-7xl mx-auto mt-10">
 
-<div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+<!-- BORDER UTAMA: TEBA L 4PX, WARNA BIRU TUUA, SUDUT SIKU-SIKU (SAMPAI POJOK) -->
+<div class="bg-white shadow-lg overflow-hidden" style="border: 4px solid #1a365d; border-radius: 0;">
 
 <!-- HEADER / INSTRUCTION - DIPERKAYA DENGAN INFORMASI LENGKAP -->
-
 <h1 class="text-3xl font-bold text-gray-900 mb-4 text-center">
     Mulai Audit Internal
 </h1>
@@ -163,7 +164,9 @@ N/A: Tidak relevan dengan departemen</p>
             </div>
         </div>
     @endif
-</div>
+</div> <!-- Penutup card utama dengan border tebal -->
+
+</div> <!-- Penutup container max-w-7xl dengan mt-10 -->
 
 <style>
     /* === HEADER === */
