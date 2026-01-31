@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Mulai Audit Internal</title>
-    <!-- Font Awesome -->
+    <title>Internal Audit Charter | PT Trias Sentosa Tbk</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,587 +13,431 @@
                 extend: {
                     colors: {
                         primary: '#1a365d',
+                        secondary: '#2563eb',
+                        accent: '#10b981'
                     }
                 }
             }
         }
     </script>
     <style>
-        /* === HEADER === */
-        .header-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        /* Header styling */
+        .header-section {
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            color: white;
+            padding: 3rem 1.5rem;
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
-            border: 1px solid #e2e8f0;
         }
 
-        .header-card::before {
+        .header-section::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 6px;
-            background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="%232563eb" stroke-width="0.5" opacity="0.1"/></svg>');
+            opacity: 0.1;
         }
 
         .header-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 0.5rem;
             letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .header-subtitle {
-            color: #475569;
             font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
+            font-weight: 400;
+            max-width: 800px;
+            line-height: 1.6;
+            opacity: 0.9;
         }
 
-        /* === INFO GRID === */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: #f8fafc;
+        /* Form sections */
+        .section-card {
+            background: white;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .info-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #2563eb;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .info-text {
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        .info-label {
-            font-size: 0.85rem;
-            color: #475569;
-        }
-
-        /* === PROGRESS SECTION === */
-        .progress-section {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
-            border-radius: 12px;
-            border: 2px solid #2563eb;
             margin-bottom: 1.5rem;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .progress-title {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 1.1rem;
-        }
-
-        .progress-value {
-            font-weight: 700;
-            color: #2563eb;
-            font-size: 1.2rem;
-        }
-
-        .progress-bar-wrapper {
-            height: 12px;
-            background: white;
-            border-radius: 6px;
-            overflow: hidden;
             border: 1px solid #e2e8f0;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
-            transition: width 0.5s ease;
-            border-radius: 6px;
-        }
-
-        /* === TOKEN BANNER === */
-        .token-banner {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            padding: 1.25rem;
-            border-radius: 12px;
-            border: 2px solid #f59e0b;
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .token-label {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 0.95rem;
-        }
-
-        .token-value {
-            background: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+        .section-title {
+            font-size: 1.4rem;
             font-weight: 700;
-            color: #0f172a;
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            border: 2px solid #e2e8f0;
+            color: #1a365d;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
         }
 
-        /* === AUDIT SWITCHER === */
-        .audit-switcher {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-            border: 1px solid #e2e8f0;
-        }
-
-        .switcher-title {
-            font-weight: 700;
-            color: #0f172a;
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .audit-tabs {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .audit-tab {
-            padding: 0.75rem 1.25rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
+        .section-description {
+            color: #475569;
             font-size: 0.95rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 2px solid transparent;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
             color: #334155;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
-        .audit-tab:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
-        .audit-tab.active {
-            background: #2563eb;
-            color: white;
+        .form-control:focus {
+            outline: none;
             border-color: #2563eb;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
 
-        .audit-tab.completed {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%2364748b' d='M2 0L0 2h4L2 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.8em;
         }
 
-        /* === BUTTONS === */
+        /* Button styling */
         .btn {
-            padding: 0.875rem 1.75rem;
-            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             font-weight: 600;
             font-size: 1rem;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             transition: all 0.3s;
-            border: 2px solid;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-primary {
             background: #2563eb;
             color: white;
-            border-color: #2563eb;
         }
 
         .btn-primary:hover {
-            background: white;
-            color: #2563eb;
+            background: #1d4ed8;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .btn-outline {
             background: transparent;
-            color: #334155;
-            border-color: #cbd5e1;
-        }
-
-        .btn-outline:hover {
-            background: #f1f5f9;
-            border-color: #94a3b8;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-
-        .btn-success:hover {
-            background: white;
-            color: #10b981;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        /* === STATUS BADGE === */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .status-in-progress {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             color: #2563eb;
             border: 1px solid #2563eb;
         }
 
-        .status-completed {
-            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-            color: #10b981;
-            border: 1px solid #10b981;
+        .btn-outline:hover {
+            background: #dbeafe;
         }
 
-        /* === CLAUSE BADGE === */
-        .clause-badge {
-            min-width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 0.65rem;
+        /* Conflict warning */
+        .conflict-warning {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.5rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.75rem;
         }
 
-        .clause-badge.in-progress { 
-            background: #dbeafe; 
-            color: #1d4ed8; 
+        .conflict-icon {
+            color: #ef4444;
+            font-size: 1.2rem;
         }
 
-        .clause-badge.completed { 
-            background: #dcfce7; 
-            color: #15803d; 
+        .conflict-text {
+            color: #991b1b;
+            font-weight: 500;
         }
 
-        /* === FINISH BANNER === */
-        .finish-banner {
-            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
-            border-radius: 16px;
-            padding: 2.5rem;
-            text-align: center;
-            border: 2px solid #10b981;
-            animation: fadeInUp 0.7s ease-out;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .finish-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            display: block;
-            color: #10b981;
-        }
-
-        .finish-message {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 1rem;
-        }
-
-        .finish-subtext {
-            color: #475569;
-            font-size: 1.05rem;
-            max-width: 600px;
-            margin: 0 auto 1.75rem;
-            line-height: 1.7;
-        }
-
-        .banner-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1.25rem;
-            flex-wrap: wrap;
-        }
-
-        /* === RESPONSIVE === */
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .header-card {
-                padding: 1.5rem;
-            }
-
             .header-title {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
             }
-
+            
             .header-subtitle {
-                font-size: 0.95rem;
+                font-size: 1rem;
             }
-
-            .info-grid {
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .form-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .btn {
-                width: 100%;
-                max-width: 320px;
-            }
-
-            .audit-tabs {
-                flex-direction: column;
-            }
-
-            .audit-tab {
-                width: 100%;
-                justify-content: center;
             }
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 font-sans">
 
-<div class="max-w-7xl mx-auto p-4 sm:p-6">
+    <!-- Header Section -->
+    <header class="header-section">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="header-title">INTERNAL AUDIT CHARTER</h1>
+            <p class="header-subtitle">Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.</p>
+        </div>
+    </header>
 
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-
-        <!-- HEADER / INSTRUCTION -->
-        <h1 class="text-3xl font-bold text-gray-900 mb-4 text-center">
-            Mulai Audit Internal
-        </h1>
-
-        <div class="max-w-4xl mx-auto mb-8">
-            <p class="text-lg text-gray-700 mb-4">
-                Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.
-            </p>
-            <div class="bg-white border rounded-2xl p-6 text-left shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
-                <ol class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                    <li class="flex items-start">
-                        <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
-                              style="background-color: #1a365d;">1</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Pilih Klausul Audit</h4>
-                            <p class="text-sm text-gray-600 mt-1">Setiap klausul berisi pertanyaan yang wajib dijawab sesuai kondisi aktual departemen.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
-                              style="background-color: #1a365d;">2</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Jawab Pertanyaan Audit</h4>
-                            <p class="text-sm text-gray-600 mt-1">Jawaban harus mencerminkan kondisi aktual departemen.<br>
-                                YES: Klausul telah diterapkan<br>
-                                NO: Klausul tidak diterapkan (wajib isi catatan)<br>
-                                N/A: Tidak relevan dengan departemen</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start">
-                        <span class="flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-1" 
-                              style="background-color: #1a365d;">3</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Penyimpanan Otomatis</h4>
-                            <p class="text-sm text-gray-600 mt-1">Jawaban disimpan otomatis. Pastikan seluruh pertanyaan dalam satu klausul telah terisi sebelum berpindah.</p>
-                        </div>
-                    </li>
-                </ol>
-            </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Internal Audit Charter | PT Trias Sentosa Tbk</h2>
+            <button class="btn btn-primary">
+                <i class="fas fa-file-alt"></i> Lanjutkan Audit
+            </button>
         </div>
 
-        <!-- TOKEN SECTION -->
-        <div class="max-w-4xl mx-auto mb-10">
-            <div class="bg-white border rounded-2xl p-6 shadow-sm" style="border-color: rgba(26, 54, 93, 0.2);">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div class="flex-1">
-                        <div class="flex items-start">
-                            <div class="shrink-0 mt-0.5">
-                                <i class="fas fa-key text-xl" style="color: #1a365d;"></i>
+        <!-- Form Content -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+            <form>
+                <!-- Identitas & Standar Audit Section -->
+                <div class="section-card">
+                    <h2 class="section-title">Identitas & Standar Audit</h2>
+                    <p class="section-description">Formalize the foundational elements of your audit engagement per ISO 19011 requirements</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Jenis Pemeriksaan</label>
+                            <select class="form-control form-select">
+                                <option>Pihak Pertama (Internal Rutin)</option>
+                                <option>Pemeriksaan Lanjutan (Corrective Action)</option>
+                                <option>Investigasi Khusus (Insidentil)</option>
+                                <option>Audit Mendadak (Unannounced)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Referensi Standar / Kriteria Audit</label>
+                            <input type="text" class="form-control" 
+                                   placeholder="Pilih standar yang relevan..." 
+                                   value="ISO 14001:2015 (Environmental Management System)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tujuan & Lingkup Section -->
+                <div class="section-card">
+                    <h2 class="section-title">Tujuan & Lingkup (Objective & Scope)</h2>
+                    <p class="section-description">Define the strategic purpose and operational boundaries of the audit engagement</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Audit Objective (Tujuan)</label>
+                            <textarea class="form-control" rows="4" placeholder="Contoh: Mengevaluasi efektivitas pengendalian stok gudang dan kepatuhan terhadap prosedur FIFO.">Mengevaluasi efektivitas pengendalian stok gudang dan kepatuhan terhadap prosedur FIFO.</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Audit Scope (Lingkup)</label>
+                            <textarea class="form-control" rows="4" placeholder="Pilih batasan area audit...">Proses Pengadaan
+Proses Produksi
+Proses Keuangan
+Fisik Aset / Inventaris
+Kompetensi SDM
+Keamanan Data / IT</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metodologi Pemeriksaan Section -->
+                <div class="section-card">
+                    <h2 class="section-title">Metodologi Pemeriksaan</h2>
+                    <p class="section-description">Document the methodology that will be used to conduct the audit</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Metodologi Pemeriksaan</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="doc-review" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="doc-review" class="ml-2 text-gray-700">Document Review</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="interview" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="interview" class="ml-2 text-gray-700">Wawancara (Interview)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="field-obs" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="field-obs" class="ml-2 text-gray-700">Observasi Lapangan</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="physical-sampling" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="physical-sampling" class="ml-2 text-gray-700">Sampling Fisik</label>
+                                </div>
                             </div>
-                            <div class="ml-3">
-                                <h2 class="text-lg font-bold text-gray-800 mb-1">Token Audit (WAJIB DISIMPAN)</h2>
-                                <p class="text-sm text-gray-600 mb-2">
-                                    <span class="font-semibold text-gray-800">Penting:</span> Simpan kode ini untuk melanjutkan audit di kemudian hari. 
-                                    Dengan kode ini, progress audit <span class="font-medium" style="color: #1a365d;">dapat dipulihkan</span>.
-                                    Jika ada kendala dengan token audit bisa menghubungi Admin 
-                                    <span class="font-semibold text-gray-700">Brahmanto Anggoro Laksono - SSSE</span>
-                                </p>
-                                <p class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                                    <span class="font-medium">Tips:</span> Simpan token di tempat aman (catatan kerja, dokumen internal, atau screenshot).
-                                </p>
-                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Catatan Tambahan</label>
+                            <textarea class="form-control" rows="4" placeholder="Masukkan catatan metodologi tambahan jika diperlukan..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tim Pemeriksa Section -->
+                <div class="section-card">
+                    <h2 class="section-title">Tim Pemeriksa (Audit Team)</h2>
+                    <p class="section-description">Ensure team composition meets independence requirements per ISO 19011 clause 5.3</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Lead Auditor</label>
+                            <input type="text" class="form-control" placeholder="Nama Lead Auditor" value="Brahmanto Anggoro Laksono">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Email Lead Auditor (opsional)</label>
+                            <input type="email" class="form-control" placeholder="Digunakan untuk komunikasi dan distribusi laporan audit." value="brahmanto@trias-sentosa.co.id">
                         </div>
                     </div>
                     
-                    <div class="w-full sm:w-auto">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-stretch">
-                                <div id="audit-token" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 font-mono font-medium text-sm px-4 py-3 rounded-l-lg break-all min-w-[250px]">
-                                    {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
-                                </div>
-                                <button id="copy-token-btn" 
-                                        class="text-white font-medium px-4 py-3 rounded-r-lg flex items-center gap-2 transition-opacity duration-200 whitespace-nowrap {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90' }}"
-                                        style="background-color: #1a365d;"
-                                        {{ !$resumeToken ? 'disabled' : '' }}
-                                        aria-label="Salin Kode Audit">
-                                    <i class="fas fa-copy"></i>
-                                    <span class="hidden sm:inline">Salin</span>
+                    <div class="mt-4">
+                        <label class="form-label">Anggota Tim Tambahan</label>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="flex items-center bg-gray-100 rounded-lg px-3 py-1.5">
+                                <span class="text-gray-700 mr-2">Siti Aminah (Auditor)</span>
+                                <button type="button" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-400 text-right">
-                                Klik tombol Salin untuk menyalin ke clipboard
-                            </p>
+                            <div class="flex items-center bg-gray-100 rounded-lg px-3 py-1.5">
+                                <span class="text-gray-700 mr-2">Ahmad Fauzi (Expert)</span>
+                                <button type="button" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-outline">
+                                <i class="fas fa-plus"></i> Tambah Auditor / Observer / Expert
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- PROGRESS PER DEPARTEMEN -->
-        <div class="mt-6">
-            @if($relatedAudits)
-                <div class="space-y-6">
-                    @foreach($relatedAudits as $dept)
-                        <div class="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="font-bold text-gray-800 text-xl flex items-center gap-2">
-                                    <i class="fas fa-building text-blue-600"></i>
-                                    {{ $dept['dept_name'] }}
-                                </h4>
+                <!-- Target Audit & Jadwal Section -->
+                <div class="section-card">
+                    <h2 class="section-title">Target Audit & Jadwal</h2>
+                    <p class="section-description">Define the auditee departments and schedule the audit execution period.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Departemen Auditee</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="dept-prod" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="dept-prod" class="ml-2 text-gray-700">Produksi</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="dept-qc" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="dept-qc" class="ml-2 text-gray-700">Quality Control</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="dept-warehouse" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="dept-warehouse" class="ml-2 text-gray-700">Gudang</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="dept-finance" class="form-checkbox h-5 w-5 text-blue-600" checked>
+                                    <label for="dept-finance" class="ml-2 text-gray-700">Keuangan</label>
+                                </div>
                             </div>
-
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3">
-                                @php $clauses = [4,5,6,7,8,9,10]; @endphp
-                                @foreach($clauses as $clauseNum)
-                                    @php
-                                        $p = $dept['clauses'][$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
-                                        $isCompleted = $p['percentage'] >= 100;
-                                        $badgeClass = $isCompleted 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : ($p['count'] > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600');
-                                    @endphp
-                                    <a href="{{ route('audit.show', ['id' => $dept['id'], 'clause' => $clauseNum]) }}"
-                                       class="block p-4 bg-white border rounded-lg hover:shadow-md transition-all text-center group">
-                                        <div class="text-base font-bold mb-1 {{ $isCompleted ? 'text-green-600' : 'text-blue-600' }}">
-                                            @if($isCompleted) ✅ @else {{ $clauseNum }} @endif
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">Klausul {{ $clauseNum }}</div>
-                                        <div class="mt-1 inline-block px-2 py-1 rounded text-xs font-medium {{ $badgeClass }}">
-                                            {{ $p['count'] }}/{{ $p['total'] }}
-                                        </div>
-                                    </a>
-                                @endforeach
+                            
+                            <div class="conflict-warning mt-3">
+                                <i class="fas fa-exclamation-triangle conflict-icon"></i>
+                                <span class="conflict-text">KONFLIK: Lead Auditor berasal dari salah satu departemen yang dipilih!</span>
                             </div>
+                            <p class="text-gray-600 text-sm mt-1">Audit dapat mencakup lebih dari satu departemen dalam satu penugasan.</p>
                         </div>
-                    @endforeach
+                        
+                        <div class="form-group">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="form-label">Tanggal Mulai Audit</label>
+                                    <input type="date" class="form-control" value="2026-01-31">
+                                </div>
+                                <div>
+                                    <label class="form-label">Tanggal Selesai Audit</label>
+                                    <input type="date" class="form-control" value="2026-02-05">
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mt-1">Rentang tanggal digunakan untuk audit yang berlangsung lebih dari satu hari.</p>
+                        </div>
+                    </div>
                 </div>
-            @else
-                <div class="text-center py-6 text-gray-500">
-                    Tidak ada departemen yang tersedia.
+
+                <!-- Action Buttons -->
+                <div class="section-card">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <button type="button" class="btn btn-outline w-full sm:w-auto">
+                            <i class="fas fa-undo"></i> Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary w-full sm:w-auto">
+                            <i class="fas fa-check-circle"></i> Start Audit Process
+                        </button>
+                    </div>
                 </div>
-            @endif
+            </form>
         </div>
-
-        <!-- FINISH BANNER -->
-        @if(isset($allFinished) && $allFinished)
-            <div class="finish-banner mt-6">
-                <div class="finish-icon">🎉</div>
-                <h2 class="finish-message">Audit {{ $deptName }} Selesai!</h2>
-                <p class="finish-subtext">Semua klausul telah diisi dengan lengkap dan siap direview. Silakan selesaikan proses audit untuk menghasilkan laporan final.</p>
-                
-                <div class="banner-actions">
-                    <a href="{{ route('audit.finish') }}" class="btn btn-success">
-                        <i class="fas fa-check-circle"></i> Selesaikan Audit
-                    </a>
-                    @if(isset($relatedAudits) && count($relatedAudits) > 1)
-                        <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
-                           class="btn btn-outline">
-                            <i class="fas fa-arrow-left"></i> Audit Lainnya
-                        </a>
-                    @endif
-                </div>
-            </div>
-        @endif
-
     </div>
 
-</div>
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-6 text-center text-gray-500 text-sm">
+        <p>© 2026 PT Trias Sentosa Tbk. All rights reserved. | Internal Audit Management System</p>
+    </footer>
 
-<!-- SCRIPT COPY TOKEN -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const copyBtn = document.getElementById('copy-token-btn');
-    const tokenElement = document.getElementById('audit-token');
-    const originalBtnHTML = copyBtn.innerHTML;
-    
-    if (copyBtn && tokenElement && !copyBtn.disabled) {
-        copyBtn.addEventListener('click', async () => {
-            try {
-                const tokenValue = tokenElement.textContent.trim();
-                await navigator.clipboard.writeText(tokenValue);
-                
-                copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
-                copyBtn.style.backgroundColor = '#10b981';
-                
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simple validation for date fields
+            const startDate = document.querySelector('input[type="date"]');
+            startDate.min = new Date().toISOString().split('T')[0];
+            
+            // Button interaction
+            document.querySelector('.btn-primary').addEventListener('click', function(e) {
+                e.preventDefault();
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
                 setTimeout(() => {
-                    copyBtn.innerHTML = originalBtnHTML;
-                    copyBtn.style.backgroundColor = '#1a365d';
-                }, 2000);
-            } catch (err) {
-                console.error('Gagal menyalin token:', err);
-                alert('Gagal menyalin. Silakan salin manual.');
+                    this.innerHTML = '<i class="fas fa-check-circle"></i> Start Audit Process';
+                    alert('Audit process has started successfully!');
+                }, 1500);
+            });
+            
+            // Conflict warning toggle
+            const conflictWarning = document.querySelector('.conflict-warning');
+            if (conflictWarning) {
+                setTimeout(() => {
+                    conflictWarning.style.opacity = 0.8;
+                    setTimeout(() => {
+                        conflictWarning.style.opacity = 1;
+                    }, 100);
+                }, 500);
             }
         });
-    }
-});
-</script>
-
+    </script>
 </body>
 </html>
