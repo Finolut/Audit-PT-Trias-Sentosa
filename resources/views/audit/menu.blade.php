@@ -238,85 +238,116 @@
             color: #2563eb;
             border: 1px solid #2563eb;
         }
+
+                .hero-section {
+            background:
+                linear-gradient(
+                    rgba(12, 45, 90, 0.88),
+                    rgba(12, 45, 90, 0.88)
+                ),
+                url('https://media.licdn.com/dms/image/v2/D563DAQEpYdKv0Os29A/image-scale_191_1128/image-scale_191_1128/0/1690510724603/pt_trias_sentosa_tbk_cover?e=2147483647&v=beta&t=dOGhpl6HrbRAla_mDVT5azyevrvu-cOGFxPcrlizZ6M');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 260px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--slate-dark);
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .section-description {
+            color: var(--slate);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
 
-    <!-- Header -->
-    <header class="header-section">
-        <div class="max-w-7xl mx-auto px-4">
-            <h1 class="header-title">MULAI AUDIT INTERNAL</h1>
-            <p class="header-subtitle">Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.</p>
-        </div>
-    </header>
+<!-- Mini Hero Section -->
+<section class="hero-section text-white">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">
+            MULAI AUDIT INTERNAL
+        </h1>
+        <p class="text-base md:text-lg opacity-90 max-w-3xl">
+            Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.
+        </p>
+    </div>
+</section>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
-        <!-- Instruksi & Token -->
-        <div class="mt-6">
+<!-- Instruksi & Token -->
+<div class="mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Instruksi -->
+        <div>
             <h2 class="section-title">Instruksi Pengisian</h2>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Instruksi -->
-                <div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">1</div>
-                        <div class="instruction-content">
-                            <h3>Pilih Klausul Audit</h3>
-                            <p class="instruction-text">Setiap klausul berisi pertanyaan yang wajib dijawab sesuai kondisi aktual departemen.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="instruction-item">
-                        <div class="instruction-number">2</div>
-                        <div class="instruction-content">
-                            <h3>Jawab Pertanyaan Audit</h3>
-                            <p class="instruction-text">
-                                Jawaban harus mencerminkan kondisi aktual departemen.<br>
-                                <span class="font-medium text-blue-600">YES:</span> Klausul telah diterapkan<br>
-                                <span class="font-medium text-red-600">NO:</span> Klausul tidak diterapkan (wajib isi catatan)<br>
-                                <span class="font-medium text-gray-600">N/A:</span> Tidak relevan dengan departemen
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="instruction-item">
-                        <div class="instruction-number">3</div>
-                        <div class="instruction-content">
-                            <h3>Penyimpanan Otomatis</h3>
-                            <p class="instruction-text">Jawaban disimpan otomatis. Pastikan seluruh pertanyaan dalam satu klausul telah terisi sebelum berpindah.</p>
-                        </div>
-                    </div>
+
+            <div class="instruction-item mt-4">
+                <div class="instruction-number">1</div>
+                <div class="instruction-content">
+                    <h3>Pilih Klausul Audit</h3>
+                    <p class="instruction-text">Setiap klausul berisi pertanyaan yang wajib dijawab sesuai kondisi aktual departemen.</p>
                 </div>
+            </div>
 
- <!-- Token -->
-<div class="token-container">
-    <div class="token-label">
-        <i class="fas fa-key"></i>
-        Token Audit (WAJIB DISIMPAN)
-    </div>
+            <div class="instruction-item mt-4">
+                <div class="instruction-number">2</div>
+                <div class="instruction-content">
+                    <h3>Jawab Pertanyaan Audit</h3>
+                    <p class="instruction-text">
+                        Jawaban harus mencerminkan kondisi aktual departemen.<br>
+                        <span class="font-medium text-blue-600">YES:</span> Klausul telah diterapkan<br>
+                        <span class="font-medium text-red-600">NO:</span> Klausul tidak diterapkan (wajib isi catatan)<br>
+                        <span class="font-medium text-gray-600">N/A:</span> Tidak relevan dengan departemen
+                    </p>
+                </div>
+            </div>
 
-    <!-- TEXT TAMBAHAN (INFORMATIF, TANPA UBAH DESAIN) -->
-    <p class="text-xs text-gray-600 mt-1">
-        <strong>Penting:</strong> Simpan token ini untuk melanjutkan audit di kemudian hari.
-        Dengan token ini, progress audit dapat dipulihkan.
-        Jika terjadi kendala, hubungi Admin
-        <strong>Brahmanto Anggoro Laksono - SSSE</strong>.
-    </p>
-
-    <p class="text-xs text-gray-500 mt-1">
-        Tips: Simpan token di catatan kerja, dokumen internal, atau screenshot.
-    </p>
-
-    <div class="flex items-center gap-1 mt-2">
-        <div id="audit-token" class="token-value">
-            {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+            <div class="instruction-item mt-4">
+                <div class="instruction-number">3</div>
+                <div class="instruction-content">
+                    <h3>Penyimpanan Otomatis</h3>
+                    <p class="instruction-text">Jawaban disimpan otomatis. Pastikan seluruh pertanyaan dalam satu klausul telah terisi sebelum berpindah.</p>
+                </div>
+            </div>
         </div>
-        <button id="copy-token-btn" 
-                class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
-                {{ !$resumeToken ? 'disabled' : '' }}
-                aria-label="Salin Kode Audit">
-            <i class="fas fa-copy"></i>
-        </button>
+
+        <!-- Token -->
+        <div>
+            <h2 class="section-title">Token Audit (WAJIB DISIMPAN)</h2>
+
+            <!-- TEXT TAMBAHAN (INFORMATIF, TANPA UBAH DESAIN) -->
+            <p class="text-xs text-gray-600 mt-2">
+                <strong>Penting:</strong> Simpan token ini untuk melanjutkan audit di kemudian hari.
+                Dengan token ini, progress audit dapat dipulihkan.
+                Jika terjadi kendala, hubungi Admin
+                <strong>Brahmanto Anggoro Laksono - SSSE</strong>.
+            </p>
+
+            <p class="text-xs text-gray-500 mt-2">
+                Tips: Simpan token di catatan kerja, dokumen internal, atau screenshot.
+            </p>
+
+            <div class="flex items-center gap-1 mt-3">
+                <div id="audit-token" class="token-value">
+                    {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                </div>
+                <button id="copy-token-btn"
+                        class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+                        {{ !$resumeToken ? 'disabled' : '' }}
+                        aria-label="Salin Kode Audit">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
