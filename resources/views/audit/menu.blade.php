@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Mulai Audit Internal</title>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,25 +15,46 @@
                 extend: {
                     colors: {
                         primary: '#1a365d',
-                        secondary: '#2563eb',
-                        accent: '#10b981'
+                        secondary: '#2563eb'
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Hanya gunakan padding & margin dasar — TIDAK ADA BORDER, SHADOW, CARD */
+        /* Header */
+        .header-section {
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            color: white;
+            padding: 2.5rem 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Section title */
         .section-title {
             font-size: 1.4rem;
             font-weight: 700;
             color: #1a365d;
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
+            margin: 1.5rem 0 1rem;
             padding-bottom: 0.25rem;
-            border-bottom: 1px solid #e2e8f0; /* hanya garis tipis, bukan box */
+            border-bottom: 1px solid #e2e8f0;
         }
 
+        /* Instruction item */
         .instruction-item {
             display: flex;
             align-items: flex-start;
@@ -66,7 +90,7 @@
             margin: 0;
         }
 
-        /* Token — tanpa kotak, hanya teks + input */
+        /* Token section */
         .token-container {
             display: flex;
             align-items: center;
@@ -81,9 +105,12 @@
             color: #1a365d;
             font-size: 0.95rem;
             min-width: 120px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .token-input {
+        .token-value {
             flex: 1;
             background: #f8fafc;
             border: 1px solid #cbd5e1;
@@ -92,6 +119,7 @@
             font-family: 'Courier New', monospace;
             font-size: 0.95rem;
             color: #0f172a;
+            word-break: break-all;
         }
 
         .token-btn {
@@ -104,7 +132,7 @@
             cursor: pointer;
         }
 
-        /* Progress per departemen — polos, tanpa card */
+        /* Department progress */
         .dept-list {
             margin-top: 1.5rem;
         }
@@ -119,37 +147,69 @@
             gap: 0.5rem;
         }
 
-        .clause-list {
-            display: flex;
-            flex-wrap: wrap;
+        .clause-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 0.75rem;
             margin-top: 0.5rem;
         }
 
-        .clause-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.3rem 0.6rem;
+        .clause-card {
+            padding: 0.75rem;
             background: #f8fafc;
             border-radius: 6px;
-            font-size: 0.85rem;
-            color: #475569;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .clause-card:hover {
+            background: #eef6ff;
         }
 
         .clause-number {
-            font-weight: 600;
-            color: #2563eb;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 0.25rem;
         }
 
         .clause-status {
+            font-size: 0.85rem;
+            color: #475569;
+            margin-bottom: 0.25rem;
+        }
+
+        .clause-progress {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .progress-completed {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .progress-in-progress {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .progress-not-started {
+            background: #e2e8f0;
             color: #64748b;
         }
 
-        /* Finish banner — polos, hanya teks + tombol */
+        /* Finish banner */
         .finish-banner {
-            margin: 2rem 0;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e6fffa 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
             text-align: center;
+            border: 1px solid #10b981;
+            margin-top: 2rem;
         }
 
         .finish-message {
@@ -168,8 +228,8 @@
             cursor: pointer;
         }
 
-        .btn-primary {
-            background: #2563eb;
+        .btn-success {
+            background: #10b981;
             color: white;
         }
 
@@ -183,18 +243,20 @@
 <body class="bg-gray-50 font-sans">
 
     <!-- Header -->
-    <header class="max-w-7xl mx-auto px-4 py-4">
-        <h1 class="text-2xl font-bold text-gray-900">MULAI AUDIT INTERNAL</h1>
-        <p class="text-gray-600 mt-1">Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.</p>
+    <header class="header-section">
+        <div class="max-w-7xl mx-auto px-4">
+            <h1 class="header-title">MULAI AUDIT INTERNAL</h1>
+            <p class="header-subtitle">Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.</p>
+        </div>
     </header>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
-        <!-- Instruksi Vertikal + Token di Samping -->
+        <!-- Instruksi & Token -->
         <div class="mt-6">
             <h2 class="section-title">Instruksi Pengisian</h2>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Instruksi (kiri) -->
+                <!-- Instruksi -->
                 <div>
                     <div class="instruction-item">
                         <div class="instruction-number">1</div>
@@ -226,15 +288,20 @@
                     </div>
                 </div>
 
-                <!-- Token (kanan) — tanpa kotak, hanya input + label -->
+                <!-- Token -->
                 <div class="token-container">
                     <div class="token-label">
-                        <i class="fas fa-key mr-2 text-lg" style="color: #1a365d;"></i>
+                        <i class="fas fa-key"></i>
                         Token Audit (WAJIB DISIMPAN)
                     </div>
                     <div class="flex items-center gap-1">
-                        <input type="text" value="A7B9C2D3E4F5" class="token-input" readonly>
-                        <button id="copy-token-btn" class="token-btn">
+                        <div id="audit-token" class="token-value">
+                            {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                        </div>
+                        <button id="copy-token-btn" 
+                                class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                {{ !$resumeToken ? 'disabled' : '' }}
+                                aria-label="Salin Kode Audit">
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
@@ -242,47 +309,63 @@
             </div>
         </div>
 
-        <!-- Progress Per Departemen — POLos, tanpa card/border -->
+        <!-- Progress Per Departemen -->
         <div class="mt-8">
             <h2 class="section-title">Progress Per Departemen</h2>
             
-            <div class="dept-list">
-                @foreach($relatedAudits as $dept)
-                <div>
-                    <div class="dept-header">
-                        <i class="fas fa-building text-blue-600"></i>
-                        {{ $dept['dept_name'] }}
+            @if($relatedAudits)
+                <div class="dept-list">
+                    @foreach($relatedAudits as $dept)
+                    <div>
+                        <div class="dept-header">
+                            <i class="fas fa-building text-blue-600"></i>
+                            {{ $dept['dept_name'] }}
+                        </div>
+                        <div class="clause-grid">
+                            @php $clauses = [4,5,6,7,8,9,10]; @endphp
+                            @foreach($clauses as $clauseNum)
+                                @php
+                                    $p = $dept['clauses'][$clauseNum] ?? ['percentage' => 0, 'count' => 0, 'total' => 0];
+                                    $isCompleted = $p['percentage'] >= 100;
+                                    $badgeClass = $isCompleted 
+                                        ? 'progress-completed' 
+                                        : ($p['count'] > 0 ? 'progress-in-progress' : 'progress-not-started');
+                                @endphp
+                                <a href="{{ route('audit.show', ['id' => $dept['id'], 'clause' => $clauseNum]) }}"
+                                   class="clause-card block">
+                                    <div class="clause-number">{{ $clauseNum }}</div>
+                                    <div class="clause-status">Klausul {{ $clauseNum }}</div>
+                                    <div class="clause-progress {{ $badgeClass }}">
+                                        {{ $p['count'] }}/{{ $p['total'] }}
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
-                    <div class="clause-list">
-                        @php $clauses = [4,5,6,7,8,9,10]; @endphp
-                        @foreach($clauses as $clauseNum)
-                            @php
-                                $p = $dept['clauses'][$clauseNum] ?? ['count' => 0, 'total' => 0];
-                                $status = $p['count'] == $p['total'] ? 'Selesai' : ($p['count'] > 0 ? 'Sedang' : 'Belum');
-                            @endphp
-                            <div class="clause-item">
-                                <span class="clause-number">{{ $clauseNum }}</span>
-                                <span class="clause-status">({{ $p['count'] }}/{{ $p['total'] }})</span>
-                            </div>
-                        @endforeach
-                    </div>
+                    @endforeach
                 </div>
-                @endforeach
-            </div>
+            @else
+                <div class="text-center py-6 text-gray-500">
+                    Tidak ada departemen yang tersedia.
+                </div>
+            @endif
         </div>
 
-        <!-- Finish Banner — minimalis -->
+        <!-- Finish Banner -->
         @if(isset($allFinished) && $allFinished)
         <div class="finish-banner">
-            <div class="finish-message">Audit Selesai!</div>
+            <div class="finish-message">Audit {{ $deptName }} Selesai!</div>
             <p class="text-gray-600 mb-3">Semua klausul telah diisi dengan lengkap dan siap direview.</p>
             <div class="flex justify-center gap-3">
-                <button class="btn btn-primary">
+                <a href="{{ route('audit.finish') }}" class="btn btn-success">
                     <i class="fas fa-check-circle mr-1"></i> Selesaikan Audit
-                </button>
-                <button class="btn btn-outline">
-                    <i class="fas fa-arrow-left mr-1"></i> Audit Lainnya
-                </button>
+                </a>
+                @if(isset($relatedAudits) && count($relatedAudits) > 1)
+                    <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
+                       class="btn btn-outline">
+                        <i class="fas fa-arrow-left mr-1"></i> Audit Lainnya
+                    </a>
+                @endif
             </div>
         </div>
         @endif
@@ -293,17 +376,17 @@
             const copyBtn = document.getElementById('copy-token-btn');
             const tokenElement = document.getElementById('audit-token');
             
-            if (copyBtn && tokenElement) {
+            if (copyBtn && tokenElement && !copyBtn.disabled) {
                 copyBtn.addEventListener('click', async () => {
                     try {
                         const tokenValue = tokenElement.textContent.trim();
                         await navigator.clipboard.writeText(tokenValue);
                         
-                        copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i><span>Tersalin!</span>';
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
                         copyBtn.style.backgroundColor = '#10b981';
                         
                         setTimeout(() => {
-                            copyBtn.innerHTML = '<i class="fas fa-copy"></i><span class="hidden sm:inline">Salin</span>';
+                            copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
                             copyBtn.style.backgroundColor = '#1a365d';
                         }, 2000);
                     } catch (err) {
