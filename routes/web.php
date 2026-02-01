@@ -95,7 +95,7 @@ Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
     ->name('audit.resume.form');
 
 // 2. Proses Validasi Token dari Form Input (POST)
-Route::post('/audit/resume/validate', [AuditController::class, 'processTokenInput'])
+Route::post('/audit/resume/validate', [AuditController::class, 'validateResumeToken'])
     ->name('audit.resume.validate');
 
 // 3. Tampilkan Halaman Keputusan (GET)

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -267,72 +267,6 @@ private function generateUniqueAuditCode($userInput = null)
         return view('audit.resume_form');
     }
 
-public function processTokenInput(Request $request)
-{
-    $request->validate(['resume_token' => 'required|string']);
-    $token = strtoupper(trim($request->resume_token));
-
-    try {
-        // 1. Cari parent session
-        $parentSession = DB::table('audit_sessions')
-            ->where('resume_token', $token)
-            ->where('is_parent', true)
-            ->where('resume_token_expires_at', '>', now())
-            ->first();
-
-        if (!$parentSession) {
-            return redirect()->route('audit.resume.form')
-                ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
-        }
-
-        // 2. Cari child session pertama
-        $childSession = DB::table('audit_sessions')
-            ->where('parent_session_id', $parentSession->id)
-            ->where('is_parent', false)
-            ->first();
-
-        if (!$childSession) {
-            return redirect()->route('audit.resume.form')
-                ->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
-        }
-
-        // 3. Cari audit dari child session
-        $audit = DB::table('audits')
-            ->where('audit_session_id', $childSession->id)
-            ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
-            ->first();
-
-        if (!$audit) {
-            return redirect()->route('audit.resume.form')
-                ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
-        }
-
-        // 4. Ambil data tambahan
-        $department = DB::table('departments')
-            ->where('id', $audit->department_id)
-            ->first();
-
-        // ✅ Tampilkan decision di halaman yang sama (resume_form)
-        return view('audit.resume_form', [
-            'showDecision' => true,
-            'token' => $token,
-            'auditId' => $audit->id,
-            'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
-            'auditeeDept' => $department->name ?? 'Unknown Dept',
-            'auditDate' => $audit->audit_start_date 
-                ? date('d M Y', strtotime($audit->audit_start_date)) 
-                : 'Belum ditentukan',
-            'lastActivity' => $childSession->last_activity_at 
-                ? date('d M Y H:i', strtotime($childSession->last_activity_at)) 
-                : 'Aktif',
-        ]);
-
-    } catch (\Exception $e) {
-        return redirect()->route('audit.resume.form')
-            ->withErrors(['resume_token' => 'Terjadi kesalahan: ' . $e->getMessage()]);
-    }
-}
-
     // ----------------------------------------------------------------------
     // STEP 2: Logic Query Database & Return View (Method GET)
     // ----------------------------------------------------------------------
@@ -404,10 +338,13 @@ public function showDecisionPage($token)
 // ----------------------------------------------------------------------
 // 3. Validasi Token & Return JSON Response untuk AJAX
 // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// 3. Validasi Token & Return JSON Response untuk AJAX
+// ----------------------------------------------------------------------
 public function validateResumeToken(Request $request)
 {
     // Cek apakah request via AJAX/JSON
-    if ($request->expectsJson()) {
+    if ($request->expectsJson() || $request->ajax()) {
         $request->validate(['resume_token' => 'required|string']);
         $token = strtoupper(trim($request->resume_token));
 
@@ -420,6 +357,7 @@ public function validateResumeToken(Request $request)
                 ->first();
 
             if (!$parentSession) {
+                logger('Token tidak valid', ['token' => $token]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Token tidak valid atau telah kedaluwarsa.'
@@ -464,13 +402,21 @@ public function validateResumeToken(Request $request)
                 'auditId' => $audit->id,
                 'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
                 'auditeeDept' => $department->name ?? 'Unknown Dept',
-                'auditDate' => date('d M Y', strtotime($audit->audit_start_date ?? now())),
+                'auditDate' => $audit->audit_start_date 
+                    ? date('d M Y', strtotime($audit->audit_start_date)) 
+                    : 'Belum ditentukan',
                 'lastActivity' => $childSession->last_activity_at 
                     ? date('d M Y H:i', strtotime($childSession->last_activity_at)) 
                     : 'Aktif',
             ]);
 
         } catch (\Exception $e) {
+            logger()->error('Error in validateResumeToken', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
@@ -479,8 +425,10 @@ public function validateResumeToken(Request $request)
     }
 
     // Jika bukan AJAX (fallback untuk backward compatibility)
-    return redirect()->route('audit.resume.form')
-        ->withErrors(['resume_token' => 'Invalid request']);
+    // Redirect ke route GET agar URL bersih
+    $request->validate(['resume_token' => 'required|string']);
+    $token = strtoupper(trim($request->resume_token));
+    return redirect()->route('audit.resume.decision', ['token' => $token]);
 }
 
     // ----------------------------------------------------------------------

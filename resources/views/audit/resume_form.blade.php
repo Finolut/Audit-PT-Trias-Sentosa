@@ -444,6 +444,10 @@
                     showError(data.message || 'Token tidak valid');
                 }
             })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Terjadi kesalahan. Silakan coba lagi.');
+            })
             .finally(() => {
                 // Reset button state
                 submitBtn.disabled = false;
