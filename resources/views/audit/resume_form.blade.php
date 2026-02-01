@@ -242,7 +242,8 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
         
-        <!-- SECTION 1: Input Token -->
+        <!-- SECTION 1: Input Token (Hidden jika showDecision = true) -->
+        @if(!isset($showDecision) || !$showDecision)
         <section id="token-section">
             <h2 class="section-title">Lanjutkan Audit</h2>
             <p class="section-description">Masukkan Token Unik yang Anda dapatkan saat memulai audit.</p>
@@ -268,8 +269,8 @@
                         autocomplete="off"
                         placeholder="XXX-XXX"
                         class="token-input"
+                        value="{{ session('prefilled_token') ?? old('resume_token') }}"
                         maxlength="7"
-                        oninput="formatTokenInput(this)"
                     >
                 </div>
 
@@ -294,8 +295,9 @@
                 </a>
             </div>
         </section>
+        @endif
 
-        <!-- SECTION 2: Decision Gate (Hidden by default) -->
+        <!-- SECTION 2: Decision Gate (Tampil jika showDecision = true) -->
         @if(isset($showDecision) && $showDecision)
         <section id="decision-section" class="decision-card">
             <div class="decision-header">
@@ -328,7 +330,7 @@
                 </div>
             </div>
 
-            <form id="decisionForm" action="{{ route('audit.resume.handle') }}" method="POST">
+            <form id="decisionForm" action="{{ route('audit.resume.action') }}" method="POST">
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
                 <input type="hidden" name="audit_id" value="{{ $auditId }}">
@@ -353,13 +355,13 @@
 
     <script>
         // Format token input (auto-add hyphen)
-        function formatTokenInput(input) {
-            let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        document.getElementById('resume_token')?.addEventListener('input', function(e) {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             if (value.length > 3) {
                 value = value.substring(0, 3) + '-' + value.substring(3, 6);
             }
-            input.value = value;
-        }
+            e.target.value = value;
+        });
 
         // Form submission handler
         const resumeForm = document.getElementById('resumeForm');

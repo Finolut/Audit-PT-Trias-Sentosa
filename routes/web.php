@@ -245,3 +245,10 @@ Route::get('/api/audit/{auditId}/progress', function ($auditId) {
         ], 500);
     }
 })->middleware('auth:sanctum');
+
+Route::get('/audit/resume/form', [AuditController::class, 'showResumePage'])
+    ->name('audit.resume.form');
+
+// 2. Proses Validasi Token dari Form Input (POST) - Langsung tampilkan decision
+Route::post('/audit/resume/validate', [AuditController::class, 'processTokenInput'])
+    ->name('audit.resume.validate');
