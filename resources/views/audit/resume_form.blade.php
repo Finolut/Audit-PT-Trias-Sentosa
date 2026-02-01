@@ -79,22 +79,7 @@
             opacity: 0.75;
             cursor: not-allowed;
         }
-        /* Token section styling - matching main form */
-        .token-section {
-            margin: 2rem 0;
-        }
-        .token-section-title {
-            font-weight: 700;
-            color: var(--slate-dark);
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-        }
-        .token-section-description {
-            color: var(--slate);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 1.25rem;
-        }
+        /* Token input styling to match form */
         .token-input {
             border: 1px solid #cbd5e1;
             border-radius: 0.375rem;
@@ -113,26 +98,7 @@
             box-shadow: 0 0 0 2px rgba(12, 45, 90, 0.1);
         }
         .token-button {
-            background: var(--navy);
-            color: white;
-            border-radius: 0.5rem;
-            padding: 0.75rem 2rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-            width: 100%;
-            margin: 1.25rem auto 0;
-            text-align: center;
-        }
-        .token-button:hover:not(:disabled) {
-            background: #0a2445;
-        }
-        .token-button:disabled {
-            opacity: 0.75;
-            cursor: not-allowed;
+            @apply main-cta;
         }
         .token-footer {
             text-align: center;
@@ -152,7 +118,7 @@
     </style>
 </head>
 <body class="text-slate-800">
-    <!-- Hero Section (same as main form) -->
+    <!-- Hero Section -->
     <section class="hero-section text-white">
         <div class="max-w-7xl mx-auto px-4 lg:px-6">
             <h1 class="text-3xl md:text-4xl font-bold mb-3">
@@ -166,19 +132,17 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
-        <!-- Token Section - matching main form structure -->
-        <section class="token-section">
-            <h2 class="token-section-title">Lanjutkan Audit</h2>
-            <p class="token-section-description">Masukkan Token Unik yang Anda dapatkan saat memulai audit.</p>
+        <!-- SECTION: Lanjutkan Audit — dengan garis bawah seperti form utama -->
+        <section>
+            <h2 class="section-title">Lanjutkan Audit</h2>
+            <p class="section-description">Masukkan Token Unik yang Anda dapatkan saat memulai audit.</p>
             
-            <!-- Error Message -->
             @if($errors->any())
                 <div class="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm border border-red-200">
                     {{ $errors->first() }}
                 </div>
             @endif
-            
-            <!-- Token Form -->
+
             <form id="resumeForm" action="{{ route('audit.resume.validate') }}" method="POST" class="space-y-6">
                 @csrf
 
@@ -204,7 +168,6 @@
                     <span id="btnText">Cek Token</span>
                     <span>→</span>
                     
-                    <!-- Loading Icon -->
                     <svg id="loadingIcon" class="hidden w-5 h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -212,7 +175,6 @@
                 </button>
             </form>
 
-            <!-- Footer -->
             <div class="token-footer">
                 <a href="{{ route('audit.create') }}">
                     ← Kembali ke Buat Audit Baru
@@ -228,11 +190,9 @@
         const btnText = document.getElementById('btnText');
 
         resumeForm.addEventListener('submit', function() {
-            // Prevent double submission
+            if (submitBtn.disabled) return;
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
-            
-            // Show loading state
             loadingIcon.classList.remove('hidden');
             btnText.innerText = 'MEMPROSES...';
         });
