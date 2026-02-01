@@ -345,7 +345,6 @@ public function showDecisionPage($token)
     // ----------------------------------------------------------------------
 public function validateResumeToken(Request $request)
 {
-
     $request->validate(['resume_token' => 'required|string']);
     $token = strtoupper(trim($request->resume_token));
 
@@ -388,9 +387,16 @@ public function validateResumeToken(Request $request)
         ->where('id', $audit->department_id)
         ->first();
 
-return redirect()->route('audit.resume.decision', [
-    'token' => $token
-]);
+    // ✅ Tampilkan decision di halaman yang sama
+    return view('audit.resume_form', [
+        'showDecision' => true,
+        'token' => $token,
+        'auditId' => $audit->id,
+        'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
+        'auditeeDept' => $department->name ?? 'Unknown Dept',
+        'auditDate' => date('d M Y', strtotime($audit->audit_start_date ?? now())),
+        'lastActivity' => $childSession->last_activity_at ? date('d M Y H:i', strtotime($childSession->last_activity_at)) : 'Aktif',
+    ]);
 }
 
     // ----------------------------------------------------------------------
