@@ -141,6 +141,17 @@
             margin: 2rem 0;
             border: 2px solid var(--navy);
             box-shadow: 0 4px 12px rgba(12, 45, 90, 0.1);
+            animation: slideDown 0.4s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .decision-header {
             font-size: 1.5rem;
@@ -224,6 +235,24 @@
         .hidden {
             display: none;
         }
+        .error-message {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s ease-out;
+        }
+        .success-message {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -242,19 +271,15 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
         
-        <!-- SECTION 1: Input Token (Hidden jika showDecision = true) -->
-        @if(!isset($showDecision) || !$showDecision)
+        <!-- SECTION: Input Token -->
         <section id="token-section">
             <h2 class="section-title">Lanjutkan Audit</h2>
             <p class="section-description">Masukkan Token Unik yang Anda dapatkan saat memulai audit.</p>
             
-            @if($errors->any())
-                <div class="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm border border-red-200">
-                    {{ $errors->first() }}
-                </div>
-            @endif
+            <!-- Error & Success Messages Container -->
+            <div id="message-container"></div>
 
-            <form id="resumeForm" action="{{ route('audit.resume.validate') }}" method="POST" class="space-y-6">
+            <form id="resumeForm" class="space-y-6">
                 @csrf
 
                 <div>
@@ -269,7 +294,6 @@
                         autocomplete="off"
                         placeholder="XXX-XXX"
                         class="token-input"
-                        value="{{ session('prefilled_token') ?? old('resume_token') }}"
                         maxlength="7"
                     >
                 </div>
@@ -295,11 +319,9 @@
                 </a>
             </div>
         </section>
-        @endif
 
-        <!-- SECTION 2: Decision Gate (Tampil jika showDecision = true) -->
-        @if(isset($showDecision) && $showDecision)
-        <section id="decision-section" class="decision-card">
+        <!-- SECTION: Decision Gate (Hidden by default, muncul dengan animasi) -->
+        <section id="decision-section" class="hidden decision-card">
             <div class="decision-header">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -310,30 +332,30 @@
             <div class="decision-info">
                 <div class="decision-info-item">
                     <span class="decision-info-label">TOKEN</span>
-                    <span class="decision-info-value">{{ $token }}</span>
+                    <span class="decision-info-value" id="decision-token"></span>
                 </div>
                 <div class="decision-info-item">
                     <span class="decision-info-label">Auditor</span>
-                    <span class="decision-info-value">{{ $auditorName }}</span>
+                    <span class="decision-info-value" id="decision-auditor"></span>
                 </div>
                 <div class="decision-info-item">
                     <span class="decision-info-label">Target Departemen</span>
-                    <span class="decision-info-value">{{ $auditeeDept }}</span>
+                    <span class="decision-info-value" id="decision-dept"></span>
                 </div>
                 <div class="decision-info-item">
                     <span class="decision-info-label">Tanggal Audit</span>
-                    <span class="decision-info-value">{{ $auditDate }}</span>
+                    <span class="decision-info-value" id="decision-date"></span>
                 </div>
                 <div class="decision-info-item">
                     <span class="decision-info-label">Terakhir Aktif</span>
-                    <span class="decision-info-value">{{ $lastActivity }}</span>
+                    <span class="decision-info-value" id="decision-activity"></span>
                 </div>
             </div>
 
-            <form id="decisionForm" action="{{ route('audit.resume.action') }}" method="POST">
+            <form id="decisionForm">
                 @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-                <input type="hidden" name="audit_id" value="{{ $auditId }}">
+                <input type="hidden" name="token" id="decision-token-input">
+                <input type="hidden" name="audit_id" id="decision-audit-id">
 
                 <div class="decision-actions">
                     <button type="submit" name="action" value="continue" class="decision-continue">
@@ -349,13 +371,12 @@
                 </div>
             </form>
         </section>
-        @endif
 
     </div>
 
     <script>
         // Format token input (auto-add hyphen)
-        document.getElementById('resume_token')?.addEventListener('input', function(e) {
+        document.getElementById('resume_token').addEventListener('input', function(e) {
             let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             if (value.length > 3) {
                 value = value.substring(0, 3) + '-' + value.substring(3, 6);
@@ -363,25 +384,151 @@
             e.target.value = value;
         });
 
-        // Form submission handler
+        // Form submission handler - AJAX
         const resumeForm = document.getElementById('resumeForm');
         const submitBtn = document.getElementById('submitBtn');
         const loadingIcon = document.getElementById('loadingIcon');
         const btnText = document.getElementById('btnText');
+        const messageContainer = document.getElementById('message-container');
+        const decisionSection = document.getElementById('decision-section');
 
-        if (resumeForm) {
-            resumeForm.addEventListener('submit', function(e) {
-                // Prevent double submission
-                if (submitBtn.disabled) return;
-                
-                submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                
-                // Show loading state
-                loadingIcon.classList.remove('hidden');
-                btnText.innerText = 'MEMPROSES...';
+        resumeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous messages
+            messageContainer.innerHTML = '';
+            
+            // Get token value
+            const token = document.getElementById('resume_token').value.trim();
+            
+            if (!token) {
+                showError('Token tidak boleh kosong');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            loadingIcon.classList.remove('hidden');
+            btnText.innerText = 'MEMPROSES...';
+
+            // AJAX request
+            fetch("{{ route('audit.resume.validate') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') 
+                        || document.querySelector('input[name="_token"]').value
+                },
+                body: JSON.stringify({
+                    resume_token: token
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // ✅ Token valid - Tampilkan decision gate dengan animasi
+                    showDecisionGate(data);
+                } else {
+                    // ❌ Token tidak valid
+                    showError(data.message || 'Token tidak valid');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Terjadi kesalahan. Silakan coba lagi.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                loadingIcon.classList.add('hidden');
+                btnText.innerText = 'Cek Token';
             });
+        });
+
+        // Decision form handler
+        const decisionForm = document.getElementById('decisionForm');
+        decisionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const action = e.submitter.value;
+            const token = document.getElementById('decision-token-input').value;
+            const auditId = document.getElementById('decision-audit-id').value;
+            
+            // Redirect based on action
+            if (action === 'continue') {
+                // Redirect to menu
+                window.location.href = `/audit/menu/${auditId}?token=${token}`;
+            } else {
+                // Abandon - POST to server then redirect
+                fetch("{{ route('audit.resume.action') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') 
+                            || document.querySelector('input[name="_token"]').value
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        audit_id: auditId,
+                        action: 'abandon'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "{{ route('audit.create') }}";
+                    } else {
+                        alert(data.message || 'Gagal membatalkan audit');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan');
+                });
+            }
+        });
+
+        // Helper functions
+        function showDecisionGate(data) {
+            // Fill decision data
+            document.getElementById('decision-token').textContent = data.token;
+            document.getElementById('decision-auditor').textContent = data.auditorName;
+            document.getElementById('decision-dept').textContent = data.auditeeDept;
+            document.getElementById('decision-date').textContent = data.auditDate;
+            document.getElementById('decision-activity').textContent = data.lastActivity;
+            
+            document.getElementById('decision-token-input').value = data.token;
+            document.getElementById('decision-audit-id').value = data.auditId;
+            
+            // Show decision section with animation
+            decisionSection.classList.remove('hidden');
+            
+            // Scroll to decision section
+            decisionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showError(message) {
+            messageContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>❌ Error:</strong> ${message}
+                </div>
+            `;
+            // Scroll to message
+            messageContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showSuccess(message) {
+            messageContainer.innerHTML = `
+                <div class="success-message">
+                    <strong>✅ Sukses:</strong> ${message}
+                </div>
+            `;
         }
     </script>
+
+    <!-- CSRF Token untuk AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
 </html>

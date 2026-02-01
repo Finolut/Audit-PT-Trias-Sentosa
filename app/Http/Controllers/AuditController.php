@@ -401,60 +401,86 @@ public function showDecisionPage($token)
     // ----------------------------------------------------------------------
     // 3. Validasi Token & Tampilkan Decision Gate
     // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+// 3. Validasi Token & Return JSON Response untuk AJAX
+// ----------------------------------------------------------------------
 public function validateResumeToken(Request $request)
 {
-    $request->validate(['resume_token' => 'required|string']);
-    $token = strtoupper(trim($request->resume_token));
+    // Cek apakah request via AJAX/JSON
+    if ($request->expectsJson()) {
+        $request->validate(['resume_token' => 'required|string']);
+        $token = strtoupper(trim($request->resume_token));
 
-    // Cari parent session
-    $parentSession = DB::table('audit_sessions')
-        ->where('resume_token', $token)
-        ->where('is_parent', true)
-        ->where('resume_token_expires_at', '>', now())
-        ->first();
+        try {
+            // Cari parent session
+            $parentSession = DB::table('audit_sessions')
+                ->where('resume_token', $token)
+                ->where('is_parent', true)
+                ->where('resume_token_expires_at', '>', now())
+                ->first();
 
-    if (!$parentSession) {
-        return redirect()->route('audit.resume.form')
-            ->withErrors(['resume_token' => 'Token tidak valid atau telah kedaluwarsa.']);
+            if (!$parentSession) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Token tidak valid atau telah kedaluwarsa.'
+                ]);
+            }
+
+            // Cari child session pertama
+            $childSession = DB::table('audit_sessions')
+                ->where('parent_session_id', $parentSession->id)
+                ->where('is_parent', false)
+                ->first();
+
+            if (!$childSession) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada audit aktif untuk token ini.'
+                ]);
+            }
+
+            // Cari audit dari child session
+            $audit = DB::table('audits')
+                ->where('audit_session_id', $childSession->id)
+                ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
+                ->first();
+
+            if (!$audit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Audit tidak ditemukan untuk token ini.'
+                ]);
+            }
+
+            // Ambil data tambahan
+            $department = DB::table('departments')
+                ->where('id', $audit->department_id)
+                ->first();
+
+            // ✅ Return JSON data untuk ditampilkan di halaman yang sama
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'auditId' => $audit->id,
+                'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
+                'auditeeDept' => $department->name ?? 'Unknown Dept',
+                'auditDate' => date('d M Y', strtotime($audit->audit_start_date ?? now())),
+                'lastActivity' => $childSession->last_activity_at 
+                    ? date('d M Y H:i', strtotime($childSession->last_activity_at)) 
+                    : 'Aktif',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    // Cari child session pertama
-    $childSession = DB::table('audit_sessions')
-        ->where('parent_session_id', $parentSession->id)
-        ->where('is_parent', false)
-        ->first();
-
-    if (!$childSession) {
-        return redirect()->route('audit.resume.form')
-            ->withErrors(['resume_token' => 'Tidak ada audit aktif untuk token ini.']);
-    }
-
-    // Cari audit dari child session
-    $audit = DB::table('audits')
-        ->where('audit_session_id', $childSession->id)
-        ->whereIn('status', ['DRAFT', 'IN_PROGRESS'])
-        ->first();
-
-    if (!$audit) {
-        return redirect()->route('audit.resume.form')
-            ->withErrors(['resume_token' => 'Audit tidak ditemukan untuk token ini.']);
-    }
-
-    // Ambil data tambahan
-    $department = DB::table('departments')
-        ->where('id', $audit->department_id)
-        ->first();
-
-    // ✅ Tampilkan decision di halaman yang sama
-    return view('audit.resume_form', [
-        'showDecision' => true,
-        'token' => $token,
-        'auditId' => $audit->id,
-        'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
-        'auditeeDept' => $department->name ?? 'Unknown Dept',
-        'auditDate' => date('d M Y', strtotime($audit->audit_start_date ?? now())),
-        'lastActivity' => $childSession->last_activity_at ? date('d M Y H:i', strtotime($childSession->last_activity_at)) : 'Aktif',
-    ]);
+    // Jika bukan AJAX (fallback untuk backward compatibility)
+    return redirect()->route('audit.resume.form')
+        ->withErrors(['resume_token' => 'Invalid request']);
 }
 
     // ----------------------------------------------------------------------
