@@ -2,80 +2,7 @@
 /**
  * Variabel Global & State
  */
-let sessionAnswers = {};
-
-/**
- * Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
- */
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Script loaded');
-    
-    if (typeof dbAnswers !== 'undefined' && dbAnswers !== null) {
-        console.log('✅ Loading saved answers:', dbAnswers);
-        
-        // 1. Looping setiap jawaban dari database
-        Object.keys(dbAnswers).forEach(itemId => {
-            const userAnswers = dbAnswers[itemId];
-            
-            Object.keys(userAnswers).forEach(userName => {
-                const answerData = userAnswers[userName];
-                const value = answerData.answer;
-
-                console.log(`  - Item ${itemId}, User ${userName}: ${value}`);
-
-                // 2. Masukkan ke state sessionAnswers
-                const key = `${itemId}_${userName}`;
-                sessionAnswers[key] = value;
-
-                // 3. Jika ini adalah jawaban Auditor, beri warna pada tombol utama
-                if (userName === auditorName) {
-                    const group = document.getElementById(`btn_group_${itemId}`);
-                    if (group) {
-                        const buttons = group.querySelectorAll('.answer-btn');
-                        buttons.forEach(b => {
-                            b.classList.remove('active-yes', 'active-no', 'active-na');
-                        });
-                        
-                        if (value === 'YES') buttons[0]?.classList.add('active-yes');
-                        else if (value === 'NO') buttons[1]?.classList.add('active-no');
-                        else if (value === 'N/A') buttons[2]?.classList.add('active-na');
-                    }
-                }
-
-                // 4. Update input hidden
-                updateHiddenInputs(itemId);
-
-                // 5. Update info box perbedaan
-                updateInfoBox(itemId);
-
-                // 6. Isi Finding Level dan Finding Note jika ada
-                if (answerData.finding_level) {
-                    const findingSelect = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
-                    if (findingSelect) {
-                        findingSelect.value = answerData.finding_level;
-                    }
-                }
-                
-                if (answerData.finding_note) {
-                    const findingTextarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
-                    if (findingTextarea) {
-                        findingTextarea.value = answerData.finding_note;
-                    }
-                }
-                
-                // 7. Set Answer ID untuk update (bukan insert baru)
-                const answerIdInput = document.querySelector(`input[name="answer_id_map[${itemId}][${userName}]"]`);
-                if (answerIdInput && answerData.id) {
-                    answerIdInput.value = answerData.id;
-                }
-            });
-        });
-        
-        console.log('✅ Answers loaded successfully!');
-    } else {
-        console.log('⚠️ No saved answers found or dbAnswers not defined');
-    }
-});
+let sessionAnswers = {}; 
 
 /**
  * Fungsi Utama: Menetapkan nilai jawaban (YES/NO/N/A)
@@ -103,34 +30,86 @@ function setVal(itemId, userName, value, btnElement) {
     // 3. Update input hidden untuk submit form
     updateHiddenInputs(itemId);
 
-    // 4. Update kotak info (perbedaan jawaban)
+    // 4. Update kotak info (perbedaan jawaban) yang kita buat sebelumnya
     updateInfoBox(itemId);
+}
+
+/**
+ * Menghitung perbandingan suara Author vs Responder secara real-time
+ */
+function calculateScore(itemId) {
+    const infoBox = document.getElementById(`info_${itemId}`);
+    if (!infoBox) return;
+
+    let yesCount = 0;
+    let noCount = 0;
+    let details = [];
+
+    for (let key in sessionAnswers) {
+        if (key.startsWith(itemId + '_')) {
+            const val = sessionAnswers[key];
+            if (val === 'YES') yesCount++;
+            if (val === 'NO') noCount++;
+            details.push(val);
+        }
+    }
+
+    if (details.length > 0) {
+        let statusText = "";
+        let statusColor = "#64748b";
+
+        if (yesCount > noCount) {
+            statusText = `✓ Terpenuhi (Skor: 1)`;
+            statusColor = "#16a34a";
+        } else if (noCount > yesCount) {
+            statusText = `✗ Tidak Terpenuhi (Skor: 0)`;
+            statusColor = "#dc2626";
+        } else {
+            statusText = `! Hasil Seri (${yesCount} vs ${noCount})`;
+            statusColor = "#f59e0b";
+        }
+
+        infoBox.style.display = 'block';
+        infoBox.innerHTML = `
+            <div style="margin-top: 10px; padding: 8px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 0.75rem; color: #475569; margin-bottom: 4px;">
+                    <strong>Hasil:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
+                </div>
+                <div style="font-size: 0.7rem; color: #94a3b8;">
+                    Detail: ${yesCount} YES, ${noCount} NO
+                </div>
+            </div>
+        `;
+    }
+}
+
+/**
+ * Menyamakan tombol di layar utama dengan pilihan Auditor di modal
+ */
+function syncMainButtons(itemId, val) {
+    const mainGroup = document.getElementById(`btn_group_${itemId}`);
+    if(!mainGroup) return;
+    mainGroup.querySelectorAll('.answer-btn').forEach(b => {
+        b.classList.remove('active-yes', 'active-no', 'active-na');
+        if(b.innerText.trim().includes(val)) {
+            if(val === 'YES') b.classList.add('active-yes');
+            if(val === 'NO') b.classList.add('active-no');
+            if(val === 'N/A') b.classList.add('active-na');
+        }
+    });
 }
 
 /**
  * Sinkronisasi data ke input hidden form
  */
 function updateHiddenInputs(itemId) {
-    // Cari container hidden inputs atau buat baru
-    let container = document.getElementById(`hidden_inputs_${itemId}`);
-    if (!container) {
-        container = document.createElement('div');
-        container.id = `hidden_inputs_${itemId}`;
-        container.style.display = 'none';
-        const form = document.getElementById('form');
-        if (form) {
-            form.appendChild(container);
-        }
-    }
-
-    // Bersihkan container
-    container.innerHTML = '';
-
-    // Tambahkan input hidden untuk setiap jawaban
+    const container = document.getElementById(`hidden_inputs_${itemId}`);
+    if (!container) return;
+    container.innerHTML = ''; 
     for (let key in sessionAnswers) {
-        if (key.startsWith(`${itemId}_`)) {
+        if (key.startsWith(itemId + '_')) {
             const val = sessionAnswers[key];
-            const name = key.replace(`${itemId}_`, '');
+            const name = key.replace(itemId + '_', '');
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = `answers[${itemId}][${name}][val]`;
@@ -141,8 +120,131 @@ function updateHiddenInputs(itemId) {
 }
 
 /**
- * Update info box perbedaan jawaban
+ * Membuat baris responder di dalam modal secara dinamis
  */
+function createResponderRow(name, role, itemId, isAuditor = false) {
+    const responderDiv = document.createElement('div');
+    responderDiv.className = 'responder-item';
+    
+    const val = sessionAnswers[`${itemId}_${name}`] || '';
+    
+    responderDiv.innerHTML = `
+        <div class="responder-info">
+            <div class="responder-name">
+                ${name} ${isAuditor ? '<span class="responder-author">AUTHOR</span>' : ''}
+            </div>
+            <div class="responder-role">${role}</div>
+        </div>
+        <div class="responder-buttons">
+            <button type="button" class="responder-btn yes ${val === 'YES' ? 'active' : ''}" 
+                onclick="setVal('${itemId}', '${name}', 'YES', this)">
+                <i class="fas fa-check"></i> YES
+            </button>
+            <button type="button" class="responder-btn no ${val === 'NO' ? 'active' : ''}" 
+                onclick="setVal('${itemId}', '${name}', 'NO', this)">
+                <i class="fas fa-times"></i> NO
+            </button>
+        </div>
+    `;
+    return responderDiv;
+}
+
+/**
+ * Kontrol Modal
+ */
+function openModal(itemId, itemText) {
+    const modal = document.getElementById('answerModal');
+    document.getElementById('modalItemText').innerText = itemText;
+    const list = document.getElementById('modalRespondersList');
+    list.innerHTML = '';
+
+    if (Array.isArray(responders)) {
+        responders.forEach(res => {
+            const isAuditor = (res.responder_name === auditorName);
+            list.appendChild(createResponderRow(
+                res.responder_name,
+                res.responder_department || 'Departemen Tidak Diketahui',
+                itemId,
+                isAuditor
+            ));
+        });
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        document.querySelector('.modal-content').classList.add('active');
+    }, 10);
+}
+
+function closeModal() {
+    const modalContent = document.querySelector('.modal-content');
+    modalContent.classList.remove('active');
+    
+    setTimeout(() => {
+        document.getElementById('answerModal').style.display = 'none';
+    }, 300);
+}
+
+// Close modal when clicking outside content
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        closeModal();
+    }
+});
+
+/**
+ * Validasi Sebelum Lanjut (Submit) – Tanpa Alert, Pakai Navigasi Animasi
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('form');
+    if (!form) return;
+
+    // Fungsi highlight animasi
+    function animateHighlight(element) {
+        // Reset dulu
+        element.classList.remove('unanswered-highlight');
+        void element.offsetWidth; // Trigger reflow
+
+        // Tambahkan kelas animasi
+        element.classList.add('unanswered-highlight');
+
+        // Hapus setelah animasi selesai
+        setTimeout(() => {
+            element.classList.remove('unanswered-highlight');
+        }, 1500);
+    }
+
+    form.addEventListener('submit', function (e) {
+        const allRows = document.querySelectorAll('.item-row'); // <-- pastikan class ini ada di HTML
+        let firstUnansweredRow = null;
+
+        allRows.forEach(row => {
+            const itemId = row.id.replace('row_', '');
+            const hasAuditorAnswer = sessionAnswers[`${itemId}_${auditorName}`];
+            if (!hasAuditorAnswer) {
+                if (!firstUnansweredRow) firstUnansweredRow = row;
+            }
+        });
+
+        if (firstUnansweredRow) {
+            e.preventDefault();
+
+            // Scroll ke soal tersebut dengan smooth + center
+            firstUnansweredRow.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+
+            // Tunggu scroll selesai, lalu highlight
+            setTimeout(() => {
+                animateHighlight(firstUnansweredRow);
+                // Fokus ke tombol pertama biar bisa langsung dijawab
+                firstUnansweredRow.querySelector('.answer-btn')?.focus();
+            }, 600);
+        }
+    });
+});
+
 function updateInfoBox(itemId) {
     const infoBox = document.getElementById(`info_${itemId}`);
     if (!infoBox) return;
@@ -163,9 +265,9 @@ function updateInfoBox(itemId) {
 
     // Helper warna & teks
     const getColor = (val) => {
-        if (val === 'YES') return '#16a34a';
-        if (val === 'NO') return '#dc2626';
-        return '#64748b';
+        if (val === 'YES') return '#16a34a'; // Hijau Sukses
+        if (val === 'NO') return '#dc2626';  // Merah Bahaya
+        return '#64748b';                    // Abu-abu N/A
     };
 
     const getDisplayText = (val) => {
@@ -216,81 +318,13 @@ function updateInfoBox(itemId) {
 }
 
 /**
- * Fungsi pembantu khusus klik dari dalam modal agar UI modal langsung update
- */
-function setValFromModal(itemId, userName, value, btnElement) {
-    // Jalankan fungsi setVal utama untuk simpan data
-    setVal(itemId, userName, value, null);
-
-    // Update UI tombol di dalam modal secara instan
-    const parent = btnElement.parentElement;
-    parent.querySelectorAll('.modal-resp-btn').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
-    
-    // Jika yang diubah di modal adalah akun Auditor, sinkronkan tombol di halaman utama
-    if (userName === auditorName) {
-        const mainGroup = document.getElementById(`btn_group_${itemId}`);
-        if (mainGroup) {
-            const mainButtons = mainGroup.querySelectorAll('.answer-btn');
-            mainButtons.forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
-            
-            if (value === 'YES') mainButtons[0].classList.add('active-yes');
-            if (value === 'NO') mainButtons[1].classList.add('active-no');
-            if (value === 'N/A') mainButtons[2].classList.add('active-na');
-        }
-    }
-}
-
-/**
- * Kontrol Modal
- */
-function openModal(itemId, itemText) {
-    const modal = document.getElementById('answerModal');
-    document.getElementById('modalItemText').innerText = itemText;
-    const list = document.getElementById('modalRespondersList');
-    list.innerHTML = '';
-
-    if (Array.isArray(responders)) {
-        responders.forEach(res => {
-            const isAuditor = (res.responder_name === auditorName);
-            list.appendChild(createResponderRow(
-                res.responder_name,
-                res.responder_department || 'Departemen Tidak Diketahui',
-                itemId,
-                isAuditor
-            ));
-        });
-    }
-
-    modal.style.display = 'flex';
-    setTimeout(() => {
-        document.querySelector('.modal-content').classList.add('active');
-    }, 10);
-}
-
-function closeModal() {
-    const modalContent = document.querySelector('.modal-content');
-    modalContent.classList.remove('active');
-    
-    setTimeout(() => {
-        document.getElementById('answerModal').style.display = 'none';
-    }, 300);
-}
-
-// Close modal when clicking outside content
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal-overlay')) {
-        closeModal();
-    }
-});
-
-/**
  * Membuat baris responder di dalam modal secara dinamis
  */
 function createResponderRow(name, role, itemId, isAuditor = false) {
     const responderDiv = document.createElement('div');
     responderDiv.className = 'responder-item';
     
+    // Ambil jawaban spesifik user ini untuk item ini dari state
     const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
     
     responderDiv.innerHTML = `
@@ -316,3 +350,102 @@ function createResponderRow(name, role, itemId, isAuditor = false) {
     `;
     return responderDiv;
 }
+
+/**
+ * Fungsi pembantu khusus klik dari dalam modal agar UI modal langsung update
+ */
+function setValFromModal(itemId, userName, value, btnElement) {
+    // Jalankan fungsi setVal utama untuk simpan data
+    // Kita panggil setVal tanpa parameter btnElement auditor agar tidak bentrok
+    setVal(itemId, userName, value, null);
+
+    // Update UI tombol di dalam modal secara instan
+    const parent = btnElement.parentElement;
+    parent.querySelectorAll('.modal-resp-btn').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+    
+    // Jika yang diubah di modal adalah akun Auditor, sinkronkan tombol di halaman utama
+    if (userName === auditorName) {
+        const mainGroup = document.getElementById(`btn_group_${itemId}`);
+        if (mainGroup) {
+            const mainButtons = mainGroup.querySelectorAll('.answer-btn');
+            mainButtons.forEach(b => b.classList.remove('active-yes', 'active-no', 'active-na'));
+            
+            // Cari tombol yang teksnya sesuai (Iya/Tidak/N/A)
+            if (value === 'YES') mainButtons[0].classList.add('active-yes');
+            if (value === 'NO') mainButtons[1].classList.add('active-no');
+            if (value === 'N/A') mainButtons[2].classList.add('active-na');
+        }
+    }
+}
+
+/**
+Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
+*/
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof dbAnswers !== 'undefined' && dbAnswers !== null) {
+        console.log('✅ Loading saved answers:', dbAnswers); // ✅ DEBUG LOG
+        
+        // 1. Looping setiap jawaban dari database
+        Object.keys(dbAnswers).forEach(itemId => {
+            const userAnswers = dbAnswers[itemId]; // Berisi { "NamaUser": { answer, finding_level, finding_note, id } }
+            
+            Object.keys(userAnswers).forEach(userName => {
+                const answerData = userAnswers[userName];
+                const value = answerData.answer;
+
+                console.log(`  - Item ${itemId}, User ${userName}: ${value}`); // ✅ DEBUG LOG
+
+                // 2. Masukkan ke state sessionAnswers
+                const key = `${itemId}_${userName}`;
+                sessionAnswers[key] = value;
+
+                // 3. Jika ini adalah jawaban Auditor, beri warna pada tombol utama
+                if (userName === auditorName) {
+                    const group = document.getElementById(`btn_group_${itemId}`);
+                    if (group) {
+                        const buttons = group.querySelectorAll('.answer-btn');
+                        buttons.forEach(b => {
+                            b.classList.remove('active-yes', 'active-no', 'active-na');
+                        });
+                        
+                        if (value === 'YES') buttons[0]?.classList.add('active-yes');
+                        else if (value === 'NO') buttons[1]?.classList.add('active-no');
+                        else if (value === 'N/A') buttons[2]?.classList.add('active-na');
+                    }
+                }
+
+                // 4. Update input hidden
+                updateHiddenInputs(itemId);
+
+                // 5. Update info box perbedaan
+                updateInfoBox(itemId);
+
+                // 6. Isi Finding Level dan Finding Note jika ada
+                if (answerData.finding_level) {
+                    const findingSelect = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
+                    if (findingSelect) {
+                        findingSelect.value = answerData.finding_level;
+                    }
+                }
+                
+                if (answerData.finding_note) {
+                    const findingTextarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
+                    if (findingTextarea) {
+                        findingTextarea.value = answerData.finding_note;
+                    }
+                }
+                
+                // 7. Set Answer ID untuk update (bukan insert baru)
+                const answerIdInput = document.querySelector(`input[name="answer_id_map[${itemId}][${userName}]"]`);
+                if (answerIdInput && answerData.id) {
+                    answerIdInput.value = answerData.id;
+                }
+            });
+        });
+        
+        console.log('✅ Answers loaded successfully!'); // ✅ DEBUG LOG
+    } else {
+        console.log('⚠️ No saved answers found'); // ✅ DEBUG LOG
+    }
+});
