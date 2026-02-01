@@ -79,29 +79,23 @@
             opacity: 0.75;
             cursor: not-allowed;
         }
-        /* Transparent token section styling */
-        .resume-token-section {
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
+        /* Token section styling - matching main form */
+        .token-section {
             margin: 2rem 0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(4px);
         }
-        .resume-token-header {
+        .token-section-title {
             font-weight: 700;
             color: var(--slate-dark);
-            margin-bottom: 0.75rem;
             font-size: 1.25rem;
+            margin-bottom: 0.75rem;
         }
-        .resume-token-description {
+        .token-section-description {
             color: var(--slate);
             font-size: 0.95rem;
             line-height: 1.5;
             margin-bottom: 1.25rem;
         }
-        .resume-token-input {
-            background-color: white;
+        .token-input {
             border: 1px solid #cbd5e1;
             border-radius: 0.375rem;
             padding: 0.75rem 1rem;
@@ -113,12 +107,12 @@
             text-transform: uppercase;
             transition: border-color 0.2s;
         }
-        .resume-token-input:focus {
+        .token-input:focus {
             outline: none;
             border-color: var(--navy);
             box-shadow: 0 0 0 2px rgba(12, 45, 90, 0.1);
         }
-        .resume-token-button {
+        .token-button {
             background: var(--navy);
             color: white;
             border-radius: 0.5rem;
@@ -133,32 +127,32 @@
             margin: 1.25rem auto 0;
             text-align: center;
         }
-        .resume-token-button:hover:not(:disabled) {
+        .token-button:hover:not(:disabled) {
             background: #0a2445;
         }
-        .resume-token-button:disabled {
+        .token-button:disabled {
             opacity: 0.75;
             cursor: not-allowed;
         }
-        .resume-token-footer {
+        .token-footer {
             text-align: center;
             margin-top: 1.5rem;
             color: var(--slate);
             font-size: 0.9rem;
         }
-        .resume-token-footer a {
+        .token-footer a {
             color: var(--navy);
             text-decoration: none;
             font-weight: 500;
             transition: opacity 0.2s;
         }
-        .resume-token-footer a:hover {
+        .token-footer a:hover {
             opacity: 0.8;
         }
     </style>
 </head>
 <body class="text-slate-800">
-    <!-- Hero Section (same as form) -->
+    <!-- Hero Section (same as main form) -->
     <section class="hero-section text-white">
         <div class="max-w-7xl mx-auto px-4 lg:px-6">
             <h1 class="text-3xl md:text-4xl font-bold mb-3">
@@ -172,10 +166,10 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-8">
-        <!-- Transparent Resume Token Section -->
-        <section class="resume-token-section">
-            <h2 class="resume-token-header">Lanjutkan Audit</h2>
-            <p class="resume-token-description">Masukkan Token Unik yang Anda dapatkan saat memulai audit.</p>
+        <!-- Token Section - matching main form structure -->
+        <section class="token-section">
+            <h2 class="token-section-title">Lanjutkan Audit</h2>
+            <p class="token-section-description">Masukkan Token Unik yang Anda dapatkan saat memulai audit.</p>
             
             <!-- Error Message -->
             @if($errors->any())
@@ -198,14 +192,14 @@
                         required
                         autocomplete="off"
                         placeholder="XXX-XXX"
-                        class="resume-token-input"
+                        class="token-input"
                     >
                 </div>
 
                 <button
                     id="submitBtn"
                     type="submit"
-                    class="resume-token-button"
+                    class="token-button"
                 >
                     <span id="btnText">Cek Token</span>
                     <span>→</span>
@@ -219,15 +213,12 @@
             </form>
 
             <!-- Footer -->
-            <div class="resume-token-footer">
+            <div class="token-footer">
                 <a href="{{ route('audit.create') }}">
                     ← Kembali ke Buat Audit Baru
                 </a>
             </div>
         </section>
-
-        <!-- Rest of the form content would go here -->
-        <!-- ... (other sections would follow) ... -->
     </div>
 
     <script>
