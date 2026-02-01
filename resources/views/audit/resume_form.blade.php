@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Resume Audit | Internal Audit</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -412,20 +413,29 @@
             loadingIcon.classList.remove('hidden');
             btnText.innerText = 'MEMPROSES...';
 
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
             // AJAX request
             fetch("{{ route('audit.resume.validate') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') 
-                        || document.querySelector('input[name="_token"]').value
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     resume_token: token
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
+                
                 if (data.success) {
                     // ✅ Token valid - Tampilkan decision gate dengan animasi
                     showDecisionGate(data);
@@ -449,46 +459,50 @@
 
         // Decision form handler
         const decisionForm = document.getElementById('decisionForm');
-        decisionForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const action = e.submitter.value;
-            const token = document.getElementById('decision-token-input').value;
-            const auditId = document.getElementById('decision-audit-id').value;
-            
-            // Redirect based on action
-            if (action === 'continue') {
-                // Redirect to menu
-                window.location.href = `/audit/menu/${auditId}?token=${token}`;
-            } else {
-                // Abandon - POST to server then redirect
-                fetch("{{ route('audit.resume.action') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') 
-                            || document.querySelector('input[name="_token"]').value
-                    },
-                    body: JSON.stringify({
-                        token: token,
-                        audit_id: auditId,
-                        action: 'abandon'
+        if (decisionForm) {
+            decisionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const action = e.submitter.value;
+                const token = document.getElementById('decision-token-input').value;
+                const auditId = document.getElementById('decision-audit-id').value;
+                
+                // Redirect based on action
+                if (action === 'continue') {
+                    // Redirect to menu
+                    window.location.href = `/audit/menu/${auditId}?token=${token}`;
+                } else {
+                    // Abandon - POST to server then redirect
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    
+                    fetch("{{ route('audit.resume.action') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            token: token,
+                            audit_id: auditId,
+                            action: 'abandon'
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = "{{ route('audit.create') }}";
-                    } else {
-                        alert(data.message || 'Gagal membatalkan audit');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan');
-                });
-            }
-        });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = "{{ route('audit.create') }}";
+                        } else {
+                            alert(data.message || 'Gagal membatalkan audit');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan');
+                    });
+                }
+            });
+        }
 
         // Helper functions
         function showDecisionGate(data) {
@@ -527,8 +541,5 @@
             `;
         }
     </script>
-
-    <!-- CSRF Token untuk AJAX -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
 </html>
