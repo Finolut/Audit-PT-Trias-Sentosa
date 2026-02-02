@@ -403,30 +403,34 @@
 </head>
 <body class="bg-gray-50 audit-body">
 
-    <section class="hero-section">
-        <div class="hero-back">
-            <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
-                <i class="fas fa-arrow-left"></i> Kembali ke Menu
-            </a>
+<section class="hero-section">
+    <div class="hero-back">
+        <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Kembali ke Menu
+        </a>
+    </div>
+
+    <div class="hero-content">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">
+            Clause {{ $currentMain }}
+        </h1>
+
+        <div class="flex flex-wrap gap-4 text-sm md:text-base opacity-95">
+            <span class="flex items-center gap-2">
+                <i class="fas fa-building"></i>
+                Dept: <strong>{{ $targetDept }}</strong>
+            </span>
+
+            <span class="flex items-center gap-2">
+                <i class="fas fa-user-check"></i>
+                Auditor: <strong>{{ $auditorName }}</strong>
+            </span>
         </div>
-        <div class="hero-content">
-            <h1 class="text-3xl md:text-4xl font-bold mb-3">
-                INTERNAL AUDIT
-            </h1>
-            <p class="text-base md:text-lg opacity-90 max-w-3xl">
-                Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
-            </p>
-        </div>
-    </section>
+    </div>
+</section>
 
     <div class="audit-container">
-        <header class="page-header">
-            <h1>Clause {{ $currentMain }}</h1>
-            <div class="meta-info">
-                <span><i class="fas fa-building"></i> Dept: <strong>{{ $targetDept }}</strong></span>
-                <span><i class="fas fa-user-check"></i> Auditor: <strong>{{ $auditorName }}</strong></span>
-            </div>
-        </header>
+
 
         <form method="POST"
               action="{{ route('audit.store', ['id' => $auditId, 'clause' => $currentMain]) }}"
