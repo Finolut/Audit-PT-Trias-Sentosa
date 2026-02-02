@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Klausul {{ $currentMain }}</title>
+    <title>Internal Audit | PT Trias Sentosa Tbk</title>
     <link rel="stylesheet" href="{{ asset('css/audit-style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -170,32 +170,38 @@
         .back-link {
             display: inline-flex;
             align-items: center;
-            color: #0c2d5a;
+            color: white;
             text-decoration: none;
             font-weight: 600;
-            margin-bottom: 1.5rem;
             font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
         }
         .back-link:hover {
-            text-decoration: underline;
+            background: rgba(255, 255, 255, 0.25);
+            text-decoration: none;
         }
 
         .page-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e2e8f0;
+            margin: 2rem 0;
+            text-align: center;
         }
         .page-header h1 {
             font-size: 1.8rem;
             font-weight: 700;
             color: #0c2d5a;
-            margin: 0 0 0.5rem 0;
+            margin: 0;
         }
+
         .meta-info {
             display: flex;
+            justify-content: center;
             gap: 1.5rem;
             font-size: 0.9rem;
             color: #475569;
+            margin-top: 0.75rem;
         }
         .meta-info span {
             display: flex;
@@ -358,7 +364,12 @@
             .answer-btn {
                 flex: calc(33.333% - 0.5rem);
             }
+            .back-link {
+                position: static;
+                margin-top: 1rem;
+            }
         }
+
         .hero-section {
             background:
                 linear-gradient(
@@ -371,27 +382,44 @@
             background-repeat: no-repeat;
             min-height: 260px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            padding: 0 1rem;
+        }
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            color: white;
+            text-align: center;
+            z-index: 2;
+        }
+        .hero-back {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
         }
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
 
-    <section class="hero-section text-white">
-    <div class="max-w-7xl mx-auto px-4 lg:px-6">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">
-            INTERNAL AUDIT
-        </h1>
-        <p class="text-base md:text-lg opacity-90 max-w-3xl">
-            Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
-        </p>
-    </div>
-</section>
-    <div class="audit-container">
-        <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
-            <i class="fas fa-arrow-left"></i> Kembali ke Menu
-        </a>
+    <section class="hero-section">
+        <div class="hero-back">
+            <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Kembali ke Menu
+            </a>
+        </div>
+        <div class="hero-content">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3">
+                INTERNAL AUDIT
+            </h1>
+            <p class="text-base md:text-lg opacity-90 max-w-3xl">
+                Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
+            </p>
+        </div>
+    </section>
 
+    <div class="audit-container">
         <header class="page-header">
             <h1>Clause {{ $currentMain }}</h1>
             <div class="meta-info">
@@ -444,7 +472,6 @@
                                            name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
                                            value="{{ $answerId }}">
 
-                                    <!-- Tombol Respon Lain hanya aktif jika jawaban BUKAN N/A -->
                                     @if(count($responders) > 1)
                                         <button type="button"
                                                 class="btn-more mt-2 {{ $isNA ? 'disabled' : '' }}"
@@ -541,7 +568,6 @@
                 const value = btn.dataset.value;
                 setVal(itemId, auditorName, value, btn);
 
-                // Nonaktifkan tombol "Respon Lain" jika jawaban = N/A
                 const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
                 if (moreBtn) {
                     if (value === 'N/A') {
@@ -570,7 +596,6 @@
         function setVal(itemId, userName, value, btnElement) {
             sessionAnswers[`${itemId}_${userName}`] = value;
 
-            // Update main UI (auditor only)
             if (userName === auditorName && btnElement) {
                 const group = document.getElementById(`btn_group_${itemId}`);
                 if (group) {
@@ -583,7 +608,6 @@
                 }
             }
 
-            // Update modal if open
             if (document.getElementById('answerModal').style.display === 'flex') {
                 updateModalButtonStates(itemId);
             }
@@ -624,7 +648,6 @@
                 updateHiddenInputs(itemId);
                 updateInfoBox(itemId);
             }
-            // Apply active states to main UI
             for (const [itemId, users] of Object.entries(dbAnswers)) {
                 if (users[auditorName]) {
                     const ans = users[auditorName].answer;
@@ -635,7 +658,6 @@
                         else if (ans === 'NO') group.children[1]?.classList.add('active-no');
                         else if (ans === 'N/A') group.children[2]?.classList.add('active-na');
                     }
-                    // Nonaktifkan tombol "Respon Lain" jika N/A
                     if (ans === 'N/A') {
                         const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
                         if (moreBtn) {
@@ -728,7 +750,6 @@
         }
 
         function openModal(itemId, text, isNA) {
-            // Jika jawaban saat ini N/A, jangan buka modal
             if (isNA || sessionAnswers[`${itemId}_${auditorName}`] === 'N/A') {
                 Swal.fire('Info', 'Tidak dapat melihat respon lain untuk item yang dijawab "N/A".', 'info');
                 return;
