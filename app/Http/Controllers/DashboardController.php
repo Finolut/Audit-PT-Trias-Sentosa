@@ -56,29 +56,27 @@ public function index(Request $request)
     ];
 
     // Ambil recent audits dan tambahkan department_names
-   $recentAudits = Audit::with('session')
+ $recentAudits = Audit::whereNotNull('audit_session_id')
+    ->with('session')
     ->orderBy('created_at', 'desc')
     ->take(5)
     ->get()
     ->map(function ($audit) {
-        // Decode department_ids JSON
         $deptIds = json_decode($audit->department_ids, true) ?? [];
 
-        // Pastikan ini array dan tidak kosong
         if (!is_array($deptIds) || empty($deptIds)) {
             $audit->department_names = [];
             return $audit;
         }
 
-        // Hanya lakukan query jika ada ID
-        $deptNames = DB::table('departments')
+        $audit->department_names = DB::table('departments')
             ->whereIn('id', $deptIds)
             ->pluck('name')
             ->toArray();
 
-        $audit->department_names = $deptNames;
         return $audit;
     });
+
 
     // Query live questions (sudah benar)
    $findings = DB::table('answers')
