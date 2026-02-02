@@ -8,528 +8,287 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ========== GLOBAL STYLES ========== */
-        .active-yes {
-            background-color: #16a34a !important;
-            color: white !important;
-            border: none !important;
-        }
-        .active-no {
-            background-color: #dc2626 !important;
-            color: white !important;
-            border: none !important;
-        }
-        .active-na {
-            background-color: #64748b !important;
-            color: white !important;
-            border: none !important;
+        :root {
+            --primary: #0C2D5A;
+            --primary-dark: #0A2547;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
         }
 
-        .score-info-box {
-            display: none;
-            margin-top: 10px;
-            padding: 8px;
-            background: #f8fafc;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            font-size: 0.85rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .diff-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 4px 0;
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #ffffff;
+            color: var(--gray-800);
+            line-height: 1.6;
         }
 
-        .unanswered-highlight {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* ========== MODAL ========== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .modal-header h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #0c2d5a;
-        }
-        .modal-header button {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #64748b;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s;
-        }
-        .modal-header button:hover {
-            background: #f1f5f9;
-            color: #0c2d5a;
-        }
-
-        .responder-item {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-        }
-        .responder-item:hover {
-            background: #f1f5f9;
-        }
-
-        .responder-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 8px;
-        }
-        .responder-name {
-            font-weight: 600;
-            color: #1e293b;
-        }
-        .responder-role {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-        .author-badge {
-            background: #10b981;
-            color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
-        }
-
-        .modal-answer-btn {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            min-width: 60px;
-            text-align: center;
-            background-color: #f1f5f9;
-            color: #334155;
-        }
-        .modal-answer-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .modal-answer-btn.yes { background-color: #f1f5f9; color: #334155; }
-        .modal-answer-btn.no { background-color: #f1f5f9; color: #334155; }
-        .modal-answer-btn.yes.active { background-color: #16a34a; color: white; }
-        .modal-answer-btn.no.active { background-color: #dc2626; color: white; }
-
-        /* ========== MAIN LAYOUT ========== */
-        .audit-container {
-            max-width: 900px;
+        .container {
+            max-width: 800px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 2rem 1rem;
         }
 
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary), #1e3a8a);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            border-radius: 0 0 16px 16px;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .hero p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Back Link */
         .back-link {
             display: inline-flex;
             align-items: center;
             color: white;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 0;
         }
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.25);
-            text-decoration: none;
+        .back-link i {
+            margin-right: 0.5rem;
         }
 
-        .page-header {
-            margin: 2rem 0;
-            text-align: center;
-        }
-        .page-header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #0c2d5a;
-            margin: 0;
-        }
-
-        .meta-info {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            font-size: 0.9rem;
-            color: #475569;
-            margin-top: 0.75rem;
-        }
-        .meta-info span {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .sub-clause-section {
+        /* Question Block */
+        .question-block {
             margin-bottom: 2rem;
         }
-        .sub-clause-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #0c2d5a;
-            margin: 0 0 1rem 0;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #cbd5e1;
-        }
-
-        .level-badge {
-            display: inline-block;
-            background: #e0e7ff;
-            color: #1e293b;
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .item-row {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.25rem;
-            border-bottom: 1px dashed #e2e8f0;
-        }
-        .item-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .item-content-col {
-            margin-bottom: 0.75rem;
-        }
-        .item-text {
-            font-size: 1rem;
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            color: var(--gray-800);
             line-height: 1.6;
-            color: #1e293b;
-            margin: 0;
         }
 
-        .item-action-col {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .button-group {
+        /* Answer Buttons */
+        .answer-buttons {
             display: flex;
             gap: 0.75rem;
+            margin-bottom: 1.25rem;
         }
-        .answer-btn {
+        .btn-answer {
             flex: 1;
-            padding: 0.6rem 0.8rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid var(--gray-200);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            background-color: #f1f5f9;
-            color: #334155;
+            background-color: #ffffff;
+            color: var(--gray-700);
         }
-        .answer-btn:focus {
-            outline: none;
-            box-shadow: none;
-        }
-        .answer-btn:hover {
+        .btn-answer:hover {
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
+        .btn-answer.active {
+            border-color: var(--primary) !important;
+            background-color: var(--primary) !important;
+            color: white !important;
+        }
+        .btn-answer.yes { background-color: #ffffff; }
+        .btn-answer.no { background-color: #ffffff; }
+        .btn-answer.na { background-color: #ffffff; }
+        .btn-answer.yes.active { background-color: var(--success); border-color: var(--success); }
+        .btn-answer.no.active { background-color: var(--danger); border-color: var(--danger); }
+        .btn-answer.na.active { background-color: #64748b; border-color: #64748b; }
 
-        .finding-container {
-            background: #f8fafc;
-            padding: 0.75rem;
-            border-radius: 6px;
+        /* Finding Section */
+        .finding-section {
+            margin-top: 1rem;
         }
-        .finding-container label {
-            display: block;
-            margin-bottom: 0.3rem;
-            font-size: 0.8rem;
+        .finding-label {
+            font-size: 0.875rem;
             font-weight: 600;
-            color: #475569;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            display: block;
         }
-        .finding-container select,
-        .finding-container textarea {
+        .finding-select,
+        .finding-note {
             width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
         }
-        .finding-container textarea {
+        .finding-note {
+            min-height: 100px;
             resize: vertical;
         }
 
-        .btn-more {
-            background: transparent;
-            color: #0c2d5a;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 0.4rem 0.75rem;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Submit Area */
+        .submit-area {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
         }
-        .btn-more:hover {
-            background: #f1f5f9;
-        }
-        .btn-more:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: #f1f5f9;
-        }
-
-        /* ========== SUBMIT BUTTON (MIRIP GAMBAR) ========== */
         .btn-submit {
-            background: #7C3AED !important;
-            color: white !important;
+            background: var(--primary);
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.875rem 2rem;
             font-size: 1rem;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            width: 100%;
-            max-width: 200px;
+            margin-bottom: 1rem;
         }
         .btn-submit:hover {
-            background: #6D28D9 !important;
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
+            box-shadow: 0 4px 8px rgba(12, 45, 90, 0.3);
         }
-
         .submit-warning {
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             color: #64748b;
-            margin-top: 0.5rem;
-            text-align: center;
-            max-width: 400px;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.5;
         }
 
         @media (max-width: 768px) {
-            .meta-info {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            .button-group {
+            .answer-buttons {
                 flex-wrap: wrap;
             }
-            .answer-btn {
-                flex: calc(33.333% - 0.5rem);
+            .btn-answer {
+                flex: calc(50% - 0.375rem);
             }
-            .btn-submit {
-                width: 100%;
-            }
-        }
-
-        .hero-section {
-            background:
-                linear-gradient(
-                    rgba(12, 45, 90, 0.88),
-                    rgba(12, 45, 90, 0.88)
-                ),
-                url('https://media.licdn.com/dms/image/v2/D563DAQEpYdKv0Os29A/image-scale_191_1128/image-scale_191_1128/0/1690510724603/pt_trias_sentosa_tbk_cover?e=2147483647&v=beta&t=dOGhpl6HrbRAla_mDVT5azyevrvu-cOGFxPcrlizZ6M');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            min-height: 260px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            padding: 0 1rem;
-        }
-        .hero-content {
-            max-width: 900px;
-            margin: 0 auto;
-            color: white;
-            text-align: center;
-            z-index: 2;
-        }
-        .hero-back {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
         }
     </style>
 </head>
-<body class="bg-gray-50 audit-body">
-
-    <section class="hero-section">
-        <div class="hero-back">
-            <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
-                <i class="fas fa-arrow-left"></i> Kembali ke Menu
-            </a>
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <div class="hero">
+            <h1>INTERNAL AUDIT</h1>
+            <p>Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.</p>
         </div>
-        <div class="hero-content">
-            <h1 class="text-3xl md:text-4xl font-bold mb-3">
-                INTERNAL AUDIT
-            </h1>
-            <p class="text-base md:text-lg opacity-90 max-w-3xl">
-                Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
-            </p>
-        </div>
-    </section>
 
-    <div class="audit-container">
-        <header class="page-header">
-            <h1>Clause {{ $currentMain }}</h1>
-            <div class="meta-info">
-                <span><i class="fas fa-building"></i> Dept: <strong>{{ $targetDept }}</strong></span>
-                <span><i class="fas fa-user-check"></i> Auditor: <strong>{{ $auditorName }}</strong></span>
-            </div>
-        </header>
+        <!-- Back Link -->
+        <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Kembali ke Menu
+        </a>
 
-        <form method="POST"
-              action="{{ route('audit.store', ['id' => $auditId, 'clause' => $currentMain]) }}"
-              id="form">
+        <!-- Form -->
+        <form id="form">
             @csrf
 
             @foreach ($subClauses as $subCode)
-                <div class="sub-clause-section">
-                    <h2 class="sub-clause-title">{{ $subCode }} – {{ $clauseTitles[$subCode] ?? 'Detail' }}</h2>
+                <h2 style="font-size: 1.3rem; font-weight: 600; color: var(--primary); margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--gray-200);">
+                    {{ $subCode }} – {{ $clauseTitles[$subCode] ?? 'Detail' }}
+                </h2>
 
-                    @foreach ($maturityLevels as $level)
-                        <div class="level-badge">Maturity Level {{ $level->level_number }}</div>
+                @foreach ($maturityLevels as $level)
+                    <div style="background: var(--gray-100); padding: 0.5rem 1rem; border-radius: 6px; display: inline-block; margin: 1rem 0;">
+                        Maturity Level {{ $level->level_number }}
+                    </div>
 
-                        @php
-                            $items = $itemsGrouped[$subCode] ?? collect();
-                        @endphp
+                    @php
+                        $items = $itemsGrouped[$subCode] ?? collect();
+                    @endphp
 
-                        @foreach ($items->where('maturity_level_id', $level->id) as $item)
-                            <div class="item-row" id="row_{{ $item->id }}">
-                                <div class="item-content-col">
-                                    <p class="item-text">{{ $item->item_text }}</p>
-                                    <div id="info_{{ $item->id }}" class="score-info-box"></div>
-                                </div>
+                    @foreach ($items->where('maturity_level_id', $level->id) as $item)
+                        <div class="question-block" id="row_{{ $item->id }}">
+                            <div class="question-text">{{ $item->item_text }}</div>
 
-                                <div class="item-action-col">
-                                    <div class="button-group" id="btn_group_{{ $item->id }}">
-                                        <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
-                                        <button type="button" class="answer-btn no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
-                                        <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
-                                    </div>
-
-                                    <div id="hidden_inputs_{{ $item->id }}"></div>
-
-                                    @php
-                                        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                                        $findingLevel = $existingAnswer['finding_level'] ?? '';
-                                        $findingNote = $existingAnswer['finding_note'] ?? '';
-                                        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
-                                        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
-                                    @endphp
-
-                                    <input type="hidden"
-                                           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
-                                           value="{{ $answerId }}">
-
-                                    @if(count($responders) > 1)
-                                        <button type="button"
-                                                class="btn-more mt-2 {{ $isNA ? 'disabled' : '' }}"
-                                                onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}', {{ $isNA ? 'true' : 'false' }})"
-                                                {{ $isNA ? 'disabled' : '' }}>
-                                            Respon Lain...
-                                        </button>
-                                    @endif
-
-                                    <div class="finding-container mt-3">
-                                        <div class="flex flex-wrap gap-4 items-end">
-                                            <div class="flex-1 min-w-[160px]">
-                                                <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                                                    Finding Level
-                                                </label>
-                                                <select
-                                                    name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
-                                                    id="finding_level_{{ $item->id }}_{{ $auditorName }}"
-                                                    class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
-                                                    onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
-                                                    <option value="">-- No Finding --</option>
-                                                    <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
-                                                        Observed (OFI)
-                                                    </option>
-                                                    <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
-                                                        Minor NC
-                                                    </option>
-                                                    <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
-                                                        Major NC
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
-                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                                Catatan Temuan
-                                            </label>
-                                            <textarea
-                                                name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
-                                                rows="3"
-                                                class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
-                                                placeholder="Jelaskan temuan secara detail...">{{ $findingNote }}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- Answer Buttons -->
+                            <div class="answer-buttons" id="btn_group_{{ $item->id }}">
+                                <button type="button" class="btn-answer yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
+                                <button type="button" class="btn-answer no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
+                                <button type="button" class="btn-answer na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
                             </div>
-                        @endforeach
+
+                            <!-- Hidden inputs -->
+                            <div id="hidden_inputs_{{ $item->id }}"></div>
+
+                            @php
+                                $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+                                $findingLevel = $existingAnswer['finding_level'] ?? '';
+                                $findingNote = $existingAnswer['finding_note'] ?? '';
+                                $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+                                $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
+                            @endphp
+
+                            <input type="hidden"
+                                   name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+                                   value="{{ $answerId }}">
+
+                            <!-- Respon Lain (jika ada multiple responder) -->
+                            @if(count($responders) > 1)
+                                <button type="button"
+                                        class="btn-more mt-2"
+                                        style="background: transparent; color: var(--primary); border: 1px solid var(--gray-200); border-radius: 4px; padding: 0.4rem 0.75rem; font-size: 0.85rem; cursor: pointer; margin-bottom: 1rem;"
+                                        onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}', {{ $isNA ? 'true' : 'false' }})"
+                                        {{ $isNA ? 'disabled' : '' }}>
+                                    Respon Lain...
+                                </button>
+                            @endif
+
+                            <!-- Finding Section -->
+                            <div class="finding-section">
+                                <label class="finding-label">Finding Level</label>
+                                <select
+                                    name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
+                                    class="finding-select"
+                                    onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
+                                    <option value="">-- No Finding --</option>
+                                    <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
+                                        Observed (OFI)
+                                    </option>
+                                    <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
+                                        Minor NC
+                                    </option>
+                                    <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
+                                        Major NC
+                                    </option>
+                                </select>
+
+                                <label class="finding-label">Catatan Temuan</label>
+                                <textarea
+                                    name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
+                                    class="finding-note"
+                                    placeholder="Jelaskan temuan secara detail...">{{ $findingNote }}</textarea>
+                            </div>
+                        </div>
                     @endforeach
-                </div>
+                @endforeach
             @endforeach
 
-            <!-- GANTI SECTION SUBMIT -->
-            <div class="submit-bar" style="text-align: center; margin-top: 3rem;">
+            <!-- Submit Area -->
+            <div class="submit-area">
                 <button type="button" class="btn-submit" onclick="submitAuditMock()">
                     Kirim
                 </button>
@@ -541,16 +300,16 @@
     </div>
 
     <!-- MODAL -->
-    <div id="answerModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Jawaban Auditor Lain</h3>
-                <button type="button" onclick="closeModal()">×</button>
+    <div id="answerModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:24px; border-radius:12px; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #e2e8f0;">
+                <h3 style="font-size:1.25rem; font-weight:700; color:var(--primary);">Jawaban Auditor Lain</h3>
+                <button type="button" onclick="closeModal()" style="background:none; border:none; font-size:1.5rem; color:#64748b; cursor:pointer; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button>
             </div>
-            <p id="modalItemText" style="margin-bottom: 16px; font-weight: 500; color: #1e293b;"></p>
+            <p id="modalItemText" style="margin-bottom:16px; font-weight:500; color:var(--gray-800);"></p>
             <div id="modalRespondersList"></div>
-            <div class="mt-4" style="text-align: right;">
-                <button type="button" class="submit-audit" style="padding: 0.5rem 1.25rem;" onclick="closeModal()">Selesai</button>
+            <div style="text-align:right; margin-top:16px;">
+                <button type="button" style="background:var(--primary); color:white; border:none; padding:0.5rem 1.25rem; border-radius:6px; cursor:pointer;" onclick="closeModal()">Selesai</button>
             </div>
         </div>
     </div>
@@ -570,7 +329,7 @@
 
         function bindButtons() {
             document.body.addEventListener('click', function(e) {
-                const btn = e.target.closest('.answer-btn');
+                const btn = e.target.closest('.btn-answer');
                 if (!btn) return;
                 const itemId = btn.dataset.itemId;
                 const value = btn.dataset.value;
@@ -580,10 +339,12 @@
                 if (moreBtn) {
                     if (value === 'N/A') {
                         moreBtn.disabled = true;
-                        moreBtn.classList.add('disabled');
+                        moreBtn.style.opacity = '0.5';
+                        moreBtn.style.cursor = 'not-allowed';
                     } else {
                         moreBtn.disabled = false;
-                        moreBtn.classList.remove('disabled');
+                        moreBtn.style.opacity = '1';
+                        moreBtn.style.cursor = 'pointer';
                     }
                 }
             });
@@ -607,12 +368,10 @@
             if (userName === auditorName && btnElement) {
                 const group = document.getElementById(`btn_group_${itemId}`);
                 if (group) {
-                    group.querySelectorAll('.answer-btn').forEach(b => {
-                        b.classList.remove('active-yes', 'active-no', 'active-na');
+                    group.querySelectorAll('.btn-answer').forEach(b => {
+                        b.classList.remove('active');
                     });
-                    if (value === 'YES') btnElement.classList.add('active-yes');
-                    else if (value === 'NO') btnElement.classList.add('active-no');
-                    else if (value === 'N/A') btnElement.classList.add('active-na');
+                    btnElement.classList.add('active');
                 }
             }
 
@@ -621,7 +380,6 @@
             }
 
             updateHiddenInputs(itemId);
-            updateInfoBox(itemId);
         }
 
         function updateModalButtonStates(itemId) {
@@ -632,9 +390,22 @@
                 const current = sessionAnswers[`${itemId}_${user}`] || '';
                 
                 btn.className = 'modal-answer-btn';
-                btn.classList.add(val.toLowerCase());
+                btn.style.padding = '0.5rem 0.75rem';
+                btn.style.fontSize = '0.875rem';
+                btn.style.fontWeight = '500';
+                btn.style.border = 'none';
+                btn.style.borderRadius = '6px';
+                btn.style.cursor = 'pointer';
+                btn.style.transition = 'all 0.2s';
+                btn.style.minWidth = '60px';
+                btn.style.textAlign = 'center';
+                btn.style.backgroundColor = '#f1f5f9';
+                btn.style.color = '#334155';
+
+                if (val === 'YES') btn.style.backgroundColor = current === 'YES' ? '#16a34a' : '#f1f5f9';
+                if (val === 'NO') btn.style.backgroundColor = current === 'NO' ? '#dc2626' : '#f1f5f9';
                 if (current === val) {
-                    btn.classList.add('active');
+                    btn.style.color = 'white';
                 }
             });
         }
@@ -653,24 +424,22 @@
                         if (textarea) textarea.value = data.finding_note;
                     }
                 }
-                updateHiddenInputs(itemId);
-                updateInfoBox(itemId);
             }
             for (const [itemId, users] of Object.entries(dbAnswers)) {
                 if (users[auditorName]) {
                     const ans = users[auditorName].answer;
                     const group = document.getElementById(`btn_group_${itemId}`);
                     if (group) {
-                        group.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-                        if (ans === 'YES') group.children[0]?.classList.add('active-yes');
-                        else if (ans === 'NO') group.children[1]?.classList.add('active-no');
-                        else if (ans === 'N/A') group.children[2]?.classList.add('active-na');
+                        group.querySelectorAll('.btn-answer').forEach(b => b.classList.remove('active'));
+                        const targetBtn = Array.from(group.children).find(b => b.dataset.value === ans);
+                        if (targetBtn) targetBtn.classList.add('active');
                     }
                     if (ans === 'N/A') {
                         const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
                         if (moreBtn) {
                             moreBtn.disabled = true;
-                            moreBtn.classList.add('disabled');
+                            moreBtn.style.opacity = '0.5';
+                            moreBtn.style.cursor = 'not-allowed';
                         }
                     }
                 }
@@ -693,49 +462,11 @@
             }
         }
 
-        function updateInfoBox(itemId) {
-            const infoBox = document.getElementById(`info_${itemId}`);
-            if (!infoBox) return;
-            const auditorAns = sessionAnswers[`${itemId}_${auditorName}`];
-            if (!auditorAns) {
-                infoBox.style.display = 'none';
-                return;
-            }
-            let diff = [];
-            for (const [key, val] of Object.entries(sessionAnswers)) {
-                if (key.startsWith(`${itemId}_`)) {
-                    const user = key.replace(`${itemId}_`, '');
-                    if (user !== auditorName && val !== auditorAns) {
-                        diff.push({ user, val });
-                    }
-                }
-            }
-            if (diff.length === 0) {
-                infoBox.style.display = 'none';
-                return;
-            }
-            const getColor = (v) => v === 'YES' ? '#16a34a' : v === 'NO' ? '#dc2626' : '#64748b';
-            const getText = (v) => v === 'YES' ? 'Iya' : v === 'NO' ? 'Tidak' : 'N/A';
-            infoBox.innerHTML = `
-                <div class="diff-item">
-                    <span><strong>${auditorName} (Anda)</strong></span>
-                    <span style="color:${getColor(auditorAns)}"><strong>${getText(auditorAns)}</strong></span>
-                </div>
-                ${diff.map(d => `
-                    <div class="diff-item">
-                        <span>${d.user}</span>
-                        <span style="color:${getColor(d.val)}">${getText(d.val)}</span>
-                    </div>
-                `).join('')}
-            `;
-            infoBox.style.display = 'block';
-        }
-
         function bindFormValidation() {
             const form = document.getElementById('form');
             if (!form) return;
             form.addEventListener('submit', function(e) {
-                const rows = document.querySelectorAll('.item-row');
+                const rows = document.querySelectorAll('.question-block');
                 let firstEmpty = null;
                 rows.forEach(row => {
                     const id = row.id.replace('row_', '');
@@ -746,34 +477,27 @@
                 if (firstEmpty) {
                     e.preventDefault();
                     firstEmpty.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstEmpty.classList.add('unanswered-highlight');
-                    setTimeout(() => firstEmpty.classList.remove('unanswered-highlight'), 1500);
-                    Swal.fire('Perhatian!', 'Silakan jawab semua pertanyaan sebelum menyimpan.', 'warning');
+                    firstEmpty.style.boxShadow = '0 0 0 0 rgba(239, 68, 68, 0.4)';
+                    setTimeout(() => {
+                        firstEmpty.style.animation = 'pulse 1.5s infinite';
+                    }, 100);
+                    setTimeout(() => {
+                        firstEmpty.style.animation = 'none';
+                    }, 1600);
+                    Swal.fire('Perhatian!', 'Silakan jawab semua pertanyaan sebelum mengirim.', 'warning');
                 }
             });
         }
 
-        // ✅ FUNGSI "KIRIM" — TIDAK BENAR-BENAR SUBMIT, HANYA SIMULASI (seperti gambar)
         function submitAuditMock() {
             Swal.fire({
                 title: 'Berhasil!',
-                text: 'Data telah dikirim.',
+                text: 'Data audit telah dikirim.',
                 icon: 'success',
-                confirmButtonText: 'OK',
+                confirmButtonText: 'Selesai',
                 allowOutsideClick: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Kosongkan formulir (opsional)
-                    document.getElementById('form').reset();
-                    // Reset state JS
-                    sessionAnswers = {};
-                    // Clear all active states
-                    document.querySelectorAll('.answer-btn').forEach(btn => {
-                        btn.classList.remove('active-yes', 'active-no', 'active-na');
-                    });
-                    // Redirect ke menu (sesuai kebutuhan)
-                    window.location.href = "{{ route('audit.menu', $auditId) }}";
-                }
+            }).then(() => {
+                window.location.href = "{{ route('audit.menu', $auditId) }}";
             });
         }
 
@@ -790,26 +514,26 @@
                 const name = res.responder_name || res.name;
                 const role = res.responder_department || res.dept || '–';
                 const isAuditor = (name === auditorName);
+                const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
 
                 const div = document.createElement('div');
-                div.className = 'responder-item';
+                div.style.background = '#f8fafc';
+                div.style.borderRadius = '8px';
+                div.style.padding = '16px';
+                div.style.marginBottom = '12px';
                 div.innerHTML = `
-                    <div class="responder-header">
-                        <div>
-                            <span class="responder-name">${name}</span>
-                            ${isAuditor ? '<span class="author-badge">AUTHOR</span>' : ''}
-                            <div class="responder-role">${role}</div>
-                        </div>
+                    <div style="font-weight:600; color:#1e293b; margin-bottom:4px;">
+                        ${name} ${isAuditor ? '<span style="background:#10b981;color:white;font-size:0.75rem;padding:2px 6px;border-radius:4px;margin-left:8px;">AUTHOR</span>' : ''}
+                        <div style="font-size:0.85rem; color:#64748b;">${role}</div>
                     </div>
-                    <div class="flex gap-2">
-                        <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="YES">Iya</button>
-                        <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="NO">Tidak</button>
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="YES" style="padding:0.5rem 0.75rem; font-size:0.875rem; font-weight:500; border:none; border-radius:6px; cursor:pointer; min-width:60px; text-align:center; background-color:${currentVal === 'YES' ? '#16a34a' : '#f1f5f9'}; color:${currentVal === 'YES' ? 'white' : '#334155'};">Iya</button>
+                        <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="NO" style="padding:0.5rem 0.75rem; font-size:0.875rem; font-weight:500; border:none; border-radius:6px; cursor:pointer; min-width:60px; text-align:center; background-color:${currentVal === 'NO' ? '#dc2626' : '#f1f5f9'}; color:${currentVal === 'NO' ? 'white' : '#334155'};">Tidak</button>
                     </div>
                 `;
                 list.appendChild(div);
             });
 
-            updateModalButtonStates(itemId);
             document.getElementById('answerModal').style.display = 'flex';
         }
 
@@ -818,8 +542,10 @@
         }
 
         function toggleFindingNote(itemId, auditor, value) {
-            const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
-            if (wrapper) wrapper.style.display = value ? 'block' : 'none';
+            const textarea = document.querySelector(`textarea[name="finding_note[${itemId}][${auditor}]"]`);
+            if (textarea) {
+                textarea.style.display = value ? 'block' : 'none';
+            }
         }
     </script>
 </body>
