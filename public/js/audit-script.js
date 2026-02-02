@@ -120,36 +120,6 @@ function updateHiddenInputs(itemId) {
 }
 
 /**
- * Membuat baris responder di dalam modal secara dinamis
- */
-function createResponderRow(name, role, itemId, isAuditor = false) {
-    const responderDiv = document.createElement('div');
-    responderDiv.className = 'responder-item';
-    
-    const val = sessionAnswers[`${itemId}_${name}`] || '';
-    
-    responderDiv.innerHTML = `
-        <div class="responder-info">
-            <div class="responder-name">
-                ${name} ${isAuditor ? '<span class="responder-author">AUTHOR</span>' : ''}
-            </div>
-            <div class="responder-role">${role}</div>
-        </div>
-        <div class="responder-buttons">
-            <button type="button" class="responder-btn yes ${val === 'YES' ? 'active' : ''}" 
-                onclick="setVal('${itemId}', '${name}', 'YES', this)">
-                <i class="fas fa-check"></i> YES
-            </button>
-            <button type="button" class="responder-btn no ${val === 'NO' ? 'active' : ''}" 
-                onclick="setVal('${itemId}', '${name}', 'NO', this)">
-                <i class="fas fa-times"></i> NO
-            </button>
-        </div>
-    `;
-    return responderDiv;
-}
-
-/**
  * Kontrol Modal
  */
 function openModal(itemId, itemText) {
@@ -323,10 +293,9 @@ function updateInfoBox(itemId) {
 function createResponderRow(name, role, itemId, isAuditor = false) {
     const responderDiv = document.createElement('div');
     responderDiv.className = 'responder-item';
-    
-    // Ambil jawaban spesifik user ini untuk item ini dari state
+
     const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
-    
+
     responderDiv.innerHTML = `
         <div class="responder-info">
             <div class="responder-name">
@@ -335,21 +304,21 @@ function createResponderRow(name, role, itemId, isAuditor = false) {
             <div class="responder-role">${role}</div>
         </div>
         <div class="responder-buttons">
-            <button type="button" 
-                class="modal-resp-btn btn-yes ${currentVal === 'YES' ? 'active' : ''}" 
+            <button type="button"
+                class="modal-resp-btn btn-yes ${currentVal === 'YES' ? 'active' : ''}"
                 onclick="setValFromModal('${itemId}', '${name}', 'YES', this)">
-                <i class="fas fa-check"></i>
+                ✔
             </button>
-            
-            <button type="button" 
-                class="modal-resp-btn btn-no ${currentVal === 'NO' ? 'active' : ''}" 
+            <button type="button"
+                class="modal-resp-btn btn-no ${currentVal === 'NO' ? 'active' : ''}"
                 onclick="setValFromModal('${itemId}', '${name}', 'NO', this)">
-                <i class="fas fa-times"></i>
+                ✖
             </button>
         </div>
     `;
     return responderDiv;
 }
+
 
 /**
  * Fungsi pembantu khusus klik dari dalam modal agar UI modal langsung update

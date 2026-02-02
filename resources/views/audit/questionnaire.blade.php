@@ -158,6 +158,8 @@
 
     @push('scripts')
 <script>
+
+
     // Toggle visibility catatan temuan
     function toggleFindingNote(itemId, auditorName, value) {
         const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
@@ -167,45 +169,38 @@
     }
 
     // Event delegation untuk button YES/NO/N/A
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle klik button jawaban
-        document.querySelectorAll('.answer-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const itemId = this.getAttribute('data-item-id');
-                const value = this.getAttribute('data-value');
-                const auditorName = "{{ $auditorName }}";
-                
-                // Reset semua button di group ini
-                document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(btn => {
-                    btn.classList.remove('active-yes', 'active-no', 'active-na');
-                });
-                
-                // Set active class
-                if (value === 'YES') {
-                    this.classList.add('active-yes');
-                } else if (value === 'NO') {
-                    this.classList.add('active-no');
-                } else if (value === 'N/A') {
-                    this.classList.add('active-na');
-                }
-                
-                // Update hidden input
-                const answerInput = document.getElementById(`answer_input_${itemId}_${auditorName}`);
-                if (answerInput) {
-                    answerInput.value = value;
-                }
-                
-                // Optional: Auto-hide finding note jika jawaban YES
-                if (value === 'YES') {
-                    const findingSelect = document.getElementById(`finding_level_${itemId}_${auditorName}`);
-                    if (findingSelect) {
-                        findingSelect.value = '';
-                        toggleFindingNote(itemId, auditorName, '');
-                    }
-                }
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    if (!dbAnswers) return;
+
+    Object.keys(dbAnswers).forEach(itemId => {
+        Object.keys(dbAnswers[itemId]).forEach(userName => {
+            const data = dbAnswers[itemId][userName];
+            const key = `${itemId}_${userName}`;
+
+            sessionAnswers[key] = data.answer;
+
+            // Mark tombol auditor
+            if (userName === auditorName) {
+                const btns = document
+                    .getElementById(`btn_group_${itemId}`)
+                    ?.querySelectorAll('.answer-btn');
+
+                if (!btns) return;
+                btns.forEach(b => b.classList.remove('active-yes','active-no','active-na'));
+
+                if (data.answer === 'YES') btns[0].classList.add('active-yes');
+                if (data.answer === 'NO')  btns[1].classList.add('active-no');
+                if (data.answer === 'N/A') btns[2].classList.add('active-na');
+            }
+
+            updateHiddenInputs(itemId);
+            updateInfoBox(itemId);
         });
     });
+});
+    const auditorName = @json(auth()->user()->name);
+    const responders  = @json($responders);
+
 
     function confirmSubmit() {
         Swal.fire({

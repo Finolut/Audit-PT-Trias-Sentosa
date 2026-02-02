@@ -366,10 +366,6 @@
                         Batalkan & Buat Baru
                     </button>
                 </div>
-
-                <div class="decision-or">
-                    <span>Masuk kembali ke menu & data tersimpan</span>
-                </div>
             </form>
         </section>
 
