@@ -4,13 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model; // <--- WAJIB ADA
 
-class Audit extends Model {
+class Audit extends Model
+{
     protected $table = 'audits';
     protected $guarded = [];
     public $incrementing = false;
     protected $keyType = 'string';
 
-    public function session() {
+    // Tambahkan ini agar Laravel tahu kolom foreign key bertipe string
+    protected $casts = [
+        'audit_session_id' => 'string',
+    ];
+
+    public function session()
+    {
         return $this->belongsTo(AuditSession::class, 'audit_session_id');
     }
 

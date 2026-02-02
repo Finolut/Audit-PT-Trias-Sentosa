@@ -3,10 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids; // Laravel 10+
 use Illuminate\Support\Str;
 
 class AuditSession extends Model
 {
+    use HasUuids; // ← Tambahkan ini
+
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'auditor_name',
         'auditor_email',
