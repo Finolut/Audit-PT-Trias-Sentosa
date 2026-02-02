@@ -182,7 +182,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 
     // ✅ ROUTE BARU: Catatan Temuan Audit
 Route::get('/admin/audit/findings', [DashboardController::class, 'findingsIndex'])
-    ->name('admin.audit.findings');
+    ->name('audit.findings');
 });
 
 // Preserved special routes (public)
