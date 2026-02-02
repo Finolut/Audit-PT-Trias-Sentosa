@@ -239,9 +239,9 @@
             border: 1px solid #2563eb;
         }
 
-        /* Start Audit Button */
+        /* Start Audit Button - SOLID COLOR (NO GRADIENT) */
         .start-audit-container {
-            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            background: #10b981; /* Warna solid hijau */
             border-radius: 12px;
             padding: 2rem;
             text-align: center;
@@ -250,22 +250,23 @@
         }
 
         .btn-start-audit {
-            background: #10b981;
-            color: white;
+            background: white; /* Tombol putih di atas background hijau */
+            color: #10b981;
             padding: 1rem 2.5rem;
             font-size: 1.1rem;
             font-weight: 700;
             border-radius: 8px;
-            border: none;
+            border: 2px solid white;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            text-decoration: none;
         }
 
         .btn-start-audit:hover {
-            background: #0da271;
+            background: #f0fdf4;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
         }
@@ -284,12 +285,12 @@
         }
 
         .start-audit-subtitle {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             font-size: 1rem;
             margin-bottom: 1.5rem;
         }
 
-                .hero-section {
+        .hero-section {
             background:
                 linear-gradient(
                     rgba(12, 45, 90, 0.88),
@@ -320,10 +321,21 @@
 </head>
 <body class="bg-gray-50 font-sans">
 
+<!-- Mini Hero Section -->
+<section class="hero-section text-white">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">
+            MULAI AUDIT INTERNAL
+        </h1>
+        <p class="text-base md:text-lg opacity-90 max-w-3xl">
+            Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.
+        </p>
+    </div>
+</section>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
         
-        <!-- Start Audit Button Section -->
+        <!-- Start Audit Button Section - SOLID COLOR -->
         <div class="start-audit-container">
             <h2 class="start-audit-title">
                 <i class="fas fa-play-circle mr-2"></i> Mulai Audit Sekarang
