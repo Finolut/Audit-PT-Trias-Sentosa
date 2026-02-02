@@ -32,6 +32,13 @@
         {{-- KIRI --}}
         <div class="space-y-2">
             <div class="flex">
+                <span class="w-48 font-semibold text-gray-600">Kode Audit</span>:
+                <span class="ml-2 font-mono text-gray-800">
+                    {{ $auditSummary['audit_code'] }}
+                </span>
+            </div>
+
+            <div class="flex">
                 <span class="w-48 font-semibold text-gray-600">Jenis Pemeriksaan</span>:
                 <span class="ml-2">{{ $auditSummary['type'] }}</span>
             </div>
@@ -62,7 +69,7 @@
             <div class="flex">
                 <span class="w-48 font-semibold text-gray-600">Email Lead Auditor</span>:
                 <span class="ml-2 text-blue-700 underline">
-                    {{ $session->auditor_email ?? '-' }}
+                    {{ $leadAuditor['email'] }}
                 </span>
             </div>
 
@@ -83,9 +90,25 @@
                     {{ $auditSummary['start_date'] }} – {{ $auditSummary['end_date'] }}
                 </span>
             </div>
+
+            {{-- STATUS --}}
+            <div class="flex items-center pt-1">
+                <span class="w-48 font-semibold text-gray-600">Status Audit</span>:
+                @if($auditSummary['status'] === 'COMPLETE')
+                    <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700 rounded border border-green-200">
+                        SELESAI
+                    </span>
+                @else
+                    <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-yellow-100 text-yellow-700 rounded border border-yellow-200">
+                        BERJALAN
+                    </span>
+                @endif
+            </div>
         </div>
+
     </div>
 </div>
+
 
 
     </div> {{-- AKHIR HEADER SECTION --}}

@@ -208,18 +208,16 @@ public function index(Request $request)
         $departments = Department::all();
        $audit = Audit::with('department')->findOrFail($auditId);
 
-       
-       
-
        // --- TAMBAHKAN INI AGAR NAMA AUDITOR MUNCUL ---
     $session = DB::table('audit_sessions')
         ->where('id', $audit->audit_session_id)
         ->first();
 
-    $leadAuditor = [
-        'name' => $session->auditor_name ?? '-',
-        'nik' => $session->auditor_nik ?? '-',
-    ];
+$leadAuditor = [
+    'name'  => $session->auditor_name ?? '-',
+    'email' => $session->auditor_email ?? '-',
+    'nik'   => $session->auditor_nik ?? '-',
+];
 
     $teamMembers = DB::table('audit_responders')
         ->where('audit_session_id', $audit->audit_session_id)
@@ -294,6 +292,9 @@ foreach ($allItems as $item) {
 }
 
 $auditSummary = [
+    'audit_code' => $audit->audit_code ?? '-',
+    'status'     => strtoupper($audit->status),
+
     'type' => $audit->type,
 
     'objective' => $audit->objective,
@@ -317,11 +318,8 @@ $auditSummary = [
     'end_date' => $audit->audit_end_date
         ? \Carbon\Carbon::parse($audit->audit_end_date)->format('d F Y')
         : '-',
-
-    'scheduled_date' => $audit->scheduled_date
-        ? \Carbon\Carbon::parse($audit->scheduled_date)->format('d F Y')
-        : '-',
 ];
+
 
 
 
