@@ -359,9 +359,34 @@
                 flex: calc(33.333% - 0.5rem);
             }
         }
+        .hero-section {
+            background:
+                linear-gradient(
+                    rgba(12, 45, 90, 0.88),
+                    rgba(12, 45, 90, 0.88)
+                ),
+                url('https://media.licdn.com/dms/image/v2/D563DAQEpYdKv0Os29A/image-scale_191_1128/image-scale_191_1128/0/1690510724603/pt_trias_sentosa_tbk_cover?e=2147483647&v=beta&t=dOGhpl6HrbRAla_mDVT5azyevrvu-cOGFxPcrlizZ6M');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 260px;
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
+
+    <section class="hero-section text-white">
+    <div class="max-w-7xl mx-auto px-4 lg:px-6">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">
+            INTERNAL AUDIT
+        </h1>
+        <p class="text-base md:text-lg opacity-90 max-w-3xl">
+            Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
+        </p>
+    </div>
+</section>
     <div class="audit-container">
         <a href="{{ route('audit.menu', $auditId) }}" class="back-link">
             <i class="fas fa-arrow-left"></i> Kembali ke Menu
