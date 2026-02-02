@@ -164,7 +164,7 @@
         data: {
           labels: ['Sesuai', 'Tidak Sesuai', 'N/A', 'Belum Dijawab'],
             datasets: [{
-                data: [{{ $totalYes }}, {{ $totalDraw }}, {{ $totalNo }}, {{ $totalNA }}, {{ $totalUnanswered }}],
+                data: [{{ $totalYes }}, {{ $totalNo }}, {{ $totalNA }}, {{ $totalUnanswered }}],
                 backgroundColor: ['#22c55e', '#ef4444', '#facc15', '#e2e8f0'],
                 borderWidth: 0,
                 hoverOffset: 4
