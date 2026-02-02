@@ -327,10 +327,15 @@
             background: #f1f5f9;
         }
 
-        /* ========== SUBMIT BUTTON (MIRIP GAMBAR) ========== */
-        .btn-submit {
-            background: #7C3AED !important;
-            color: white !important;
+        .submit-bar {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: right;
+        }
+        .submit-audit {
+            background: #0c2d5a;
+            color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             font-size: 1rem;
@@ -341,21 +346,11 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            width: 100%;
-            max-width: 200px;
         }
-        .btn-submit:hover {
-            background: #6D28D9 !important;
+        .submit-audit:hover {
+            background: #0a2547;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
-        }
-
-        .submit-warning {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-top: 0.5rem;
-            text-align: center;
-            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(12, 45, 90, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -369,8 +364,9 @@
             .answer-btn {
                 flex: calc(33.333% - 0.5rem);
             }
-            .btn-submit {
-                width: 100%;
+            .back-link {
+                position: static;
+                margin-top: 1rem;
             }
         }
 
@@ -528,14 +524,10 @@
                 </div>
             @endforeach
 
-            <!-- GANTI SECTION SUBMIT -->
-            <div class="submit-bar" style="text-align: center; margin-top: 3rem;">
-                <button type="button" class="btn-submit" onclick="submitAuditMock()">
-                    Kirim
+            <div class="submit-bar">
+                <button type="button" onclick="confirmSubmit()" class="submit-audit">
+                    <i class="fas fa-save"></i> Simpan Klausul ini
                 </button>
-                <div class="submit-warning">
-                    Jangan pernah mengirimkan sandi melalui Google Formulir.
-                </div>
             </div>
         </form>
     </div>
@@ -753,28 +745,8 @@
             });
         }
 
-        // ✅ FUNGSI "KIRIM" — TIDAK BENAR-BENAR SUBMIT, HANYA SIMULASI (seperti gambar)
-        function submitAuditMock() {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Data telah dikirim.',
-                icon: 'success',
-                confirmButtonText: 'OK',
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Kosongkan formulir (opsional)
-                    document.getElementById('form').reset();
-                    // Reset state JS
-                    sessionAnswers = {};
-                    // Clear all active states
-                    document.querySelectorAll('.answer-btn').forEach(btn => {
-                        btn.classList.remove('active-yes', 'active-no', 'active-na');
-                    });
-                    // Redirect ke menu (sesuai kebutuhan)
-                    window.location.href = "{{ route('audit.menu', $auditId) }}";
-                }
-            });
+        function confirmSubmit() {
+            document.getElementById('form').dispatchEvent(new Event('submit', { cancelable: true }));
         }
 
         function openModal(itemId, text, isNA) {
