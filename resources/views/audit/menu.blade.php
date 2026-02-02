@@ -239,6 +239,56 @@
             border: 1px solid #2563eb;
         }
 
+        /* Start Audit Button */
+        .start-audit-container {
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-start-audit {
+            background: #10b981;
+            color: white;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-start-audit:hover {
+            background: #0da271;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-start-audit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .start-audit-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .start-audit-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
                 .hero-section {
             background:
                 linear-gradient(
@@ -283,6 +333,22 @@
 </section>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
+        
+        <!-- Start Audit Button Section -->
+        <div class="start-audit-container">
+            <h2 class="start-audit-title">
+                <i class="fas fa-play-circle mr-2"></i> Mulai Audit Sekarang
+            </h2>
+            <p class="start-audit-subtitle">
+                Klik tombol di bawah untuk memulai audit dari Klausul 4
+            </p>
+            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => '4']) }}" 
+               class="btn-start-audit">
+                <i class="fas fa-arrow-right"></i>
+                Mulai Audit (Klausul 4)
+            </a>
+        </div>
+
 <!-- Instruksi & Token -->
 <div class="mt-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
