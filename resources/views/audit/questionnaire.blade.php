@@ -159,89 +159,16 @@
         </div>
     </div>
 
-    @push('scripts')
+@push('scripts')
 <script>
-
-
-    // Toggle visibility catatan temuan
-    function toggleFindingNote(itemId, auditorName, value) {
-        const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
-        if (wrapper) {
-            wrapper.style.display = (value === '' || value === null) ? 'none' : 'block';
-        }
-    }
-
-    // Event delegation untuk button YES/NO/N/A
-document.addEventListener('DOMContentLoaded', function() {
-    if (!dbAnswers) return;
-
-    Object.keys(dbAnswers).forEach(itemId => {
-        Object.keys(dbAnswers[itemId]).forEach(userName => {
-            const data = dbAnswers[itemId][userName];
-            const key = `${itemId}_${userName}`;
-
-            sessionAnswers[key] = data.answer;
-
-            // Mark tombol auditor
-            if (userName === auditorName) {
-                const btns = document
-                    .getElementById(`btn_group_${itemId}`)
-                    ?.querySelectorAll('.answer-btn');
-
-                if (!btns) return;
-                btns.forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-
-                if (data.answer === 'YES') btns[0].classList.add('active-yes');
-                if (data.answer === 'NO')  btns[1].classList.add('active-no');
-                if (data.answer === 'N/A') btns[2].classList.add('active-na');
-            }
-
-            updateHiddenInputs(itemId);
-            updateInfoBox(itemId);
-        });
-    });
-});
-
-    function confirmSubmit() {
-        Swal.fire({
-            title: 'Simpan Jawaban?',
-            text: "Apakah Anda sudah yakin dengan semua respon di klausul ini?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#2563eb',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Ya, Simpan',
-            cancelButtonText: 'Cek Lagi'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Menyimpan...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-                document.getElementById('form').submit();
-            }
-        });
-    }
-
-    @if(session('all_complete'))
-        Swal.fire({
-            title: 'Audit Selesai!',
-            text: 'Semua klausul telah terisi 100%. Mengalihkan ke halaman laporan...',
-            icon: 'success',
-            timer: 3000,
-            showConfirmButton: false
-        }).then(() => {
-            window.location.href = "{{ route('audit.thanks') }}";
-        });
-    @endif
-    // ✅ KIRIM DATA JAWABAN YANG SUDAH ADA KE JAVASCRIPT
-    const dbAnswers = @json($existingAnswers);
-    const auditorName = "{{ $auditorName }}";
-    const responders = @json($responders);
+    window.dbAnswers   = @json($existingAnswers ?? []);
+    window.auditorName = @json($auditorName);
+    window.responders  = @json($responders);
 </script>
+
 <script src="{{ asset('js/audit-script.js') }}"></script>
 @endpush
+
 
 <!-- Pastikan script eksternal dimuat setelah inline script -->
 

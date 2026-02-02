@@ -24,15 +24,17 @@ function initAudit() {
  * ===============================
  */
 function bindMainButtons() {
-    document.querySelectorAll('.answer-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const itemId = this.dataset.itemId;
-            const value  = this.dataset.value;
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.answer-btn');
+        if (!btn) return;
 
-            setVal(itemId, auditorName, value, this);
-        });
+        const itemId = btn.dataset.itemId;
+        const value  = btn.dataset.value;
+
+        setVal(itemId, auditorName, value, btn);
     });
 }
+
 
 /**
  * ===============================
@@ -48,15 +50,19 @@ function setVal(itemId, userName, value, btnElement) {
             group.querySelectorAll('.answer-btn')
                 .forEach(b => b.classList.remove('active-yes','active-no','active-na'));
 
-            if (value === 'YES') btnElement.classList.add('active-yes');
-            if (value === 'NO')  btnElement.classList.add('active-no');
-            if (value === 'N/A') btnElement.classList.add('active-na');
+            btnElement.classList.add(
+                value === 'YES' ? 'active-yes' :
+                value === 'NO'  ? 'active-no'  :
+                                  'active-na'
+            );
         }
     }
 
+    // 🔥 PAKSA UPDATE
     updateHiddenInputs(itemId);
     updateInfoBox(itemId);
 }
+
 
 /**
  * ===============================
