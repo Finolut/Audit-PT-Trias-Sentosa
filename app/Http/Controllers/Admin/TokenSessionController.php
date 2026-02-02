@@ -9,11 +9,15 @@ use Illuminate\Support\Str;
 
 class TokenSessionController extends Controller
 {
-    public function index()
-    {
-        $sessions = AuditSession::orderBy('created_at', 'desc')->get();
-        return view('admin.token-sessions.index', compact('sessions'));
-    }
+public function index()
+{
+    $sessions = AuditSession::where('is_parent', true)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    return view('admin.token-sessions.index', compact('sessions'));
+}
+
 
     public function store(Request $request)
     {
