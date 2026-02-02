@@ -329,26 +329,41 @@
 
 .submit-bar {
     margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    padding: 0;
 
     display: flex;
     justify-content: flex-end;
+
+    background: transparent;
+    border: none;
 }
 
 .submit-audit {
-    width: fit-content;
-    padding: 0.75rem 1.5rem;
-    border-radius: 10px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-        .submit-audit:hover {
-            background: #0a2547;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(12, 45, 90, 0.3);
-        }
+    background-color: #0c2d5a;
+    color: #ffffff;
 
+    width: fit-content;
+    padding: 0.75rem 1.6rem;
+
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+
+    box-shadow: 0 8px 22px rgba(12, 45, 90, 0.35);
+    transition: all 0.2s ease;
+}
+
+/* hover & active */
+.submit-audit:hover {
+    background-color: #0a254d;
+    transform: translateY(-1px);
+}
+
+.submit-audit:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(12, 45, 90, 0.35);
+}
         @media (max-width: 768px) {
             .meta-info {
                 flex-direction: column;
