@@ -249,28 +249,29 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-start-audit {
-            background: white; /* Tombol putih di atas background hijau */
-            color: #10b981;
-            padding: 1rem 2.5rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border-radius: 8px;
-            border: 2px solid white;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
+.btn-start-audit {
+    background: white;
+    color: #0c2d5a;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
 
-        .btn-start-audit:hover {
-            background: #f0fdf4;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
-        }
-
+.btn-start-audit:hover {
+    background: #0a2547; /* Sedikit lebih gelap dari #0c2d5a */
+    color: white;
+    border-color: #0a2547;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(12, 45, 90, 0.4);
+}
         .btn-start-audit:disabled {
             background: #94a3b8;
             cursor: not-allowed;
@@ -334,21 +335,7 @@
 </section>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
-        
-        <!-- Start Audit Button Section - SOLID COLOR -->
-        <div class="start-audit-container">
-            <h2 class="start-audit-title">
-                <i class="fas fa-play-circle mr-2"></i> Mulai Audit Sekarang
-            </h2>
-            <p class="start-audit-subtitle">
-                Klik tombol di bawah untuk memulai audit dari Klausul 4
-            </p>
-            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => '4']) }}" 
-               class="btn-start-audit">
-                <i class="fas fa-arrow-right"></i>
-                Mulai Audit (Klausul 4)
-            </a>
-        </div>
+    
 
 <!-- Instruksi & Token -->
 <div class="mt-6">
@@ -418,6 +405,20 @@
     </div>
 </div>
 
+        <!-- Start Audit Button Section - SOLID COLOR -->
+        <div class="start-audit-container">
+            <h2 class="start-audit-title">
+                <i class="fas fa-play-circle mr-2"></i> Mulai Audit Sekarang
+            </h2>
+            <p class="start-audit-subtitle">
+                Klik tombol di bawah untuk memulai audit dari Klausul 4
+            </p>
+            <a href="{{ route('audit.show', ['id' => $auditId, 'clause' => '4']) }}" 
+               class="btn-start-audit">
+                <i class="fas fa-arrow-right"></i>
+                Mulai Audit (Klausul 4)
+            </a>
+        </div>
 
         <!-- Progress Per Departemen -->
         <div class="mt-8">
