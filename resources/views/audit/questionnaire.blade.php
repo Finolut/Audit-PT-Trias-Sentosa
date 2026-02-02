@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* ========== GLOBAL STYLES (TETAP) ========== */
-        .active-yes { background-color: #16a34a !important; color: white !important; border-color: #16a34a !important; }
+        .active-yes { background-color: #16a3 !important; color: white !important; border-color: #16a34a !important; }
         .active-no  { background-color: #dc2626 !important; color: white !important; border-color: #dc2626 !important; }
         .active-na  { background-color: #64748b !important; color: white !important; border-color: #64748b !important; }
 
@@ -59,7 +59,7 @@
             overflow-y: auto;
         }
 
-        /* ========== NEW DESIGN: CLEAN LAYOUT (NO CARDS) ========== */
+        /* ========== NEW DESIGN: COMPACT LAYOUT (DESKTOP = SIDE-BY-SIDE) ========== */
         .audit-container {
             max-width: 900px;
             margin: 0 auto;
@@ -127,8 +127,10 @@
             margin-bottom: 1rem;
         }
 
-        /* Item row */
+        /* Item row — DESKTOP: flex, 70% + 30% */
         .item-row {
+            display: flex;
+            gap: 1.5rem;
             margin-bottom: 1.5rem;
             padding-bottom: 1.25rem;
             border-bottom: 1px dashed #e2e8f0;
@@ -140,7 +142,8 @@
         }
 
         .item-content-col {
-            margin-bottom: 0.75rem;
+            flex: 1;
+            min-width: 0;
         }
         .item-text {
             font-size: 1rem;
@@ -150,15 +153,15 @@
         }
 
         .item-action-col {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            flex: 0 0 30%;
+            min-width: 220px;
         }
 
         /* Button group */
         .button-group {
             display: flex;
             gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
         .answer-btn {
             flex: 1;
@@ -175,29 +178,31 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Finding container */
-        .finding-container {
+        /* Finding section — compact */
+        .finding-section {
             background: #f8fafc;
             padding: 0.75rem;
             border-radius: 6px;
+            border: 1px solid #cbd5e1;
         }
-        .finding-container label {
+        .finding-section label {
             display: block;
             margin-bottom: 0.3rem;
             font-size: 0.8rem;
             font-weight: 600;
             color: #475569;
         }
-        .finding-container select,
-        .finding-container textarea {
+        .finding-section select,
+        .finding-section textarea {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
             font-size: 0.9rem;
         }
-        .finding-container textarea {
+        .finding-section textarea {
             resize: vertical;
+            max-height: 120px;
         }
 
         /* Respon lain button */
@@ -242,11 +247,21 @@
             box-shadow: 0 4px 8px rgba(12, 45, 90, 0.3);
         }
 
-        /* Responsive */
+        /* Responsive: mobile → stack vertically */
         @media (max-width: 768px) {
             .meta-info {
                 flex-direction: column;
                 gap: 0.5rem;
+            }
+            .item-row {
+                flex-direction: column;
+            }
+            .item-action-col {
+                flex: none;
+                width: 100%;
+            }
+            .finding-section {
+                margin-top: 0.5rem;
             }
             .button-group {
                 flex-wrap: wrap;
@@ -321,41 +336,36 @@
                                            name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
                                            value="{{ $answerId }}">
 
-                                    <div class="finding-container mt-3">
-                                        <div class="flex flex-wrap gap-4 items-end">
-                                            <div class="flex-1 min-w-[160px]">
-                                                <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                                                    Finding Level
-                                                </label>
-                                                <select
-                                                    name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
-                                                    id="finding_level_{{ $item->id }}_{{ $auditorName }}"
-                                                    class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
-                                                    onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
-                                                    <option value="">-- No Finding --</option>
-                                                    <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
-                                                        Observed (OFI)
-                                                    </option>
-                                                    <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
-                                                        Minor NC
-                                                    </option>
-                                                    <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
-                                                        Major NC
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                    <!-- Finding Section — DITEMPATKAN DI SISI KANAN -->
+                                    <div class="finding-section mt-2">
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                                            Finding Level
+                                        </label>
+                                        <select
+                                            name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
+                                            id="finding_level_{{ $item->id }}_{{ $auditorName }}"
+                                            class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 mb-2"
+                                            onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
+                                            <option value="">-- No Finding --</option>
+                                            <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
+                                                Observed (OFI)
+                                            </option>
+                                            <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
+                                                Minor NC
+                                            </option>
+                                            <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
+                                                Major NC
+                                            </option>
+                                        </select>
 
-                                        <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
-                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                                Catatan Temuan
-                                            </label>
-                                            <textarea
-                                                name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
-                                                rows="3"
-                                                class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
-                                                placeholder="Jelaskan temuan secara detail...">{{ $findingNote }}</textarea>
-                                        </div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                            Catatan Temuan
+                                        </label>
+                                        <textarea
+                                            name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
+                                            rows="2"
+                                            class="w-full text-sm border-gray-300 rounded p-2"
+                                            placeholder="Jelaskan temuan...">{{ $findingNote }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -365,7 +375,7 @@
             @endforeach
 
             <div class="submit-bar">
- <button type="button" onclick="confirmSubmit()" class="submit-audit">
+                <button type="button" onclick="confirmSubmit()" class="submit-audit">
                     <i class="fas fa-save"></i> Simpan Klausul ini
                 </button>
             </div>
@@ -454,7 +464,7 @@
                     // Isi finding level & note
                     if (data.finding_level) {
                         const select = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
-                        if (select) select.value = data.finding_level;
+ if (select) select.value = data.finding_level;
                     }
                     if (data.finding_note) {
                         const textarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
@@ -590,8 +600,10 @@
         }
 
         function toggleFindingNote(itemId, auditor, value) {
-            const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
-            if (wrapper) wrapper.style.display = value ? 'block' : 'none';
+            // Tidak perlu hide/show — karena sekarang selalu ditampilkan (lebih hemat ruang & UX lebih konsisten)
+            // Jika ingin sembunyikan saat "No Finding", bisa aktifkan kembali:
+            // const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
+            // if (wrapper) wrapper.style.display = value ? 'block' : 'none';
         }
     </script>
 </body>
