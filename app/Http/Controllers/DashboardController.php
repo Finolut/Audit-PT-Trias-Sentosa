@@ -208,6 +208,9 @@ public function index(Request $request)
         $departments = Department::all();
        $audit = Audit::with('department')->findOrFail($auditId);
 
+       
+       
+
        // --- TAMBAHKAN INI AGAR NAMA AUDITOR MUNCUL ---
     $session = DB::table('audit_sessions')
         ->where('id', $audit->audit_session_id)
@@ -290,13 +293,47 @@ foreach ($allItems as $item) {
     }
 }
 
+$auditSummary = [
+    'type' => $audit->type,
+
+    'objective' => $audit->objective,
+
+    'scope' => $audit->scope
+        ? implode(', ', json_decode($audit->scope, true))
+        : '-',
+
+    'standards' => $audit->standards
+        ? implode(', ', json_decode($audit->standards, true))
+        : '-',
+
+    'methodology' => $audit->methodology
+        ? implode(', ', json_decode($audit->methodology, true))
+        : '-',
+
+    'start_date' => $audit->audit_start_date
+        ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d F Y')
+        : '-',
+
+    'end_date' => $audit->audit_end_date
+        ? \Carbon\Carbon::parse($audit->audit_end_date)->format('d F Y')
+        : '-',
+
+    'scheduled_date' => $audit->scheduled_date
+        ? \Carbon\Carbon::parse($audit->scheduled_date)->format('d F Y')
+        : '-',
+];
+
+
+
 // ... (Sisa method return view tetap sama)
+
 
         return view('admin.audit_clauses', [
             'departments' => $departments,
             'audit' => $audit,
             'leadAuditor' => $leadAuditor,
             'teamMembers' => $teamMembers,
+            'auditSummary' => $auditSummary,
             'mainClauses' => $this->mainClauses,
             'titles' => $this->mainClauseTitles,
             'detailedStats' => $detailedStats, 

@@ -24,116 +24,70 @@
             </div>
         </div>
 
-{{-- 📋 RINGKASAN DATA (KOTAK BIRU) --}}
+{{-- 📋 RINGKASAN DATA AUDIT --}}
 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-sm">
-        <div class="space-y-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 text-sm">
+
+        {{-- KIRI --}}
+        <div class="space-y-2">
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Jenis Pemeriksaan</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">
-                    @php
-                        $typeLabels = [
-                            'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
-                            'Special' => 'Pemeriksaan Khusus (Mendadak)',
-                            'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
-                        ];
-                    @endphp
-                    {{ $typeLabels[$audit->type] ?? '-' }}
-                </span>
+                <span class="w-48 font-semibold text-gray-600">Jenis Pemeriksaan</span>:
+                <span class="ml-2">{{ $auditSummary['type'] }}</span>
             </div>
+
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Tanggal Pemeriksaan</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">{{ $audit->created_at->format('d F Y') }}</span>
+                <span class="w-48 font-semibold text-gray-600">Referensi Standar</span>:
+                <span class="ml-2">{{ $auditSummary['standards'] }}</span>
             </div>
+
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Bagian yang Diperiksa</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800 font-medium">{{ $audit->scope ?? '-' }}</span>
+                <span class="w-48 font-semibold text-gray-600">Audit Objective</span>:
+                <span class="ml-2">{{ $auditSummary['objective'] }}</span>
             </div>
+
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Kode Pemeriksaan</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">{{ $audit->audit_code ?? '-' }}</span>
-            </div>
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Tanggal Jadwal</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">{{ $audit->scheduled_date ? $audit->scheduled_date->format('d F Y') : '-' }}</span>
+                <span class="w-48 font-semibold text-gray-600">Audit Scope</span>:
+                <span class="ml-2">{{ $auditSummary['scope'] }}</span>
             </div>
         </div>
 
-        <div class="space-y-3">
+        {{-- KANAN --}}
+        <div class="space-y-2">
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Auditor</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800 font-medium">{{ $leadAuditor['name'] ?? '-' }}</span>
+                <span class="w-48 font-semibold text-gray-600">Lead Auditor</span>:
+                <span class="ml-2">{{ $leadAuditor['name'] }}</span>
             </div>
+
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Anggota</span>
-                <span class="mr-2">:</span>
-                <div class="flex-1">
+                <span class="w-48 font-semibold text-gray-600">Email Lead Auditor</span>:
+                <span class="ml-2 text-blue-700 underline">
+                    {{ $session->auditor_email ?? '-' }}
+                </span>
+            </div>
+
+            <div class="flex">
+                <span class="w-48 font-semibold text-gray-600">Anggota Tim</span>:
+                <span class="ml-2">
                     @forelse($teamMembers as $member)
-                        <div class="text-gray-800 mb-1">
-                            <span class="font-medium">{{ $member->name }}</span>
-                            <span class="text-gray-500 text-xs">(NIK: {{ $member->nik }})</span>
-                        </div>
+                        {{ $member->name }}@if(!$loop->last), @endif
                     @empty
-                        <span class="text-gray-400 italic">Tidak ada anggota tim</span>
+                        -
                     @endforelse
-                </div>
-            </div>
-            <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Metodologi</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">
-                    @if($audit->methodology)
-                        {{ implode(', ', json_decode($audit->methodology, true)) }}
-                    @else
-                        -
-                    @endif
                 </span>
             </div>
+
             <div class="flex">
-                <span class="w-44 font-bold text-gray-600">Standar</span>
-                <span class="mr-2">:</span>
-                <span class="text-gray-800">
-                    @if($audit->standards)
-                        {{ implode(', ', json_decode($audit->standards, true)) }}
-                    @else
-                        -
-                    @endif
+                <span class="w-48 font-semibold text-gray-600">Periode Audit</span>:
+                <span class="ml-2">
+                    {{ $auditSummary['start_date'] }} – {{ $auditSummary['end_date'] }}
                 </span>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="mt-6">
-        <p class="text-sm font-bold text-gray-600 mb-1">Pemeriksaan Terkait :</p>
-        <p class="text-gray-700 bg-white/60 p-3 rounded-lg border border-blue-100 italic text-sm">
-            "{{ $audit->objective ?? 'Tidak diisi oleh auditor.' }}"
-        </p>
-    </div>
 
-    <div class="mt-4 pt-4 border-t border-blue-200/50 flex items-center justify-between">
-        <div class="flex items-center">
-            <span class="text-sm font-bold text-gray-600 mr-3">Status:</span>
-            @php $currentStatus = strtoupper($audit->status); @endphp
-            @if($currentStatus === 'COMPLETE' || $currentStatus === 'COMPLETED')
-                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-green-200">
-                     SELESAI
-                </span>
-            @else
-                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg font-bold text-xs uppercase shadow-sm border border-yellow-200">
-                     SEDANG BERJALAN
-                </span>
-            @endif
-        </div>
-        <span class="text-[10px] text-blue-400 font-mono">ID: {{ $audit->id }}</span>
-    </div>
-</div> {{-- AKHIR KOTAK BIRU --}}
     </div> {{-- AKHIR HEADER SECTION --}}
 
     {{-- GRAFIK SECTION --}}

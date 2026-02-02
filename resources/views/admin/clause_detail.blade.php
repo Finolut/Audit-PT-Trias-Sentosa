@@ -51,7 +51,6 @@
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
                 <div class="flex items-center justify-between">
                     <div>
-                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Sub-Clause</span>
                         <h3 class="text-lg font-bold text-gray-800 mt-0.5">{{ $code }} - {{ $subClauseTitles[$code] ?? 'Detail' }}</h3>
                     </div>
                 </div>
