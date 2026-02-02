@@ -351,6 +351,29 @@
                     <span class="decision-info-label">Terakhir Aktif</span>
                     <span class="decision-info-value" id="decision-activity"></span>
                 </div>
+
+                <!-- NEW FIELDS ADDED BELOW -->
+                <div class="decision-info-item">
+                    <span class="decision-info-label">Jenis Pemeriksaan</span>
+                    <span class="decision-info-value" id="decision-type"></span>
+                </div>
+                <div class="decision-info-item">
+                    <span class="decision-info-label">Referensi Standar / Kriteria Audit</span>
+                    <span class="decision-info-value" id="decision-standards"></span>
+                </div>
+                <div class="decision-info-item">
+                    <span class="decision-info-label">Audit Objective (Tujuan)</span>
+                    <span class="decision-info-value" id="decision-objective"></span>
+                </div>
+                <div class="decision-info-item">
+                    <span class="decision-info-label">Audit Scope (Lingkup)</span>
+                    <span class="decision-info-value" id="decision-scope"></span>
+                </div>
+                <div class="decision-info-item">
+                    <span class="decision-info-label">Metodologi Pemeriksaan</span>
+                    <span class="decision-info-value" id="decision-methodology"></span>
+                </div>
+                <!-- END NEW FIELDS -->
             </div>
 
             <form id="decisionForm">
@@ -502,13 +525,27 @@
 
         // Helper functions
         function showDecisionGate(data) {
-            // Fill decision data
+            // Fill existing decision data
             document.getElementById('decision-token').textContent = data.token;
             document.getElementById('decision-auditor').textContent = data.auditorName;
             document.getElementById('decision-dept').textContent = data.auditeeDept;
             document.getElementById('decision-date').textContent = data.auditDate;
             document.getElementById('decision-activity').textContent = data.lastActivity;
             
+            // Fill NEW audit info fields
+            document.getElementById('decision-type').textContent = data.auditType || '—';
+            document.getElementById('decision-standards').textContent = Array.isArray(data.auditStandards) 
+                ? data.auditStandards.join(', ') 
+                : (data.auditStandards || '—');
+            document.getElementById('decision-objective').textContent = data.auditObjective || '—';
+            document.getElementById('decision-scope').textContent = Array.isArray(data.auditScope) 
+                ? data.auditScope.join(', ') 
+                : (data.auditScope || '—');
+            document.getElementById('decision-methodology').textContent = Array.isArray(data.auditMethodology) 
+                ? data.auditMethodology.join(', ') 
+                : (data.auditMethodology || '—');
+            
+            // Set hidden inputs
             document.getElementById('decision-token-input').value = data.token;
             document.getElementById('decision-audit-id').value = data.auditId;
             

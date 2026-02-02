@@ -390,25 +390,35 @@ public function validateResumeToken(Request $request)
                 ]);
             }
 
-            // Ambil data tambahan
-            $department = DB::table('departments')
-                ->where('id', $audit->department_id)
-                ->first();
+$department = DB::table('departments')
+        ->where('id', $audit->department_id)
+        ->first();
 
-            // ✅ Return JSON data untuk ditampilkan di halaman yang sama
-            return response()->json([
-                'success' => true,
-                'token' => $token,
-                'auditId' => $audit->id,
-                'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
-                'auditeeDept' => $department->name ?? 'Unknown Dept',
-                'auditDate' => $audit->audit_start_date 
-                    ? date('d M Y', strtotime($audit->audit_start_date)) 
-                    : 'Belum ditentukan',
-                'lastActivity' => $childSession->last_activity_at 
-                    ? date('d M Y H:i', strtotime($childSession->last_activity_at)) 
-                    : 'Aktif',
-            ]);
+    // DECODE JSON FIELDS
+    $auditScope = json_decode($audit->scope, true) ?? [];
+    $auditStandards = json_decode($audit->standards, true) ?? [];
+    $auditMethodology = json_decode($audit->methodology, true) ?? [];
+
+        // ✅ Return JSON data untuk ditampilkan di halaman yang sama
+    return response()->json([
+        'success' => true,
+        'token' => $token,
+        'auditId' => $audit->id,
+        'auditorName' => $childSession->auditor_name ?? 'Auditor Terdaftar',
+        'auditeeDept' => $department->name ?? 'Unknown Dept',
+        'auditDate' => $audit->audit_start_date
+            ? date('d M Y', strtotime($audit->audit_start_date))
+            : 'Belum ditentukan',
+        'lastActivity' => $childSession->last_activity_at
+            ? date('d M Y H:i', strtotime($childSession->last_activity_at))
+            : 'Aktif',
+        // ADD THE NEW FIELDS
+        'auditType' => $audit->type ?? 'Tidak diketahui',
+        'auditObjective' => $audit->objective ?? 'Tidak diketahui',
+        'auditScope' => $auditScope,
+        'auditStandards' => $auditStandards,
+        'auditMethodology' => $auditMethodology
+    ]);
 
         } catch (\Exception $e) {
             logger()->error('Error in validateResumeToken', [
