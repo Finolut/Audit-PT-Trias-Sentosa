@@ -349,8 +349,6 @@
     font-weight: 600;
     font-size: 0.95rem;
     white-space: nowrap;
-
-    box-shadow: 0 8px 22px rgba(12, 45, 90, 0.35);
     transition: all 0.2s ease;
 }
 
