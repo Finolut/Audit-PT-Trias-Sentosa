@@ -306,6 +306,120 @@
     outline: none !important;
     box-shadow: none !important;
 }
+
+/* ===== MODAL: RESPOON LAIN — DESAIN BARU & KONSISTEN ===== */
+#answerModal .modal-content {
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0c2d5a;
+}
+
+.modal-header button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #64748b;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+.modal-header button:hover {
+    background: #f1f5f9;
+    color: #0c2d5a;
+}
+
+/* Responder item di modal */
+.responder-item {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+}
+.responder-item:hover {
+    background: #f1f5f9;
+}
+
+.responder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+}
+.responder-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+.responder-role {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+.author-badge {
+    background: #10b981;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+/* Tombol jawaban di modal — GANTI DENGAN STYLING YANG SAMA SEPERTI UTAMA */
+.modal-answer-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 60px;
+    text-align: center;
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+.modal-answer-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.modal-answer-btn.active {
+    border: none !important;
+}
+
+.modal-answer-btn.yes {
+    background-color: #16a34a;
+    color: white;
+}
+.modal-answer-btn.no {
+    background-color: #dc2626;
+    color: white;
+}
+
+/* Hilangkan N/A — jadi hanya 2 tombol */
+.modal-answer-btn.na {
+    display: none !important;
+}
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -465,24 +579,44 @@
         }
 
         function setVal(itemId, userName, value, btnElement) {
-            sessionAnswers[`${itemId}_${userName}`] = value;
+    sessionAnswers[`${itemId}_${userName}`] = value;
 
-            // Update UI utama (jika auditor)
-            if (userName === auditorName && btnElement) {
-                const group = document.getElementById(`btn_group_${itemId}`);
-                if (group) {
-                    group.querySelectorAll('.answer-btn').forEach(b => {
-                        b.classList.remove('active-yes', 'active-no', 'active-na');
-                    });
-                    if (value === 'YES') btnElement.classList.add('active-yes');
-                    else if (value === 'NO') btnElement.classList.add('active-no');
-                    else if (value === 'N/A') btnElement.classList.add('active-na');
-                }
-            }
-
-            updateHiddenInputs(itemId);
-            updateInfoBox(itemId);
+    // Update UI utama (jika auditor)
+    if (userName === auditorName && btnElement) {
+        const group = document.getElementById(`btn_group_${itemId}`);
+        if (group) {
+            group.querySelectorAll('.answer-btn').forEach(b => {
+                b.classList.remove('active-yes', 'active-no', 'active-na');
+            });
+            if (value === 'YES') btnElement.classList.add('active-yes');
+            else if (value === 'NO') btnElement.classList.add('active-no');
+            // N/A dihilangkan → tidak perlu else if 'N/A'
         }
+    }
+
+    // Update UI modal (jika btnElement adalah tombol modal)
+    if (btnElement && btnElement.classList.contains('modal-answer-btn')) {
+        // Hapus semua kelas aktif di grup tombol ini
+        const parent = btnElement.closest('.flex.gap-2');
+        if (parent) {
+            parent.querySelectorAll('.modal-answer-btn')
+                .forEach(b => b.classList.remove('active', 'yes', 'no'));
+            
+            // Tambahkan kelas sesuai jawaban
+            btnElement.classList.add('active');
+            if (value === 'YES') {
+                btnElement.classList.add('yes');
+                btnElement.classList.remove('no');
+            } else if (value === 'NO') {
+                btnElement.classList.add('no');
+                btnElement.classList.remove('yes');
+            }
+        }
+    }
+
+    updateHiddenInputs(itemId);
+    updateInfoBox(itemId);
+}
 
         function restoreFromDB() {
             if (!dbAnswers) return;
@@ -607,34 +741,49 @@
         }
 
         function openModal(itemId, text) {
-            document.getElementById('modalItemText').innerText = text;
-            const list = document.getElementById('modalRespondersList');
-            list.innerHTML = '';
+    document.getElementById('modalItemText').innerText = text;
+    const list = document.getElementById('modalRespondersList');
+    list.innerHTML = '';
 
-            responders.forEach(res => {
-                const name = res.responder_name || res.name;
-                const role = res.responder_department || res.dept || '–';
-                const isAuditor = (name === auditorName);
-                const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
+    responders.forEach(res => {
+        const name = res.responder_name || res.name;
+        const role = res.responder_department || res.dept || '–';
+        const isAuditor = (name === auditorName);
+        const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
 
-                const div = document.createElement('div');
-                div.className = 'mb-2 p-2 border rounded';
-                div.innerHTML = `
-                    <div><strong>${name}</strong> ${isAuditor ? '<span style="color:#16a34a">(AUTHOR)</span>' : ''}<br><small>${role}</small></div>
-                    <div class="mt-1">
-                        <button type="button" class="btn btn-sm ${currentVal === 'YES' ? 'btn-success' : 'btn-outline-success'}" 
-                            onclick="setVal('${itemId}', '${name}', 'YES', null)">Iya</button>
-                        <button type="button" class="btn btn-sm ${currentVal === 'NO' ? 'btn-danger' : 'btn-outline-danger'}" 
-                            onclick="setVal('${itemId}', '${name}', 'NO', null)">Tidak</button>
-                        <button type="button" class="btn btn-sm ${currentVal === 'N/A' ? 'btn-secondary' : 'btn-outline-secondary'}" 
-                            onclick="setVal('${itemId}', '${name}', 'N/A', null)">N/A</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+        // Tentukan kelas aktif
+        let yesClass = currentVal === 'YES' ? 'yes active' : 'yes';
+        let noClass = currentVal === 'NO' ? 'no active' : 'no';
 
-            document.getElementById('answerModal').style.display = 'flex';
-        }
+        const div = document.createElement('div');
+        div.className = 'responder-item';
+        div.innerHTML = `
+            <div class="responder-header">
+                <div>
+                    <span class="responder-name">${name}</span>
+                    ${isAuditor ? '<span class="author-badge">AUTHOR</span>' : ''}
+                    <div class="responder-role">${role}</div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button type="button"
+                        class="modal-answer-btn ${yesClass}"
+                        onclick="setVal('${itemId}', '${name}', 'YES', this)">
+                    Iya
+                </button>
+                <button type="button"
+                        class="modal-answer-btn ${noClass}"
+                        onclick="setVal('${itemId}', '${name}', 'NO', this)">
+                    Tidak
+                </button>
+                <!-- N/A DIHILANGKAN -->
+            </div>
+        `;
+        list.appendChild(div);
+    });
+
+    document.getElementById('answerModal').style.display = 'flex';
+}
 
         function closeModal() {
             document.getElementById('answerModal').style.display = 'none';
