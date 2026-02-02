@@ -461,6 +461,16 @@ $department = DB::table('departments')
         }
         
         $childSession = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
+
+        // ✅ Ambil responders dari tabel audit_responders
+$responders = [];
+if ($childSession) {
+    $responders = DB::table('audit_responders')
+        ->where('audit_session_id', $childSession->id)
+        ->select('responder_name', 'responder_department as responder_department')
+        ->get()
+        ->toArray();
+}
         if ($childSession && $childSession->parent_session_id) {
             DB::table('audit_sessions')
                 ->where('id', $childSession->parent_session_id)
@@ -555,6 +565,11 @@ public function menu($auditId)
     // Ambil child session
     $childSession = DB::table('audit_sessions')->where('id', $audit->audit_session_id)->first();
     if (!$childSession) abort(404);
+    $responders = DB::table('audit_responders')
+    ->where('audit_session_id', $childSession->id)
+    ->select('responder_name', 'responder_department as responder_department')
+    ->get()
+    ->toArray();
 
     // ✅ Ambil parent session untuk token
     $parentSession = DB::table('audit_sessions')
@@ -670,6 +685,7 @@ foreach ($siblings as $sibling) {
         'resumeToken'      => $parentSession->resume_token ?? session('resume_token') ?? 'TOKEN TIDAK TERSEDIA', // ✅ Token dari parent
         'relatedAudits'    => $relatedAudits,
         'currentAuditId'   => $auditId,
+        'responders'       => $responders,
     ]);
 }
  public function show($auditId, $mainClause)
