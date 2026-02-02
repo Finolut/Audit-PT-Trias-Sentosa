@@ -326,28 +326,7 @@
             cursor: not-allowed;
             background: #f1f5f9;
         }
-/* ========== INLINE FINDING LEVEL ========== */
-.item-action-col {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-}
 
-.finding-inline {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.finding-inline label {
-    margin: 0;
-    padding: 0;
-}
-
-.finding-note-wrapper {
-    width: 100%;
-}
 .submit-bar {
     margin-top: 2.5rem;
     padding: 0;
@@ -429,6 +408,39 @@
             top: 1rem;
             left: 1rem;
         }
+
+        /* ========== INLINE FINDING LEVEL ========== */
+.item-action-col {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.finding-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 160px;
+}
+
+.finding-inline label {
+    margin: 0;
+    padding: 0;
+    font-size: 0.75rem;
+}
+
+/* Responsif: tumpuk di mobile */
+@media (max-width: 640px) {
+    .item-action-col {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .finding-inline {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -486,14 +498,15 @@
                                 </div>
 
 <div class="item-action-col flex flex-wrap items-center gap-2">
+    <!-- Tombol Jawaban -->
     <div class="button-group flex gap-1" id="btn_group_{{ $item->id }}">
         <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
         <button type="button" class="answer-btn no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
         <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
     </div>
 
-    <!-- Finding Level di samping (inline) -->
-    <div class="finding-inline flex items-center gap-1 min-w-[180px]">
+    <!-- Finding Level (inline) -->
+    <div class="finding-inline flex items-center gap-1 min-w-[160px]">
         <label class="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap">Finding:</label>
         <select
             name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
@@ -507,7 +520,20 @@
         </select>
     </div>
 
-    <!-- Tombol "Respon Lain..." tetap di bawah jika banyak responder -->
+    <!-- Hidden Inputs & Data -->
+    <div id="hidden_inputs_{{ $item->id }}"></div>
+    @php
+        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+        $findingLevel = $existingAnswer['finding_level'] ?? '';
+        $findingNote = $existingAnswer['finding_note'] ?? '';
+        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
+    @endphp
+    <input type="hidden"
+           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+           value="{{ $answerId }}">
+
+    <!-- Tombol Respon Lain (jika diperlukan) -->
     @if(count($responders) > 1)
         <button type="button"
                 class="btn-more mt-1 {{ $isNA ? 'disabled' : '' }}"
@@ -517,8 +543,8 @@
         </button>
     @endif
 
-    <!-- Catatan Temuan (tetap tersembunyi sampai dipilih finding) -->
-    <div class="finding-note-wrapper w-full mt-2" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
+    <!-- Catatan Temuan (hanya muncul jika Finding dipilih) -->
+    <div class="w-full mt-2" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan Temuan</label>
         <textarea
             name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
