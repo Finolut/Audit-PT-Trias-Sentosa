@@ -329,26 +329,6 @@
     </form>
 </div>
 
-<div class="absolute top-6 right-6 z-20 flex gap-3">
-    <!-- Resume Audit Button -->
-    <a href="{{ route('audit.resume.form') }}"
-       class="bg-yellow-500 hover:bg-yellow-600 text-blue-900
-              font-bold text-xs md:text-base
-              px-3 py-2 md:px-6 md:py-2.5
-              rounded-lg transition-all
-              flex items-center gap-1.5 md:gap-2
-              shadow-md">
-        <!-- Resume Icon -->
-        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>
-            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 11v4m0 0l2-2m-2 2l-2-2"/>
-        </svg>
-        <span>Lanjutkan Audit</span>
-    </a>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

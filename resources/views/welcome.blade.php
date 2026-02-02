@@ -87,9 +87,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
-                <a href="https://trias-sentosa.com/home" 
+                <a href="{{ route('audit.resume.form') }}"
                    class="bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-lg transition-all inline-flex items-center justify-center gap-2 hover:bg-white hover:text-primary-blue card-hover">
-                    Learn More
+                    Resume Audit
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
