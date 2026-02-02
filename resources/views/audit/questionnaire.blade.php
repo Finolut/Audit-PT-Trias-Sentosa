@@ -498,6 +498,19 @@
                                 </div>
 
 <div class="item-action-col flex flex-wrap items-center gap-2">
+    <!-- Hidden Inputs & Data (didefinisikan LEBIH DULU) -->
+    @php
+        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+        $findingLevel = $existingAnswer['finding_level'] ?? '';
+        $findingNote = $existingAnswer['finding_note'] ?? '';
+        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
+    @endphp
+
+    <input type="hidden"
+           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+           value="{{ $answerId }}">
+
     <!-- Tombol Jawaban -->
     <div class="button-group flex gap-1" id="btn_group_{{ $item->id }}">
         <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
@@ -520,18 +533,8 @@
         </select>
     </div>
 
-    <!-- Hidden Inputs & Data -->
+    <!-- Hidden container for dynamic inputs -->
     <div id="hidden_inputs_{{ $item->id }}"></div>
-    @php
-        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-        $findingLevel = $existingAnswer['finding_level'] ?? '';
-        $findingNote = $existingAnswer['finding_note'] ?? '';
-        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
-        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
-    @endphp
-    <input type="hidden"
-           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
-           value="{{ $answerId }}">
 
     <!-- Tombol Respon Lain (jika diperlukan) -->
     @if(count($responders) > 1)
