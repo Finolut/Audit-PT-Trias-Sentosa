@@ -468,7 +468,6 @@
                                 <div id="hidden_inputs_{{ $item->id }}"></div>
 
                                 @php
-                                    // Ambil data auditor UTAMA (author)
                                     $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
                                     $authorFindingLevel = $authorAnswer['finding_level'] ?? '';
                                     $authorFindingNote = $authorAnswer['finding_note'] ?? '';
@@ -736,39 +735,14 @@
         infoBox.style.display = 'block';
     }
 
+    // ✅ TIDAK ADA VALIDASI PEMBLOKIR — BOLEH SIMPAN MESKI KOSONG
     function bindFormValidation() {
-        // ✅ BOLEH SIMPAN MESKI ADA YANG BELUM DIJAWAB
-        // Hanya tampilkan peringatan opsional, tapi tidak blokir submit
-        const form = document.getElementById('form');
-        if (!form) return;
-        form.addEventListener('submit', function(e) {
-            const rows = document.querySelectorAll('.item-row');
-            let hasEmpty = false;
-            rows.forEach(row => {
-                const id = row.id.replace('row_', '');
-                if (!sessionAnswers[`${id}_${auditorName}`]) {
-                    hasEmpty = true;
-                }
-            });
-            if (hasEmpty) {
-                Swal.fire({
-                    title: 'Peringatan',
-                    text: 'Beberapa pertanyaan belum dijawab. Tetap simpan?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Simpan',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (!result.isConfirmed) {
-                        e.preventDefault();
-                    }
-                });
-            }
-        });
+        // Kosongkan agar tidak mencegah submit
     }
 
+    // ✅ PENTING: LANGSUNG SUBMIT KE SERVER → TRIGGER REDIRECT OTOMATIS
     function confirmSubmit() {
-        document.getElementById('form').dispatchEvent(new Event('submit', { cancelable: true }));
+        document.getElementById('form').submit();
     }
 
     function openModal(itemId, text, isNA) {
