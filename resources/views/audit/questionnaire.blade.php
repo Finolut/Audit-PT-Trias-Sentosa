@@ -13,16 +13,17 @@
         .active-na  { background-color: #64748b !important; color: white !important; border-color: #64748b !important; }
         .score-info-box {
             display: none;
-            margin-top: 8px;
-            padding: 6px;
-            background: #f1f5f9;
-            border-radius: 4px;
-            font-size: 12px;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.85rem;
         }
         .diff-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin: 4px 0;
         }
         .unanswered-highlight {
             animation: pulse 1.5s infinite;
@@ -31,6 +32,24 @@
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -80,7 +99,7 @@
                                             <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
                                         </div>
 
-                                        {{-- 🔥 HARUS DI DALAM .item-row --}}
+                                        {{-- 🔥 HARUS DI SINI --}}
                                         <div id="hidden_inputs_{{ $item->id }}"></div>
 
                                         @if(count($responders) > 1)
@@ -154,87 +173,60 @@
         </form>
     </div>
 
-    {{-- MODAL UNTUK RESPON LAIN --}}
-    <div id="answerModal" class="modal" style="display:none;">
+    {{-- MODAL --}}
+    <div id="answerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Respon Lain</h3>
-                <button type="button" class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                <h3>Respon Lain</h3>
+                <button type="button" onclick="closeModal()" style="float:right; background:none; border:none; font-size:1.2em;">×</button>
             </div>
-            <div class="item-preview-modal">
-                <p id="modalItemText"></p>
-            </div>
-            <div id="modalRespondersList" class="modal-body"></div>
-            <div class="modal-footer">
-                <button type="button" class="modal-close-btn" onclick="closeModal()">Selesai</button>
+            <p id="modalItemText"></p>
+            <div id="modalRespondersList" class="mt-3"></div>
+            <div class="mt-4">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Selesai</button>
             </div>
         </div>
     </div>
 
-    @push('scripts')
+    {{-- INTEGRATED JAVASCRIPT --}}
     <script>
-        window.dbAnswers   = @json($existingAnswers ?? []);
-        window.auditorName = @json($auditorName);
-        window.responders  = @json($responders);
-    </script>
-
-    <script>
-        /**
-         * ===============================
-         * GLOBAL STATE
-         * ===============================
-         */
+        // ✅ GLOBAL STATE
+        const auditorName = @json($auditorName);
+        const responders = @json($responders);
+        const dbAnswers = @json($existingAnswers ?? []);
         let sessionAnswers = {};
 
-        /**
-         * ===============================
-         * ENTRY POINT
-         * ===============================
-         */
-        document.addEventListener('DOMContentLoaded', initAudit);
-
-        function initAudit() {
+        // ✅ INIT
+        document.addEventListener('DOMContentLoaded', function () {
             restoreFromDB();
-            bindMainButtons();
+            bindButtons();
             bindFormValidation();
-        }
+        });
 
-        /**
-         * ===============================
-         * MAIN BUTTON (YES / NO / N/A)
-         * ===============================
-         */
-        function bindMainButtons() {
-            document.body.addEventListener('click', function (e) {
+        function bindButtons() {
+            document.body.addEventListener('click', function(e) {
                 const btn = e.target.closest('.answer-btn');
                 if (!btn) return;
 
                 const itemId = btn.dataset.itemId;
-                const value  = btn.dataset.value;
-
+                const value = btn.dataset.value;
                 setVal(itemId, auditorName, value, btn);
             });
         }
 
-        /**
-         * ===============================
-         * SET ANSWER
-         * ===============================
-         */
         function setVal(itemId, userName, value, btnElement) {
             sessionAnswers[`${itemId}_${userName}`] = value;
 
+            // Update UI utama (jika auditor)
             if (userName === auditorName && btnElement) {
                 const group = document.getElementById(`btn_group_${itemId}`);
                 if (group) {
-                    group.querySelectorAll('.answer-btn')
-                        .forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-
-                    btnElement.classList.add(
-                        value === 'YES' ? 'active-yes' :
-                        value === 'NO'  ? 'active-no'  :
-                                          'active-na'
-                    );
+                    group.querySelectorAll('.answer-btn').forEach(b => {
+                        b.classList.remove('active-yes', 'active-no', 'active-na');
+                    });
+                    if (value === 'YES') btnElement.classList.add('active-yes');
+                    else if (value === 'NO') btnElement.classList.add('active-no');
+                    else if (value === 'N/A') btnElement.classList.add('active-na');
                 }
             }
 
@@ -242,159 +234,166 @@
             updateInfoBox(itemId);
         }
 
-        /**
-         * ===============================
-         * RESTORE FROM DATABASE
-         * ===============================
-         */
         function restoreFromDB() {
-            if (!window.dbAnswers) return;
+            if (!dbAnswers) return;
 
-            Object.entries(dbAnswers).forEach(([itemId, users]) => {
-                Object.entries(users).forEach(([userName, data]) => {
+            for (const [itemId, users] of Object.entries(dbAnswers)) {
+                for (const [userName, data] of Object.entries(users)) {
                     sessionAnswers[`${itemId}_${userName}`] = data.answer;
 
                     if (userName === auditorName) {
-                        markMainButtons(itemId, data.answer);
+                        const group = document.getElementById(`btn_group_${itemId}`);
+                        if (group) {
+                            const buttons = group.querySelectorAll('.answer-btn');
+                            buttons.forEach(b => b.classList.remove('active-yes','active-no','active-na'));
+                            if (data.answer === 'YES') buttons[0]?.classList.add('active-yes');
+                            else if (data.answer === 'NO') buttons[1]?.classList.add('active-no');
+                            else if (data.answer === 'N/A') buttons[2]?.classList.add('active-na');
+                        }
                     }
 
-                    updateHiddenInputs(itemId);
-                    updateInfoBox(itemId);
-                });
-            });
+                    // Isi finding level & note
+                    if (data.finding_level) {
+                        const select = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
+                        if (select) select.value = data.finding_level;
+                    }
+                    if (data.finding_note) {
+                        const textarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
+                        if (textarea) textarea.value = data.finding_note;
+                    }
+                }
+                updateHiddenInputs(itemId);
+                updateInfoBox(itemId);
+            }
         }
 
-        function markMainButtons(itemId, value) {
-            const group = document.getElementById(`btn_group_${itemId}`);
-            if (!group) return;
-
-            const btns = group.querySelectorAll('.answer-btn');
-            btns.forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-
-            if (value === 'YES') btns[0]?.classList.add('active-yes');
-            if (value === 'NO')  btns[1]?.classList.add('active-no');
-            if (value === 'N/A') btns[2]?.classList.add('active-na');
-        }
-
-        /**
-         * ===============================
-         * HIDDEN INPUT SYNC
-         * ===============================
-         */
         function updateHiddenInputs(itemId) {
             const container = document.getElementById(`hidden_inputs_${itemId}`);
-            if (!container) {
-                console.warn(`Container hidden_inputs_${itemId} tidak ditemukan!`);
-                return;
-            }
+            if (!container) return;
 
             container.innerHTML = '';
-            Object.entries(sessionAnswers).forEach(([key, val]) => {
-                if (!key.startsWith(itemId + '_')) return;
-
-                const user = key.replace(itemId + '_', '');
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = `answers[${itemId}][${user}][val]`;
-                input.value = val;
-                container.appendChild(input);
-            });
+            for (const [key, val] of Object.entries(sessionAnswers)) {
+                if (key.startsWith(`${itemId}_`)) {
+                    const user = key.replace(`${itemId}_`, '');
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `answers[${itemId}][${user}][val]`;
+                    input.value = val;
+                    container.appendChild(input);
+                }
+            }
         }
 
-        /**
-         * ===============================
-         * INFO BOX
-         * ===============================
-         */
         function updateInfoBox(itemId) {
             const infoBox = document.getElementById(`info_${itemId}`);
             if (!infoBox) return;
 
-            const auditorAnswer = sessionAnswers[`${itemId}_${auditorName}`];
-            if (!auditorAnswer) {
+            const auditorAns = sessionAnswers[`${itemId}_${auditorName}`];
+            if (!auditorAns) {
                 infoBox.style.display = 'none';
                 return;
             }
 
             let diff = [];
-            Object.entries(sessionAnswers).forEach(([key, val]) => {
-                if (key.startsWith(itemId + '_')) {
-                    const user = key.replace(itemId + '_', '');
-                    if (user !== auditorName && val !== auditorAnswer) {
+            for (const [key, val] of Object.entries(sessionAnswers)) {
+                if (key.startsWith(`${itemId}_`)) {
+                    const user = key.replace(`${itemId}_`, '');
+                    if (user !== auditorName && val !== auditorAns) {
                         diff.push({ user, val });
                     }
                 }
-            });
+            }
 
-            if (!diff.length) {
+            if (diff.length === 0) {
                 infoBox.style.display = 'none';
                 return;
             }
 
-            infoBox.innerHTML = diff.map(d =>
-                `<div class="diff-item">
-                    <span>${d.user}</span>
-                    <strong>${d.val}</strong>
-                </div>`
-            ).join('');
+            const getColor = (v) => v === 'YES' ? '#16a34a' : v === 'NO' ? '#dc2626' : '#64748b';
+            const getText = (v) => v === 'YES' ? 'Iya' : v === 'NO' ? 'Tidak' : 'N/A';
 
+            infoBox.innerHTML = `
+                <div class="diff-item">
+                    <span><strong>${auditorName} (Anda)</strong></span>
+                    <span style="color:${getColor(auditorAns)}"><strong>${getText(auditorAns)}</strong></span>
+                </div>
+                ${diff.map(d => `
+                    <div class="diff-item">
+                        <span>${d.user}</span>
+                        <span style="color:${getColor(d.val)}">${getText(d.val)}</span>
+                    </div>
+                `).join('')}
+            `;
             infoBox.style.display = 'block';
         }
 
-        /**
-         * ===============================
-         * FORM VALIDATION
-         * ===============================
-         */
         function bindFormValidation() {
             const form = document.getElementById('form');
             if (!form) return;
 
-            form.addEventListener('submit', e => {
+            form.addEventListener('submit', function(e) {
                 const rows = document.querySelectorAll('.item-row');
-                const firstEmpty = [...rows].find(r => {
-                    const id = r.id.replace('row_','');
-                    return !sessionAnswers[`${id}_${auditorName}`];
+                let firstEmpty = null;
+
+                rows.forEach(row => {
+                    const id = row.id.replace('row_', '');
+                    if (!sessionAnswers[`${id}_${auditorName}`]) {
+                        if (!firstEmpty) firstEmpty = row;
+                    }
                 });
 
                 if (firstEmpty) {
                     e.preventDefault();
-                    firstEmpty.scrollIntoView({ behavior:'smooth', block:'center' });
+                    firstEmpty.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     firstEmpty.classList.add('unanswered-highlight');
-                    setTimeout(() => firstEmpty.classList.remove('unanswered-highlight'), 2000);
+                    setTimeout(() => firstEmpty.classList.remove('unanswered-highlight'), 1500);
                     Swal.fire('Perhatian!', 'Silakan jawab semua pertanyaan sebelum menyimpan.', 'warning');
-                    return;
                 }
             });
         }
 
         function confirmSubmit() {
-            const form = document.getElementById('form');
-            if (form) {
-                // Trigger validation via submit event
-                const event = new Event('submit', { cancelable: true });
-                const prevented = !form.dispatchEvent(event);
-                if (!prevented) {
-                    form.submit();
-                }
-            }
+            document.getElementById('form').dispatchEvent(new Event('submit', { cancelable: true }));
         }
 
-        // Dummy functions for modal (optional)
         function openModal(itemId, text) {
             document.getElementById('modalItemText').innerText = text;
+            const list = document.getElementById('modalRespondersList');
+            list.innerHTML = '';
+
+            responders.forEach(res => {
+                const name = res.responder_name || res.name;
+                const role = res.responder_department || res.dept || '–';
+                const isAuditor = (name === auditorName);
+                const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
+
+                const div = document.createElement('div');
+                div.className = 'mb-2 p-2 border rounded';
+                div.innerHTML = `
+                    <div><strong>${name}</strong> ${isAuditor ? '<span style="color:#16a34a">(AUTHOR)</span>' : ''}<br><small>${role}</small></div>
+                    <div class="mt-1">
+                        <button type="button" class="btn btn-sm ${currentVal === 'YES' ? 'btn-success' : 'btn-outline-success'}" 
+                            onclick="setVal('${itemId}', '${name}', 'YES', null)">Iya</button>
+                        <button type="button" class="btn btn-sm ${currentVal === 'NO' ? 'btn-danger' : 'btn-outline-danger'}" 
+                            onclick="setVal('${itemId}', '${name}', 'NO', null)">Tidak</button>
+                        <button type="button" class="btn btn-sm ${currentVal === 'N/A' ? 'btn-secondary' : 'btn-outline-secondary'}" 
+                            onclick="setVal('${itemId}', '${name}', 'N/A', null)">N/A</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
             document.getElementById('answerModal').style.display = 'flex';
         }
+
         function closeModal() {
             document.getElementById('answerModal').style.display = 'none';
         }
+
         function toggleFindingNote(itemId, auditor, value) {
             const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
-            if (wrapper) {
-                wrapper.style.display = value ? 'block' : 'none';
-            }
+            if (wrapper) wrapper.style.display = value ? 'block' : 'none';
         }
     </script>
-    @endpush
 </body>
 </html>
