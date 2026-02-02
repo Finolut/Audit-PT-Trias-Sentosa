@@ -179,149 +179,129 @@
     </div>
 </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
-<div class="p-5 hover:bg-gray-50 transition-colors">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
+    <div class="lg:col-span-2 space-y-4">
+        @forelse($recentAudits as $audit)
+            <div class="p-5 hover:bg-gray-50 transition-colors border border-gray-100 rounded-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex-1">
+                        {{-- DEPARTEMEN --}}
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="flex flex-wrap gap-1">
+                                @forelse($audit->department_names as $deptName)
+                                    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                                        {{ $deptName }}
+                                    </span>
+                                @empty
+                                    <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
+                                @endforelse
 
-        {{-- KONTEN UTAMA --}}
-        <div class="flex-1">
+                                <span class="text-[10px] text-gray-400 italic ml-2">
+                                    {{ $audit->created_at->diffForHumans() }}
+                                </span>
+                            </div>
+                        </div>
 
-            {{-- DEPARTEMEN --}}
-            <div class="flex items-center gap-2 mb-2">
-                <div class="flex flex-wrap gap-1">
-@forelse($recentAudits as $audit)
+                        {{-- SCOPE --}}
+                        <h4 class="text-sm font-semibold text-gray-800 mb-1">
+                            Audit Scope:
+                            <span class="text-blue-700 font-medium">
+                                {{ $audit->scope ?? '–' }}
+                            </span>
+                        </h4>
 
-<div class="p-5 hover:bg-gray-50 transition-colors">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-        <div class="flex-1">
-
-            {{-- DEPARTEMEN --}}
-            <div class="flex items-center gap-2 mb-2">
-                <div class="flex flex-wrap gap-1">
-                    @forelse($audit->department_names as $deptName)
-                        <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                            {{ $deptName }}
-                        </span>
-                    @empty
-                        <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
-                    @endforelse
-                </div>
-
-                <span class="text-[10px] text-gray-400 italic">
-                    {{ $audit->created_at->diffForHumans() }}
-                </span>
-            </div>
-
-            {{-- SCOPE --}}
-            <h4 class="text-sm font-semibold text-gray-800 mb-1">
-                Audit Scope:
-                <span class="text-blue-700 font-medium">
-                    {{ $audit->scope ?? '–' }}
-                </span>
-            </h4>
-
-            {{-- DETAIL --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 mt-3 gap-4 text-[11px] text-gray-600 pt-2 border-t border-gray-100">
-                <div>
-                    <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Metodologi</p>
-                    <p class="text-gray-800 font-medium">
-                        {{ $audit->methodology ?? '–' }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Mulai Audit</p>
-                    <p class="text-gray-800 font-medium">
-                        {{ $audit->audit_start_date
-                            ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d M Y')
-                            : '-' }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Lead Auditor</p>
-                    <p class="text-gray-800 font-medium">
-                        {{ $audit->session->auditor_name ?? '-' }}
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {{-- STATUS --}}
-        <div class="flex items-center gap-3 shrink-0">
-            @php $statusNorm = strtoupper($audit->status); @endphp
-            @if($statusNorm === 'COMPLETE' || $statusNorm === 'COMPLETED')
-                <span class="text-[10px] font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">SELESAI</span>
-            @else
-                <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">BERJALAN</span>
-            @endif
-
-            <a href="{{ route('admin.audit.overview', $audit->id) }}"
-               class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg">
-                DETAIL
-            </a>
-        </div>
-
-    </div>
-</div>
-
-@empty
-    <div class="p-8 text-center text-gray-400 text-sm">
-        Belum ada audit terbaru
-    </div>
-@endforelse
-
-       {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
-<div class="lg:col-span-1">
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-<div class="px-6 py-4 bg-[#1a365d] flex items-center justify-between">
-    <h3 class="font-bold text-white flex items-center gap-2">
-        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
-        </svg>
-        Pertanyaan
-    </h3>
-</div>
-
-
-        <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
-            @forelse($liveQuestions as $q)
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 group hover:bg-gray-100 transition-all">
-                <div class="flex justify-between items-start mb-2">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-black text-gray-500 uppercase tracking-tighter">{{ $q->dept_name }}</span>
-                        <span class="text-[11px] font-bold text-gray-800">Clause {{ $q->clause_code }}</span>
+                        {{-- DETAIL --}}
+                        <div class="grid grid-cols-2 md:grid-cols-4 mt-3 gap-4 text-[11px] text-gray-600 pt-2 border-t border-gray-100">
+                            <div>
+                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Metodologi</p>
+                                <p class="text-gray-800 font-medium">{{ $audit->methodology ?? '–' }}</p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Mulai Audit</p>
+                                <p class="text-gray-800 font-medium">
+                                    {{ $audit->audit_start_date ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d M Y') : '-' }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Lead Auditor</p>
+                                <p class="text-gray-800 font-medium">{{ $audit->session->auditor_name ?? '-' }}</p>
+                            </div>
+                        </div>
                     </div>
-                    <span class="text-[9px] text-gray-400 font-medium">{{ \Carbon\Carbon::parse($q->created_at)->diffForHumans() }}</span>
-                </div>
-                <p class="text-xs text-gray-700 leading-relaxed mb-3 italic">
-                    "{{ Str::limit($q->question_text, 100) }}"
-                </p>
-                <div class="flex items-center gap-2 pt-2 border-t border-gray-200">
-                    <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white">
-                        {{ strtoupper(substr($q->auditor_name ?? 'A', 0, 1)) }}
-                    </div>
-                    <span class="text-[10px] font-medium text-gray-600">
-                        Auditor: <span class="text-gray-800 font-semibold">{{ $q->auditor_name ?? 'N/A' }}</span>
-                    </span>
-                </div>
-            </div>
-            @empty
-            <div class="py-8 text-center text-gray-400">
-                <p class="text-sm">Belum ada catatan pertanyaan.</p>
-            </div>
-            @endforelse
-        </div>
 
-<div class="p-4 bg-slate-50 text-center border-t border-gray-200">
-    <a href="#"
-       class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
-        Lihat Semua Evidence →
-    </a>
-</div>
+                    {{-- STATUS --}}
+                    <div class="flex items-center gap-3 shrink-0">
+                        @php $statusNorm = strtoupper($audit->status); @endphp
+                        @if($statusNorm === 'COMPLETE' || $statusNorm === 'COMPLETED')
+                            <span class="text-[10px] font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">SELESAI</span>
+                        @else
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">BERJALAN</span>
+                        @endif
+
+                        <a href="{{ route('admin.audit.overview', $audit->id) }}"
+                           class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg">
+                            DETAIL
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="p-8 text-center text-gray-400 text-sm bg-white rounded-xl border border-gray-100">
+                Belum ada audit terbaru
+            </div>
+        @endforelse
+    </div>
+
+    {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-[#1a365d] flex items-center justify-between">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+                    </svg>
+                    Pertanyaan
+                </h3>
+            </div>
+
+            <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
+                @forelse($liveQuestions as $q)
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 group hover:bg-gray-100 transition-all">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-black text-gray-500 uppercase tracking-tighter">{{ $q->dept_name }}</span>
+                                <span class="text-[11px] font-bold text-gray-800">Clause {{ $q->clause_code }}</span>
+                            </div>
+                            <span class="text-[9px] text-gray-400 font-medium">{{ \Carbon\Carbon::parse($q->created_at)->diffForHumans() }}</span>
+                        </div>
+                        <p class="text-xs text-gray-700 leading-relaxed mb-3 italic">
+                            "{{ Str::limit($q->question_text, 100) }}"
+                        </p>
+                        <div class="flex items-center gap-2 pt-2 border-t border-gray-200">
+                            <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white">
+                                {{ strtoupper(substr($q->auditor_name ?? 'A', 0, 1)) }}
+                            </div>
+                            <span class="text-[10px] font-medium text-gray-600">
+                                Auditor: <span class="text-gray-800 font-semibold">{{ $q->auditor_name ?? 'N/A' }}</span>
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-8 text-center text-gray-400">
+                        <p class="text-sm">Belum ada catatan pertanyaan.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="p-4 bg-slate-50 text-center border-t border-gray-200">
+                <a href="#"
+                   class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
+                    Lihat Semua Evidence →
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
