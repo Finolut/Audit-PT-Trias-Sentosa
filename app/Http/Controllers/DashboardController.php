@@ -15,6 +15,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Carbon\Carbon;
+use App\Models\User;
 
 
 class DashboardController extends Controller
@@ -701,7 +702,36 @@ public function findingsIndex()
 
     return view('admin.audit-findings.index', compact('findings'));
 }
+// App\Http\Controllers\DashboardController.php
 
+public function searchAuditByCode(Request $request)
+{
+    $request->validate([
+        'audit_code' => 'required|string|max:255',
+    ]);
+
+    $auditCode = trim($request->audit_code);
+
+    // Cari di tabel audits berdasarkan audit_code
+    $audit = Audit::where('audit_code', $auditCode)->first();
+
+    if (!$audit) {
+        return back()->with('search_error', '❌ Kode audit tidak ditemukan.');
+    }
+
+    // Cari user auditor berdasarkan nama di session
+    $auditorUser = User::where('name', $audit->session?->auditor_name)
+        ->where('role', 'auditor')
+        ->first();
+
+    if (!$auditorUser) {
+        return back()->with('search_error', '⚠️ Auditor tidak ditemukan.');
+    }
+
+    return redirect()
+        ->route('admin.auditors.show', $auditorUser->id)
+        ->with('highlight_audit', $audit->id);
+}
 }
 
 

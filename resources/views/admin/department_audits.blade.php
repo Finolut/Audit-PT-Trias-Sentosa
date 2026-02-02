@@ -93,7 +93,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <a href="{{ route('admin.audit.overview', $audit->id) }}" 
-                                   class="btn-loading inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all active:scale-95">
+                                   class=" items-center justify-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all active:scale-95">
                                     Lihat Hasil 
                                     <svg class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -115,29 +115,7 @@
 
     @push('scripts')
     <script>
-        // Loading untuk Filter Tahun
-        document.getElementById('year').addEventListener('change', function() {
-            Swal.fire({
-                title: 'Menyaring Data...',
-                text: 'Harap tunggu sebentar',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-            document.getElementById('yearFilterForm').submit();
-        });
-
-        // Loading untuk Klik Lihat Hasil
-        document.querySelectorAll('.btn-loading').forEach(button => {
-            button.addEventListener('click', function() {
-                Swal.fire({
-                    title: 'Memuat Laporan...',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-            });
-        });
+  
     </script>
     @endpush
 @endsection

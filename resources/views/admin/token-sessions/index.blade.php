@@ -7,7 +7,7 @@
 </div>
 
 <!-- Form Tambah Sesi -->
-<div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
+{{-- <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
     <h3 class="font-bold text-gray-800 mb-4">Tambah Sesi Baru</h3>
     <form action="{{ route('admin.token-sessions.store') }}" method="POST">
         @csrf
@@ -38,7 +38,7 @@
             Buat Sesi & Generate Token
         </button>
     </form>
-</div>
+</div> --}}
 
 <!-- Daftar Sesi -->
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -64,40 +64,38 @@
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @foreach($sessions as $session)
-                        <tr>
-                            <td class="px-4 py-2 font-mono text-sm font-bold text-blue-600">{{ $session->resume_token }}</td>
-                            <td class="px-4 py-2 text-sm">{{ $session->auditor_name }}</td>
-                            <td class="px-4 py-2 text-sm">{{ $session->auditor_nik }}</td>
-                            <td class="px-4 py-2 text-sm">{{ $session->auditor_department }}</td>
-                            <td class="px-4 py-2">
-                                <div class="flex items-center gap-2">
-                                    <!-- Regenerate Token -->
-                                    <form action="{{ route('admin.token-sessions.regenerate', $session) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" title="Perbarui Token"
-                                            class="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200">
-                                            Perbarui
-                                        </button>
-                                    </form>
+<tbody class="divide-y divide-gray-200">
+    @foreach($sessions as $session)
+    <tr>
+        <td class="px-4 py-2 font-mono text-sm font-bold text-blue-600">{{ $session->resume_token }}</td>
+        <td class="px-4 py-2 text-sm">{{ $session->auditor_name }}</td>
+        <td class="px-4 py-2 text-sm">{{ $session->auditor_nik }}</td>
+        <td class="px-4 py-2 text-sm">{{ $session->auditor_department }}</td>
+        <td class="px-4 py-2">
+            <div class="flex flex-col gap-1">
 
-                                    <!-- Hapus -->
-                                    <form action="{{ route('admin.token-sessions.destroy', $session) }}" method="POST" class="inline"
-                                        onsubmit="return confirm('Hapus sesi ini? Token akan hilang permanen.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" title="Hapus"
-                                            class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+
+                <!-- Aksi -->
+                <div class="flex items-center gap-1 mt-1">
+                    <a href="{{ route('admin.token-sessions.extend.form', $session) }}"
+                       class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                        Perpanjang
+                    </a>
+
+                    <form action="{{ route('admin.token-sessions.destroy', $session) }}" method="POST" class="inline"
+                        onsubmit="return confirm('Hapus sesi ini?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" title="Hapus"
+                            class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
                 </table>
             </div>
         @endif

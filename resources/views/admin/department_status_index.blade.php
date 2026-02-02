@@ -89,20 +89,6 @@
             else noResult.classList.add('hidden');
         });
 
-        // 2. Script Loading saat Klik Detail
-        document.querySelectorAll('.btn-detail').forEach(button => {
-            button.addEventListener('click', function(e) {
-                Swal.fire({
-                    title: 'Memuat Data...',
-                    text: 'Sedang mengambil ringkasan departemen',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            });
-        });
     </script>
     @endpush
 @endsection

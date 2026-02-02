@@ -151,7 +151,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // DASHBOARD & LOGS
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/question-log', [DashboardController::class, 'questionLog'])->name('question_log');
-    Route::get('/audit/search', [DashboardController::class, 'searchAudit'])->name('audit.search');
+    Route::get('/audit/search', [DashboardController::class, 'searchAuditByCode'])->name('audit.search');
     Route::get('audit/day-details', [DashboardController::class, 'getDayDetails'])
         ->name('audit.day-details');
     Route::get('/audit/{auditId}', [DashboardController::class, 'showAuditOverview'])->name('audit.overview');
@@ -190,6 +190,14 @@ Route::get('/admin/audit/findings', [DashboardController::class, 'findingsIndex'
     Route::put('/token-sessions/{session}', [TokenSessionController::class, 'update'])->name('token-sessions.update');
     Route::patch('/token-sessions/{session}/regenerate', [TokenSessionController::class, 'regenerateToken'])->name('token-sessions.regenerate');
     Route::delete('/token-sessions/{session}', [TokenSessionController::class, 'destroy'])->name('token-sessions.destroy');
+
+    // ... route lainnya ...
+
+Route::get('/token-sessions/{session}/extend', [TokenSessionController::class, 'showExtendForm'])
+    ->name('token-sessions.extend.form');
+
+Route::post('/token-sessions/{session}/extend', [TokenSessionController::class, 'extendToken'])
+    ->name('token-sessions.extend');
 });
 
 // Preserved special routes (public)
