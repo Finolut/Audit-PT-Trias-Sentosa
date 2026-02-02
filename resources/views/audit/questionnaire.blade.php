@@ -283,6 +283,29 @@
                 flex: calc(33.333% - 0.5rem);
             }
         }
+
+        /* ===== FORCE REMOVE OUTER BORDER AROUND BUTTON GROUP ===== */
+.button-group {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Jika garis berasal dari parent langsung (misalnya div tanpa kelas spesifik) */
+.item-action-col > div:first-child {
+    border: none !important;
+}
+
+/* Hindari overflow border dari button yang saling bertumpuk */
+.answer-btn {
+    margin: 0 !important;
+}
+
+/* Jika masih ada garis abu-abu tipis, kemungkinan itu outline dari focus — hilangkan */
+.answer-btn:focus,
+.button-group:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
