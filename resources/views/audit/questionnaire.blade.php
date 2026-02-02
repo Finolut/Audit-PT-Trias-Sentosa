@@ -408,39 +408,6 @@
             top: 1rem;
             left: 1rem;
         }
-
-        /* ========== INLINE FINDING LEVEL ========== */
-.item-action-col {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.finding-inline {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    min-width: 160px;
-}
-
-.finding-inline label {
-    margin: 0;
-    padding: 0;
-    font-size: 0.75rem;
-}
-
-/* Responsif: tumpuk di mobile */
-@media (max-width: 640px) {
-    .item-action-col {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .finding-inline {
-        width: 100%;
-        justify-content: space-between;
-    }
-}
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -497,65 +464,73 @@
                                     <div id="info_{{ $item->id }}" class="score-info-box"></div>
                                 </div>
 
-<div class="item-action-col flex flex-wrap items-center gap-2">
-    <!-- Hidden Inputs & Data (didefinisikan LEBIH DULU) -->
-    @php
-        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-        $findingLevel = $existingAnswer['finding_level'] ?? '';
-        $findingNote = $existingAnswer['finding_note'] ?? '';
-        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
-        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
-    @endphp
+                                <div class="item-action-col">
+                                    <div class="button-group" id="btn_group_{{ $item->id }}">
+                                        <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
+                                        <button type="button" class="answer-btn no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
+                                        <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
+                                    </div>
 
-    <input type="hidden"
-           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
-           value="{{ $answerId }}">
+                                    <div id="hidden_inputs_{{ $item->id }}"></div>
 
-    <!-- Tombol Jawaban -->
-    <div class="button-group flex gap-1" id="btn_group_{{ $item->id }}">
-        <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
-        <button type="button" class="answer-btn no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
-        <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
-    </div>
+                                    @php
+                                        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+                                        $findingLevel = $existingAnswer['finding_level'] ?? '';
+                                        $findingNote = $existingAnswer['finding_note'] ?? '';
+                                        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+                                        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
+                                    @endphp
 
-    <!-- Finding Level (inline) -->
-    <div class="finding-inline flex items-center gap-1 min-w-[160px]">
-        <label class="text-[10px] font-bold text-gray-500 uppercase whitespace-nowrap">Finding:</label>
-        <select
-            name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
-            id="finding_level_{{ $item->id }}_{{ $auditorName }}"
-            class="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
-            onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
-            <option value="">-- No Finding --</option>
-            <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>OFI</option>
-            <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>Minor NC</option>
-            <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>Major NC</option>
-        </select>
-    </div>
+                                    <input type="hidden"
+                                           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
+                                           value="{{ $answerId }}">
 
-    <!-- Hidden container for dynamic inputs -->
-    <div id="hidden_inputs_{{ $item->id }}"></div>
+                                    @if(count($responders) > 1)
+                                        <button type="button"
+                                                class="btn-more mt-2 {{ $isNA ? 'disabled' : '' }}"
+                                                onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}', {{ $isNA ? 'true' : 'false' }})"
+                                                {{ $isNA ? 'disabled' : '' }}>
+                                            Respon Lain...
+                                        </button>
+                                    @endif
 
-    <!-- Tombol Respon Lain (jika diperlukan) -->
-    @if(count($responders) > 1)
-        <button type="button"
-                class="btn-more mt-1 {{ $isNA ? 'disabled' : '' }}"
-                onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}', {{ $isNA ? 'true' : 'false' }})"
-                {{ $isNA ? 'disabled' : '' }}>
-            Respon Lain...
-        </button>
-    @endif
+                                    <div class="finding-container mt-3">
+                                        <div class="flex flex-wrap gap-4 items-end">
+                                            <div class="flex-1 min-w-[160px]">
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                                                    Finding Level
+                                                </label>
+                                                <select
+                                                    name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
+                                                    id="finding_level_{{ $item->id }}_{{ $auditorName }}"
+                                                    class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
+                                                    onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
+                                                    <option value="">-- No Finding --</option>
+                                                    <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
+                                                        Observed (OFI)
+                                                    </option>
+                                                    <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
+                                                        Minor NC
+                                                    </option>
+                                                    <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
+                                                        Major NC
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
 
-    <!-- Catatan Temuan (hanya muncul jika Finding dipilih) -->
-    <div class="w-full mt-2" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
-        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan Temuan</label>
-        <textarea
-            name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
-            rows="2"
-            class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
-            placeholder="Jelaskan temuan...">{{ $findingNote }}</textarea>
-    </div>
-</div>
+                                        <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                                Catatan Temuan
+                                            </label>
+                                            <textarea
+                                                name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
+                                                rows="3"
+                                                class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
+                                                placeholder="Jelaskan temuan secara detail...">{{ $findingNote }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         @endforeach
                     @endforeach
