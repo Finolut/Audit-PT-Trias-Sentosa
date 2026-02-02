@@ -327,7 +327,7 @@ foreach ($allItems as $item) {
 
 $items = Item::whereIn('clause_id', $clauseIds)
     ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-    ->join('mature_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+    ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
     ->leftJoin('answers', function($join) use ($auditId) {
         $join->on('items.id', '=', 'answers.item_id')
              ->where('answers.audit_id', '=', $auditId);
