@@ -162,10 +162,10 @@
     new Chart(ctxDonut, {
         type: 'doughnut',
         data: {
-          labels: ['Sesuai', 'Tidak Sesuai', 'N/A', 'Belum Dijawab'],
+            labels: ['Sesuai', 'Tidak Sesuai', 'N/A', 'Belum Dijawab'],
             datasets: [{
-                data: [{{ $totalYes }}, {{ $totalDraw }}, {{ $totalNo }}, {{ $totalNA }}, {{ $totalUnanswered }}],
-                backgroundColor: ['#22c55e', '#ef4444', '#facc15', '#e2e8f0'],
+                 [{{ $totalYes }}, {{ $totalNo }}, {{ $totalNA }}, {{ $totalUnanswered }}],
+                backgroundColor: ['#22c55e', '#ef4444', '#facc15', '#94a3b8'],
                 borderWidth: 0,
                 hoverOffset: 4
             }]
@@ -180,23 +180,22 @@
 
     const rawData = {!! json_encode($stackedChartData) !!};
     const labels = Object.keys(rawData);
-const dataYes = labels.map(k => rawData[k].yes);
-const dataNo = labels.map(k => rawData[k].no);
-const dataNA = labels.map(k => rawData[k].na);
-const dataUnanswered = labels.map(k => rawData[k].unanswered);
-
+    const dataYes = labels.map(k => rawData[k].yes);
+    const dataNo = labels.map(k => rawData[k].no);
+    const dataNA = labels.map(k => rawData[k].na);
+    const dataUnanswered = labels.map(k => rawData[k].unanswered);
 
     const ctxBar = document.getElementById('stackedBarChart').getContext('2d');
     new Chart(ctxBar, {
         type: 'bar',
-        data: {
+         {
             labels: labels,
             datasets: [
-    { label: 'Sesuai', data: dataYes, backgroundColor: '#22c55e', barPercentage: 0.6 },
-    { label: 'Tidak Sesuai', data: dataNo, backgroundColor: '#ef4444', barPercentage: 0.6 },
-    { label: 'N/A', data: dataNA, backgroundColor: '#facc15', barPercentage: 0.6 },
-    { label: 'Belum Dijawab', data: dataUnanswered, backgroundColor: '#e2e8f0', barPercentage: 0.6 }
-]
+                { label: 'Sesuai',  dataYes, backgroundColor: '#22c55e', barPercentage: 0.6 },
+                { label: 'Tidak Sesuai',  dataNo, backgroundColor: '#ef4444', barPercentage: 0.6 },
+                { label: 'N/A',  dataNA, backgroundColor: '#facc15', barPercentage: 0.6 },
+                { label: 'Belum Dijawab',  dataUnanswered, backgroundColor: '#94a3b8', barPercentage: 0.6 }
+            ]
         },
         options: {
             responsive: true,
