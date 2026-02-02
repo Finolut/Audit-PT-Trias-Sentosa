@@ -472,14 +472,15 @@
                                     </div>
 
                                     <div id="hidden_inputs_{{ $item->id }}"></div>
-
-                                    @php
-                                        $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                                        $findingLevel = $existingAnswer['finding_level'] ?? '';
-                                        $findingNote = $existingAnswer['finding_note'] ?? '';
-                                        $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
-                                        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
-                                    @endphp
+@php
+    // Ambil data auditor UTAMA (author)
+    $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+    $authorFindingLevel = $authorAnswer['finding_level'] ?? '';
+    $authorFindingNote = $authorAnswer['finding_note'] ?? '';
+    $authorAnswerVal = $authorAnswer['answer'] ?? '';
+    $answerId = $authorAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+    $isNA = ($authorAnswerVal === 'N/A');
+@endphp
 
 @foreach($responders as $responder)
     @php
@@ -487,18 +488,11 @@
         $existing = $existingAnswers[$item->id][$responderName] ?? null;
         $ansId = $existing['id'] ?? \Illuminate\Support\Str::uuid();
         $ansVal = $existing['answer'] ?? '';
-        $findingLevel = $existing['finding_level'] ?? '';
-        $findingNote = $existing['finding_note'] ?? '';
+        // JANGAN timpa $authorFindingLevel!
     @endphp
 
-    <input type="hidden"
-           name="answer_id_map[{{ $item->id }}][{{ $responderName }}]"
-           value="{{ $ansId }}">
-
-    <input type="hidden"
-           name="answers[{{ $item->id }}][{{ $responderName }}][val]"
-           value="{{ $ansVal }}"
-           id="hidden_ans_{{ $item->id }}_{{ $responderName }}">
+    <input type="hidden" name="answer_id_map[{{ $item->id }}][{{ $responderName }}]" value="{{ $ansId }}">
+    <input type="hidden" name="answers[{{ $item->id }}][{{ $responderName }}][val]" value="{{ $ansVal }}" id="hidden_ans_{{ $item->id }}_{{ $responderName }}">
 @endforeach
 
                                     @if(count($responders) > 1)
@@ -748,7 +742,35 @@ function updateHiddenInputs(itemId) {
             infoBox.style.display = 'block';
         }
 
-        function bindFormValidation() {
+function bindFormValidation() {
+    const form = document.getElementById('form');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+        const rows = document.querySelectorAll('.item-row');
+        let hasEmpty = false;
+        rows.forEach(row => {
+            const id = row.id.replace('row_', '');
+            if (!sessionAnswers[`${id}_${auditorName}`]) {
+                hasEmpty = true;
+                return;
+            }
+        });
+        if (hasEmpty) {
+            Swal.fire({
+                title: 'Peringatan',
+                text: 'Beberapa pertanyaan belum dijawab. Tetap simpan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Simpan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    e.preventDefault(); // Batalkan submit
+                }
+            });
+        }
+    });
+}
             const form = document.getElementById('form');
             if (!form) return;
             form.addEventListener('submit', function(e) {
