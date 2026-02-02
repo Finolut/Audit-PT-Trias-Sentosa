@@ -136,19 +136,19 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Jenis Pemeriksaan</label>
-                    <select name="audit_type" required class="form-input">
-                        <option value="FIRST_PARTY">Pihak Pertama (Internal Rutin)</option>
-                        <option value="FOLLOW_UP">Pemeriksaan Lanjutan (Corrective Action)</option>
-                        <option value="INVESTIGATIVE">Investigasi Khusus (Insidentil)</option>
-                        <option value="SURPRISE">Audit Mendadak (Unannounced)</option>
-                    </select>
+<select name="audit_type" required class="form-input">
+    <option value="first party">Audit Internal (Pihak Pertama)</option>
+    <option value="follow up">Audit Tindak Lanjut (Corrective Action)</option>
+    <option value="investigative">Audit Investigatif (Khusus/Insidentil)</option>
+    <option value="unannounced">Audit Mendadak (Unannounced)</option>
+</select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Referensi Standar / Kriteria Audit</label>
                     <select id="select-standards" name="audit_standards[]" multiple 
                             placeholder="Pilih standar yang relevan..." required 
                             class="form-input">
-                        <option value="ISO 14001:2015">ISO 14001:2015 (Environmental Management System)</option>
+                        <option value="ISO 14001:2015 (Environmental Management System)">ISO 14001:2015 (Environmental Management System)</option>
                     </select>
                 </div>
             </div>
@@ -166,20 +166,16 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Audit Scope (Lingkup)</label>
-                    <select id="select-scope" name="audit_scope[]" multiple
-                            placeholder="Pilih batasan area audit..." required
-                            class="form-input">
-                        <!-- PROSES -->
-                        <option value="PROCESS_PROCUREMENT">Proses Pengadaan</option>
-                        <option value="PROCESS_PRODUCTION">Proses Produksi</option>
-                        <option value="PROCESS_FINANCE">Proses Keuangan</option>
-                        <!-- ASET -->
-                        <option value="ASSET_PHYSICAL">Fisik Aset / Inventaris</option>
-                        <!-- SDM -->
-                        <option value="HR_COMPETENCY">Kompetensi SDM</option>
-                        <!-- IT -->
-                        <option value="IT_SECURITY">Keamanan Data / IT</option>
-                    </select>
+<select id="select-scope" name="audit_scope[]" multiple
+        placeholder="Pilih ruang lingkup audit..." required
+        class="form-input">
+    <option value="process procurement">Proses Pengadaan</option>
+    <option value="process production">Proses Produksi</option>
+    <option value="process finance">Proses Keuangan</option>
+    <option value="asset physical">Aset Fisik & Inventaris</option>
+    <option value="hr competency">Kompetensi Sumber Daya Manusia</option>
+    <option value="it security">Keamanan Sistem Informasi & Data</option>
+</select>
                 </div>
             </div>
 
@@ -189,22 +185,22 @@
                 </label>
                 <div class="flex flex-wrap gap-3">
                     <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                        <input type="checkbox" name="methodology[]" value="METHOD_DOC_REVIEW"
+                        <input type="checkbox" name="methodology[]" value="Document Review"
                                class="rounded text-slate-800 focus:ring-slate-800">
                         <span class="text-sm">Document Review</span>
                     </label>
                     <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                        <input type="checkbox" name="methodology[]" value="METHOD_INTERVIEW"
+                        <input type="checkbox" name="methodology[]" value="Wawancara (Interview)"
                                class="rounded text-slate-800 focus:ring-slate-800">
                         <span class="text-sm">Wawancara (Interview)</span>
                     </label>
                     <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                        <input type="checkbox" name="methodology[]" value="METHOD_OBSERVATION"
+                        <input type="checkbox" name="methodology[]" value="Observasi Lapangan"
                                class="rounded text-slate-800 focus:ring-slate-800">
                         <span class="text-sm">Observasi Lapangan</span>
                     </label>
                     <label class="flex items-center space-x-2 bg-white px-3 py-2 rounded border border-slate-200 cursor-pointer hover:bg-slate-50">
-                        <input type="checkbox" name="methodology[]" value="METHOD_SAMPLING"
+                        <input type="checkbox" name="methodology[]" value="Sampling Fisik"
                                class="rounded text-slate-800 focus:ring-slate-800">
                         <span class="text-sm">Sampling Fisik</span>
                     </label>
@@ -262,7 +258,7 @@
                 <!-- Departemen Auditee (Multi) -->
                 <div class="mb-6">
                     <label class="block text-sm font-semibold mb-1 text-slate-700">
-                        Departemen Auditee
+                        Departemen yang akann di audit
                     </label>
                     <select id="select-department"
                             name="auditee_dept_ids[]"
