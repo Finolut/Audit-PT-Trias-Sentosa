@@ -190,7 +190,16 @@
             {{-- DEPARTEMEN --}}
             <div class="flex items-center gap-2 mb-2">
                 <div class="flex flex-wrap gap-1">
-                    @forelse($recentAudits as $audit)
+@forelse($recentAudits as $audit)
+
+<div class="p-5 hover:bg-gray-50 transition-colors">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+        <div class="flex-1">
+
+            {{-- DEPARTEMEN --}}
+            <div class="flex items-center gap-2 mb-2">
+                <div class="flex flex-wrap gap-1">
                     @forelse($audit->department_names as $deptName)
                         <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
                             {{ $deptName }}
@@ -205,34 +214,23 @@
                 </span>
             </div>
 
-            {{-- JUDUL / SCOPE --}}
+            {{-- SCOPE --}}
             <h4 class="text-sm font-semibold text-gray-800 mb-1">
                 Audit Scope:
                 <span class="text-blue-700 font-medium">
-                    @if($audit->scope)
-                        {{ is_array($audit->scope) ? implode(', ', $audit->scope) : $audit->scope }}
-                    @else
-                        –
-                    @endif
+                    {{ $audit->scope ?? '–' }}
                 </span>
             </h4>
 
-            {{-- DETAIL GRID --}}
+            {{-- DETAIL --}}
             <div class="grid grid-cols-2 md:grid-cols-4 mt-3 gap-4 text-[11px] text-gray-600 pt-2 border-t border-gray-100">
-
-                {{-- METODOLOGI --}}
                 <div>
                     <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Metodologi</p>
                     <p class="text-gray-800 font-medium">
-                        @if($audit->methodology)
-                            {{ is_array($audit->methodology) ? implode(', ', $audit->methodology) : $audit->methodology }}
-                        @else
-                            –
-                        @endif
+                        {{ $audit->methodology ?? '–' }}
                     </p>
                 </div>
 
-                {{-- TANGGAL MULAI --}}
                 <div>
                     <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Mulai Audit</p>
                     <p class="text-gray-800 font-medium">
@@ -242,39 +240,38 @@
                     </p>
                 </div>
 
-                {{-- LEAD AUDITOR --}}
                 <div>
                     <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Lead Auditor</p>
                     <p class="text-gray-800 font-medium">
                         {{ $audit->session->auditor_name ?? '-' }}
                     </p>
                 </div>
-
             </div>
         </div>
 
-        {{-- STATUS + ACTION --}}
+        {{-- STATUS --}}
         <div class="flex items-center gap-3 shrink-0">
             @php $statusNorm = strtoupper($audit->status); @endphp
-
             @if($statusNorm === 'COMPLETE' || $statusNorm === 'COMPLETED')
-                <span class="text-[10px] font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full uppercase tracking-wide">
-                    SELESAI
-                </span>
+                <span class="text-[10px] font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">SELESAI</span>
             @else
-                <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full uppercase tracking-wide">
-                    BERJALAN
-                </span>
+                <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">BERJALAN</span>
             @endif
 
             <a href="{{ route('admin.audit.overview', $audit->id) }}"
-               class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-sm">
+               class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg">
                 DETAIL
             </a>
         </div>
 
     </div>
 </div>
+
+@empty
+    <div class="p-8 text-center text-gray-400 text-sm">
+        Belum ada audit terbaru
+    </div>
+@endforelse
 
        {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
 <div class="lg:col-span-1">
