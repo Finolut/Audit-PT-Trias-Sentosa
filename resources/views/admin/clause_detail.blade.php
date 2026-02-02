@@ -14,21 +14,29 @@
             <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
         </div>
         
-        {{-- Mini Stats Summary --}}
-        <div class="flex gap-3">
-            <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-green-100">
-                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                <div class="leading-tight">SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
-            </div>
-            <div class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-gray-200">
-                <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
-                <div class="leading-tight">PARTIAL<br><span class="text-lg font-bold">{{ $totalDraw }}</span></div>
-            </div>
-            <div class="px-3 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-red-100">
-                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                <div class="leading-tight">TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span></div>
-            </div>
-        </div>
+{{-- Mini Stats Summary --}}
+<div class="flex gap-3">
+    <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-green-100">
+        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+        <div class="leading-tight">SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
+    </div>
+    <div class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-gray-200">
+        <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
+        <div class="leading-tight">PARTIAL<br><span class="text-lg font-bold">{{ $totalDraw }}</span></div>
+    </div>
+    <div class="px-3 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-red-100">
+        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+        <div class="leading-tight">TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span></div>
+    </div>
+    <div class="px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-yellow-100">
+        <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+        <div class="leading-tight">N/A<br><span class="text-lg font-bold">{{ $totalNA }}</span></div>
+    </div>
+    <div class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-blue-100">
+        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+        <div class="leading-tight">BELUM<br><span class="text-lg font-bold">{{ $totalUnanswered }}</span></div>
+    </div>
+</div>
     </div>
 </div>
 
@@ -133,9 +141,6 @@
         <tr class="bg-red-50/20 border-t border-red-100">
             <td colspan="5" class="px-4 py-2">
                 <div class="flex items-start gap-2">
-                    <svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.195 3 1.732 3z" />
-                    </svg>
                     <p class="text-sm text-red-800 bg-red-50 p-2 rounded-md border border-red-100 whitespace-pre-wrap">
                         <span class="font-semibold">Temuan:</span> {{ $item->finding_note }}
                     </p>
@@ -161,10 +166,10 @@
     new Chart(ctxDonut, {
         type: 'doughnut',
         data: {
-            labels: ['Sesuai', 'Partial', 'Tidak Sesuai', 'N/A'],
+          labels: ['Sesuai', 'Partial', 'Tidak Sesuai', 'N/A', 'Belum Dijawab'],
             datasets: [{
-                data: [{{ $totalYes }}, {{ $totalDraw }}, {{ $totalNo }}, {{ $totalNA }}],
-                backgroundColor: ['#22c55e', '#94a3b8', '#ef4444', '#facc15'],
+                data: [{{ $totalYes }}, {{ $totalDraw }}, {{ $totalNo }}, {{ $totalNA }}, {{ $totalUnanswered }}],
+                backgroundColor: ['#22c55e', '#94a3b8', '#ef4444', '#facc15', '#60a5fa'],
                 borderWidth: 0,
                 hoverOffset: 4
             }]
@@ -179,10 +184,12 @@
 
     const rawData = {!! json_encode($stackedChartData) !!};
     const labels = Object.keys(rawData);
-    const dataYes = labels.map(k => rawData[k].yes);
-    const dataNo = labels.map(k => rawData[k].no);
-    const dataPartial = labels.map(k => rawData[k].partial);
-    const dataNA = labels.map(k => rawData[k].na);
+const dataYes = labels.map(k => rawData[k].yes);
+const dataNo = labels.map(k => rawData[k].no);
+const dataPartial = labels.map(k => rawData[k].partial);
+const dataNA = labels.map(k => rawData[k].na);
+const dataUnanswered = labels.map(k => rawData[k].unanswered);
+
 
     const ctxBar = document.getElementById('stackedBarChart').getContext('2d');
     new Chart(ctxBar, {
@@ -190,11 +197,12 @@
         data: {
             labels: labels,
             datasets: [
-                { label: 'Sesuai', data: dataYes, backgroundColor: '#22c55e', barPercentage: 0.6 },
-                { label: 'Partial', data: dataPartial, backgroundColor: '#94a3b8', barPercentage: 0.6 },
-                { label: 'Tidak Sesuai', data: dataNo, backgroundColor: '#ef4444', barPercentage: 0.6 },
-                { label: 'N/A', data: dataNA, backgroundColor: '#facc15', barPercentage: 0.6 }
-            ]
+    { label: 'Sesuai', data: dataYes, backgroundColor: '#22c55e', barPercentage: 0.6 },
+    { label: 'Partial', data: dataPartial, backgroundColor: '#94a3b8', barPercentage: 0.6 },
+    { label: 'Tidak Sesuai', data: dataNo, backgroundColor: '#ef4444', barPercentage: 0.6 },
+    { label: 'N/A', data: dataNA, backgroundColor: '#facc15', barPercentage: 0.6 },
+    { label: 'Belum Dijawab', data: dataUnanswered, backgroundColor: '#60a5fa', barPercentage: 0.6 }
+]
         },
         options: {
             responsive: true,

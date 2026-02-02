@@ -349,37 +349,43 @@ $items = Item::whereIn('clause_id', $clauseIds)
 
         $itemsGrouped = $items->groupBy('current_code');
 
-        // Statistik Global (Doughnut)
-        $totalYes = 0; $totalNo = 0; $totalDraw = 0; $totalNA = 0;
+    // Statistik Global (Doughnut)
+$totalYes = 0; $totalNo = 0; $totalDraw = 0; $totalNA = 0; $totalUnanswered = 0;
+// Statistik Stacked Bar
+$stackedChartData = [];
+foreach($subCodes as $code) {
+    $stackedChartData[$code] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+}
 
-        // Statistik Stacked Bar
-        $stackedChartData = [];
-        foreach($subCodes as $code) {
-            $stackedChartData[$code] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0];
-        }
+$items->each(function($item) use (&$totalYes, &$totalNo, &$totalDraw, &$totalNA, &$totalUnanswered, &$stackedChartData) {
+    $final = $item->answerFinals->first();
 
-        $items->each(function($item) use (&$totalYes, &$totalNo, &$totalDraw, &$totalNA, &$stackedChartData) {
-            $final = $item->answerFinals->first();
-            $status = 'na';
+    // Cek apakah BELUM DIJAWAB (tidak ada record di answer_finals)
+    if (!$final) {
+        $totalUnanswered++;
+        $status = 'unanswered';
+    }
+    // Cek N/A (ada jawaban tapi semua 0)
+    elseif ($final->yes_count == 0 && $final->no_count == 0) {
+        $totalNA++;
+        $status = 'na';
+    }
+    // Logika voting
+    elseif ($final->final_yes > $final->final_no) {
+        $totalYes++;
+        $status = 'yes';
+    } elseif ($final->final_no > $final->final_yes) {
+        $totalNo++;
+        $status = 'no';
+    } else {
+        $totalDraw++;
+        $status = 'partial';
+    }
 
-            if (!$final || ($final->yes_count == 0 && $final->no_count == 0)) {
-                $totalNA++;
-                $status = 'na';
-            } elseif ($final->final_yes > $final->final_no) {
-                $totalYes++;
-                $status = 'yes';
-            } elseif ($final->final_no > $final->final_yes) {
-                $totalNo++;
-                $status = 'no';
-            } else {
-                $totalDraw++;
-                $status = 'partial';
-            }
-
-            if(isset($stackedChartData[$item->current_code])) {
-                $stackedChartData[$item->current_code][$status]++;
-            }
-        });
+    if(isset($stackedChartData[$item->current_code])) {
+        $stackedChartData[$item->current_code][$status]++;
+    }
+});
 
         return view('admin.clause_detail', compact(
             'departments', 'audit', 'mainClause', 'subCodes', 'subClauseTitles',
