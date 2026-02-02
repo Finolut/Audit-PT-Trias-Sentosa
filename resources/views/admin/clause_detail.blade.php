@@ -5,32 +5,22 @@
 <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-18 mb-8 transition-all">
     <div class="w-full flex items-center justify-between px-8 lg:px-12 py-4">
         <div>
-            <a href="{{ route('admin.audit.overview', $audit->id) }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                Kembali ke Menu Utama
-            </a>
             <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
         </div>
         
 {{-- Mini Stats Summary --}}
 <div class="flex gap-3">
     <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-green-100">
-        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
         <div class="leading-tight">SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
     </div>
 
     <div class="px-3 py-1.5 bg-red-50 text-red-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-red-100">
-        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
         <div class="leading-tight">TIDAK<br><span class="text-lg font-bold">{{ $totalNo }}</span></div>
     </div>
     <div class="px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-yellow-100">
-        <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
         <div class="leading-tight">N/A<br><span class="text-lg font-bold">{{ $totalNA }}</span></div>
     </div>
-    <div class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-blue-100">
-        <span class="w-3 h-3 bg-gray-600 rounded-full"></span>
+    <div class="px-3 py-1.5 bg-gray-50/50 text-gray-600 rounded-md text-xs font-semibold flex items-center gap-1 border border-blue-100">
         <div class="leading-tight">BELUM<br><span class="text-lg font-bold">{{ $totalUnanswered }}</span></div>
     </div>
 </div>
