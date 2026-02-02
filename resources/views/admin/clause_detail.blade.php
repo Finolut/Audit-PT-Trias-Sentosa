@@ -74,102 +74,82 @@
                                 <th class="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase">Result</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 bg-white">
-                        @php 
-                            $subItems = $itemsGrouped[$code] ?? collect(); 
-                            $currentMaturity = null;
-                        @endphp
+<tbody class="divide-y divide-gray-100 bg-white">
+@php 
+    $subItems = $itemsGrouped[$code] ?? collect(); 
+    $currentMaturity = null;
+@endphp
 
-                        @forelse($subItems as $item)
-                            @if($currentMaturity !== $item->level_number)
-                                <tr class="bg-blue-50/20">
-                                    <td colspan="5" class="px-4 py-1.5 text-[10px] font-medium text-blue-700 uppercase tracking-wide border-t border-blue-100">
-                                        Maturity Level {{ $item->level_number }}
-                                    </td>
-                                </tr>
-                                @php $currentMaturity = $item->level_number; @endphp
-                            @endif
+@forelse($subItems as $item)
+    @if($currentMaturity !== $item->level_number)
+        <tr class="bg-blue-50/20">
+            <td colspan="5" class="px-4 py-1.5 text-[10px] font-medium text-blue-700 uppercase tracking-wide border-t border-blue-100">
+                Maturity Level {{ $item->level_number }}
+            </td>
+        </tr>
+        @php $currentMaturity = $item->level_number; @endphp
+    @endif
 
-                            @php
-                                $final = $item->answerFinals->first();
-                                $yesCount = $final->yes_count ?? 0;
-                                $noCount  = $final->no_count ?? 0;
-                                $finalYes = $final->final_yes ?? 0;
-                                $finalNo  = $final->final_no ?? 0;
-                                $isNA = (!$final || ($yesCount == 0 && $noCount == 0)); 
-                            @endphp
+    @php
+        $final = $item->answerFinals->first();
+        $yesCount = $final->yes_count ?? 0;
+        $noCount  = $final->no_count ?? 0;
+        $finalYes = $final->final_yes ?? 0;
+        $finalNo  = $final->final_no ?? 0;
+        $isNA = (!$final || ($yesCount == 0 && $noCount == 0)); 
+    @endphp
 
-                            <tr class="hover:bg-gray-50 transition-colors {{ $isNA ? 'bg-gray-50/50' : '' }}">
-                                <td class="px-4 py-3 text-gray-700 leading-snug">
-                                    {{ $item->item_text }}
-                                </td>
-                                <td class="px-3 py-3 text-center">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-blue-600 bg-blue-100 rounded-full">
-                                        {{ $item->level_number }}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-3 text-center font-medium {{ $isNA ? 'text-gray-300' : 'text-green-600' }}">
-                                    {{ $isNA ? '-' : $yesCount }}
-                                </td>
-                                <td class="px-3 py-3 text-center font-medium {{ $isNA ? 'text-gray-300' : 'text-red-600' }}">
-                                    {{ $isNA ? '-' : $noCount }}
-                                </td>
-                                <td class="px-3 py-3 text-center">
-                                    @if($isNA)
-                                        <span class="px-2 py-0.5 text-[10px] font-medium text-yellow-700 bg-yellow-100 rounded border border-yellow-200">N/A</span>
-                                    @elseif($finalYes > $finalNo)
-                                        <span class="px-2 py-0.5 text-[10px] font-medium text-green-700 bg-green-100 rounded border border-green-200">SESUAI</span>
-                                    @elseif($finalNo > $finalYes)
-                                        <span class="px-2 py-0.5 text-[10px] font-medium text-red-700 bg-red-100 rounded border border-red-200">TIDAK</span>
-                                    @else
-                                        <span class="px-2 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-100 rounded border border-gray-200">PARTIAL</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="px-4 py-4 text-center italic text-gray-400">Data kosong</td></tr>
-                        @endforelse
-                        </tbody>
+    {{-- ROW SOAL --}}
+    <tr class="hover:bg-gray-50 transition-colors {{ $isNA ? 'bg-gray-50/50' : '' }}">
+        <td class="px-4 py-3 text-gray-700 leading-snug">
+            {{ $item->item_text }}
+        </td>
+        <td class="px-3 py-3 text-center">
+            <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-blue-600 bg-blue-100 rounded-full">
+                {{ $item->level_number }}
+            </span>
+        </td>
+        <td class="px-3 py-3 text-center font-medium {{ $isNA ? 'text-gray-300' : 'text-green-600' }}">
+            {{ $isNA ? '-' : $yesCount }}
+        </td>
+        <td class="px-3 py-3 text-center font-medium {{ $isNA ? 'text-gray-300' : 'text-red-600' }}">
+            {{ $isNA ? '-' : $noCount }}
+        </td>
+        <td class="px-3 py-3 text-center">
+            @if($isNA)
+                <span class="px-2 py-0.5 text-[10px] font-medium text-yellow-700 bg-yellow-100 rounded border border-yellow-200">N/A</span>
+            @elseif($finalYes > $finalNo)
+                <span class="px-2 py-0.5 text-[10px] font-medium text-green-700 bg-green-100 rounded border border-green-200">SESUAI</span>
+            @elseif($finalNo > $finalYes)
+                <span class="px-2 py-0.5 text-[10px] font-medium text-red-700 bg-red-100 rounded border border-red-200">TIDAK</span>
+            @else
+                <span class="px-2 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-100 rounded border border-gray-200">PARTIAL</span>
+            @endif
+        </td>
+    </tr>
+
+    {{-- ✅ ROW TEMUAN (Jika Ada) --}}
+    @if(!empty(trim($item->finding_note)))
+        <tr class="bg-red-50/20 border-t border-red-100">
+            <td colspan="5" class="px-4 py-2">
+                <div class="flex items-start gap-2">
+                    <svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.195 3 1.732 3z" />
+                    </svg>
+                    <p class="text-sm text-red-800 bg-red-50 p-2 rounded-md border border-red-100 whitespace-pre-wrap">
+                        <span class="font-semibold">Temuan:</span> {{ $item->finding_note }}
+                    </p>
+                </div>
+            </td>
+        </tr>
+    @endif
+@empty
+    <tr><td colspan="5" class="px-4 py-4 text-center italic text-gray-400">Data kosong</td></tr>
+@endforelse
+</tbody>
                     </table>
                 </div>
 
-                {{-- ✅ CARD TEMUAN AUDIT - SEDERHANA, HANYA TAMPILKAN JIKA ADA --}}
-                @php
-                    $hasFindings = $subItems->contains(fn($item) => !empty(trim($item->finding_note)));
-                @endphp
-
-                @if($hasFindings)
-                    <div class="border-t border-gray-100 p-5 bg-white">
-                        <h4 class="text-xs font-semibold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.195 3 1.732 3z" />
-                            </svg>
-                            Temuan Audit ({{ $code }})
-                        </h4>
-
-                        <div class="space-y-3">
-                            @foreach($subItems as $item)
-                                @if(!empty(trim($item->finding_note)))
-                                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200">
-                                        <p class="text-sm text-gray-800 whitespace-pre-wrap">
-                                            {{ $item->finding_note }}
-                                        </p>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <div class="border-t border-gray-100 p-5 bg-gray-50">
-                        <h4 class="text-xs font-semibold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Temuan Audit ({{ $code }})
-                        </h4>
-                        <p class="text-gray-500 text-sm italic">Tidak ada temuan audit untuk sub-klausul ini.</p>
-                    </div>
-                @endif
             </div>
         </div>
     </div>
