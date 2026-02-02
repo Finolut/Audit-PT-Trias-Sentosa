@@ -110,6 +110,12 @@
         <span class="hide-on-mini whitespace-nowrap">Kelola Pertanyaan Audit</span>
     </a>
 
+    <a href="{{ route('admin.token-sessions.index') }}"
+   class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.token-sessions.*') ? 'active-link' : '' }}">
+    <span class="text-xl min-w-[24px] text-center no-margin-on-mini mr-3">🔑</span> 
+    <span class="hide-on-mini whitespace-nowrap">Token Sesi Audit</span>
+</a>
+
     <!-- Cari Laporan -->
     <a href="{{ route('admin.search.report') }}"
        class="flex items-center px-3 py-2.5 text-sm text-gray-700 rounded-lg hover:bg-gray-50 group transition-colors {{ request()->routeIs('admin.search.report') ? 'active-link' : '' }}">

@@ -12,6 +12,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminAuditorController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\TokenSessionController;
 use App\Http\Controllers\EvidencesController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
@@ -183,6 +184,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // ✅ ROUTE BARU: Catatan Temuan Audit
 Route::get('/admin/audit/findings', [DashboardController::class, 'findingsIndex'])
     ->name('audit.findings');
+
+     Route::get('/token-sessions', [TokenSessionController::class, 'index'])->name('token-sessions.index');
+    Route::post('/token-sessions', [TokenSessionController::class, 'store'])->name('token-sessions.store');
+    Route::put('/token-sessions/{session}', [TokenSessionController::class, 'update'])->name('token-sessions.update');
+    Route::patch('/token-sessions/{session}/regenerate', [TokenSessionController::class, 'regenerateToken'])->name('token-sessions.regenerate');
+    Route::delete('/token-sessions/{session}', [TokenSessionController::class, 'destroy'])->name('token-sessions.destroy');
 });
 
 // Preserved special routes (public)

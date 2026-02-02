@@ -3,23 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class AuditSession extends Model
 {
-    protected $table = 'audit_sessions';
-    protected $guarded = [];
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $fillable = [
+        'auditor_name',
+        'auditor_email',
+        'auditor_nik',
+        'auditor_department',
+        'resume_token'
+    ];
 
-    // Relasi ke tabel audits
-    public function audits()
+    protected static function booted()
     {
-        return $this->hasMany(Audit::class, 'audit_session_id');
-    }
-
-    // Relasi ke para responder di sesi ini
-    public function responders()
-    {
-        return $this->hasMany(AuditResponder::class, 'audit_session_id');
+        static::creating(function ($model) {
+            if (empty($model->resume_token)) {
+                $model->resume_token = Str::random(12);
+            }
+        });
     }
 }
