@@ -105,7 +105,7 @@
     @endphp
 
     {{-- ROW SOAL --}}
-    <tr class="hover:bg-gray-50 transition-colors {{ $isNA ? 'bg-gray-50/50' : '' }}">
+    <tr class="hover:bg-gray-50 transition-colors {{ $isUnanswered ? 'bg-gray-50/50' : '' }}">
         <td class="px-4 py-3 text-gray-700 leading-snug">
             {{ $item->item_text }}
         </td>
