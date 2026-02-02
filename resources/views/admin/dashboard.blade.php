@@ -190,6 +190,7 @@
             {{-- DEPARTEMEN --}}
             <div class="flex items-center gap-2 mb-2">
                 <div class="flex flex-wrap gap-1">
+                    @forelse($recentAudits as $audit)
                     @forelse($audit->department_names as $deptName)
                         <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
                             {{ $deptName }}
