@@ -315,6 +315,11 @@
         .btn-more:hover {
             background: #f1f5f9;
         }
+        .btn-more:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f1f5f9;
+        }
 
         .submit-bar {
             margin-top: 2.5rem;
@@ -351,7 +356,7 @@
                 flex-wrap: wrap;
             }
             .answer-btn {
-                flex: calc(50% - 0.5rem);
+                flex: calc(33.333% - 0.5rem);
             }
         }
     </style>
@@ -402,22 +407,27 @@
 
                                     <div id="hidden_inputs_{{ $item->id }}"></div>
 
-                                    @if(count($responders) > 1)
-                                        <button type="button" class="btn-more mt-2" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
-                                            Respon Lain...
-                                        </button>
-                                    @endif
-
                                     @php
                                         $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
                                         $findingLevel = $existingAnswer['finding_level'] ?? '';
                                         $findingNote = $existingAnswer['finding_note'] ?? '';
                                         $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
+                                        $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
                                     @endphp
 
                                     <input type="hidden"
                                            name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
                                            value="{{ $answerId }}">
+
+                                    <!-- Tombol Respon Lain hanya aktif jika jawaban BUKAN N/A -->
+                                    @if(count($responders) > 1)
+                                        <button type="button"
+                                                class="btn-more mt-2 {{ $isNA ? 'disabled' : '' }}"
+                                                onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}', {{ $isNA ? 'true' : 'false' }})"
+                                                {{ $isNA ? 'disabled' : '' }}>
+                                            Respon Lain...
+                                        </button>
+                                    @endif
 
                                     <div class="finding-container mt-3">
                                         <div class="flex flex-wrap gap-4 items-end">
@@ -474,6 +484,7 @@
     <div id="answerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
+                <h3>Jawaban Auditor Lain</h3>
                 <button type="button" onclick="closeModal()">×</button>
             </div>
             <p id="modalItemText" style="margin-bottom: 16px; font-weight: 500; color: #1e293b;"></p>
@@ -504,6 +515,18 @@
                 const itemId = btn.dataset.itemId;
                 const value = btn.dataset.value;
                 setVal(itemId, auditorName, value, btn);
+
+                // Nonaktifkan tombol "Respon Lain" jika jawaban = N/A
+                const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
+                if (moreBtn) {
+                    if (value === 'N/A') {
+                        moreBtn.disabled = true;
+                        moreBtn.classList.add('disabled');
+                    } else {
+                        moreBtn.disabled = false;
+                        moreBtn.classList.remove('disabled');
+                    }
+                }
             });
         }
 
@@ -551,11 +574,8 @@
                 const val = btn.dataset.value;
                 const current = sessionAnswers[`${itemId}_${user}`] || '';
                 
-                // Reset classes
                 btn.className = 'modal-answer-btn';
                 btn.classList.add(val.toLowerCase());
-                
-                // Activate if matches
                 if (current === val) {
                     btn.classList.add('active');
                 }
@@ -589,6 +609,14 @@
                         if (ans === 'YES') group.children[0]?.classList.add('active-yes');
                         else if (ans === 'NO') group.children[1]?.classList.add('active-no');
                         else if (ans === 'N/A') group.children[2]?.classList.add('active-na');
+                    }
+                    // Nonaktifkan tombol "Respon Lain" jika N/A
+                    if (ans === 'N/A') {
+                        const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
+                        if (moreBtn) {
+                            moreBtn.disabled = true;
+                            moreBtn.classList.add('disabled');
+                        }
                     }
                 }
             }
@@ -674,7 +702,12 @@
             document.getElementById('form').dispatchEvent(new Event('submit', { cancelable: true }));
         }
 
-        function openModal(itemId, text) {
+        function openModal(itemId, text, isNA) {
+            // Jika jawaban saat ini N/A, jangan buka modal
+            if (isNA || sessionAnswers[`${itemId}_${auditorName}`] === 'N/A') {
+                Swal.fire('Info', 'Tidak dapat melihat respon lain untuk item yang dijawab "N/A".', 'info');
+                return;
+            }
             document.getElementById('modalItemText').innerText = text;
             const list = document.getElementById('modalRespondersList');
             list.innerHTML = '';
