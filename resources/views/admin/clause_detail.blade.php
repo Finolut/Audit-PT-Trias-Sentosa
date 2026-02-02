@@ -30,7 +30,7 @@
         <div class="leading-tight">N/A<br><span class="text-lg font-bold">{{ $totalNA }}</span></div>
     </div>
     <div class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-blue-100">
-        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+        <span class="w-3 h-3 bg-gray-600 rounded-full"></span>
         <div class="leading-tight">BELUM<br><span class="text-lg font-bold">{{ $totalUnanswered }}</span></div>
     </div>
 </div>
@@ -141,17 +141,17 @@
     </tr>
 
     {{-- ✅ ROW TEMUAN (Jika Ada) --}}
-    @if(!empty(trim($item->finding_note)))
-        <tr class="bg-red-50/20 border-t border-red-100">
-            <td colspan="5" class="px-4 py-2">
-                <div class="flex items-start gap-2">
-                    <p class="text-sm text-red-800 bg-red-50 p-2 rounded-md border border-red-100 whitespace-pre-wrap">
-                        <span class="font-semibold">Temuan:</span> {{ $item->finding_note }}
-                    </p>
-                </div>
-            </td>
-        </tr>
-    @endif
+ @if(!empty(trim($item->finding_note)))
+<tr class="bg-red-50/30 border-t border-red-100">
+    <td colspan="5" class="px-4 py-1.5">
+        <p class="text-sm text-red-800 bg-red-50 px-3 py-1.5 rounded border border-red-100 leading-snug">
+            <span class="font-semibold">Temuan:</span>
+            {{ $item->finding_note }}
+        </p>
+    </td>
+</tr>
+@endif
+
 @empty
     <tr><td colspan="5" class="px-4 py-4 text-center italic text-gray-400">Data kosong</td></tr>
 @endforelse
