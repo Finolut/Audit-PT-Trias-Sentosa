@@ -232,11 +232,25 @@
             margin-bottom: 1rem;
         }
 
-        .item-row {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.25rem;
-            border-bottom: 1px dashed #e2e8f0;
-        }
+.item-row {
+    /* Padding dikurangi dari 20px → 12px agar lebih compact */
+    padding: 12px;
+    
+    /* Margin-bottom dari 24px → 14px */
+    margin-bottom: 14px;
+    
+    /* Background tetap putih, tapi border-bottom tetap ada */
+    background: #ffffff;
+    border-bottom: 1px dashed #e2e8f0;
+    border-radius: 6px; /* tambahkan sedikit radius agar lebih modern */
+    
+    /* Optional: hover efek ringan */
+    transition: all 0.2s ease;
+}
+.item-row:hover {
+    background: #f8fafc;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
         .item-row:last-child {
             border-bottom: none;
             margin-bottom: 0;
