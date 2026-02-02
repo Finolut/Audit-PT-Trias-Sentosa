@@ -241,7 +241,7 @@
 
         /* Start Audit Button - SOLID COLOR (NO GRADIENT) */
         .start-audit-container {
-            background: #10b981; /* Warna solid hijau */
+            background: #0c2d5a; /* Warna solid hijau */
             border-radius: 12px;
             padding: 2rem;
             text-align: center;
