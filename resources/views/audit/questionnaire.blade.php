@@ -47,13 +47,12 @@
                             @endphp
                             
 @foreach ($items->where('maturity_level_id', $level->id) as $item)
-    
     <div class="item-row" id="row_{{ $item->id }}">
         <div class="item-content-col">
             <p class="item-text">{{ $item->item_text }}</p>
             <div id="info_{{ $item->id }}" class="score-info-box"></div>
         </div>
-        
+
         <div class="item-action-col">
             <div class="button-group" id="btn_group_{{ $item->id }}">
                 <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
@@ -61,8 +60,8 @@
                 <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
             </div>
 
-             {{-- 🔥 INI YANG HILANG --}}
-    <div id="hidden_inputs_{{ $item->id }}"></div>
+            {{-- ✅ PINDAHKAN KE SINI: container untuk hidden inputs --}}
+            <div id="hidden_inputs_{{ $item->id }}"></div>
 
             @if(count($responders) > 1)
                 <button type="button" class="btn-more mt-2" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
@@ -70,24 +69,22 @@
                 </button>
             @endif
 
-            {{-- ✅ Hidden input untuk jawaban dan answer ID mapping --}}
+            {{-- Hidden input untuk answer_id_map --}}
             @php
                 $existingAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
                 $answerValue = $existingAnswer['answer'] ?? '';
                 $findingLevel = $existingAnswer['finding_level'] ?? '';
                 $findingNote = $existingAnswer['finding_note'] ?? '';
-                $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid(); // ✅ Fix typo
+                $answerId = $existingAnswer['id'] ?? \Illuminate\Support\Str::uuid();
             @endphp
 
-            {{-- ✅ HIDDEN INPUT UNTUK ANSWER ID - WAJIB ADA --}}
             <input type="hidden" 
                    name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]" 
                    value="{{ $answerId }}">
 
-            {{-- === INPUT FINDING + CATATAN TEMUAN PER AUDITOR === --}}
+            {{-- FINDING & CATATAN --}}
             <div class="finding-container mt-3 p-2 bg-gray-50 rounded border border-dashed border-gray-300">
                 <div class="flex flex-wrap gap-4 items-end">
-                    {{-- FINDING LEVEL --}}
                     <div class="flex-1 min-w-[160px]">
                         <label class="block text-[10px] font-bold text-gray-500 uppercase">
                             Finding Level
@@ -98,24 +95,15 @@
                             class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
                             onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
                             <option value="">-- No Finding --</option>
-                            <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>
-                                Observed (OFI)
-                            </option>
-                            <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>
-                                Minor NC
-                            </option>
-                            <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>
-                                Major NC
-                            </option>
+                            <option value="observed" {{ $findingLevel === 'observed' ? 'selected' : '' }}>Observed (OFI)</option>
+                            <option value="minor" {{ $findingLevel === 'minor' ? 'selected' : '' }}>Minor NC</option>
+                            <option value="major" {{ $findingLevel === 'major' ? 'selected' : '' }}>Major NC</option>
                         </select>
                     </div>
                 </div>
 
-                {{-- TEXTAREA CATATAN TEMUAN --}}
                 <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $findingLevel ? 'display: block;' : 'display: none;' }}">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                        Catatan Temuan
-                    </label>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan Temuan</label>
                     <textarea 
                         name="finding_note[{{ $item->id }}][{{ $auditorName }}]" 
                         rows="3" 
@@ -123,7 +111,6 @@
                         placeholder="Jelaskan temuan secara detail...">{{ $findingNote }}</textarea>
                 </div>
             </div>
-            {{-- === AKHIR FINDING + CATATAN === --}}
         </div>
     </div>
 @endforeach
