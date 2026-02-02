@@ -9,10 +9,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* ========== GLOBAL STYLES (TETAP) ========== */
-        .active-yes { background-color: #16a34a !important; color: white !important; border-color: #16a34a !important; }
-        .active-no  { background-color: #dc2626 !important; color: white !important; border-color: #dc2626 !important; }
-        .active-na  { background-color: #64748b !important; color: white !important; border-color: #64748b !important; }
+.active-yes {
+    background-color: #16a34a !important;
+    color: white !important;
+    border: none !important; /* 👈 HAPUS GARIS */
+}
 
+.active-no {
+    background-color: #dc2626 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.active-na {
+    background-color: #64748b !important;
+    color: white !important;
+    border: none !important;
+}
         .score-info-box {
             display: none;
             margin-top: 10px;
@@ -160,16 +173,31 @@
             display: flex;
             gap: 0.75rem;
         }
-        .answer-btn {
-            flex: 1;
-            padding: 0.6rem 0.8rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+.answer-btn {
+    flex: 1;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 50;
+    border: none; /* 👈 HAPUS BORDER */
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #f1f5f9; /* warna default netral */
+    color: #334155;
+}
+
+.answer-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.answer-btn.active-yes,
+.answer-btn.active-no,
+.answer-btn.active-na {
+    border: none; /* pastikan tidak ada border saat aktif */
+}
+
+
         .answer-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
