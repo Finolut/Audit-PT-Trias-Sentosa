@@ -189,13 +189,13 @@
                         {{-- DEPARTEMEN --}}
                         <div class="flex items-center gap-2 mb-2">
                             <div class="flex flex-wrap gap-1">
-                                @forelse($audit->department_names as $deptName)
-                                    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                                        {{ $deptName }}
-                                    </span>
-
-                                    <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
-                                @endforelse
+@forelse($audit->department_names as $deptName)
+    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+        {{ $deptName }}
+    </span>
+@empty
+    <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
+@endforelse
 
                                 <span class="text-[10px] text-gray-400 italic ml-2">
                                     {{ $audit->created_at->diffForHumans() }}
@@ -256,37 +256,38 @@
 {{-- KOLOM KANAN (1/3): TEMUAN AUDIT --}}
 <div class="lg:col-span-1">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-
         <div class="px-6 py-4 bg-[#7c1d1d] flex items-center gap-2">
             <svg class="w-5 h-5 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
             </svg>
-            <h3 class="font-bold text-white tracking-tight">
-                Temuan Audit
-            </h3>
+            <h3 class="font-bold text-white tracking-tight">Temuan Audit</h3>
         </div>
 
         <div class="p-4 space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
-
             @forelse($findings as $f)
                 @php
-                    $levelStyle = match($f->finding_level) {
-                        'MAJOR_NC' => 'bg-red-100 text-red-700 border-red-200',
-                        'MINOR_NC' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                        default    => 'bg-blue-100 text-blue-700 border-blue-200',
+                    // Mapping level ke label & warna
+                    $levelConfig = match($f->finding_level) {
+                        'MAJOR_NC' => ['label' => 'MAJOR NC', 'color' => 'red'],
+                        'MINOR_NC' => ['label' => 'MINOR NC', 'color' => 'yellow'],
+                        default    => ['label' => 'OBSERVED', 'color' => 'blue'],
                     };
 
-                    $levelLabel = match($f->finding_level) {
-                        'MAJOR_NC' => 'MAJOR NC',
-                        'MINOR_NC' => 'MINOR NC',
-                        default    => 'OBSERVED',
+                    $bgClass = match($levelConfig['color']) {
+                        'red'    => 'bg-red-50 border-red-200',
+                        'yellow' => 'bg-yellow-50 border-yellow-200',
+                        'blue'   => 'bg-blue-50 border-blue-200',
+                    };
+
+                    $textClass = match($levelConfig['color']) {
+                        'red'    => 'text-red-700',
+                        'yellow' => 'text-yellow-700',
+                        'blue'   => 'text-blue-700',
                     };
                 @endphp
 
-                <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition">
-
-                    {{-- HEADER --}}
+                <div class="p-3 rounded-xl border {{ $bgClass }} hover:bg-opacity-80 transition">
                     <div class="flex justify-between items-start mb-1">
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black text-gray-500 uppercase tracking-tight">
@@ -296,28 +297,24 @@
                                 Clause {{ $f->clause_code }}
                             </span>
                         </div>
-
-                        <span class="px-2 py-0.5 text-[9px] font-bold rounded border {{ $levelStyle }}">
-                            {{ $levelLabel }}
+                        <span class="px-2 py-0.5 text-[9px] font-bold rounded {{ $textClass }}">
+                            {{ $levelConfig['label'] }}
                         </span>
                     </div>
 
-                    {{-- NOTE --}}
-                    <p class="text-xs text-gray-700 leading-snug italic mb-2">
+                    <p class="text-xs text-gray-700 leading-relaxed italic mb-2">
                         "{{ Str::limit($f->finding_note, 120) }}"
                     </p>
 
-                    {{-- FOOTER --}}
                     <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                        <span class="text-[10px] text-gray-500">
-                            Auditor: <span class="font-semibold text-gray-700">{{ $f->auditor_name ?? '-' }}</span>
+                        <span class="text-[10px] text-gray-600">
+                            Auditor: <span class="font-semibold text-gray-800">{{ $f->auditor_name ?? '-' }}</span>
                         </span>
                         <span class="text-[9px] text-gray-400">
-                            {{ \Carbon\Carbon::parse($f->created_at)->diffForHumans() }}
+                            {{ \Carbon\Carbon::parse($f->created_at)->format('d M Y') }}
                         </span>
                     </div>
                 </div>
-
             @empty
                 <div class="py-10 text-center text-gray-400">
                     <p class="text-sm italic">Belum ada temuan audit.</p>
@@ -331,7 +328,6 @@
                 Lihat Semua Temuan →
             </a>
         </div>
-
     </div>
 </div>
 
