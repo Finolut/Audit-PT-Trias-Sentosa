@@ -76,18 +76,24 @@ public function index(Request $request)
                          });
 
     // Query live questions (sudah benar)
-    $liveQuestions = DB::table('audit_questions')
-        ->join('departments', 'audit_questions.department_id', '=', 'departments.id')
-        ->leftJoin('audits', 'audit_questions.audit_id', '=', 'audits.id')
-        ->leftJoin('audit_sessions', 'audits.audit_session_id', '=', 'audit_sessions.id')
-        ->select(
-            'audit_questions.*',
-            'departments.name as dept_name',
-            'audit_sessions.auditor_name as auditor_name'
-        )
-        ->orderBy('audit_questions.created_at', 'desc')
-        ->take(5)
-        ->get();
+   $findings = DB::table('answers')
+    ->join('items', 'answers.item_id', '=', 'items.id')
+    ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+    ->join('departments', 'answers.department_id', '=', 'departments.id')
+    ->whereNotNull('answers.finding_note')
+    ->where('answers.finding_note', '!=', '')
+    ->select(
+        'answers.finding_level',
+        'answers.finding_note',
+        'answers.auditor_name',
+        'answers.created_at',
+        'clauses.clause_code',
+        'departments.name as dept_name'
+    )
+    ->orderBy('answers.created_at', 'desc')
+    ->limit(20)
+    ->get();
+
 
   // 1. Tentukan Tahun yang dipilih (Default tahun sekarang)
     $selectedYear = $request->input('year', Carbon::now()->year);
@@ -168,10 +174,11 @@ public function index(Request $request)
     return view('admin.dashboard', compact(
         'stats', 
         'recentAudits', 
-        'liveQuestions', 
+        'findings', 
         'contributionData', 
         'selectedYear', 
         'availableYears'
+        
     ));
 }
 

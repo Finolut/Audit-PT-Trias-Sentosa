@@ -193,7 +193,7 @@
                                     <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
                                         {{ $deptName }}
                                     </span>
-                                @empty
+
                                     <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
                                 @endforelse
 
@@ -253,56 +253,88 @@
         @endforelse
     </div>
 
-    {{-- KOLOM KANAN (1/3): LOG PERTANYAAN --}}
-    <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 bg-[#1a365d] flex items-center justify-between">
-                <h3 class="font-bold text-white flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
-                    </svg>
-                    Pertanyaan
-                </h3>
-            </div>
+{{-- KOLOM KANAN (1/3): TEMUAN AUDIT --}}
+<div class="lg:col-span-1">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-            <div class="p-4 space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
-                @forelse($liveQuestions as $q)
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 group hover:bg-gray-100 transition-all">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-black text-gray-500 uppercase tracking-tighter">{{ $q->dept_name }}</span>
-                                <span class="text-[11px] font-bold text-gray-800">Clause {{ $q->clause_code }}</span>
-                            </div>
-                            <span class="text-[9px] text-gray-400 font-medium">{{ \Carbon\Carbon::parse($q->created_at)->diffForHumans() }}</span>
-                        </div>
-                        <p class="text-xs text-gray-700 leading-relaxed mb-3 italic">
-                            "{{ Str::limit($q->question_text, 100) }}"
-                        </p>
-                        <div class="flex items-center gap-2 pt-2 border-t border-gray-200">
-                            <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white">
-                                {{ strtoupper(substr($q->auditor_name ?? 'A', 0, 1)) }}
-                            </div>
-                            <span class="text-[10px] font-medium text-gray-600">
-                                Auditor: <span class="text-gray-800 font-semibold">{{ $q->auditor_name ?? 'N/A' }}</span>
+        <div class="px-6 py-4 bg-[#7c1d1d] flex items-center gap-2">
+            <svg class="w-5 h-5 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
+            </svg>
+            <h3 class="font-bold text-white tracking-tight">
+                Temuan Audit
+            </h3>
+        </div>
+
+        <div class="p-4 space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
+
+            @forelse($findings as $f)
+                @php
+                    $levelStyle = match($f->finding_level) {
+                        'MAJOR_NC' => 'bg-red-100 text-red-700 border-red-200',
+                        'MINOR_NC' => 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                        default    => 'bg-blue-100 text-blue-700 border-blue-200',
+                    };
+
+                    $levelLabel = match($f->finding_level) {
+                        'MAJOR_NC' => 'MAJOR NC',
+                        'MINOR_NC' => 'MINOR NC',
+                        default    => 'OBSERVED',
+                    };
+                @endphp
+
+                <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 transition">
+
+                    {{-- HEADER --}}
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-black text-gray-500 uppercase tracking-tight">
+                                {{ $f->dept_name }}
+                            </span>
+                            <span class="text-[11px] font-bold text-gray-800">
+                                Clause {{ $f->clause_code }}
                             </span>
                         </div>
-                    </div>
-                @empty
-                    <div class="py-8 text-center text-gray-400">
-                        <p class="text-sm">Belum ada catatan pertanyaan.</p>
-                    </div>
-                @endforelse
-            </div>
 
-            <div class="p-4 bg-slate-50 text-center border-t border-gray-200">
-                <a href="#"
-                   class="text-blue-600 text-xs font-bold hover:underline uppercase tracking-wider">
-                    Lihat Semua Evidence →
-                </a>
-            </div>
+                        <span class="px-2 py-0.5 text-[9px] font-bold rounded border {{ $levelStyle }}">
+                            {{ $levelLabel }}
+                        </span>
+                    </div>
+
+                    {{-- NOTE --}}
+                    <p class="text-xs text-gray-700 leading-snug italic mb-2">
+                        "{{ Str::limit($f->finding_note, 120) }}"
+                    </p>
+
+                    {{-- FOOTER --}}
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span class="text-[10px] text-gray-500">
+                            Auditor: <span class="font-semibold text-gray-700">{{ $f->auditor_name ?? '-' }}</span>
+                        </span>
+                        <span class="text-[9px] text-gray-400">
+                            {{ \Carbon\Carbon::parse($f->created_at)->diffForHumans() }}
+                        </span>
+                    </div>
+                </div>
+
+            @empty
+                <div class="py-10 text-center text-gray-400">
+                    <p class="text-sm italic">Belum ada temuan audit.</p>
+                </div>
+            @endforelse
         </div>
+
+        <div class="p-4 bg-slate-50 text-center border-t border-gray-200">
+            <a href="{{ route('admin.audit.findings') }}"
+               class="text-red-700 text-xs font-bold hover:underline uppercase tracking-wider">
+                Lihat Semua Temuan →
+            </a>
+        </div>
+
     </div>
+</div>
+
 </div>
 
 @push('scripts')
