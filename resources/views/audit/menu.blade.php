@@ -414,31 +414,14 @@
         @endif
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const copyBtn = document.getElementById('copy-token-btn');
-            const tokenElement = document.getElementById('audit-token');
-            
-            if (copyBtn && tokenElement && !copyBtn.disabled) {
-                copyBtn.addEventListener('click', async () => {
-                    try {
-                        const tokenValue = tokenElement.textContent.trim();
-                        await navigator.clipboard.writeText(tokenValue);
-                        
-                        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-                        copyBtn.style.backgroundColor = '#10b981';
-                        
-                        setTimeout(() => {
-                            copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-                            copyBtn.style.backgroundColor = '#1a365d';
-                        }, 2000);
-                    } catch (err) {
-                        console.error('Gagal menyalin token:', err);
-                        alert('Gagal menyalin. Silakan salin manual.');
-                    }
-                });
-            }
-        });
-    </script>
+@push('scripts')
+<script>
+    window.auditorName = @json($auditorName);
+    window.responders  = @json($responders);
+    window.dbAnswers = @json($existingAnswers ?: []);
+</script>
+
+<script src="{{ asset('js/audit-script.js') }}"></script>
+@endpush
 </body>
 </html>

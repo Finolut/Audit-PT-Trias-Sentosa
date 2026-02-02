@@ -61,6 +61,9 @@
                 <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
             </div>
 
+             {{-- 🔥 INI YANG HILANG --}}
+    <div id="hidden_inputs_{{ $item->id }}"></div>
+
             @if(count($responders) > 1)
                 <button type="button" class="btn-more mt-2" onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}')">
                     Respon Lain...
