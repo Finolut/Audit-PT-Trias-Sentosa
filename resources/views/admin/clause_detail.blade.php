@@ -101,7 +101,7 @@
         $noCount  = $final->no_count ?? 0;
         $finalYes = $final->final_yes ?? 0;
         $finalNo  = $final->final_no ?? 0;
-        $isNA = (!$final || ($yesCount == 0 && $noCount == 0)); 
+        $isUnanswered = !$final || ($yesCount === 0 && $noCount === 0);
     @endphp
 
     {{-- ROW SOAL --}}
@@ -114,22 +114,29 @@
                 {{ $item->level_number }}
             </span>
         </td>
-        <td class="px-3 py-3 text-center font-medium {{ $isNA ? 'text-gray-300' : 'text-green-600' }}">
-            {{ $isNA ? '-' : $yesCount }}
-        </td>
-        <td class="px-3 py-3 text-center font-medium {{ $isNA ? 'text-gray-300' : 'text-red-600' }}">
-            {{ $isNA ? '-' : $noCount }}
-        </td>
-        <td class="px-3 py-3 text-center">
-            @if($isNA)
-                <span class="px-2 py-0.5 text-[10px] font-medium text-yellow-700 bg-yellow-100 rounded border border-yellow-200">N/A</span>
-            @elseif($finalYes > $finalNo)
-                <span class="px-2 py-0.5 text-[10px] font-medium text-green-700 bg-green-100 rounded border border-green-200">SESUAI</span>
-            @elseif($finalNo > $finalYes)
-                <span class="px-2 py-0.5 text-[10px] font-medium text-red-700 bg-red-100 rounded border border-red-200">TIDAK</span>
-    
-            @endif
-        </td>
+ <td class="px-3 py-3 text-center font-medium {{ $isUnanswered ? 'text-gray-300' : 'text-green-600' }}">
+    {{ $isUnanswered ? '-' : $yesCount }}
+</td>
+<td class="px-3 py-3 text-center font-medium {{ $isUnanswered ? 'text-gray-300' : 'text-red-600' }}">
+    {{ $isUnanswered ? '-' : $noCount }}
+</td>
+
+<td class="px-3 py-3 text-center">
+    @if($isUnanswered)
+        <span class="px-2 py-0.5 text-[10px] font-medium text-blue-700 bg-blue-100 rounded border border-blue-200">
+            BELUM DIJAWAB
+        </span>
+    @elseif($finalYes > $finalNo)
+        <span class="px-2 py-0.5 text-[10px] font-medium text-green-700 bg-green-100 rounded border border-green-200">
+            SESUAI
+        </span>
+    @elseif($finalNo > $finalYes)
+        <span class="px-2 py-0.5 text-[10px] font-medium text-red-700 bg-red-100 rounded border border-red-200">
+            TIDAK
+        </span>
+    @endif
+</td>
+
     </tr>
 
     {{-- ✅ ROW TEMUAN (Jika Ada) --}}
