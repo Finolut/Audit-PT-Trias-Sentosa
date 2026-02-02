@@ -327,26 +327,22 @@
             background: #f1f5f9;
         }
 
-        .submit-bar {
-            margin-top: 2.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e2e8f0;
-            text-align: right;
-        }
-        .submit-audit {
-            background: #0c2d5a;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.submit-bar {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submit-audit {
+    width: fit-content;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
         .submit-audit:hover {
             background: #0a2547;
             transform: translateY(-2px);
