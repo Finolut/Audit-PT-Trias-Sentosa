@@ -8,24 +8,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ========== GLOBAL STYLES (TETAP) ========== */
-.active-yes {
-    background-color: #16a34a !important;
-    color: white !important;
-    border: none !important; /* 👈 HAPUS GARIS */
-}
+        /* ========== GLOBAL STYLES ========== */
+        .active-yes {
+            background-color: #16a34a !important;
+            color: white !important;
+            border: none !important;
+        }
+        .active-no {
+            background-color: #dc2626 !important;
+            color: white !important;
+            border: none !important;
+        }
+        .active-na {
+            background-color: #64748b !important;
+            color: white !important;
+            border: none !important;
+        }
 
-.active-no {
-    background-color: #dc2626 !important;
-    color: white !important;
-    border: none !important;
-}
-
-.active-na {
-    background-color: #64748b !important;
-    color: white !important;
-    border: none !important;
-}
         .score-info-box {
             display: none;
             margin-top: 10px;
@@ -64,15 +63,104 @@
         }
         .modal-content {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 24px;
+            border-radius: 12px;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
-        /* ========== NEW DESIGN: CLEAN LAYOUT (NO CARDS) ========== */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0c2d5a;
+        }
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        .modal-header button:hover {
+            background: #f1f5f9;
+            color: #0c2d5a;
+        }
+
+        .responder-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        .responder-item:hover {
+            background: #f1f5f9;
+        }
+
+        .responder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .responder-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .responder-role {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        .author-badge {
+            background: #10b981;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .modal-answer-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 60px;
+            text-align: center;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+        .modal-answer-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .modal-answer-btn.yes { background-color: #f1f5f9; color: #334155; }
+        .modal-answer-btn.no { background-color: #f1f5f9; color: #334155; }
+        .modal-answer-btn.yes.active { background-color: #16a34a; color: white; }
+        .modal-answer-btn.no.active { background-color: #dc2626; color: white; }
+
+        /* ========== MAIN LAYOUT ========== */
         .audit-container {
             max-width: 900px;
             margin: 0 auto;
@@ -115,7 +203,6 @@
             gap: 0.5rem;
         }
 
-        /* Sub-clause section */
         .sub-clause-section {
             margin-bottom: 2rem;
         }
@@ -128,7 +215,6 @@
             border-bottom: 1px solid #cbd5e1;
         }
 
-        /* Level badge */
         .level-badge {
             display: inline-block;
             background: #e0e7ff;
@@ -140,7 +226,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Item row */
         .item-row {
             margin-bottom: 1.5rem;
             padding-bottom: 1.25rem;
@@ -168,42 +253,31 @@
             gap: 1rem;
         }
 
-        /* Button group */
         .button-group {
             display: flex;
             gap: 0.75rem;
         }
-.answer-btn {
-    flex: 1;
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9rem;
-    font-weight: 50;
-    border: none; /* 👈 HAPUS BORDER */
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background-color: #f1f5f9; /* warna default netral */
-    color: #334155;
-}
-
-.answer-btn:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-.answer-btn.active-yes,
-.answer-btn.active-no,
-.answer-btn.active-na {
-    border: none; /* pastikan tidak ada border saat aktif */
-}
-
-
+        .answer-btn {
+            flex: 1;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+        .answer-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
         .answer-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Finding container */
         .finding-container {
             background: #f8fafc;
             padding: 0.75rem;
@@ -228,7 +302,6 @@
             resize: vertical;
         }
 
-        /* Respon lain button */
         .btn-more {
             background: transparent;
             color: #0c2d5a;
@@ -243,7 +316,6 @@
             background: #f1f5f9;
         }
 
-        /* Submit bar */
         .submit-bar {
             margin-top: 2.5rem;
             padding-top: 1.5rem;
@@ -270,7 +342,6 @@
             box-shadow: 0 4px 8px rgba(12, 45, 90, 0.3);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .meta-info {
                 flex-direction: column;
@@ -280,146 +351,9 @@
                 flex-wrap: wrap;
             }
             .answer-btn {
-                flex: calc(33.333% - 0.5rem);
+                flex: calc(50% - 0.5rem);
             }
         }
-
-        /* ===== FORCE REMOVE OUTER BORDER AROUND BUTTON GROUP ===== */
-.button-group {
-    border: none !important;
-    box-shadow: none !important;
-}
-
-/* Jika garis berasal dari parent langsung (misalnya div tanpa kelas spesifik) */
-.item-action-col > div:first-child {
-    border: none !important;
-}
-
-/* Hindari overflow border dari button yang saling bertumpuk */
-.answer-btn {
-    margin: 0 !important;
-}
-
-/* Jika masih ada garis abu-abu tipis, kemungkinan itu outline dari focus — hilangkan */
-.answer-btn:focus,
-.button-group:focus-within {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* ===== MODAL: RESPOON LAIN — DESAIN BARU & KONSISTEN ===== */
-#answerModal .modal-content {
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.modal-header h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0c2d5a;
-}
-
-.modal-header button {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #64748b;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s;
-}
-.modal-header button:hover {
-    background: #f1f5f9;
-    color: #0c2d5a;
-}
-
-/* Responder item di modal */
-.responder-item {
-    background: #f8fafc;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    transition: all 0.2s;
-}
-.responder-item:hover {
-    background: #f1f5f9;
-}
-
-.responder-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 8px;
-}
-.responder-name {
-    font-weight: 600;
-    color: #1e293b;
-}
-.responder-role {
-    font-size: 0.85rem;
-    color: #64748b;
-}
-.author-badge {
-    background: #10b981;
-    color: white;
-    font-size: 0.75rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 8px;
-}
-
-/* Tombol jawaban di modal — GANTI DENGAN STYLING YANG SAMA SEPERTI UTAMA */
-.modal-answer-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-width: 60px;
-    text-align: center;
-    background-color: #f1f5f9;
-    color: #334155;
-}
-
-.modal-answer-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.modal-answer-btn.active {
-    border: none !important;
-}
-
-.modal-answer-btn.yes {
-    background-color: #16a34a;
-    color: white;
-}
-.modal-answer-btn.no {
-    background-color: #dc2626;
-    color: white;
-}
-
-/* Hilangkan N/A — jadi hanya 2 tombol */
-.modal-answer-btn.na {
-    display: none !important;
-}
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -466,7 +400,6 @@
                                         <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
                                     </div>
 
-                                    {{-- Hidden inputs will be injected by JS --}}
                                     <div id="hidden_inputs_{{ $item->id }}"></div>
 
                                     @if(count($responders) > 1)
@@ -530,7 +463,7 @@
             @endforeach
 
             <div class="submit-bar">
- <button type="button" onclick="confirmSubmit()" class="submit-audit">
+                <button type="button" onclick="confirmSubmit()" class="submit-audit">
                     <i class="fas fa-save"></i> Simpan Klausul ini
                 </button>
             </div>
@@ -541,102 +474,100 @@
     <div id="answerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Respon Lain</h3>
-                <button type="button" onclick="closeModal()" style="float:right; background:none; border:none; font-size:1.2em;">×</button>
+                <h3>Jawaban Auditor Lain</h3>
+                <button type="button" onclick="closeModal()">×</button>
             </div>
-            <p id="modalItemText"></p>
-            <div id="modalRespondersList" class="mt-3"></div>
-            <div class="mt-4">
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Selesai</button>
+            <p id="modalItemText" style="margin-bottom: 16px; font-weight: 500; color: #1e293b;"></p>
+            <div id="modalRespondersList"></div>
+            <div class="mt-4" style="text-align: right;">
+                <button type="button" class="submit-audit" style="padding: 0.5rem 1.25rem;" onclick="closeModal()">Selesai</button>
             </div>
         </div>
     </div>
 
-    <!-- INTEGRATED JAVASCRIPT (TIDAK DIUBAH) -->
     <script>
-        // ✅ GLOBAL STATE
         const auditorName = @json($auditorName);
         const responders = @json($responders);
         const dbAnswers = @json($existingAnswers ?? []);
         let sessionAnswers = {};
 
-        // ✅ INIT
         document.addEventListener('DOMContentLoaded', function () {
             restoreFromDB();
             bindButtons();
             bindFormValidation();
+            bindModalButtons();
         });
 
         function bindButtons() {
             document.body.addEventListener('click', function(e) {
                 const btn = e.target.closest('.answer-btn');
                 if (!btn) return;
-
                 const itemId = btn.dataset.itemId;
                 const value = btn.dataset.value;
                 setVal(itemId, auditorName, value, btn);
             });
         }
 
-        function setVal(itemId, userName, value, btnElement) {
-    sessionAnswers[`${itemId}_${userName}`] = value;
-
-    // Update UI utama (jika auditor)
-    if (userName === auditorName && btnElement) {
-        const group = document.getElementById(`btn_group_${itemId}`);
-        if (group) {
-            group.querySelectorAll('.answer-btn').forEach(b => {
-                b.classList.remove('active-yes', 'active-no', 'active-na');
+        function bindModalButtons() {
+            document.body.addEventListener('click', function(e) {
+                const btn = e.target.closest('#answerModal .modal-answer-btn');
+                if (btn) {
+                    const itemId = btn.dataset.itemId;
+                    const userName = btn.dataset.user;
+                    const value = btn.dataset.value;
+                    setVal(itemId, userName, value, btn);
+                }
             });
-            if (value === 'YES') btnElement.classList.add('active-yes');
-            else if (value === 'NO') btnElement.classList.add('active-no');
-            // N/A dihilangkan → tidak perlu else if 'N/A'
         }
-    }
 
-    // Update UI modal (jika btnElement adalah tombol modal)
-    if (btnElement && btnElement.classList.contains('modal-answer-btn')) {
-        // Hapus semua kelas aktif di grup tombol ini
-        const parent = btnElement.closest('.flex.gap-2');
-        if (parent) {
-            parent.querySelectorAll('.modal-answer-btn')
-                .forEach(b => b.classList.remove('active', 'yes', 'no'));
-            
-            // Tambahkan kelas sesuai jawaban
-            btnElement.classList.add('active');
-            if (value === 'YES') {
-                btnElement.classList.add('yes');
-                btnElement.classList.remove('no');
-            } else if (value === 'NO') {
-                btnElement.classList.add('no');
-                btnElement.classList.remove('yes');
+        function setVal(itemId, userName, value, btnElement) {
+            sessionAnswers[`${itemId}_${userName}`] = value;
+
+            // Update main UI (auditor only)
+            if (userName === auditorName && btnElement) {
+                const group = document.getElementById(`btn_group_${itemId}`);
+                if (group) {
+                    group.querySelectorAll('.answer-btn').forEach(b => {
+                        b.classList.remove('active-yes', 'active-no', 'active-na');
+                    });
+                    if (value === 'YES') btnElement.classList.add('active-yes');
+                    else if (value === 'NO') btnElement.classList.add('active-no');
+                    else if (value === 'N/A') btnElement.classList.add('active-na');
+                }
             }
-        }
-    }
 
-    updateHiddenInputs(itemId);
-    updateInfoBox(itemId);
-}
+            // Update modal if open
+            if (document.getElementById('answerModal').style.display === 'flex') {
+                updateModalButtonStates(itemId);
+            }
+
+            updateHiddenInputs(itemId);
+            updateInfoBox(itemId);
+        }
+
+        function updateModalButtonStates(itemId) {
+            const buttons = document.querySelectorAll(`#answerModal [data-item-id="${itemId}"]`);
+            buttons.forEach(btn => {
+                const user = btn.dataset.user;
+                const val = btn.dataset.value;
+                const current = sessionAnswers[`${itemId}_${user}`] || '';
+                
+                // Reset classes
+                btn.className = 'modal-answer-btn';
+                btn.classList.add(val.toLowerCase());
+                
+                // Activate if matches
+                if (current === val) {
+                    btn.classList.add('active');
+                }
+            });
+        }
 
         function restoreFromDB() {
             if (!dbAnswers) return;
-
             for (const [itemId, users] of Object.entries(dbAnswers)) {
                 for (const [userName, data] of Object.entries(users)) {
                     sessionAnswers[`${itemId}_${userName}`] = data.answer;
-
-                    if (userName === auditorName) {
-                        const group = document.getElementById(`btn_group_${itemId}`);
-                        if (group) {
-                            const buttons = group.querySelectorAll('.answer-btn');
-                            buttons.forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-                            if (data.answer === 'YES') buttons[0]?.classList.add('active-yes');
-                            else if (data.answer === 'NO') buttons[1]?.classList.add('active-no');
-                            else if (data.answer === 'N/A') buttons[2]?.classList.add('active-na');
-                        }
-                    }
-
-                    // Isi finding level & note
                     if (data.finding_level) {
                         const select = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
                         if (select) select.value = data.finding_level;
@@ -649,12 +580,24 @@
                 updateHiddenInputs(itemId);
                 updateInfoBox(itemId);
             }
+            // Apply active states to main UI
+            for (const [itemId, users] of Object.entries(dbAnswers)) {
+                if (users[auditorName]) {
+                    const ans = users[auditorName].answer;
+                    const group = document.getElementById(`btn_group_${itemId}`);
+                    if (group) {
+                        group.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes','active-no','active-na'));
+                        if (ans === 'YES') group.children[0]?.classList.add('active-yes');
+                        else if (ans === 'NO') group.children[1]?.classList.add('active-no');
+                        else if (ans === 'N/A') group.children[2]?.classList.add('active-na');
+                    }
+                }
+            }
         }
 
         function updateHiddenInputs(itemId) {
             const container = document.getElementById(`hidden_inputs_${itemId}`);
             if (!container) return;
-
             container.innerHTML = '';
             for (const [key, val] of Object.entries(sessionAnswers)) {
                 if (key.startsWith(`${itemId}_`)) {
@@ -671,13 +614,11 @@
         function updateInfoBox(itemId) {
             const infoBox = document.getElementById(`info_${itemId}`);
             if (!infoBox) return;
-
             const auditorAns = sessionAnswers[`${itemId}_${auditorName}`];
             if (!auditorAns) {
                 infoBox.style.display = 'none';
                 return;
             }
-
             let diff = [];
             for (const [key, val] of Object.entries(sessionAnswers)) {
                 if (key.startsWith(`${itemId}_`)) {
@@ -687,15 +628,12 @@
                     }
                 }
             }
-
             if (diff.length === 0) {
                 infoBox.style.display = 'none';
                 return;
             }
-
             const getColor = (v) => v === 'YES' ? '#16a34a' : v === 'NO' ? '#dc2626' : '#64748b';
             const getText = (v) => v === 'YES' ? 'Iya' : v === 'NO' ? 'Tidak' : 'N/A';
-
             infoBox.innerHTML = `
                 <div class="diff-item">
                     <span><strong>${auditorName} (Anda)</strong></span>
@@ -714,18 +652,15 @@
         function bindFormValidation() {
             const form = document.getElementById('form');
             if (!form) return;
-
             form.addEventListener('submit', function(e) {
                 const rows = document.querySelectorAll('.item-row');
                 let firstEmpty = null;
-
                 rows.forEach(row => {
                     const id = row.id.replace('row_', '');
                     if (!sessionAnswers[`${id}_${auditorName}`]) {
                         if (!firstEmpty) firstEmpty = row;
                     }
                 });
-
                 if (firstEmpty) {
                     e.preventDefault();
                     firstEmpty.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -741,49 +676,36 @@
         }
 
         function openModal(itemId, text) {
-    document.getElementById('modalItemText').innerText = text;
-    const list = document.getElementById('modalRespondersList');
-    list.innerHTML = '';
+            document.getElementById('modalItemText').innerText = text;
+            const list = document.getElementById('modalRespondersList');
+            list.innerHTML = '';
 
-    responders.forEach(res => {
-        const name = res.responder_name || res.name;
-        const role = res.responder_department || res.dept || '–';
-        const isAuditor = (name === auditorName);
-        const currentVal = sessionAnswers[`${itemId}_${name}`] || '';
+            responders.forEach(res => {
+                const name = res.responder_name || res.name;
+                const role = res.responder_department || res.dept || '–';
+                const isAuditor = (name === auditorName);
 
-        // Tentukan kelas aktif
-        let yesClass = currentVal === 'YES' ? 'yes active' : 'yes';
-        let noClass = currentVal === 'NO' ? 'no active' : 'no';
+                const div = document.createElement('div');
+                div.className = 'responder-item';
+                div.innerHTML = `
+                    <div class="responder-header">
+                        <div>
+                            <span class="responder-name">${name}</span>
+                            ${isAuditor ? '<span class="author-badge">AUTHOR</span>' : ''}
+                            <div class="responder-role">${role}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="YES">Iya</button>
+                        <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="NO">Tidak</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
 
-        const div = document.createElement('div');
-        div.className = 'responder-item';
-        div.innerHTML = `
-            <div class="responder-header">
-                <div>
-                    <span class="responder-name">${name}</span>
-                    ${isAuditor ? '<span class="author-badge">AUTHOR</span>' : ''}
-                    <div class="responder-role">${role}</div>
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <button type="button"
-                        class="modal-answer-btn ${yesClass}"
-                        onclick="setVal('${itemId}', '${name}', 'YES', this)">
-                    Iya
-                </button>
-                <button type="button"
-                        class="modal-answer-btn ${noClass}"
-                        onclick="setVal('${itemId}', '${name}', 'NO', this)">
-                    Tidak
-                </button>
-                <!-- N/A DIHILANGKAN -->
-            </div>
-        `;
-        list.appendChild(div);
-    });
-
-    document.getElementById('answerModal').style.display = 'flex';
-}
+            updateModalButtonStates(itemId);
+            document.getElementById('answerModal').style.display = 'flex';
+        }
 
         function closeModal() {
             document.getElementById('answerModal').style.display = 'none';
