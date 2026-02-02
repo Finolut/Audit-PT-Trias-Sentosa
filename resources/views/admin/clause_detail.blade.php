@@ -133,9 +133,9 @@
                     </table>
                 </div>
 
-                {{-- ✅ CARD TEMUAN AUDIT (HANYA TAMPIL JIKA ADA finding_note DI TABEL answers) --}}
+                {{-- ✅ CARD TEMUAN AUDIT - SEDERHANA, HANYA TAMPILKAN JIKA ADA --}}
                 @php
-                    $hasFindings = $subItems->contains(fn($item) => !empty($item->finding_note));
+                    $hasFindings = $subItems->contains(fn($item) => !empty(trim($item->finding_note)));
                 @endphp
 
                 @if($hasFindings)
@@ -147,31 +147,12 @@
                             Temuan Audit ({{ $code }})
                         </h4>
 
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             @foreach($subItems as $item)
-                                @if(!empty($item->finding_note))
-                                    <div class="border-l-4 pl-4 py-2 rounded-r-lg {{
-                                        $item->finding_level === 'High' ? 'border-red-500 bg-red-50/30' :
-                                        $item->finding_level === 'Medium' ? 'border-orange-500 bg-orange-50/30' :
-                                        $item->finding_level === 'Low' ? 'border-yellow-500 bg-yellow-50/30' :
-                                        'border-blue-500 bg-blue-50/30'
-                                    }}">
-                                        <div class="flex items-start gap-2">
-                                            <span class="mt-0.5 px-2 py-0.5 text-[10px] font-bold rounded-full capitalize
-                                                {{
-                                                    $item->finding_level === 'High' ? 'bg-red-100 text-red-800' :
-                                                    $item->finding_level === 'Medium' ? 'bg-orange-100 text-orange-800' :
-                                                    $item->finding_level === 'Low' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-blue-100 text-blue-800'
-                                                }}">
-                                                {{ $item->finding_level ?? 'Info' }}
-                                            </span>
-                                            <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                                                {{ $item->finding_note }}
-                                            </p>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">
-                                            Item: <span class="font-medium">{{ Str::limit($item->item_text, 40) }}</span>
+                                @if(!empty(trim($item->finding_note)))
+                                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200">
+                                        <p class="text-sm text-gray-800 whitespace-pre-wrap">
+                                            {{ $item->finding_note }}
                                         </p>
                                     </div>
                                 @endif
