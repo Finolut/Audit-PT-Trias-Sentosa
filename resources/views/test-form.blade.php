@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Internal Audit Charter | PT Trias Sentosa Tbk</title>
+    <title>Internal Audit | PT Trias Sentosa Tbk</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
@@ -112,7 +112,7 @@
 <section class="hero-section text-white">
     <div class="max-w-7xl mx-auto px-4 lg:px-6">
         <h1 class="text-3xl md:text-4xl font-bold mb-3">
-            INTERNAL AUDIT CHARTER
+            INTERNAL AUDIT
         </h1>
         <p class="text-base md:text-lg opacity-90 max-w-3xl">
             Official charter defining the objectives, scope, and criteria of internal audits in accordance with ISO 14001.
@@ -132,8 +132,7 @@
         <!-- Section 1: Identitas & Standar Audit -->
         <section>
             <h2 class="section-title">Identitas & Standar Audit</h2>
-            <p class="section-description">Formalize the foundational elements of your audit engagement per ISO 19011 requirements</p>
-            
+    
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Jenis Pemeriksaan</label>
@@ -158,7 +157,6 @@
         <!-- Section 2: Tujuan & Lingkup -->
         <section class="mt-10">
             <h2 class="section-title">Tujuan & Lingkup (Objective & Scope)</h2>
-            <p class="section-description">Define the strategic purpose and operational boundaries of the audit engagement</p>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
@@ -219,8 +217,7 @@
             <!-- Column 1: Tim Pemeriksa -->
             <section>
                 <h2 class="section-title">Tim Pemeriksa (Audit Team)</h2>
-                <p class="section-description">Ensure team composition meets independence requirements per ISO 19011 clause 5.3</p>
-
+            
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-semibold mb-1 text-slate-700">
@@ -261,9 +258,6 @@
             <!-- Column 2: Target Audit & Jadwal -->
             <section>
                 <h2 class="section-title">Target Audit & Jadwal</h2>
-                <p class="section-description">
-                    Define the auditee departments and schedule the audit execution period.
-                </p>
 
                 <!-- Departemen Auditee (Multi) -->
                 <div class="mb-6">
