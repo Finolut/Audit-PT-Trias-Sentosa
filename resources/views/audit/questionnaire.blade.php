@@ -481,9 +481,25 @@
                                         $isNA = ($existingAnswer['answer'] ?? '') === 'N/A';
                                     @endphp
 
-                                    <input type="hidden"
-                                           name="answer_id_map[{{ $item->id }}][{{ $auditorName }}]"
-                                           value="{{ $answerId }}">
+@foreach($responders as $responder)
+    @php
+        $responderName = $responder->responder_name ?? $responder->name;
+        $existing = $existingAnswers[$item->id][$responderName] ?? null;
+        $ansId = $existing['id'] ?? \Illuminate\Support\Str::uuid();
+        $ansVal = $existing['answer'] ?? '';
+        $findingLevel = $existing['finding_level'] ?? '';
+        $findingNote = $existing['finding_note'] ?? '';
+    @endphp
+
+    <input type="hidden"
+           name="answer_id_map[{{ $item->id }}][{{ $responderName }}]"
+           value="{{ $ansId }}">
+
+    <input type="hidden"
+           name="answers[{{ $item->id }}][{{ $responderName }}][val]"
+           value="{{ $ansVal }}"
+           id="hidden_ans_{{ $item->id }}_{{ $responderName }}">
+@endforeach
 
                                     @if(count($responders) > 1)
                                         <button type="button"
@@ -682,21 +698,17 @@
             }
         }
 
-        function updateHiddenInputs(itemId) {
-            const container = document.getElementById(`hidden_inputs_${itemId}`);
-            if (!container) return;
-            container.innerHTML = '';
-            for (const [key, val] of Object.entries(sessionAnswers)) {
-                if (key.startsWith(`${itemId}_`)) {
-                    const user = key.replace(`${itemId}_`, '');
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = `answers[${itemId}][${user}][val]`;
-                    input.value = val;
-                    container.appendChild(input);
-                }
+function updateHiddenInputs(itemId) {
+    for (const [key, val] of Object.entries(sessionAnswers)) {
+        if (key.startsWith(`${itemId}_`)) {
+            const user = key.replace(`${itemId}_`, '');
+            const input = document.querySelector(`input[name="answers[${itemId}][${user}][val]"]`);
+            if (input) {
+                input.value = val;
             }
         }
+    }
+}
 
         function updateInfoBox(itemId) {
             const infoBox = document.getElementById(`info_${itemId}`);
