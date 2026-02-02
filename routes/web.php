@@ -181,8 +181,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     Route::post('/admin/items', [ItemController::class, 'store'])->name('admin.items.store');
 
     // ✅ ROUTE BARU: Catatan Temuan Audit
-    Route::get('/audit/findings', [AuditFindingLogController::class, 'index'])
-         ->name('audit.finding-logs');
+Route::get('/admin/audit/findings', [DashboardController::class, 'findingsIndex'])
+    ->name('admin.audit.findings');
 });
 
 // Preserved special routes (public)

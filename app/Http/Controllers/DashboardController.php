@@ -676,6 +676,29 @@ public function getDayDetails(Request $request)
     }
 }
 
+// Di method index() atau buat method baru di controller
+public function findingsIndex()
+{
+    $findings = DB::table('answers')
+        ->join('items', 'answers.item_id', '=', 'items.id')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->join('departments', 'answers.department_id', '=', 'departments.id')
+        ->whereNotNull('answers.finding_note')
+        ->where('answers.finding_note', '!=', '')
+        ->select(
+            'answers.finding_level',
+            'answers.finding_note',
+            'answers.auditor_name',
+            'answers.created_at',
+            'clauses.clause_code',
+            'departments.name as dept_name'
+        )
+        ->orderBy('answers.created_at', 'desc')
+        ->paginate(20); // ← gunakan paginate()
+
+    return view('admin.audit-findings.index', compact('findings'));
+}
+
 }
 
 
