@@ -123,7 +123,7 @@
 
 <td class="px-3 py-3 text-center">
     @if($isUnanswered)
-<span class="px-2 py-0.5 text-[10px] font-medium text-gray-50/50 bg-gray-100 rounded border border-gray-200">
+<span class="px-2 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-100 rounded border border-gray-200">
     BELUM DIJAWAB
 </span>
 
