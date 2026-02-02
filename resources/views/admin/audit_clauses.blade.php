@@ -211,7 +211,6 @@
 
 {{-- SCRIPT --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     // 1. Inisialisasi Chart (Pastikan data PHP tersedia)
@@ -251,26 +250,5 @@
         options: commonOptions
     });
 
-    // 2. LOGIC LOADING (SweetAlert)
-    document.addEventListener('DOMContentLoaded', function() {
-        const clauseButtons = document.querySelectorAll('.btn-clause');
-        
-        clauseButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                // Jangan jalankan jika user klik kanan atau ctrl+klik
-                if (e.ctrlKey || e.metaKey || e.button !== 0) return;
-
-                Swal.fire({
-                    title: 'Memuat Klausul...',
-                    text: 'Mohon tunggu sebentar',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            });
-        });
-    });
 </script>
 @endsection
