@@ -474,7 +474,6 @@
     <div id="answerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Jawaban Auditor Lain</h3>
                 <button type="button" onclick="closeModal()">×</button>
             </div>
             <p id="modalItemText" style="margin-bottom: 16px; font-weight: 500; color: #1e293b;"></p>
