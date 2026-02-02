@@ -123,9 +123,10 @@
 
 <td class="px-3 py-3 text-center">
     @if($isUnanswered)
-        <span class="px-2 py-0.5 text-[10px] font-medium text-blue-700 bg-blue-100 rounded border border-blue-200">
-            BELUM DIJAWAB
-        </span>
+<span class="px-2 py-0.5 text-[10px] font-medium text-gray-50/50 bg-gray-100 rounded border border-gray-200">
+    BELUM DIJAWAB
+</span>
+
     @elseif($finalYes > $finalNo)
         <span class="px-2 py-0.5 text-[10px] font-medium text-green-700 bg-green-100 rounded border border-green-200">
             SESUAI
