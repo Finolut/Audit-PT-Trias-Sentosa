@@ -201,8 +201,6 @@ public function index(Request $request)
 
         return view('admin.department_audits', compact('departments', 'currentDept', 'audits', 'localStats'));
     }
-
-    // ... (Fungsi showAuditOverview dan showClauseDetail biarkan seperti kode Anda sebelumnya) ...
     public function showAuditOverview($auditId)
     {
         // Copy paste logic showAuditOverview Anda yang panjang di sini
@@ -306,95 +304,113 @@ foreach ($allItems as $item) {
         ]);
     }
 
-    public function showClauseDetail($auditId, $mainClause)
-    {
-        // Copy paste logic showClauseDetail Anda di sini
-        // Pastikan return view('admin.clause_detail', ...)
-         $departments = Department::all();
-        $audit = Audit::findOrFail($auditId);
+public function showClauseDetail($auditId, $mainClause)
+{
+    $departments = Department::all();
+    $audit = Audit::findOrFail($auditId);
+    
+    if (!array_key_exists($mainClause, $this->mainClauses)) {
+        abort(404);
+    }
 
-        if (!array_key_exists($mainClause, $this->mainClauses)) abort(404);
+    $subCodes = $this->mainClauses[$mainClause];
+    $clausesDb = Clause::whereIn('clause_code', $subCodes)->get();
+    $clauseIds = $clausesDb->pluck('id');
+    $subClauseTitles = $clausesDb->pluck('title', 'clause_code');
 
-        $subCodes = $this->mainClauses[$mainClause];
-        $clausesDb = Clause::whereIn('clause_code', $subCodes)->get();
-        $clauseIds = $clausesDb->pluck('id');
-        $subClauseTitles = $clausesDb->pluck('title', 'clause_code');
+    // Ambil catatan auditor (opsional, bisa dihapus jika tidak dipakai)
+    $auditorNotes = DB::table('audit_questions')
+        ->where('audit_id', $auditId)
+        ->whereIn('clause_code', $subCodes)
+        ->pluck('question_text', 'clause_code');
 
-        $auditorNotes = DB::table('audit_questions')
-            ->where('audit_id', $auditId)
-            ->whereIn('clause_code', $subCodes)
-            ->pluck('question_text', 'clause_code');
+    // Query utama: ambil item + finding_note dari tabel answers
+    $items = Item::whereIn('clause_id', $clauseIds)
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+        ->leftJoin('answers', function($join) use ($auditId) {
+            $join->on('items.id', '=', 'answers.item_id')
+                 ->where('answers.audit_id', '=', $auditId);
+        })
+        ->select(
+            'items.*',
+            'clauses.clause_code as current_code',
+            'maturity_levels.level_number',
+            'answers.finding_note'
+        )
+        ->orderBy('clauses.clause_code')
+        ->orderBy('maturity_levels.level_number', 'asc')
+        ->orderBy('items.item_order', 'asc')
+        ->with(['answerFinals' => function($q) use ($auditId) {
+            $q->where('audit_id', $auditId);
+        }])
+        ->get();
 
-$items = Item::whereIn('clause_id', $clauseIds)
-    ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-    ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
-    ->leftJoin('answers', function($join) use ($auditId) {
-        $join->on('items.id', '=', 'answers.item_id')
-             ->where('answers.audit_id', '=', $auditId);
-    })
-    ->select(
-        'items.*',
-        'clauses.clause_code as current_code',
-        'maturity_levels.level_number',
-        'answers.finding_note',
-        'answers.finding_level'
-    )
-    ->orderBy('clauses.clause_code')
-    ->orderBy('maturity_levels.level_number', 'asc')
-    ->orderBy('items.item_order', 'asc')
-    ->with(['answerFinals' => function($q) use ($auditId) {
-        $q->where('audit_id', $auditId);
-    }])
-    ->get();
+    $itemsGrouped = $items->groupBy('current_code');
 
-        $itemsGrouped = $items->groupBy('current_code');
+    // ✅ INISIALISASI SEMUA VARIABEL STATISTIK
+    $totalYes = 0;
+    $totalNo = 0;
+    $totalDraw = 0;
+    $totalNA = 0;
+    $totalUnanswered = 0; // ← INI YANG KURANG!
 
-    // Statistik Global (Doughnut)
-$totalYes = 0; $totalNo = 0; $totalDraw = 0; $totalNA = 0; $totalUnanswered = 0;
-// Statistik Stacked Bar
-$stackedChartData = [];
-foreach($subCodes as $code) {
-    $stackedChartData[$code] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
+    // Statistik per sub-clause untuk stacked bar
+    $stackedChartData = [];
+    foreach($subCodes as $code) {
+        $stackedChartData[$code] = [
+            'yes' => 0,
+            'no' => 0,
+            'partial' => 0,
+            'na' => 0,
+            'unanswered' => 0 // ← tambahkan ini
+        ];
+    }
+
+    // Hitung status tiap item
+    $items->each(function($item) use (&$totalYes, &$totalNo, &$totalDraw, &$totalNA, &$totalUnanswered, &$stackedChartData) {
+        $final = $item->answerFinals->first();
+
+        if (!$final) {
+            // BELUM DIJAWAB → tidak ada record di answer_finals
+            $totalUnanswered++;
+            $status = 'unanswered';
+        } elseif ($final->yes_count == 0 && $final->no_count == 0) {
+            // SUDAH DIJAWAB TAPI SEMUA PILIHAN N/A
+            $totalNA++;
+            $status = 'na';
+        } elseif ($final->final_yes > $final->final_no) {
+            $totalYes++;
+            $status = 'yes';
+        } elseif ($final->final_no > $final->final_yes) {
+            $totalNo++;
+            $status = 'no';
+        } else {
+            $totalDraw++;
+            $status = 'partial';
+        }
+
+        if (isset($stackedChartData[$item->current_code])) {
+            $stackedChartData[$item->current_code][$status]++;
+        }
+    });
+
+    return view('admin.clause_detail', compact(
+        'departments',
+        'audit',
+        'mainClause',
+        'subCodes',
+        'subClauseTitles',
+        'itemsGrouped',
+        'auditorNotes',
+        'totalYes',
+        'totalNo',
+        'totalDraw',
+        'totalNA',
+        'totalUnanswered', // ← pastikan dikirim ke view
+        'stackedChartData'
+    ));
 }
-
-$items->each(function($item) use (&$totalYes, &$totalNo, &$totalDraw, &$totalNA, &$totalUnanswered, &$stackedChartData) {
-    $final = $item->answerFinals->first();
-
-    // Cek apakah BELUM DIJAWAB (tidak ada record di answer_finals)
-    if (!$final) {
-        $totalUnanswered++;
-        $status = 'unanswered';
-    }
-    // Cek N/A (ada jawaban tapi semua 0)
-    elseif ($final->yes_count == 0 && $final->no_count == 0) {
-        $totalNA++;
-        $status = 'na';
-    }
-    // Logika voting
-    elseif ($final->final_yes > $final->final_no) {
-        $totalYes++;
-        $status = 'yes';
-    } elseif ($final->final_no > $final->final_yes) {
-        $totalNo++;
-        $status = 'no';
-    } else {
-        $totalDraw++;
-        $status = 'partial';
-    }
-
-    if(isset($stackedChartData[$item->current_code])) {
-        $stackedChartData[$item->current_code][$status]++;
-    }
-});
-
-        return view('admin.clause_detail', compact(
-            'departments', 'audit', 'mainClause', 'subCodes', 'subClauseTitles',
-            'itemsGrouped', 'auditorNotes', 
-            'totalYes', 'totalNo', 'totalDraw', 'totalNA', 
-            'stackedChartData',
-            'items'
-        ));
-    }
 
     // Tambahkan method ini di dalam class DashboardController
 
