@@ -198,9 +198,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-    const auditorName = @json(auth()->user()->name);
-    const responders  = @json($responders);
-
 
     function confirmSubmit() {
         Swal.fire({
