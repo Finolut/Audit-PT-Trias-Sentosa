@@ -325,17 +325,27 @@ foreach ($allItems as $item) {
             ->whereIn('clause_code', $subCodes)
             ->pluck('question_text', 'clause_code');
 
-        $items = Item::whereIn('clause_id', $clauseIds)
-            ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-            ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
-            ->select('items.*', 'clauses.clause_code as current_code', 'maturity_levels.level_number')
-            ->orderBy('clauses.clause_code')
-            ->orderBy('maturity_levels.level_number', 'asc')
-            ->orderBy('items.item_order', 'asc')
-            ->with(['answerFinals' => function($q) use ($auditId) {
-                $q->where('audit_id', $auditId);
-            }])
-            ->get();
+$items = Item::whereIn('clause_id', $clauseIds)
+    ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+    ->join('mature_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+    ->leftJoin('answers', function($join) use ($auditId) {
+        $join->on('items.id', '=', 'answers.item_id')
+             ->where('answers.audit_id', '=', $auditId);
+    })
+    ->select(
+        'items.*',
+        'clauses.clause_code as current_code',
+        'maturity_levels.level_number',
+        'answers.finding_note',
+        'answers.finding_level'
+    )
+    ->orderBy('clauses.clause_code')
+    ->orderBy('maturity_levels.level_number', 'asc')
+    ->orderBy('items.item_order', 'asc')
+    ->with(['answerFinals' => function($q) use ($auditId) {
+        $q->where('audit_id', $auditId);
+    }])
+    ->get();
 
         $itemsGrouped = $items->groupBy('current_code');
 
