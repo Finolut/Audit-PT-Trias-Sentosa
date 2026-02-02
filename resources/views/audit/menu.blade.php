@@ -418,7 +418,6 @@
 <script>
     window.auditorName = @json($auditorName);
     window.responders  = @json($responders);
-    window.dbAnswers = @json($existingAnswers ?: []);
 </script>
 
 <script src="{{ asset('js/audit-script.js') }}"></script>
