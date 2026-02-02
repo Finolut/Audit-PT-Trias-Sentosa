@@ -320,17 +320,6 @@
 </head>
 <body class="bg-gray-50 font-sans">
 
-<!-- Mini Hero Section -->
-<section class="hero-section text-white">
-    <div class="max-w-7xl mx-auto px-4 lg:px-6">
-        <h1 class="text-3xl md:text-4xl font-bold mb-3">
-            MULAI AUDIT INTERNAL
-        </h1>
-        <p class="text-base md:text-lg opacity-90 max-w-3xl">
-            Halaman ini digunakan untuk mengisi audit internal berdasarkan kondisi aktual departemen.
-        </p>
-    </div>
-</section>
 
     <div class="max-w-7xl mx-auto px-4 pb-8">
         
