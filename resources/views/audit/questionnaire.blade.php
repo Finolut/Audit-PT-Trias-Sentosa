@@ -427,6 +427,42 @@
         .hero-section .meta-info i {
             color: rgba(255, 255, 255, 0.85) !important;
         }
+
+        /* ===== FORCE OVERRIDE: KECILKAN ITEM ROW (pastikan ini DI AKHIR <style>) ===== */
+.audit-container .sub-clause-section .item-row,
+div.item-row[id^="row_"] {
+    padding: 10px !important;
+    margin-bottom: 12px !important;
+    background: #fbfcfd !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+/* Agar teks tidak terlalu besar */
+.audit-container .item-text {
+    font-size: 14.5px !important;
+    line-height: 1.4 !important;
+}
+
+/* Kecilkan tombol jawaban */
+.audit-container .answer-btn {
+    padding: 0.35rem 0.55rem !important;
+    font-size: 0.82rem !important;
+    min-width: auto !important;
+    flex: none !important;
+    width: 60px !important;
+}
+
+/* Kecilkan finding container */
+.audit-container .finding-container {
+    padding: 0.4rem !important;
+    font-size: 0.8rem !important;
+}
+
+.audit-container .finding-container label {
+    font-size: 0.7rem !important;
+}
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
