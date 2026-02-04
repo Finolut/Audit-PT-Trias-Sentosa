@@ -177,9 +177,9 @@
                         <div class="flex items-center gap-2 mb-2">
                             <div class="flex flex-wrap gap-1">
 @forelse($audit->department_names as $deptName)
-    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-        {{ $deptName }}
-    </span>
+<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+    {{ $audit->department_name }}
+</span>
 @empty
     <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
 @endforelse
@@ -190,17 +190,20 @@
                             </div>
                         </div>
 
-                        <h4 class="text-sm font-semibold text-gray-800 mb-1">
-                            Audit Scope:
-                            <span class="text-blue-700 font-medium">
-                                {{ $audit->scope ?? '–' }}
-                            </span>
-                        </h4>
+<h4 class="text-sm font-semibold text-gray-800 mb-1">
+    Audit Scope:
+    <span class="text-blue-700 font-medium">
+        {{ $audit->scope_clean ?: '–' }}
+    </span>
+</h4>
+
 
                         <div class="grid grid-cols-2 md:grid-cols-4 mt-3 gap-4 text-[11px] text-gray-600 pt-2 border-t border-gray-100">
                             <div>
-                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Metodologi</p>
-                                <p class="text-gray-800 font-medium">{{ $audit->methodology ?? '–' }}</p>
+<p class="text-gray-800 font-medium">
+    {{ $audit->methodology_clean ?: '–' }}
+</p>
+
                             </div>
                             <div>
                                 <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Mulai Audit</p>
@@ -269,34 +272,33 @@
                     };
                 @endphp
 
-                <div class="p-3 rounded-xl border {{ $bgClass }} hover:bg-opacity-80 transition">
-                    <div class="flex justify-between items-start mb-1">
-                        <div class="flex flex-col">
-                            <span class="text-[10px] font-black text-gray-500 uppercase tracking-tight">
-                                {{ $f->dept_name }}
-                            </span>
-                            <span class="text-[11px] font-bold text-gray-800">
-                                Clause {{ $f->clause_code }}
-                            </span>
-                        </div>
-                        <span class="px-2 py-0.5 text-[9px] font-bold rounded {{ $textClass }}">
-                            {{ $levelConfig['label'] }}
-                        </span>
-                    </div>
+<div class="p-3 rounded-xl border bg-{{ $cfg['color'] }}-50 border-{{ $cfg['color'] }}-200">
+    <div class="flex justify-between items-start mb-1">
+        <div>
+            <span class="text-[10px] font-black text-gray-500 uppercase">
+                {{ $f->dept_name }}
+            </span>
+            <div class="text-xs font-semibold text-gray-800">
+                Clause {{ $f->clause_code }}
+            </div>
+        </div>
 
-                    <p class="text-xs text-gray-700 leading-relaxed italic mb-2">
-                        "{{ Str::limit($f->finding_note, 120) }}"
-                    </p>
+        <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded 
+            text-{{ $cfg['color'] }}-700 bg-white border border-{{ $cfg['color'] }}-200">
+            {{ $cfg['label'] }}
+        </span>
+    </div>
 
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                        <span class="text-[10px] text-gray-600">
-                            Auditor: <span class="font-semibold text-gray-800">{{ $f->auditor_name ?? '-' }}</span>
-                        </span>
-                        <span class="text-[9px] text-gray-400">
-                            {{ \Carbon\Carbon::parse($f->created_at)->format('d M Y') }}
-                        </span>
-                    </div>
-                </div>
+    <p class="text-xs italic text-gray-700 leading-snug">
+        "{{ Str::limit($f->finding_note, 120) }}"
+    </p>
+
+    <div class="flex justify-between text-[9px] text-gray-400 pt-2 border-t mt-2">
+        <span>Auditor: <b class="text-gray-700">{{ $f->auditor_name ?? '-' }}</b></span>
+        <span>{{ \Carbon\Carbon::parse($f->created_at)->format('d M Y') }}</span>
+    </div>
+</div>
+
             @empty
                 <div class="py-10 text-center text-gray-400">
                     <p class="text-sm italic">Belum ada temuan audit.</p>

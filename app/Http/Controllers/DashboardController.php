@@ -58,7 +58,7 @@ public function index(Request $request)
 
     // Ambil recent audits dan tambahkan department_names
  $recentAudits = Audit::whereNotNull('audit_session_id')
-    ->with('session')
+    ->with('session','department')
     ->orderBy('created_at', 'desc')
     ->take(5)
     ->get()
@@ -74,6 +74,18 @@ public function index(Request $request)
             ->whereIn('id', $deptIds)
             ->pluck('name')
             ->toArray();
+                // Department
+        $audit->department_name = $audit->department->name ?? '–';
+
+        // Scope (JSON → string)
+        $audit->scope_clean = collect(json_decode($audit->scope, true))
+            ->filter()
+            ->join(', ');
+
+        // Methodology (JSON → string)
+        $audit->methodology_clean = collect(json_decode($audit->methodology, true))
+            ->filter()
+            ->join(', ');
 
         return $audit;
     });

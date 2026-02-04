@@ -127,7 +127,7 @@
 
 @if(!empty(trim($item->finding_note)))
 @php
-    $level = strtolower($item->finding_level);
+    $level = strtolower($item->finding_level ?? 'observed');
 
     $levelConfig = [
         'observed' => [
@@ -136,13 +136,13 @@
             'text' => 'text-blue-800',
             'border' => 'border-blue-200',
         ],
-        'minor nc' => [
+        'minor' => [
             'label' => 'Minor NC',
             'bg' => 'bg-yellow-100',
             'text' => 'text-yellow-800',
             'border' => 'border-yellow-200',
         ],
-        'major nc' => [
+        'major' => [
             'label' => 'Major NC',
             'bg' => 'bg-red-100',
             'text' => 'text-red-800',
@@ -156,7 +156,7 @@
 <tr class="border-t {{ $cfg['border'] }}">
     <td colspan="5" class="px-4 py-2">
         <div class="flex gap-2 items-start {{ $cfg['bg'] }} px-3 py-2 rounded border {{ $cfg['border'] }}">
-            <span class="text-xs font-semibold uppercase px-2 py-0.5 rounded {{ $cfg['text'] }} bg-white/60">
+            <span class="text-xs font-semibold uppercase px-2 py-0.5 rounded {{ $cfg['text'] }} bg-white/70">
                 {{ $cfg['label'] }}
             </span>
             <p class="text-sm {{ $cfg['text'] }} leading-snug">
@@ -166,6 +166,7 @@
     </td>
 </tr>
 @endif
+
 
 
 @empty
