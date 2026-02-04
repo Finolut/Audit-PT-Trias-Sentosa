@@ -569,27 +569,27 @@ $audit = Audit::with([
         ->get();
 
     // Query items dengan finding_level dan finding_note dari answers
-    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-        ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
-        ->leftJoin('answers', function($join) use ($auditId) {
-            $join->on('items.id', '=', 'answers.item_id')
-                 ->where('answers.audit_id', '=', $auditId);
-        })
-        ->select(
-            'clauses.clause_code',
-            'clauses.clause_text',
-            'items.item_text',
-            'maturity_levels.level_number',
-            'maturity_levels.description as maturity_desc',
-            'answers.answer as current_answer',
-            'answers.finding_level',
-            'answers.finding_note',
-            'answers.action_plan',
-            'answers.completion_date'
-        )
-        ->orderBy('maturity_levels.level_number', 'asc')
-        ->orderBy('clauses.clause_code', 'asc')
-        ->get();
+  $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+    ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+    ->leftJoin('answers', function($join) use ($auditId) {
+        $join->on('items.id', '=', 'answers.item_id')
+             ->where('answers.audit_id', '=', $auditId);
+    })
+    ->select(
+        'clauses.clause_code',
+        'clauses.title as clause_title', // ✅ GANTI KE 'title'
+        'items.item_text',
+        'maturity_levels.level_number',
+        'maturity_levels.description as maturity_desc',
+        'answers.answer as current_answer',
+        'answers.finding_level',
+        'answers.finding_note',
+        'answers.action_plan',
+        'answers.completion_date'
+    )
+    ->orderBy('maturity_levels.level_number', 'asc')
+    ->orderBy('clauses.clause_code', 'asc')
+    ->get();
 
     $detailedItems = [];
     $findings = []; // Kumpulkan temuan terpisah
