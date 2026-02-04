@@ -251,26 +251,18 @@
 
         <div class="p-4 space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
             @forelse($findings as $f)
-                @php
-                    // Mapping level ke label & warna
-                    $levelConfig = match($f->finding_level) {
-                        'MAJOR_NC' => ['label' => 'MAJOR NC', 'color' => 'red'],
-                        'MINOR_NC' => ['label' => 'MINOR NC', 'color' => 'yellow'],
-                        default    => ['label' => 'OBSERVED', 'color' => 'blue'],
-                    };
+     @php
+    $level = strtolower($f->finding_level ?? 'observed');
 
-                    $bgClass = match($levelConfig['color']) {
-                        'red'    => 'bg-red-50 border-red-200',
-                        'yellow' => 'bg-yellow-50 border-yellow-200',
-                        'blue'   => 'bg-blue-50 border-blue-200',
-                    };
+    $levelMap = [
+        'observed' => ['label' => 'Observed', 'color' => 'blue'],
+        'minor'    => ['label' => 'Minor NC', 'color' => 'yellow'],
+        'major'    => ['label' => 'Major NC', 'color' => 'red'],
+    ];
 
-                    $textClass = match($levelConfig['color']) {
-                        'red'    => 'text-red-700',
-                        'yellow' => 'text-yellow-700',
-                        'blue'   => 'text-blue-700',
-                    };
-                @endphp
+    $cfg = $levelMap[$level] ?? $levelMap['observed'];
+@endphp
+
 
 <div class="p-3 rounded-xl border bg-{{ $cfg['color'] }}-50 border-{{ $cfg['color'] }}-200">
     <div class="flex justify-between items-start mb-1">
