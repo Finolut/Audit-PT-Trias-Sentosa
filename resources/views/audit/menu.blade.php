@@ -564,12 +564,6 @@
                     <i class="fas fa-check-circle mr-1"></i> Selesaikan Audit
                 </a>
                 
-                @if(isset($relatedAudits) && count($relatedAudits) > 1)
-                    <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
-                       class="btn btn-outline">
-                        <i class="fas fa-list mr-1"></i> Lihat Semua Departemen
-                    </a>
-                @endif
             </div>
         </div>
         @endif
