@@ -125,16 +125,48 @@
 
     </tr>
 
- @if(!empty(trim($item->finding_note)))
-<tr class="bg-red-50/30 border-t border-red-100">
-    <td colspan="5" class="px-4 py-1.5">
-        <p class="text-sm text-red-800 bg-red-50 px-3 py-1.5 rounded border border-red-100 leading-snug">
-            <span class="font-semibold">Temuan:</span>
-            {{ $item->finding_note }}
-        </p>
+@if(!empty(trim($item->finding_note)))
+@php
+    $level = strtolower($item->finding_level);
+
+    $levelConfig = [
+        'observed' => [
+            'label' => 'Observed',
+            'bg' => 'bg-blue-100',
+            'text' => 'text-blue-800',
+            'border' => 'border-blue-200',
+        ],
+        'minor nc' => [
+            'label' => 'Minor NC',
+            'bg' => 'bg-yellow-100',
+            'text' => 'text-yellow-800',
+            'border' => 'border-yellow-200',
+        ],
+        'major nc' => [
+            'label' => 'Major NC',
+            'bg' => 'bg-red-100',
+            'text' => 'text-red-800',
+            'border' => 'border-red-200',
+        ],
+    ];
+
+    $cfg = $levelConfig[$level] ?? $levelConfig['observed'];
+@endphp
+
+<tr class="border-t {{ $cfg['border'] }}">
+    <td colspan="5" class="px-4 py-2">
+        <div class="flex gap-2 items-start {{ $cfg['bg'] }} px-3 py-2 rounded border {{ $cfg['border'] }}">
+            <span class="text-xs font-semibold uppercase px-2 py-0.5 rounded {{ $cfg['text'] }} bg-white/60">
+                {{ $cfg['label'] }}
+            </span>
+            <p class="text-sm {{ $cfg['text'] }} leading-snug">
+                {{ $item->finding_note }}
+            </p>
+        </div>
     </td>
 </tr>
 @endif
+
 
 @empty
     <tr><td colspan="5" class="px-4 py-4 text-center italic text-gray-400">Data kosong</td></tr>
