@@ -63,15 +63,34 @@ public function index(Request $request)
     ->take(5)
     ->get()
     ->map(function ($audit) {
-        // --- 1. Department Names ---
-        $deptIds = json_decode(trim($audit->department_ids ?? ''), true) ?? [];
-        if (!is_array($deptIds)) {
-            $deptIds = [];
+     // --- 1. Department Names (gunakan department_id sebagai SINGLE UUID)
+$deptId = $audit->department_id ?? null;
+$audit->department_names = [];
+
+if ($deptId) {
+    // Jika department_id adalah UUID tunggal
+    $dept = Department::find($deptId);
+    if ($dept) {
+        $audit->department_names = [$dept->name];
+    } else {
+        // Jika tidak ditemukan, simpan UUID saja sebagai fallback
+        $audit->department_names = [$deptId];
+    }
+} elseif ($audit->department_ids) {
+    // Fallback: coba baca department_ids jika ada (untuk kompatibilitas)
+    $deptNamesRaw = trim($audit->department_ids ?? '');
+    if ($deptNamesRaw) {
+        $decoded = json_decode($deptNamesRaw, true);
+        if (is_array($decoded)) {
+            $audit->department_names = collect($decoded)
+                ->filter(fn($n) => is_string($n) && trim($n) !== '')
+                ->map(fn($n) => trim($n))
+                ->toArray();
+        } else {
+            $audit->department_names = [trim($deptNamesRaw)];
         }
-        $audit->department_names = DB::table('departments')
-            ->whereIn('id', $deptIds)
-            ->pluck('name')
-            ->toArray();
+    }
+}
 
         // --- 2. Scope (Aman dari null/empty/string) ---
         $scopeRaw = trim($audit->scope ?? '');
