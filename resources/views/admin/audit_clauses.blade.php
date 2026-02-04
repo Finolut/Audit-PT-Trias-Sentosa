@@ -99,7 +99,7 @@
         </div>
     </div>
 
-    <!-- Grafik Finding Level -->
+    <!-- Grafik Finding Level - DIPERBAIKI -->
     <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8">
         <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">
             <svg class="w-5 h-5 inline-block mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +181,14 @@
 <script>
     const mainStats = {!! json_encode($mainStats) !!};
     const detailedStats = {!! json_encode($detailedStats) !!};
-    const findingData = {!! json_encode($findingChartData) !!};
+    
+    // --- PERBAIKAN UTAMA DI SINI ---
+    // Pastikan ketiga level selalu ada, bahkan jika nilainya 0
+    const findingData = {!! json_encode([
+        'observed' => $findingChartData['observed'] ?? 0,
+        'minor' => $findingChartData['minor'] ?? 0,
+        'major' => $findingChartData['major'] ?? 0,
+    ]) !!};
 
     const commonOptions = {
         responsive: true,
@@ -192,10 +199,10 @@
 
     function createDatasets(statsObj, labels) {
         return [
-            { label: 'Yes', data: labels.map(l => statsObj[l].yes), backgroundColor: '#22c55e' },
-            { label: 'No', data: labels.map(l => statsObj[l].no), backgroundColor: '#ef4444' },
-            { label: 'N/A', data: labels.map(l => statsObj[l].na), backgroundColor: '#facc15' },
-            { label: 'Belum', data: labels.map(l => statsObj[l].unanswered), backgroundColor: '#e2e8f0' }
+            { label: 'Yes', data: labels.map(l => statsObj[l]?.yes ?? 0), backgroundColor: '#22c55e' },
+            { label: 'No', data: labels.map(l => statsObj[l]?.no ?? 0), backgroundColor: '#ef4444' },
+            { label: 'N/A', data: labels.map(l => statsObj[l]?.na ?? 0), backgroundColor: '#facc15' },
+            { label: 'Belum', data: labels.map(l => statsObj[l]?.unanswered ?? 0), backgroundColor: '#e2e8f0' }
         ];
     }
 
@@ -215,16 +222,16 @@
         options: commonOptions
     });
 
-    // Finding Level Chart
+    // Finding Level Chart - DIPERBAIKI
     new Chart(document.getElementById('findingLevelChart'), {
         type: 'doughnut',
         data: {
             labels: ['Observed', 'Minor', 'Major'],
             datasets: [{
                 data: [
-                    findingData.observed || 0,
-                    findingData.minor || 0,
-                    findingData.major || 0
+                    findingData.observed,
+                    findingData.minor,
+                    findingData.major
                 ],
                 backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444'],
                 borderWidth: 2,
