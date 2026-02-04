@@ -420,6 +420,10 @@
             20% { box-shadow: 0 0 0 8px rgba(12, 45, 90, 0.15); }
             100% { box-shadow: 0 0 0 0 rgba(12, 45, 90, 0); }
         }
+
+            .swal2-wide {
+        max-width: 500px !important;
+    }
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -899,7 +903,82 @@ const dbAnswers = @json($existingAnswers ?? []);
     }
 
     // Submit handler
-    function confirmSubmit() {
+    function confirmSubmit() {function confirmSubmit() {
+        // Hitung statistik jawaban
+        const totalItems = document.querySelectorAll('.item-row').length;
+        let answeredCount = 0;
+        let lockedCount = 0;
+        
+        document.querySelectorAll('.item-row').forEach(row => {
+            const itemId = row.id.replace('row_', '');
+            const isLocked = row.dataset.locked === '1';
+            
+            if (isLocked) {
+                lockedCount++;
+            } else if (sessionAnswers[`${itemId}_${auditorName}`]) {
+                answeredCount++;
+            }
+        });
+        
+        const unansweredCount = totalItems - answeredCount - lockedCount;
+        
+        // Tampilkan konfirmasi dengan informasi lengkap
+        Swal.fire({
+            title: 'Konfirmasi Submit Audit',
+            html: `
+                <div style="text-align: left; line-height: 1.6;">
+                    <p><strong>📊 Ringkasan Jawaban:</strong></p>
+                    <ul style="margin-left: 20px; margin-bottom: 20px;">
+                        <li>Total Item: <strong>${totalItems}</strong></li>
+                        <li>Sudah Dijawab: <strong style="color: #16a34a;">${answeredCount}</strong></li>
+                        <li>Sudah Terkunci: <strong style="color: #64748b;">${lockedCount}</strong></li>
+                        <li>Belum Dijawab: <strong style="color: #dc2626;">${unansweredCount}</strong></li>
+                    </ul>
+                    
+                    <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin: 15px 0; border-radius: 4px;">
+                        <p style="margin: 0; font-weight: 600; color: #92400e;">
+                            <i class="fas fa-exclamation-triangle"></i> PERHATIAN PENTING:
+                        </p>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">
+                            Setelah Anda klik "Submit", <strong>semua jawaban akan direkam permanen</strong> 
+                            dan <strong class="text-red-600">tidak dapat diubah kembali</strong>.
+                        </p>
+                    </div>
+                    
+                    <p style="margin-top: 15px; font-weight: 500;">
+                        Apakah Anda yakin ingin melanjutkan?
+                    </p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-paper-plane"></i> Ya, Submit Sekarang',
+            cancelButtonText: '<i class="fas fa-times"></i> Batalkan',
+            reverseButtons: true,
+            confirmButtonColor: '#0c2d5a',
+            cancelButtonColor: '#64748b',
+            customClass: {
+                popup: 'swal2-wide'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tampilkan loading saat submit
+                Swal.fire({
+                    title: 'Menyimpan Data...',
+                    html: 'Mohon tunggu, data sedang diproses.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Submit form setelah delay singkat untuk UX yang lebih baik
+                setTimeout(() => {
+                    document.getElementById('form').submit();
+                }, 300);
+            }
+        });
+    }
         // Tidak ada validasi pemblokir - langsung submit
         document.getElementById('form').submit();
     }
