@@ -248,7 +248,7 @@
     <!-- TEMUAN AUDIT SECTION -->
 @php
     $auditFindings = collect($detailedItems)->filter(function($item) {
-        return in_array(strtolower($item['finding_level'] ?? ''), ['minor', 'major']);
+        return in_array(strtolower($item['finding_level'] ?? ''), ['observed','minor', 'major']);
     });
 @endphp
 
@@ -274,8 +274,9 @@
                         @php
     $level = strtolower($finding['finding_level'] ?? '');
     $label = match($level) {
-        'minor' => 'Minor NC',
-        'major' => 'Major NC',
+        'observed'=> 'observed',
+        'minor' => 'Minor',
+        'major' => 'Major',
         default => 'Observed'
     };
 @endphp
