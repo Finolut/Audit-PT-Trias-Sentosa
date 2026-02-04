@@ -238,9 +238,6 @@
             border-bottom: 1px dashed #e2e8f0;
         }
         .item-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
         }
 
         .item-content-col {
@@ -326,17 +323,13 @@
             cursor: not-allowed;
             background: #f1f5f9;
         }
-
 .submit-bar {
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
     display: flex;
     justify-content: flex-end;
-    background-color: transparent; /* ✅ transparan */
+    margin-top: 1rem; /* hanya sedikit jarak */
+    padding-top: 1rem;
+    border-top: 1px dashed #e2e8f0; /* SESUAIKAN DENGAN .item-row */
 }
-
-
 
         .submit-audit {
             background-color: #0c2d5a;
