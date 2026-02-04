@@ -538,9 +538,14 @@ public function departmentStatusIndex()
 
 public function exportToPdf($auditId)
 {
-    $audit = Audit::with('department')->findOrFail($auditId);
+    $audit = Audit::with([
+        'department',
+        'auditSession' => function($query) {
+            $query->with('leadAuditor');
+        }
+    ])->findOrFail($auditId);
 
-    // Ambil session
+    // Ambil session lengkap dengan lead auditor
     $session = DB::table('audit_sessions')
         ->where('id', $audit->audit_session_id)
         ->first();
@@ -549,48 +554,51 @@ public function exportToPdf($auditId)
         abort(404, 'Audit session not found');
     }
 
-    // Data Auditor & Tim
+    // Data Auditor & Tim (dari form charter)
     $leadAuditor = [
-        'name' => $session->auditor_name,
-        'nik' => $session->auditor_nik,
-        'department' => $session->auditor_department,
+        'name' => $session->auditor_name ?? 'Yuli Kurniawati',
+        'position' => $session->auditor_position ?? 'Governance & Compliance Dept. Head',
+        'phone' => $session->auditor_phone ?? '031-8975825 ext. 361',
+        'address' => 'Keboharan Km. 26, Krian, Sidoarjo, East Java',
+        'email' => $session->auditor_email ?? 'yuli.kurniawati@trias-sentosa.com',
+        'department' => $session->auditor_department ?? 'Governance & Compliance',
     ];
 
-$teamMembers = DB::table('audit_responders')
-    ->where('audit_session_id', $audit->audit_session_id)
-    ->select('responder_name as name', 'responder_nik as nik', 'responder_department as department') // Role dihapus
-    ->get();
+    // Ambil anggota tim dari audit_responders
+    $teamMembers = DB::table('audit_responders')
+        ->where('audit_session_id', $audit->audit_session_id)
+        ->select('responder_name as name', 'responder_nik as nik', 'responder_department as department', 'responder_role as role')
+        ->get();
 
-    // --- PERBAIKAN QUERY UTAMA DI SINI ---
-    // Join ke maturity_levels untuk ambil definisi level per soal
-// --- PERBAIKAN QUERY SORTING ---
-$allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-    ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
-    ->leftJoin('answers', function($join) use ($auditId) {
-        $join->on('items.id', '=', 'answers.item_id')
-             ->where('answers.audit_id', '=', $auditId);
-    })
-    ->select(
-        'clauses.clause_code',
-        'items.item_text',
-        'maturity_levels.level_number',
-        'maturity_levels.description as maturity_desc',
-        'answers.answer as current_answer'
-    )
-    // Urutkan berdasarkan level_number (1-5) terlebih dahulu, 
-    // kemudian baru berdasarkan kode klausul jika levelnya sama
-    ->orderBy('maturity_levels.level_number', 'asc')
-    ->orderBy('clauses.clause_code', 'asc')
-    ->get();
+    // Query items dengan finding_level dan finding_note dari answers
+    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+        ->leftJoin('answers', function($join) use ($auditId) {
+            $join->on('items.id', '=', 'answers.item_id')
+                 ->where('answers.audit_id', '=', $auditId);
+        })
+        ->select(
+            'clauses.clause_code',
+            'clauses.clause_text',
+            'items.item_text',
+            'maturity_levels.level_number',
+            'maturity_levels.description as maturity_desc',
+            'answers.answer as current_answer',
+            'answers.finding_level',
+            'answers.finding_note',
+            'answers.action_plan',
+            'answers.completion_date'
+        )
+        ->orderBy('maturity_levels.level_number', 'asc')
+        ->orderBy('clauses.clause_code', 'asc')
+        ->get();
 
     $detailedItems = [];
+    $findings = []; // Kumpulkan temuan terpisah
     
-    // Proses data agar rapi di PDF
     foreach ($allItems as $item) {
-        // Tentukan status berdasarkan jawaban di tabel 'answers'
+        // Status mapping
         $statusRaw = strtolower($item->current_answer ?? 'unanswered');
-        
-        // Mapping status agar seragam
         $status = match ($statusRaw) {
             'yes' => 'yes',
             'no' => 'no',
@@ -598,21 +606,47 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
             default => 'unanswered',
         };
 
-        $detailedItems[] = [
+        $itemData = [
             'sub_clause' => $item->clause_code,
+            'clause_text' => $item->clause_text,
             'item_text' => $item->item_text,
             'status' => $status,
-            // Ambil Level langsung dari item tersebut, bukan dihitung
             'maturity_level' => $item->level_number, 
             'maturity_description' => $item->maturity_desc,
+            'finding_level' => $item->finding_level,
+            'finding_note' => $item->finding_note,
+            'action_plan' => $item->action_plan,
+            'completion_date' => $item->completion_date,
         ];
+
+        $detailedItems[] = $itemData;
+
+        // Kumpulkan hanya item yang memiliki temuan
+        if (!empty($item->finding_level) && in_array($item->finding_level, ['Minor NC', 'Major NC'])) {
+            $findings[] = $itemData;
+        }
     }
 
-    // --- PERBAIKAN GAMBAR PDF (BASE64) ---
-    // Mengubah gambar jadi base64 agar PDF tidak error saat loading path
+    // Format scope dari JSON/array
+    $auditScope = is_array($audit->audit_scope) ? $audit->audit_scope : 
+                 (is_string($audit->audit_scope) ? json_decode($audit->audit_scope, true) : []);
+    
+    $auditStandards = is_array($audit->audit_standards) ? $audit->audit_standards : 
+                     (is_string($audit->audit_standards) ? json_decode($audit->audit_standards, true) : []);
+
+    // Format methodology
+    $methodology = is_array($audit->methodology) ? $audit->methodology : 
+                  (is_string($audit->methodology) ? json_decode($audit->methodology, true) : []);
+
+    // Hitung durasi audit dalam jam (asumsi 8 jam/hari)
+    $startDate = \Carbon\Carbon::parse($audit->audit_start_date);
+    $endDate = \Carbon\Carbon::parse($audit->audit_end_date);
+    $durationDays = $startDate->diffInDays($endDate) + 1;
+    $timeSpent = $durationDays * 8;
+
+    // Logo base64
     $imagePath = public_path('images/ts.jpg');
     $logoBase64 = '';
-    
     if (file_exists($imagePath)) {
         $type = pathinfo($imagePath, PATHINFO_EXTENSION);
         $data = file_get_contents($imagePath);
@@ -624,15 +658,17 @@ $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
         'leadAuditor' => $leadAuditor,
         'teamMembers' => $teamMembers,
         'detailedItems' => $detailedItems,
-        'logoBase64' => $logoBase64 // Kirim variable gambar ke View
+        'findings' => $findings,
+        'auditScope' => $auditScope,
+        'auditStandards' => $auditStandards,
+        'methodology' => $methodology,
+        'timeSpent' => $timeSpent,
+        'logoBase64' => $logoBase64
     ]);
 
-    // Opsional: Set paper size jika perlu
     $pdf->setPaper('A4', 'portrait');
-
-    return $pdf->download("audit_{$audit->id}_".now()->format('Ymd').".pdf");
+    return $pdf->download("EMS_Audit_Report_{$audit->id}_".now()->format('Ymd').".pdf");
 }
-
 public function searchAudit(Request $request)
 {
     try {

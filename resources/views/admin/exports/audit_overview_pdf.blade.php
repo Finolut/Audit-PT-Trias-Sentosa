@@ -1,274 +1,357 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laporan Audit #{{ $audit->id }}</title>
+    <title>EMS Audit Report {{ $audit->year ?? date('Y') }}</title>
     <style>
         @page {
-            margin: 1cm;
+            margin: 1.5cm;
         }
         body { 
             font-family: 'Helvetica', 'Arial', sans-serif; 
-            margin: 10px; 
+            margin: 0; 
             color: #333;
-            line-height: 1.4;
+            line-height: 1.5;
+            font-size: 10pt;
         }
         
-        /* Header dengan Warna Biru Tua Konsisten */
-        .header-table {
-            width: 100%;
-            border-collapse: collapse;
-            border-bottom: 3px solid #003366;
-            margin-bottom: 10px;
-        }
-        .header-table td {
-            vertical-align: middle;
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
             padding-bottom: 10px;
+            border-bottom: 3px solid #000;
         }
-        .logo-img {
-            height: 55px;
-        }
-        .company-name {
-            font-size: 22px;
-            font-weight: bold;
-            color: #003366;
-            margin: 0;
-        }
-        .tagline {
-            font-size: 11px;
-            color: #666;
-            font-weight: normal;
-        }
-        .cert-container {
-            text-align: right;
-        }
-        .cert-logo {
-            height: 35px;
-            margin-left: 8px;
-        }
-
-        /* Tabel Alamat */
-        .address-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .address-table td {
-            width: 50%;
-            font-size: 9px;
-            line-height: 1.2;
-            padding: 5px;
-            vertical-align: top;
-        }
-        .address-title {
-            font-weight: bold;
-            color: #003366;
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        /* Section Audit Overview */
-        .audit-overview {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            border: 1px solid #003366; 
-        }
-        .audit-title-section {
-            color: #003366; 
-            border-bottom: 2px solid #003366; 
-            padding-bottom: 5px;
-            font-size: 16px;
+        .header-title {
+            font-size: 18pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 12px;
-            margin-top: 0;
-        }
-        .audit-info-grid {
-            width: 100%;
-            font-size: 11px;
-            border-collapse: collapse;
-        }
-        .audit-info-grid td {
-            padding: 4px 0;
-            vertical-align: top;
+            letter-spacing: 1px;
+            margin: 5px 0;
         }
 
-        /* Tabel Data Audit */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .data-table th {
-            background-color: #003366;
+        /* Section Title */
+        .section-title {
+            font-size: 12pt;
             font-weight: bold;
-            color: #ffffff;
-            font-size: 11px;
-            text-align: center;
-            border: 1px solid #003366;
-            padding: 10px;
-        }
-        .data-table td {
-            border: 1px solid #d1d5db;
-            padding: 8px;
-            font-size: 11px;
-            vertical-align: top;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            padding-bottom: 4px;
+            margin: 25px 0 12px 0;
+            color: #000;
         }
 
-        /* Status Badges - Bahasa Indonesia */
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 9px;
+        /* Detail Sections */
+        .detail-row {
+            margin-bottom: 8px;
+            display: flex;
+        }
+        .detail-label {
             font-weight: bold;
+            min-width: 150px;
             display: inline-block;
-            text-transform: uppercase;
         }
-        .status-yes { background: #dcfce7; color: #166534; } /* YA */
-        .status-no { background: #fee2e2; color: #b91c1c; }  /* TIDAK */
-        .status-na { background: #f3e8ff; color: #7e22ce; }  /* N/A */
-        .status-unanswered { background: #e2e8f0; color: #4b5563; } /* BELUM DIJAWAB */
-        
-        .maturity-text {
-            font-weight: bold;
-            color: #003366;
+        .detail-value {
+            flex: 1;
+            display: inline-block;
         }
 
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #6b7280;
-            font-size: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
+        /* Audit Scope Formatting */
+        .scope-list {
+            margin-left: 20px;
+            margin-top: 5px;
         }
-
-        .team-member {
+        .scope-item {
             margin-bottom: 3px;
-            line-height: 1.3;
-            font-size: 10.5px;
         }
-        .team-member-name {
+
+        /* Findings Table */
+        .findings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 9pt;
+            table-layout: fixed;
+        }
+        .findings-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            text-align: left;
+            border: 1px solid #000;
+            padding: 6px 4px;
+            vertical-align: top;
+        }
+        .findings-table td {
+            border: 1px solid #000;
+            padding: 5px 4px;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+        .findings-table th:nth-child(1) { width: 10%; }
+        .findings-table th:nth-child(2) { width: 22%; }
+        .findings-table th:nth-child(3) { width: 10%; }
+        .findings-table th:nth-child(4) { width: 15%; }
+        .findings-table th:nth-child(5) { width: 28%; }
+        .findings-table th:nth-child(6) { width: 15%; }
+
+        .minor-nc {
+            background-color: #fffacd;
             font-weight: bold;
         }
-        .team-member-detail {
+        .major-nc {
+            background-color: #ffcccc;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 8pt;
+            padding-top: 15px;
+            border-top: 1px solid #000;
+            line-height: 1.4;
             color: #555;
-            margin-left: 5px;
+        }
+
+        /* Page break */
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
 <body>
 
-    <table class="header-table">
-        <tr>
-            <td style="width: 60px;">
-                <img width="40px"  src="{{ public_path('images/ts.jpg') }}">
-            </td>
-            <td>
-                <div class="company-name">PT TRIAS SENTOSA Tbk</div>
-                <div class="tagline">FLEXIBLE PACKAGING FILM MANUFACTURER</div>
-            </td>
-        </tr>
-    </table>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">EMS AUDIT REPORT {{ $audit->year ?? date('Y') }}</div>
+    </div>
 
-<div class="audit-overview">
-    <h2 class="audit-title-section">INFORMASI AUDIT</h2>
-    <table class="audit-info-grid" style="width: 100%;">
-        <tr>
-            <td style="width: 120px; vertical-align: top; padding-bottom: 5px;"><strong>Departemen</strong></td>
-            <td style="width: 300px; vertical-align: top; padding-bottom: 5px;">: {{ $audit->department->name ?? '-' }}</td>
-            
-            <td style="width: 100px; vertical-align: top; padding-bottom: 5px;"><strong>Anggota Tim</strong></td>
-            <td style="vertical-align: top; padding-bottom: 5px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr>
-                        <td style="width: 10px; vertical-align: top;">:</td>
-                        <td style="vertical-align: top;">
-                            @if($teamMembers->count() > 0)
-                                @foreach($teamMembers as $member)
-                                    <div class="team-member" style="margin-bottom: 2px;">
-                                        <span class="team-member-name" style="display: block; font-weight: bold;">{{ $member->name }}</span>
-                                        <span class="team-member-detail" style="font-size: 9px; color: #555;">
-                                            (NIK: {{ $member->nik ?? 'N/A' }}, Dept: {{ $member->department ?? 'N/A' }})
-                                        </span>
-                                    </div>
-                                @endforeach
-                            @else
-                                -
-                            @endif
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top; padding-bottom: 5px;"><strong>Tanggal Audit</strong></td>
-            <td style="vertical-align: top; padding-bottom: 5px;">: {{ \Carbon\Carbon::parse($audit->audit_date)->format('d F Y') }}</td>
-            
-            <td style="vertical-align: top; padding-bottom: 5px;"><strong>ID Laporan</strong></td>
-            <td style="vertical-align: top; padding-bottom: 5px;">: {{ $audit->id }}</td>
-        </tr>
-        <tr>
-            <td style="vertical-align: top;"><strong>Tipe Audit</strong></td>
-            <td style="vertical-align: top;">: 
+    <!-- Company Details -->
+    <div class="section-title">COMPANY DETAILS</div>
+    <div class="company-details">
+        <div class="detail-row">
+            <span class="detail-label">Name:</span>
+            <span class="detail-value">PT Trias Sentosa Tbk</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Address:</span>
+            <span class="detail-value">Keboharan Km. 26, Krian, Sidoarjo, East Java</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Business type:</span>
+            <span class="detail-value">Public Company (Tbk)</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">President Director:</span>
+            <span class="detail-value">Hananto Indrakusuma</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Contact phone:</span>
+            <span class="detail-value">031-8975825</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Licence number:</span>
+            <span class="detail-value">8120003862018</span>
+        </div>
+    </div>
+
+    <!-- Auditor Details -->
+    <div class="section-title">AUDITOR DETAILS</div>
+    <div class="auditor-details">
+        <div class="detail-row">
+            <span class="detail-label">Name:</span>
+            <span class="detail-value">{{ $leadAuditor['name'] }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Position:</span>
+            <span class="detail-value">{{ $leadAuditor['position'] }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Phone:</span>
+            <span class="detail-value">{{ $leadAuditor['phone'] }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Address:</span>
+            <span class="detail-value">{{ $leadAuditor['address'] }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Email:</span>
+            <span class="detail-value">{{ $leadAuditor['email'] }}</span>
+        </div>
+        
+        <!-- Team Members -->
+        @if($teamMembers->count() > 0)
+            <div class="detail-row" style="margin-top: 10px;">
+                <span class="detail-label">Audit Team:</span>
+                <span class="detail-value">
+                    <div style="margin-left: 5px;">
+                        @foreach($teamMembers as $member)
+                            <div style="margin-bottom: 3px;">
+                                • {{ $member->name }} 
+                                @if($member->nik) (NIK: {{ $member->nik }}) @endif
+                                @if($member->department) - {{ $member->department }} @endif
+                                @if($member->role) [{{ $member->role }}] @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </span>
+            </div>
+        @endif
+    </div>
+
+    <!-- Audit Details -->
+    <div class="section-title">AUDIT DETAILS</div>
+    <div class="audit-details">
+        <div class="detail-row">
+            <span class="detail-label">Audit type:</span>
+            <span class="detail-value">
                 @php
-                    $typeLabels = [
-                        'Regular' => 'Pemeriksaan Rutin (Terjadwal)',
-                        'Special' => 'Pemeriksaan Khusus (Mendadak)',
-                        'FollowUp' => 'Pemeriksaan Lanjutan (Follow Up)'
+                    $typeMap = [
+                        'first party' => 'Cross-functional internal audit (CFT)',
+                        'follow up' => 'Follow-up Audit (Corrective Action Verification)',
+                        'investigative' => 'Investigative Audit (Special/Incidental)',
+                        'unannounced' => 'Unannounced Audit (Surprise Audit)'
                     ];
                 @endphp
-                {{ $typeLabels[$audit->type] ?? $audit->type }}
-            </td>
-            <td></td>
-            <td></td>
-        </tr>
-    </table>
-</div>
+                {{ $typeMap[$audit->audit_type] ?? $audit->audit_type }}
+            </span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Scope:</span>
+            <span class="detail-value">
+                @if(!empty($auditStandards))
+                    <div><strong>Standards:</strong></div>
+                    <div class="scope-list">
+                        @foreach($auditStandards as $standard)
+                            <div class="scope-item">• {{ $standard }}</div>
+                        @endforeach
+                    </div>
+                @endif
+                
+                @if(!empty($auditScope))
+                    <div style="margin-top: 8px;"><strong>Audited Areas:</strong></div>
+                    <div class="scope-list">
+                        @foreach($auditScope as $scope)
+                            <div class="scope-item">• {{ $scope }}</div>
+                        @endforeach
+                    </div>
+                @endif
+            </span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Details of activities audited:</span>
+            <span class="detail-value">
+                CFT auditors were assigned by auditor lead to conduct audit, interview, and field observation in certain areas in the scope of EMS. 
+                @if(!empty($audit->audit_objective))
+                    <strong>Objective:</strong> {{ $audit->audit_objective }}
+                @endif
+                @if(!empty($methodology))
+                    <div style="margin-top: 5px;"><strong>Methodology:</strong></div>
+                    <div class="scope-list">
+                        @foreach($methodology as $method)
+                            <div class="scope-item">• {{ $method }}</div>
+                        @endforeach
+                    </div>
+                @endif
+                The audit lasted for {{ \Carbon\Carbon::parse($audit->audit_start_date)->diffInDays(\Carbon\Carbon::parse($audit->audit_end_date)) + 1 }} days starting from {{ \Carbon\Carbon::parse($audit->audit_start_date)->format('j F Y') }} up to {{ \Carbon\Carbon::parse($audit->audit_end_date)->format('j F Y') }}. Reports were then distributed to auditees including the managers and supervisors as well as management representative of EMS.
+            </span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Details of audit program:</span>
+            <span class="detail-value">
+                This audit is a part of annual audit plan that is conducted prior to surveillance audit by certification body.
+                @if($audit->audit_type === 'follow up')
+                    This follow-up audit specifically verifies the effectiveness of corrective actions from previous audit findings.
+                @endif
+            </span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Start date:</span>
+            <span class="detail-value">{{ \Carbon\Carbon::parse($audit->audit_start_date)->format('j F, Y') }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">End date:</span>
+            <span class="detail-value">{{ \Carbon\Carbon::parse($audit->audit_end_date)->format('j F Y') }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Time spent (hours):</span>
+            <span class="detail-value">{{ $timeSpent }} hours</span>
+        </div>
+    </div>
 
-    <table class="data-table">
+    <!-- Audit Results -->
+    <div class="section-title">AUDIT RESULTS</div>
+    <div class="audit-results">
+        <div>The collective opinion of internal auditors are as follows:</div>
+        <div style="margin-left: 20px; margin-top: 8px; line-height: 1.6;">
+            <div>1. Most of areas audited comply with the environmental management system requirements.</div>
+            <div>2. There are {{ count($findings) }} non-conformities found during the audit in the production areas and supporting departments.</div>
+            <div>3. The EMS implementation program generally runs well, monitored, and evaluated regularly through internal audit activities.</div>
+        </div>
+    </div>
+
+    <!-- Audit Summary Stats -->
+    <div class="section-title">AUDIT SUMMARY STATS</div>
+    <table class="findings-table">
         <thead>
             <tr>
-                <th style="width: 8%;">Klausul</th>
-                <th style="width: 57%;">Item Pemeriksaan</th>
-                <th style="width: 15%;">Tingkat Kematangan</th>
-                <th style="width: 20%;">Status</th>
+                <th>Clause</th>
+                <th>Activity audited</th>
+                <th>Finding Status</th>
+                <th>Evidence of the NC</th>
+                <th>Action taken or proposed to be taken for each non-compliance</th>
+                <th>Agreed completion date</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(collect($detailedItems)->sortBy('sub_clause') as $item)
+            @forelse($findings as $finding)
             <tr>
-                <td style="text-align: center;"><strong>{{ $item['sub_clause'] }}</strong></td>
-                <td>{{ $item['item_text'] }}</td>
-<td style="text-align: center;">
-                    <span class="level-badge">Level {{ $item['maturity_level'] }}</span>
-                    <div class="level-desc">{{ $item['maturity_description'] }}</div>
+                <td>
+                    {{ $finding['sub_clause'] }}<br>
+                    <small>{{ Str::limit($finding['clause_text'], 40) }}</small>
                 </td>
-                <td style="text-align: center;">
-                    @php
-                        $statusMap = [
-                            'yes' => ['label' => 'YA', 'class' => 'status-yes'],
-                            'no' => ['label' => 'TIDAK', 'class' => 'status-no'],
-                            'na' => ['label' => 'N/A', 'class' => 'status-na'],
-                            'unanswered' => ['label' => 'BELUM DIJAWAB', 'class' => 'status-unanswered']
-                        ];
-                        $currStatus = strtolower($item['status']);
-                        $statusLabel = $statusMap[$currStatus]['label'] ?? $item['status'];
-                        $statusClass = $statusMap[$currStatus]['class'] ?? '';
-                    @endphp
-                    <span class="status-badge {{ $statusClass }}">
-                        {{ $statusLabel }}
-                    </span>
+                <td>{{ $finding['item_text'] }}</td>
+                <td>
+                    @if($finding['finding_level'] == 'Minor NC')
+                        <span class="minor-nc">{{ $finding['finding_level'] }}</span>
+                    @elseif($finding['finding_level'] == 'Major NC')
+                        <span class="major-nc">{{ $finding['finding_level'] }}</span>
+                    @else
+                        {{ $finding['finding_level'] }}
+                    @endif
+                </td>
+                <td>{{ $finding['finding_note'] ?? '-' }}</td>
+                <td>{{ $finding['action_plan'] ?? 'Corrective action to be determined by responsible department' }}</td>
+                <td>
+                    @if($finding['completion_date'])
+                        {{ \Carbon\Carbon::parse($finding['completion_date'])->format('d-m-Y') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($audit->audit_end_date)->addDays(30)->format('d-m-Y') }}
+                    @endif
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 25px; font-style: italic; color: #777;">
+                    No non-conformities found during this audit
+                </td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 
+    <!-- Footer -->
     <div class="footer">
-        <p>Dicetak pada {{ now()->format('d F Y H:i') }} | PT TRIAS SENTOSA Tbk</p>
+        <p>This audit summary report has been consolidated and based on consent among the auditors.</p>
+        <p>This document is intended for internal use only. Any act of exposing the content on this document to external parties without prior consent, is considered as unethical action.</p>
+        <p style="margin-top: 8px; font-weight: bold;">PT TRIAS SENTOSA Tbk | EMS Internal Audit Department</p>
+        <p>Report generated on {{ now()->format('d F Y') }} at {{ now()->format('H:i') }} WIB</p>
     </div>
 
 </body>

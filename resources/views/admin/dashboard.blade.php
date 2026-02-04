@@ -191,7 +191,6 @@
                     @if($audit->department_names && count($audit->department_names) > 0)
                         @foreach($audit->department_names as $deptName)
                             <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                                {{ Str::limit($deptName, 15, '...') }}
                             </span>
                         @endforeach
                     @else
