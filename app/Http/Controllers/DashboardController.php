@@ -420,12 +420,6 @@ public function showClauseDetail($auditId, $mainClause)
     $clauseIds = $clausesDb->pluck('id');
     $subClauseTitles = $clausesDb->pluck('title', 'clause_code');
 
-    // Ambil catatan auditor (opsional, bisa dihapus jika tidak dipakai)
-    $auditorNotes = DB::table('audit_questions')
-        ->where('audit_id', $auditId)
-        ->whereIn('clause_code', $subCodes)
-        ->pluck('question_text', 'clause_code');
-
     // Query utama: ambil item + finding_note dari tabel answers
     $items = Item::whereIn('clause_id', $clauseIds)
         ->join('clauses', 'items.clause_id', '=', 'clauses.id')
