@@ -538,12 +538,10 @@ public function departmentStatusIndex()
 
 public function exportToPdf($auditId)
 {
-    $audit = Audit::with([
-        'department',
-        'auditSession' => function($query) {
-            $query->with('leadAuditor');
-        }
-    ])->findOrFail($auditId);
+$audit = Audit::with([
+    'department',
+    'session' // <-- sesuaikan dengan nama method di model
+])->findOrFail($auditId);
 
     // Ambil session lengkap dengan lead auditor
     $session = DB::table('audit_sessions')
