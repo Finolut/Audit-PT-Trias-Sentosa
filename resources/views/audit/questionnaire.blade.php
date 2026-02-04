@@ -1032,6 +1032,18 @@ function confirmSubmit() {
     function isMobile() {
     return window.innerWidth <= 768;
 }
+function submitWithLoading() {
+    Swal.fire({
+        title: 'Menyimpan...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    setTimeout(() => {
+        document.getElementById('form').submit();
+    }, 300);
+}
+
 </script>
 </body>
 </html>
