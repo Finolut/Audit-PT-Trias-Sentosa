@@ -134,15 +134,15 @@
             <h2 class="section-title">Identitas & Standar Audit</h2>
     
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Jenis Pemeriksaan</label>
-<select name="audit_type" required class="form-input">
-    <option value="first party">Audit Internal (Pihak Pertama)</option>
-    <option value="follow up">Audit Tindak Lanjut (Corrective Action)</option>
-    <option value="investigative">Audit Investigatif (Khusus/Insidentil)</option>
-    <option value="unannounced">Audit Mendadak (Unannounced)</option>
-</select>
-                </div>
+<div>
+    <label class="block text-sm font-semibold mb-1 text-slate-700">Referensi Standar / Kriteria Audit</label>
+    <select id="select-standards" name="audit_standards[]" multiple 
+            required 
+            class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <option value="ISO 9001:2015 (Quality Management System)">ISO 9001:2015 (Quality Management System)</option>
+        <option value="ISO 14001:2015 (Environmental Management System)">ISO 14001:2015 (Environmental Management System)</option>
+    </select>
+</div>
                 <div>
                     <label class="block text-sm font-semibold mb-1 text-slate-700">Referensi Standar / Kriteria Audit</label>
                     <select id="select-standards" name="audit_standards[]" multiple 
@@ -165,18 +165,21 @@
                         placeholder="Contoh: Mengevaluasi efektivitas pengendalian stok gudang dan kepatuhan terhadap prosedur FIFO." required></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">Audit Scope (Lingkup)</label>
-<select id="select-scope" name="audit_scope[]" multiple
-        placeholder="Pilih ruang lingkup audit..." required
-        class="form-input">
-    <option value="process procurement">Proses Pengadaan</option>
-    <option value="process production">Proses Produksi</option>
-    <option value="process finance">Proses Keuangan</option>
-    <option value="asset physical">Aset Fisik & Inventaris</option>
-    <option value="hr competency">Kompetensi Sumber Daya Manusia</option>
-    <option value="it security">Keamanan Sistem Informasi & Data</option>
-</select>
-                </div>
+     <label class="block text-sm font-semibold mb-1 text-slate-700">Audit Scope (Lingkup)</label>
+    <select id="select-scope" name="audit_scope[]" multiple
+            required
+            class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <option value="process procurement">Proses Pengadaan</option>
+        <option value="process production">Proses Produksi</option>
+        <option value="process finance">Proses Keuangan</option>
+        <option value="asset physical">Aset Fisik & Inventaris</option>
+        <option value="hr competency">Kompetensi Sumber Daya Manusia</option>
+        <option value="it security">Keamanan Sistem Informasi & Data</option>
+        <option value="document control">Kontrol Dokumen & Rekaman</option>
+        <option value="management review">Tinjauan Manajemen</option>
+    </select>
+</div>
+
             </div>
 
             <div class="mt-6">
@@ -209,98 +212,100 @@
         </section>
 
         <!-- Section 3 & 4: Tim Pemeriksa + Target Audit & Jadwal (SIDE-BY-SIDE) -->
-        <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Column 1: Tim Pemeriksa -->
-            <section>
-                <h2 class="section-title">Tim Pemeriksa (Audit Team)</h2>
-            
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1 text-slate-700">
-                            Lead Auditor
-                        </label>
-                        <select id="select-auditor" name="lead_auditor_id"
-                                placeholder="Pilih Lead Auditor..." required
-                                class="form-input">
-                        </select>
-                    </div>
+<div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Column 1: Tim Pemeriksa -->
+    <section>
+        <h2 class="section-title">Tim Pemeriksa (Audit Team)</h2>
+    
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-slate-700">
+                    Lead Auditor
+                </label>
+                <select id="select-auditor" name="lead_auditor_id"
+                        required
+                        class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <!-- Data via JavaScript -->
+                </select>
+            </div>
 
-                    <div>
-                        <label class="block text-sm font-semibold mb-1 text-slate-700">
-                            Email Lead Auditor <span class="text-slate-400 font-normal">(opsional)</span>
-                        </label>
-                        <input type="email" name="lead_auditor_email"
-                               placeholder="nama@perusahaan.com"
-                               class="form-input">
-                        <p class="text-xs text-slate-500 mt-1">
-                            Digunakan untuk komunikasi dan distribusi laporan audit.
-                        </p>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold mb-2 text-slate-700">Anggota Tim Tambahan</label>
-                    <div id="team-container" class="space-y-4"></div>
-                    <button type="button" id="add-team-btn" 
-                            class="mt-3 text-sm text-slate-600 font-medium hover:text-slate-800 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Tambah Auditor / Observer / Expert
-                    </button>
-                </div>
-            </section>
-
-            <!-- Column 2: Target Audit & Jadwal -->
-            <section>
-                <h2 class="section-title">Target Audit & Jadwal</h2>
-
-                <!-- Departemen Auditee (Multi) -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold mb-1 text-slate-700">
-                        Departemen yang akann di audit
-                    </label>
-                    <select id="select-department"
-                            name="auditee_dept_ids[]"
-                            multiple
-                            placeholder="Pilih satu atau lebih departemen..."
-                            required
-                            class="form-input">
-                        <!-- Data via JavaScript -->
-                    </select>
-
-                    <div id="conflict-warning"
-                         class="hidden text-xs text-red-600 font-bold mt-1">
-                        ⛔ KONFLIK: Lead Auditor berasal dari salah satu departemen yang dipilih!
-                    </div>
-
-                    <p class="text-xs text-slate-500 mt-1">
-                        Audit dapat mencakup lebih dari satu departemen dalam satu penugasan.
-                    </p>
-                </div>
-
-                <!-- Jadwal Audit -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1 text-slate-700">
-                            Tanggal Mulai Audit
-                        </label>
-                        <input type="date" name="audit_start_date" required class="form-input">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-1 text-slate-700">
-                            Tanggal Selesai Audit
-                        </label>
-                        <input type="date" name="audit_end_date" required class="form-input">
-                    </div>
-                </div>
-
-                <p class="text-xs text-slate-500 mt-2">
-                    Rentang tanggal digunakan untuk audit yang berlangsung lebih dari satu hari.
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-slate-700">
+                    Email Lead Auditor <span class="text-slate-400 font-normal">(opsional)</span>
+                </label>
+                <input type="email" name="lead_auditor_email"
+                       placeholder="nama@perusahaan.com"
+                       class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="text-xs text-slate-500 mt-1">
+                    Digunakan untuk komunikasi dan distribusi laporan audit.
                 </p>
-            </section>
+            </div>
         </div>
+
+        <div>
+            <label class="block text-sm font-semibold mb-2 text-slate-700">Anggota Tim Tambahan</label>
+            <div id="team-container" class="space-y-4"></div>
+            <button type="button" id="add-team-btn" 
+                    class="mt-3 text-sm text-slate-600 font-medium hover:text-slate-800 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Auditor / Observer / Expert
+            </button>
+        </div>
+    </section>
+
+    <!-- Column 2: Target Audit & Jadwal -->
+    <section>
+        <h2 class="section-title">Target Audit & Jadwal</h2>
+
+        <!-- Departemen Auditee (Multi) -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold mb-1 text-slate-700">
+                Departemen yang akan di audit
+            </label>
+            <select id="select-department"
+                    name="auditee_dept_ids[]"
+                    multiple
+                    required
+                    class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <!-- Data via JavaScript -->
+            </select>
+
+            <div id="conflict-warning"
+                 class="hidden text-xs text-red-600 font-bold mt-1">
+                ⛔ KONFLIK: Lead Auditor berasal dari salah satu departemen yang dipilih!
+            </div>
+
+            <p class="text-xs text-slate-500 mt-1">
+                Audit dapat mencakup lebih dari satu departemen dalam satu penugasan.
+            </p>
+        </div>
+
+        <!-- Jadwal Audit -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-slate-700">
+                    Tanggal Mulai Audit
+                </label>
+                <input type="date" name="audit_start_date" required 
+                       class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1 text-slate-700">
+                    Tanggal Selesai Audit
+                </label>
+                <input type="date" name="audit_end_date" required 
+                       class="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+        </div>
+
+        <p class="text-xs text-slate-500 mt-2">
+            Rentang tanggal digunakan untuk audit yang berlangsung lebih dari satu hari.
+        </p>
+    </section>
+</div>
 
         <!-- CTA Utama -->
         <div class="mt-10 text-center">
