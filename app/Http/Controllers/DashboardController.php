@@ -498,7 +498,6 @@ public function showClauseDetail($auditId, $mainClause)
         'subCodes',
         'subClauseTitles',
         'itemsGrouped',
-        'auditorNotes',
         'totalYes',
         'totalNo',
         'totalDraw',

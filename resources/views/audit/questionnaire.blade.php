@@ -237,8 +237,6 @@
             padding-bottom: 1.25rem;
             border-bottom: 1px dashed #e2e8f0;
         }
-        .item-row:last-child {
-        }
 
         .item-content-col {
             margin-bottom: 0.75rem;
@@ -323,13 +321,14 @@
             cursor: not-allowed;
             background: #f1f5f9;
         }
-.submit-bar {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem; /* hanya sedikit jarak */
-    padding-top: 1rem;
-    border-top: 1px dashed #e2e8f0; /* SESUAIKAN DENGAN .item-row */
-}
+
+        .submit-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #e2e8f0;
+        }
 
         .submit-audit {
             background-color: #0c2d5a;
@@ -400,30 +399,28 @@
             left: 1rem;
         }
         .item-locked {
-    opacity: 0.75;
-}
-
-   .item-locked .answer-btn:disabled,
+            opacity: 0.75;
+        }
+        .item-locked .answer-btn:disabled,
         .item-locked select:disabled,
         .item-locked textarea:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
 
-                .item-row.active-scroll {
+        .item-row.active-scroll {
             animation: highlight-scroll 1.5s ease-out;
             box-shadow: 0 0 0 2px rgba(12, 45, 90, 0.3);
         }
-        
         @keyframes highlight-scroll {
             0% { box-shadow: 0 0 0 0 rgba(12, 45, 90, 0.1); }
             20% { box-shadow: 0 0 0 8px rgba(12, 45, 90, 0.15); }
             100% { box-shadow: 0 0 0 0 rgba(12, 45, 90, 0); }
         }
 
-            .swal2-wide {
-        max-width: 500px !important;
-    }
+        .swal2-wide {
+            max-width: 500px !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -478,7 +475,6 @@
                         $isNA = ($authorAnswer['answer'] ?? '') === 'N/A';
                     @endphp
 
-                    <!-- PERBAIKAN KRUSIAL: Perbaiki struktur HTML yang rusak -->
                     <div class="item-row" id="row_{{ $item->id }}" data-locked="{{ $isAnsweredByAuthor ? '1' : '0' }}">
                         <div class="item-content-col">
                             <p class="item-text">{{ $item->item_text }}</p>
@@ -487,7 +483,6 @@
 
                         <div class="item-action-col">
                             <div class="button-group" id="btn_group_{{ $item->id }}">
-                                <!-- Tambahkan class active sesuai jawaban tersimpan -->
                                 <button type="button" 
                                         class="answer-btn yes-btn {{ ($authorAnswer['answer'] ?? '') === 'YES' ? 'active-yes' : '' }}"
                                         data-item-id="{{ $item->id }}" 
@@ -579,7 +574,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> <!-- Penutup item-row yang benar -->
+                    </div>
                     @endforeach
                 @endforeach
             </div>
@@ -612,7 +607,7 @@
     // Inisialisasi variabel global
     const auditorName = @json($auditorName);
     const responders = @json($responders);
-const dbAnswers = @json($existingAnswers ?? []);
+    const dbAnswers = @json($existingAnswers ?? []);
     let sessionAnswers = {};
 
     // Fungsi lock item yang diperbaiki
@@ -627,7 +622,7 @@ const dbAnswers = @json($existingAnswers ?? []);
         row.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
         row.querySelectorAll('select, textarea').forEach(el => {
             el.disabled = true;
-            el.readOnly = true; // Tambahan untuk textarea
+            el.readOnly = true;
         });
         
         const moreBtn = row.querySelector('.btn-more');
@@ -670,63 +665,6 @@ const dbAnswers = @json($existingAnswers ?? []);
                 lockItem(itemId);
             }
         }
-    }
-
-    // Binding tombol jawaban
-    function bindButtons() {
-        document.querySelectorAll('.answer-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                if (this.disabled) return;
-                
-                const itemId = this.dataset.itemId;
-                const value = this.dataset.value;
-                const row = document.getElementById(`row_${itemId}`);
-                
-                // Cek apakah item terkunci
-                if (row.dataset.locked === '1') {
-                    Swal.fire('Terkunci', 'Jawaban sudah dikunci dan tidak dapat diubah.', 'info');
-                    return;
-                }
-                
-                // Update UI tombol
-                document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(btn => {
-                    btn.classList.remove('active-yes', 'active-no', 'active-na');
-                });
-                
-                if (value === 'YES') this.classList.add('active-yes');
-                else if (value === 'NO') this.classList.add('active-no');
-                else if (value === 'N/A') this.classList.add('active-na');
-                
-                // Simpan ke session
-                sessionAnswers[`${itemId}_${auditorName}`] = value;
-                
-                // Update hidden input
-                const hiddenInput = document.getElementById(`hidden_ans_${itemId}_${auditorName}`);
-                if (hiddenInput) hiddenInput.value = value;
-                
-                // Handle tombol "Respon Lain"
-                const moreBtn = row.querySelector('.btn-more');
-                if (moreBtn) {
-                    moreBtn.disabled = (value === 'N/A');
-                    moreBtn.classList.toggle('disabled', value === 'N/A');
-                }
-                
-                // Update info box
-                updateInfoBox(itemId);
-                
-                // Toggle finding note
-                if (value !== 'N/A') {
-                    const findingSelect = document.getElementById(`finding_level_${itemId}_${auditorName}`);
-                    if (findingSelect) {
-                        toggleFindingNote(itemId, auditorName, findingSelect.value);
-                    }
-                } else {
-                    // Sembunyikan finding note jika N/A
-                    const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
-                    if (wrapper) wrapper.style.display = 'none';
-                }
-            });
-        });
     }
 
     // Update hidden inputs
@@ -805,7 +743,7 @@ const dbAnswers = @json($existingAnswers ?? []);
         
         // Dapatkan semua item yang visible
         const allItems = Array.from(document.querySelectorAll('.item-row')).filter(row => {
-            return row.offsetParent !== null; // Hanya item yang visible
+            return row.offsetParent !== null;
         });
         
         const currentIndex = allItems.indexOf(currentRow);
@@ -815,7 +753,6 @@ const dbAnswers = @json($existingAnswers ?? []);
         if (currentIndex >= allItems.length - 1) {
             const submitBar = document.querySelector('.submit-bar');
             if (submitBar) {
-                // Tambahkan sedikit offset agar tidak terlalu rapat dengan elemen terakhir
                 const offset = 20;
                 const bodyRect = document.body.getBoundingClientRect().top;
                 const elementRect = submitBar.getBoundingClientRect().top;
@@ -838,7 +775,7 @@ const dbAnswers = @json($existingAnswers ?? []);
         nextItem.classList.add('active-scroll');
         
         // Scroll dengan offset agar tidak terlalu rapat dengan header
-        const offset = 100; // Offset dari atas viewport
+        const offset = 100;
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = nextItem.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
@@ -902,8 +839,8 @@ const dbAnswers = @json($existingAnswers ?? []);
         document.getElementById('answerModal').style.display = 'none';
     }
 
-    // Submit handler
-    function confirmSubmit() {function confirmSubmit() {
+    // ============ FUNGSI SUBMIT YANG DIPERBAIKI ============
+    function confirmSubmit() {
         // Hitung statistik jawaban
         const totalItems = document.querySelectorAll('.item-row').length;
         let answeredCount = 0;
@@ -941,7 +878,7 @@ const dbAnswers = @json($existingAnswers ?? []);
                         </p>
                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">
                             Setelah Anda klik "Submit", <strong>semua jawaban akan direkam permanen</strong> 
-                            dan <strong class="text-red-600">tidak dapat diubah kembali</strong>.
+                            dan <strong style="color: #dc2626;">tidak dapat diubah kembali</strong>.
                         </p>
                     </div>
                     
@@ -972,16 +909,14 @@ const dbAnswers = @json($existingAnswers ?? []);
                     }
                 });
                 
-                // Submit form setelah delay singkat untuk UX yang lebih baik
+                // Submit form setelah delay singkat
                 setTimeout(() => {
                     document.getElementById('form').submit();
                 }, 300);
             }
         });
     }
-        // Tidak ada validasi pemblokir - langsung submit
-        document.getElementById('form').submit();
-    }
+    // ============ AKHIR FUNGSI SUBMIT ============
 
     // Event delegation untuk modal buttons
     document.addEventListener('click', function(e) {
@@ -1008,36 +943,8 @@ const dbAnswers = @json($existingAnswers ?? []);
         }
     });
 
-    // Inisialisasi saat DOM siap
-    document.addEventListener('DOMContentLoaded', function() {
-        restoreFromDB();
-        bindButtons();
-        
-        // Setup event untuk tombol close modal
-        document.querySelector('#answerModal .modal-header button')?.addEventListener('click', closeModal);
-        document.getElementById('answerModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-        
-        // Setup event untuk tombol Selesai di modal
-        document.querySelector('#answerModal .submit-audit')?.addEventListener('click', closeModal);
-    });
-
-    const unansweredItems = Array.from(document.querySelectorAll('.item-row')).filter(row => {
-            const itemId = row.id.replace('row_', '');
-            return !sessionAnswers[`${itemId}_${auditorName}`] && row.dataset.locked !== '1';
-        });
-        
-        if (unansweredItems.length > 0) {
-            // Delay sedikit agar halaman selesai load
-            setTimeout(() => {
-                unansweredItems[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Tambahkan highlight
-                unansweredItems[0].classList.add('active-scroll');
-            }, 500);
-        }
-
-        function bindButtons() {
+    // Binding tombol jawaban
+    function bindButtons() {
         document.querySelectorAll('.answer-btn').forEach(button => {
             button.addEventListener('click', function() {
                 if (this.disabled) return;
@@ -1090,15 +997,41 @@ const dbAnswers = @json($existingAnswers ?? []);
                     if (wrapper) wrapper.style.display = 'none';
                 }
                 
-                // ============ AUTO-SCROLL SETELAH MENJAWAB ============
-                // Delay 350ms untuk memastikan DOM sudah update (termasuk munculnya finding note)
+                // Auto-scroll setelah menjawab
                 setTimeout(() => {
                     autoScrollToNextItem(itemId);
                 }, 350);
-                // ============ AKHIR AUTO-SCROLL ============
             });
         });
     }
+
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        restoreFromDB();
+        bindButtons();
+        
+        // Setup event untuk tombol close modal
+        document.querySelector('#answerModal .modal-header button')?.addEventListener('click', closeModal);
+        document.getElementById('answerModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        // Setup event untuk tombol Selesai di modal
+        document.querySelector('#answerModal .submit-audit')?.addEventListener('click', closeModal);
+        
+        // Auto-scroll ke item pertama yang belum dijawab
+        const unansweredItems = Array.from(document.querySelectorAll('.item-row')).filter(row => {
+            const itemId = row.id.replace('row_', '');
+            return !sessionAnswers[`${itemId}_${auditorName}`] && row.dataset.locked !== '1';
+        });
+        
+        if (unansweredItems.length > 0) {
+            setTimeout(() => {
+                unansweredItems[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                unansweredItems[0].classList.add('active-scroll');
+            }, 500);
+        }
+    });
 </script>
 </body>
 </html>
