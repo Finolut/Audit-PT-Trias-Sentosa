@@ -23,110 +23,108 @@
             </div>
         </div>
 
-<div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 text-sm">
+                {{-- KIRI --}}
+                <div class="space-y-2">
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Kode Audit</span>:
+                        <span class="ml-2 font-mono text-gray-800">{{ $auditSummary['audit_code'] }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Jenis Pemeriksaan</span>:
+                        <span class="ml-2">{{ $auditSummary['type'] }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Referensi Standar</span>:
+                        <span class="ml-2">{{ $auditSummary['standards'] }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Audit Objective</span>:
+                        <span class="ml-2">{{ $auditSummary['objective'] }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Audit Scope</span>:
+                        <span class="ml-2">{{ $auditSummary['scope'] }}</span>
+                    </div>
+                </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 text-sm">
-
-        {{-- KIRI --}}
-        <div class="space-y-2">
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Kode Audit</span>:
-                <span class="ml-2 font-mono text-gray-800">
-                    {{ $auditSummary['audit_code'] }}
-                </span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Jenis Pemeriksaan</span>:
-                <span class="ml-2">{{ $auditSummary['type'] }}</span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Referensi Standar</span>:
-                <span class="ml-2">{{ $auditSummary['standards'] }}</span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Audit Objective</span>:
-                <span class="ml-2">{{ $auditSummary['objective'] }}</span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Audit Scope</span>:
-                <span class="ml-2">{{ $auditSummary['scope'] }}</span>
-            </div>
-        </div>
-
-        {{-- KANAN --}}
-        <div class="space-y-2">
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Lead Auditor</span>:
-                <span class="ml-2">{{ $leadAuditor['name'] }}</span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Email Lead Auditor</span>:
-                <span class="ml-2 text-blue-700 underline">
-                    {{ $leadAuditor['email'] }}
-                </span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Anggota Tim</span>:
-                <span class="ml-2">
-                    @forelse($teamMembers as $member)
-                        {{ $member->name }}@if(!$loop->last), @endif
-                    @empty
-                        -
-                    @endforelse
-                </span>
-            </div>
-
-            <div class="flex">
-                <span class="w-48 font-semibold text-gray-600">Periode Audit</span>:
-                <span class="ml-2">
-                    {{ $auditSummary['start_date'] }} – {{ $auditSummary['end_date'] }}
-                </span>
-            </div>
-
-            {{-- STATUS --}}
-            <div class="flex items-center pt-1">
-                <span class="w-48 font-semibold text-gray-600">Status Audit</span>:
-                @if($auditSummary['status'] === 'COMPLETE')
-                    <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700 rounded border border-green-200">
-                        SELESAI
-                    </span>
-                @else
-                    <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-yellow-100 text-yellow-700 rounded border border-yellow-200">
-                        BERJALAN
-                    </span>
-                @endif
+                {{-- KANAN --}}
+                <div class="space-y-2">
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Lead Auditor</span>:
+                        <span class="ml-2">{{ $leadAuditor['name'] }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Email Lead Auditor</span>:
+                        <span class="ml-2 text-blue-700 underline">{{ $leadAuditor['email'] }}</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Anggota Tim</span>:
+                        <span class="ml-2">
+                            @forelse($teamMembers as $member)
+                                {{ $member->name }}@if(!$loop->last), @endif
+                            @empty
+                                -
+                            @endforelse
+                        </span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-48 font-semibold text-gray-600">Periode Audit</span>:
+                        <span class="ml-2">{{ $auditSummary['start_date'] }} – {{ $auditSummary['end_date'] }}</span>
+                    </div>
+                    <div class="flex items-center pt-1">
+                        <span class="w-48 font-semibold text-gray-600">Status Audit</span>:
+                        @if($auditSummary['status'] === 'COMPLETE')
+                            <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700 rounded border border-green-200">SELESAI</span>
+                        @else
+                            <span class="ml-2 px-2 py-0.5 text-xs font-bold bg-yellow-100 text-yellow-700 rounded border border-yellow-200">BERJALAN</span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
-
-    </div>
-</div>
-
-
-
     </div> 
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <!-- Grafik Utama -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
             <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Gambaran Per Klausul Utama</h3>
-            <div class="h-64">
-                <canvas id="mainClauseChart"></canvas>
-            </div>
+            <div class="h-64"><canvas id="mainClauseChart"></canvas></div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
             <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Rincian Lengkap (Semua Klausus)</h3>
-            <div class="h-64">
-                <canvas id="detailedClauseChart"></canvas>
+            <div class="h-64"><canvas id="detailedClauseChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Grafik Finding Level -->
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-8">
+        <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">
+            <svg class="w-5 h-5 inline-block mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            Distribusi Finding Level
+        </h3>
+        <div class="h-64"><canvas id="findingLevelChart"></canvas></div>
+        <div class="mt-4 grid grid-cols-3 gap-4 text-center">
+            <div class="flex flex-col items-center">
+                <div class="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+                <span class="text-xs font-medium">Observed: {{ $findingChartData['observed'] ?? 0 }}</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                <span class="text-xs font-medium">Minor: {{ $findingChartData['minor'] ?? 0 }}</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                <span class="text-xs font-medium">Major: {{ $findingChartData['major'] ?? 0 }}</span>
             </div>
         </div>
     </div>
 
+    <!-- Detail per Klausul -->
     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
         <span class="bg-blue-600 w-2 h-6 rounded-full mr-3"></span>
         Detail Audit per Klausul
@@ -150,13 +148,9 @@
                     </div>
 
                     @if($isComplete)
-                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 uppercase">
-                            Selesai
-                        </span>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 uppercase">Selesai</span>
                     @else
-                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 uppercase">
-                            {{ $persenProgres }}% Terisi
-                        </span>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 uppercase">{{ $persenProgres }}% Terisi</span>
                     @endif
                 </div>
                 
@@ -184,11 +178,10 @@
 
 {{-- SCRIPT --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-    // 1. Inisialisasi Chart (Pastikan data PHP tersedia)
     const mainStats = {!! json_encode($mainStats) !!};
     const detailedStats = {!! json_encode($detailedStats) !!};
+    const findingData = {!! json_encode($findingChartData) !!};
 
     const commonOptions = {
         responsive: true,
@@ -197,7 +190,6 @@
         scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
     };
 
-    // Fungsi pembantu untuk buat dataset
     function createDatasets(statsObj, labels) {
         return [
             { label: 'Yes', data: labels.map(l => statsObj[l].yes), backgroundColor: '#22c55e' },
@@ -207,7 +199,7 @@
         ];
     }
 
-    // Render Chart 1
+    // Main Clause Chart
     const mainLabels = Object.keys(mainStats);
     new Chart(document.getElementById('mainClauseChart'), {
         type: 'bar',
@@ -215,7 +207,7 @@
         options: commonOptions
     });
 
-    // Render Chart 2
+    // Detailed Clause Chart
     const detailedLabels = Object.keys(detailedStats);
     new Chart(document.getElementById('detailedClauseChart'), {
         type: 'bar',
@@ -223,5 +215,41 @@
         options: commonOptions
     });
 
+    // Finding Level Chart
+    new Chart(document.getElementById('findingLevelChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Observed', 'Minor', 'Major'],
+            datasets: [{
+                data: [
+                    findingData.observed || 0,
+                    findingData.minor || 0,
+                    findingData.major || 0
+                ],
+                backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
 </script>
 @endsection

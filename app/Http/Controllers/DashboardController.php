@@ -306,6 +306,28 @@ $teamMembers = DB::table('audit_responders')
             )
             ->get();
 
+                // --- QUERY UNTUK FINDING LEVEL ---
+    $findingStats = DB::table('answers')
+        ->join('items', 'answers.item_id', '=', 'items.id')
+        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->where('answers.audit_id', '=', $auditId)
+        ->whereNotNull('answers.finding_note')
+        ->where('answers.finding_note', '!=', '')
+        ->select(
+            'answers.finding_level',
+            DB::raw('count(*) as count')
+        )
+        ->groupBy('answers.finding_level')
+        ->pluck('count', 'finding_level')
+        ->toArray();
+
+    // Format data untuk chart
+    $findingChartData = [
+        'observed' => $findingStats['observed'] ?? 0,
+        'minor' => $findingStats['minor'] ?? 0,
+        'major' => $findingStats['major'] ?? 0,
+    ];
+
         $detailedStats = []; 
         $mainStats = [];     
 
@@ -402,7 +424,8 @@ $auditSummary = [
             'mainClauses' => $this->mainClauses,
             'titles' => $this->mainClauseTitles,
             'detailedStats' => $detailedStats, 
-            'mainStats' => $mainStats          
+            'mainStats' => $mainStats,          
+            'findingChartData' => $findingChartData,
         ]);
     }
 
