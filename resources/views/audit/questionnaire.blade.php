@@ -408,19 +408,12 @@
     opacity: 0.75;
 }
 
-.item-locked .answer-btn,
-.item-locked select,
-.item-locked textarea,
-.item-locked .btn-more {
-    pointer-events: none;
-    cursor: not-allowed;
-}
-
-.item-locked .answer-btn {
-    background-color: #e5e7eb !important;
-    color: #6b7280 !important;
-}
-
+   .item-locked .answer-btn:disabled,
+        .item-locked select:disabled,
+        .item-locked textarea:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -470,95 +463,113 @@
 
                     @foreach ($items->where('maturity_level_id', $level->id) as $item)
                     @php
-    $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-    $isAnsweredByAuthor = !empty($authorAnswer['answer']);
-@endphp
+                        $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+                        $isAnsweredByAuthor = !empty($authorAnswer['answer']);
+                        $isNA = ($authorAnswer['answer'] ?? '') === 'N/A';
+                    @endphp
 
-                        <div class="item-row"
-     id="row_{{ $item->id }}"
-     data-locked="0"
-                            <div class="item-content-col">
-                                <p class="item-text">{{ $item->item_text }}</p>
-                                <div id="info_{{ $item->id }}" class="score-info-box"></div>
+                    <!-- PERBAIKAN KRUSIAL: Perbaiki struktur HTML yang rusak -->
+                    <div class="item-row" id="row_{{ $item->id }}" data-locked="{{ $isAnsweredByAuthor ? '1' : '0' }}">
+                        <div class="item-content-col">
+                            <p class="item-text">{{ $item->item_text }}</p>
+                            <div id="info_{{ $item->id }}" class="score-info-box"></div>
+                        </div>
+
+                        <div class="item-action-col">
+                            <div class="button-group" id="btn_group_{{ $item->id }}">
+                                <!-- Tambahkan class active sesuai jawaban tersimpan -->
+                                <button type="button" 
+                                        class="answer-btn yes-btn {{ ($authorAnswer['answer'] ?? '') === 'YES' ? 'active-yes' : '' }}"
+                                        data-item-id="{{ $item->id }}" 
+                                        data-value="YES"
+                                        {{ $isAnsweredByAuthor ? 'disabled' : '' }}>
+                                    Iya
+                                </button>
+                                <button type="button" 
+                                        class="answer-btn no-btn {{ ($authorAnswer['answer'] ?? '') === 'NO' ? 'active-no' : '' }}"
+                                        data-item-id="{{ $item->id }}" 
+                                        data-value="NO"
+                                        {{ $isAnsweredByAuthor ? 'disabled' : '' }}>
+                                    Tidak
+                                </button>
+                                <button type="button" 
+                                        class="answer-btn na-btn {{ ($authorAnswer['answer'] ?? '') === 'N/A' ? 'active-na' : '' }}"
+                                        data-item-id="{{ $item->id }}" 
+                                        data-value="N/A"
+                                        {{ $isAnsweredByAuthor ? 'disabled' : '' }}>
+                                    N/A
+                                </button>
                             </div>
 
-                            <div class="item-action-col">
-                                <div class="button-group" id="btn_group_{{ $item->id }}">
-                                    <button type="button" class="answer-btn yes-btn" data-item-id="{{ $item->id }}" data-value="YES">Iya</button>
-                                    <button type="button" class="answer-btn no-btn" data-item-id="{{ $item->id }}" data-value="NO">Tidak</button>
-                                    <button type="button" class="answer-btn na-btn" data-item-id="{{ $item->id }}" data-value="N/A">N/A</button>
+                            <div id="hidden_inputs_{{ $item->id }}"></div>
+
+                            @foreach($responders as $responder)
+                                @php
+                                    $responderName = $responder->responder_name ?? $responder->name;
+                                    $existing = $existingAnswers[$item->id][$responderName] ?? null;
+                                    $ansId = $existing['id'] ?? \Illuminate\Support\Str::uuid();
+                                    $ansVal = $existing['answer'] ?? '';
+                                @endphp
+                                <input type="hidden" 
+                                       name="answer_id_map[{{ $item->id }}][{{ $responderName }}]" 
+                                       value="{{ $ansId }}">
+                                <input type="hidden" 
+                                       name="answers[{{ $item->id }}][{{ $responderName }}][val]" 
+                                       value="{{ $ansVal }}" 
+                                       id="hidden_ans_{{ $item->id }}_{{ $responderName }}">
+                            @endforeach
+
+                            @if(count($responders) > 1)
+                                <button type="button"
+                                        class="btn-more mt-2 {{ $isNA || $isAnsweredByAuthor ? 'disabled' : '' }}"
+                                        onclick="openModal('{{ $item->id }}', {{ json_encode($item->item_text) }}, {{ $isNA ? 'true' : 'false' }})"
+                                        {{ ($isNA || $isAnsweredByAuthor) ? 'disabled' : '' }}>
+                                    Respon Lain...
+                                </button>
+                            @endif
+
+                            <div class="finding-container mt-3">
+                                <div class="flex flex-wrap gap-4 items-end">
+                                    <div class="flex-1 min-w-[160px]">
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase">
+                                            Finding Level
+                                        </label>
+                                        <select
+                                            name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
+                                            id="finding_level_{{ $item->id }}_{{ $auditorName }}"
+                                            class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
+                                            onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)"
+                                            {{ $isAnsweredByAuthor ? 'disabled' : '' }}>
+                                            <option value="">-- No Finding --</option>
+                                            <option value="observed" {{ ($authorAnswer['finding_level'] ?? '') === 'observed' ? 'selected' : '' }}>
+                                                Observed
+                                            </option>
+                                            <option value="minor" {{ ($authorAnswer['finding_level'] ?? '') === 'minor' ? 'selected' : '' }}>
+                                                Minor
+                                            </option>
+                                            <option value="major" {{ ($authorAnswer['finding_level'] ?? '') === 'major' ? 'selected' : '' }}>
+                                                Major
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <div id="hidden_inputs_{{ $item->id }}"></div>
-
-                                @php
-                                    $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-                                    $authorFindingLevel = $authorAnswer['finding_level'] ?? '';
-                                    $authorFindingNote = $authorAnswer['finding_note'] ?? '';
-                                    $authorAnswerVal = $authorAnswer['answer'] ?? '';
-                                    $answerId = $authorAnswer['id'] ?? \Illuminate\Support\Str::uuid();
-                                    $isNA = ($authorAnswerVal === 'N/A');
-                                @endphp
-
-                                @foreach($responders as $responder)
-                                    @php
-                                        $responderName = $responder->responder_name ?? $responder->name;
-                                        $existing = $existingAnswers[$item->id][$responderName] ?? null;
-                                        $ansId = $existing['id'] ?? \Illuminate\Support\Str::uuid();
-                                        $ansVal = $existing['answer'] ?? '';
-                                    @endphp
-
-                                    <input type="hidden" name="answer_id_map[{{ $item->id }}][{{ $responderName }}]" value="{{ $ansId }}">
-                                    <input type="hidden" name="answers[{{ $item->id }}][{{ $responderName }}][val]" value="{{ $ansVal }}" id="hidden_ans_{{ $item->id }}_{{ $responderName }}">
-                                @endforeach
-
-                                @if(count($responders) > 1)
-                                    <button type="button"
-                                            class="btn-more mt-2 {{ $isNA ? 'disabled' : '' }}"
-                                            onclick="openModal('{{ $item->id }}', '{{ addslashes($item->item_text) }}', {{ $isNA ? 'true' : 'false' }})"
-                                            {{ $isNA ? 'disabled' : '' }}>
-                                        Respon Lain...
-                                    </button>
-                                @endif
-
-                                <div class="finding-container mt-3">
-                                    <div class="flex flex-wrap gap-4 items-end">
-                                        <div class="flex-1 min-w-[160px]">
-                                            <label class="block text-[10px] font-bold text-gray-500 uppercase">
-                                                Finding Level
-                                            </label>
-                                            <select
-                                                name="finding_level[{{ $item->id }}][{{ $auditorName }}]"
-                                                id="finding_level_{{ $item->id }}_{{ $auditorName }}"
-                                                class="w-full text-sm border-gray-300 rounded focus:ring-blue-500"
-                                                onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
-                                                <option value="">-- No Finding --</option>
-                                                <option value="observed" {{ $authorFindingLevel === 'observed' ? 'selected' : '' }}>
-                                                    Observed
-                                                </option>
-                                                <option value="minor" {{ $authorFindingLevel === 'minor' ? 'selected' : '' }}>
-                                                    Minor
-                                                </option>
-                                                <option value="major" {{ $authorFindingLevel === 'major' ? 'selected' : '' }}>
-                                                    Major
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-3" id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" style="{{ $authorFindingLevel ? 'display: block;' : 'display: none;' }}">
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
-                                            Catatan Temuan
-                                        </label>
-                                        <textarea
-                                            name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
-                                            rows="3"
-                                            class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
-                                            placeholder="Jelaskan temuan secara detail...">{{ $authorFindingNote }}</textarea>
-                                    </div>
+                                <div class="mt-3" 
+                                     id="finding_note_wrapper_{{ $item->id }}_{{ $auditorName }}" 
+                                     style="{{ ($authorAnswer['finding_level'] ?? '') ? 'display: block;' : 'display: none;' }}">
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">
+                                        Catatan Temuan
+                                    </label>
+                                    <textarea
+                                        name="finding_note[{{ $item->id }}][{{ $auditorName }}]"
+                                        rows="3"
+                                        class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 p-2"
+                                        placeholder="Jelaskan temuan secara detail..."
+                                        {{ $isAnsweredByAuthor ? 'disabled' : '' }}>{{ $authorAnswer['finding_note'] ?? '' }}</textarea>
                                 </div>
                             </div>
                         </div>
+                    </div> <!-- Penutup item-row yang benar -->
                     @endforeach
                 @endforeach
             </div>
@@ -588,234 +599,205 @@
 </div>
 
 <script>
+    // Inisialisasi variabel global
     const auditorName = @json($auditorName);
     const responders = @json($responders);
-    const dbAnswers = @json($existingAnswers ?? []);
+    const dbAnswers = @json($existingAnswers ?? );
     let sessionAnswers = {};
 
-    document.addEventListener('DOMContentLoaded', function () {
-        restoreFromDB();
-        bindButtons();
-        bindFormValidation();
-        bindModalButtons();
-    });
-
-    function bindButtons() {
-        document.body.addEventListener('click', function(e) {
-            const btn = e.target.closest('.answer-btn');
-            if (!btn) return;
-            const itemId = btn.dataset.itemId;
-            const value = btn.dataset.value;
-            setVal(itemId, auditorName, value, btn);
-
-            const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
-            if (moreBtn) {
-                if (value === 'N/A') {
-                    moreBtn.disabled = true;
-                    moreBtn.classList.add('disabled');
-                } else {
-                    moreBtn.disabled = false;
-                    moreBtn.classList.remove('disabled');
-                }
-            }
+    // Fungsi lock item yang diperbaiki
+    function lockItem(itemId) {
+        const row = document.getElementById(`row_${itemId}`);
+        if (!row || row.dataset.locked === '1') return;
+        
+        row.dataset.locked = '1';
+        row.classList.add('item-locked');
+        
+        // Disable semua elemen interaktif
+        row.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
+        row.querySelectorAll('select, textarea').forEach(el => {
+            el.disabled = true;
+            el.readOnly = true; // Tambahan untuk textarea
         });
-    }
-
-    function bindModalButtons() {
-        document.body.addEventListener('click', function(e) {
-            const btn = e.target.closest('#answerModal .modal-answer-btn');
-            if (btn) {
-                const itemId = btn.dataset.itemId;
-                const userName = btn.dataset.user;
-                const value = btn.dataset.value;
-                setVal(itemId, userName, value, btn);
-            }
-        });
-    }
-
-    function setVal(itemId, userName, value, btnElement) {
-        sessionAnswers[`${itemId}_${userName}`] = value;
-
-        if (userName === auditorName && btnElement) {
-            const group = document.getElementById(`btn_group_${itemId}`);
-            if (group) {
-                group.querySelectorAll('.answer-btn').forEach(b => {
-                    b.classList.remove('active-yes', 'active-no', 'active-na');
-                });
-                if (value === 'YES') btnElement.classList.add('active-yes');
-                else if (value === 'NO') btnElement.classList.add('active-no');
-                else if (value === 'N/A') btnElement.classList.add('active-na');
-            }
+        
+        const moreBtn = row.querySelector('.btn-more');
+        if (moreBtn) {
+            moreBtn.disabled = true;
+            moreBtn.classList.add('disabled');
         }
-
-        if (document.getElementById('answerModal').style.display === 'flex') {
-            updateModalButtonStates(itemId);
-        }
-
-        updateHiddenInputs(itemId);
-        updateInfoBox(itemId);
     }
 
-    function updateModalButtonStates(itemId) {
-        const buttons = document.querySelectorAll(`#answerModal [data-item-id="${itemId}"]`);
-        buttons.forEach(btn => {
-            const user = btn.dataset.user;
-            const val = btn.dataset.value;
-            const current = sessionAnswers[`${itemId}_${user}`] || '';
-            
-            btn.className = 'modal-answer-btn';
-            btn.classList.add(val.toLowerCase());
-            if (current === val) {
-                btn.classList.add('active');
-            }
-        });
-    }
-
-function restoreFromDB() {
-    if (!dbAnswers) return;
-
-    for (const [itemId, users] of Object.entries(dbAnswers)) {
-
-        // restore sessionAnswers
-        for (const [userName, data] of Object.entries(users)) {
-            sessionAnswers[`${itemId}_${userName}`] = data.answer;
-        }
-
-        // restore warna tombol auditor
-        if (users[auditorName]?.answer) {
-            const ans = users[auditorName].answer;
-            const group = document.getElementById(`btn_group_${itemId}`);
-
-            if (group) {
-                group.querySelectorAll('.answer-btn')
-                    .forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-
-                if (ans === 'YES') group.children[0].classList.add('active-yes');
-                if (ans === 'NO')  group.children[1].classList.add('active-no');
-                if (ans === 'N/A') group.children[2].classList.add('active-na');
-            }
-
-            // 🔒 LOCK SETELAH WARNA DIPASANG
-            lockItem(itemId);
-        }
-
-        updateHiddenInputs(itemId);
-        updateInfoBox(itemId);
-    }
-}
-
-        if (!dbAnswers) return;
+    // Restore jawaban dari database
+    function restoreFromDB() {
+        if (!dbAnswers || Object.keys(dbAnswers).length === 0) return;
+        
         for (const [itemId, users] of Object.entries(dbAnswers)) {
+            // Restore semua jawaban ke sessionAnswers
             for (const [userName, data] of Object.entries(users)) {
-                sessionAnswers[`${itemId}_${userName}`] = data.answer;
-                if (data.finding_level) {
-                    const select = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
-                    if (select) select.value = data.finding_level;
+                if (data.answer) {
+                    sessionAnswers[`${itemId}_${userName}`] = data.answer;
                 }
-                if (data.finding_note) {
-                    const textarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
-                    if (textarea) textarea.value = data.finding_note;
-                }
-            }
-            updateHiddenInputs(itemId);
-            updateInfoBox(itemId);
-        }
-
-        for (const [itemId, users] of Object.entries(dbAnswers)) {
-            if (users[auditorName]) {
-                const ans = users[auditorName].answer;
-                const group = document.getElementById(`btn_group_${itemId}`);
-                if (group) {
-                    group.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('active-yes','active-no','active-na'));
-                    if (ans === 'YES') group.children[0]?.classList.add('active-yes');
-                    else if (ans === 'NO') group.children[1]?.classList.add('active-no');
-                    else if (ans === 'N/A') group.children[2]?.classList.add('active-na');
-                }
-                if (ans === 'N/A') {
-                    const moreBtn = document.querySelector(`#row_${itemId} .btn-more`);
-                    if (moreBtn) {
-                        moreBtn.disabled = true;
-                        moreBtn.classList.add('disabled');
+                
+                // Restore finding level dan note untuk auditor
+                if (userName === auditorName) {
+                    if (data.finding_level) {
+                        const select = document.getElementById(`finding_level_${itemId}_${auditorName}`);
+                        if (select) select.value = data.finding_level;
+                    }
+                    if (data.finding_note && data.finding_level) {
+                        const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
+                        if (wrapper) wrapper.style.display = 'block';
                     }
                 }
             }
-        }
-    }
-
-    function updateHiddenInputs(itemId) {
-        for (const [key, val] of Object.entries(sessionAnswers)) {
-            if (key.startsWith(`${itemId}_`)) {
-                const user = key.replace(`${itemId}_`, '');
-                const input = document.querySelector(`input[name="answers[${itemId}][${user}][val]"]`);
-                if (input) {
-                    input.value = val;
-                }
+            
+            // Update UI untuk item ini
+            updateHiddenInputs(itemId);
+            updateInfoBox(itemId);
+            
+            // Lock item jika sudah dijawab auditor
+            if (users[auditorName]?.answer) {
+                lockItem(itemId);
             }
         }
     }
 
+    // Binding tombol jawaban
+    function bindButtons() {
+        document.querySelectorAll('.answer-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.disabled) return;
+                
+                const itemId = this.dataset.itemId;
+                const value = this.dataset.value;
+                const row = document.getElementById(`row_${itemId}`);
+                
+                // Cek apakah item terkunci
+                if (row.dataset.locked === '1') {
+                    Swal.fire('Terkunci', 'Jawaban sudah dikunci dan tidak dapat diubah.', 'info');
+                    return;
+                }
+                
+                // Update UI tombol
+                document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(btn => {
+                    btn.classList.remove('active-yes', 'active-no', 'active-na');
+                });
+                
+                if (value === 'YES') this.classList.add('active-yes');
+                else if (value === 'NO') this.classList.add('active-no');
+                else if (value === 'N/A') this.classList.add('active-na');
+                
+                // Simpan ke session
+                sessionAnswers[`${itemId}_${auditorName}`] = value;
+                
+                // Update hidden input
+                const hiddenInput = document.getElementById(`hidden_ans_${itemId}_${auditorName}`);
+                if (hiddenInput) hiddenInput.value = value;
+                
+                // Handle tombol "Respon Lain"
+                const moreBtn = row.querySelector('.btn-more');
+                if (moreBtn) {
+                    moreBtn.disabled = (value === 'N/A');
+                    moreBtn.classList.toggle('disabled', value === 'N/A');
+                }
+                
+                // Update info box
+                updateInfoBox(itemId);
+                
+                // Toggle finding note
+                if (value !== 'N/A') {
+                    const findingSelect = document.getElementById(`finding_level_${itemId}_${auditorName}`);
+                    if (findingSelect) {
+                        toggleFindingNote(itemId, auditorName, findingSelect.value);
+                    }
+                } else {
+                    // Sembunyikan finding note jika N/A
+                    const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
+                    if (wrapper) wrapper.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Update hidden inputs
+    function updateHiddenInputs(itemId) {
+        for (const [key, val] of Object.entries(sessionAnswers)) {
+            if (key.startsWith(`${itemId}_`)) {
+                const userName = key.split('_').slice(1).join('_');
+                const input = document.querySelector(`input[name="answers[${itemId}][${userName}][val]"]`);
+                if (input) input.value = val;
+            }
+        }
+    }
+
+    // Update info box perbedaan jawaban
     function updateInfoBox(itemId) {
         const infoBox = document.getElementById(`info_${itemId}`);
         if (!infoBox) return;
+        
         const auditorAns = sessionAnswers[`${itemId}_${auditorName}`];
         if (!auditorAns) {
             infoBox.style.display = 'none';
             return;
         }
-        let diff = [];
+        
+        // Cari perbedaan dengan responder lain
+        const diffs = [];
         for (const [key, val] of Object.entries(sessionAnswers)) {
-            if (key.startsWith(`${itemId}_`)) {
-                const user = key.replace(`${itemId}_`, '');
-                if (user !== auditorName && val !== auditorAns) {
-                    diff.push({ user, val });
-                }
+            if (key.startsWith(`${itemId}_`) && key !== `${itemId}_${auditorName}` && val !== auditorAns) {
+                const userName = key.split('_').slice(1).join('_');
+                diffs.push({ user: userName, val });
             }
         }
-        if (diff.length === 0) {
+        
+        if (diffs.length === 0) {
             infoBox.style.display = 'none';
             return;
         }
+        
+        // Render perbedaan
         const getColor = (v) => v === 'YES' ? '#16a34a' : v === 'NO' ? '#dc2626' : '#64748b';
         const getText = (v) => v === 'YES' ? 'Iya' : v === 'NO' ? 'Tidak' : 'N/A';
-        infoBox.innerHTML = `
-            <div class="diff-item">
-                <span><strong>${auditorName} (Anda)</strong></span>
-                <span style="color:${getColor(auditorAns)}"><strong>${getText(auditorAns)}</strong></span>
-            </div>
-            ${diff.map(d => `
-                <div class="diff-item">
-                    <span>${d.user}</span>
-                    <span style="color:${getColor(d.val)}">${getText(d.val)}</span>
-                </div>
-            `).join('')}
-        `;
+        
+        let html = `<div class="diff-item">
+            <span><strong>${auditorName} (Anda)</strong></span>
+            <span style="color:${getColor(auditorAns)}"><strong>${getText(auditorAns)}</strong></span>
+        </div>`;
+        
+        diffs.forEach(d => {
+            html += `<div class="diff-item">
+                <span>${d.user}</span>
+                <span style="color:${getColor(d.val)}">${getText(d.val)}</span>
+            </div>`;
+        });
+        
+        infoBox.innerHTML = html;
         infoBox.style.display = 'block';
     }
 
-    // ✅ TIDAK ADA VALIDASI PEMBLOKIR — BOLEH SIMPAN MESKI KOSONG
-    function bindFormValidation() {
-        // Kosongkan agar tidak mencegah submit
+    // Toggle finding note
+    function toggleFindingNote(itemId, auditor, value) {
+        const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
+        if (wrapper) wrapper.style.display = value ? 'block' : 'none';
     }
 
-    // ✅ PENTING: LANGSUNG SUBMIT KE SERVER → TRIGGER REDIRECT OTOMATIS
-    function confirmSubmit() {
-        document.getElementById('form').submit();
-    }
-
+    // Modal functions
     function openModal(itemId, text, isNA) {
         if (isNA || sessionAnswers[`${itemId}_${auditorName}`] === 'N/A') {
             Swal.fire('Info', 'Tidak dapat melihat respon lain untuk item yang dijawab "N/A".', 'info');
             return;
         }
+        
         document.getElementById('modalItemText').innerText = text;
         const list = document.getElementById('modalRespondersList');
         list.innerHTML = '';
-
+        
         responders.forEach(res => {
             const name = res.responder_name || res.name;
-            const role = res.responder_department || res.dept || '–';
+            const role = res.responder_department || res.dept || '-';
             const isAuditor = (name === auditorName);
-
+            const currentAns = sessionAnswers[`${itemId}_${name}`] || '';
+            
             const div = document.createElement('div');
             div.className = 'responder-item';
             div.innerHTML = `
@@ -827,14 +809,15 @@ function restoreFromDB() {
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="YES">Iya</button>
-                    <button type="button" class="modal-answer-btn" data-item-id="${itemId}" data-user="${name}" data-value="NO">Tidak</button>
+                    <button type="button" class="modal-answer-btn ${currentAns === 'YES' ? 'active yes' : 'yes'}" 
+                            data-item-id="${itemId}" data-user="${name}" data-value="YES">Iya</button>
+                    <button type="button" class="modal-answer-btn ${currentAns === 'NO' ? 'active no' : 'no'}" 
+                            data-item-id="${itemId}" data-user="${name}" data-value="NO">Tidak</button>
                 </div>
             `;
             list.appendChild(div);
         });
-
-        updateModalButtonStates(itemId);
+        
         document.getElementById('answerModal').style.display = 'flex';
     }
 
@@ -842,59 +825,51 @@ function restoreFromDB() {
         document.getElementById('answerModal').style.display = 'none';
     }
 
-    function toggleFindingNote(itemId, auditor, value) {
-        const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
-        if (wrapper) wrapper.style.display = value ? 'block' : 'none';
+    // Submit handler
+    function confirmSubmit() {
+        // Tidak ada validasi pemblokir - langsung submit
+        document.getElementById('form').submit();
     }
-function lockItem(itemId) {
-    const row = document.getElementById(`row_${itemId}`);
-    if (!row || row.dataset.locked === '1') return;
 
-    row.dataset.locked = '1';
-    row.classList.add('item-locked');
-
-    row.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
-    row.querySelectorAll('select, textarea').forEach(el => {
-        el.disabled = true;
-        el.readOnly = true;
+    // Event delegation untuk modal buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.modal-answer-btn')) {
+            const btn = e.target.closest('.modal-answer-btn');
+            const itemId = btn.dataset.itemId;
+            const userName = btn.dataset.user;
+            const value = btn.dataset.value;
+            
+            // Update UI tombol di modal
+            document.querySelectorAll(`#modalRespondersList [data-item-id="${itemId}"][data-user="${userName}"]`)
+                .forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Simpan ke session
+            sessionAnswers[`${itemId}_${userName}`] = value;
+            
+            // Update hidden input jika ada
+            const input = document.querySelector(`input[name="answers[${itemId}][${userName}][val]"]`);
+            if (input) input.value = value;
+            
+            // Update info box di halaman utama
+            updateInfoBox(itemId);
+        }
     });
 
-    const moreBtn = row.querySelector('.btn-more');
-    if (moreBtn) moreBtn.disabled = true;
-}
-
-const row = document.getElementById(`row_${itemId}`);
-if (row?.dataset.locked === '1') {
-    Swal.fire(
-        'Terkunci',
-        'Jawaban sudah dikunci dan tidak dapat diubah.',
-        'info'
-    );
-    return;
-}
-
-    row.classList.add('item-locked');
-    row.dataset.locked = '1';
-
-    // Disable buttons
-    row.querySelectorAll('.answer-btn').forEach(btn => {
-        btn.disabled = true;
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        restoreFromDB();
+        bindButtons();
+        
+        // Setup event untuk tombol close modal
+        document.querySelector('#answerModal .modal-header button')?.addEventListener('click', closeModal);
+        document.getElementById('answerModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        // Setup event untuk tombol Selesai di modal
+        document.querySelector('#answerModal .submit-audit')?.addEventListener('click', closeModal);
     });
-
-    // Disable finding
-    row.querySelectorAll('select, textarea').forEach(el => {
-        el.disabled = true;
-        el.readOnly = true;
-    });
-
-    // Disable modal button
-    const moreBtn = row.querySelector('.btn-more');
-    if (moreBtn) {
-        moreBtn.disabled = true;
-        moreBtn.classList.add('disabled');
-    }
-}
-
 </script>
 </body>
 </html>
