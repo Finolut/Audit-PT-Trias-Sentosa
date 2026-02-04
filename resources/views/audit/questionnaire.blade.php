@@ -238,6 +238,11 @@
             border-bottom: 1px dashed #e2e8f0;
         }
 
+        .audit-container {
+    padding-bottom: 4rem; /* ruang napas bawah */
+}
+
+
         .item-content-col {
             margin-bottom: 0.75rem;
         }
@@ -421,6 +426,36 @@
         .swal2-wide {
             max-width: 500px !important;
         }
+
+        .submit-audit.loading {
+    pointer-events: none;
+    opacity: 0.85;
+    position: relative;
+}
+
+.submit-audit.loading i {
+    display: none;
+}
+
+.submit-audit.loading::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.4);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.submit-audit.loading .btn-text {
+    display: none;
+}
+
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -580,10 +615,11 @@
             </div>
         @endforeach
 
-        <div class="submit-bar">
-            <button type="button" onclick="confirmSubmit()" class="submit-audit">
-                <i class="fas fa-save"></i> Simpan
-            </button>
+<button type="button" onclick="confirmSubmit()" class="submit-audit">
+    <i class="fas fa-save"></i>
+    <span class="btn-text">Simpan</span>
+</button>
+
         </div>
     </form>
 </div>
@@ -1033,16 +1069,18 @@ function confirmSubmit() {
     return window.innerWidth <= 768;
 }
 function submitWithLoading() {
-    Swal.fire({
-        title: 'Menyimpan...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-    });
+    const btn = document.querySelector('.submit-audit');
+    if (!btn) return;
 
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    // kecil tapi penting: kasih delay biar animasi kelihatan
     setTimeout(() => {
         document.getElementById('form').submit();
     }, 300);
 }
+
 
 </script>
 </body>
