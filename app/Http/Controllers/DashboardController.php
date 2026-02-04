@@ -538,15 +538,13 @@ public function departmentStatusIndex()
 
 public function exportToPdf($auditId)
 {
-$audit = Audit::with([
-    'department',
-    'session' // <-- sesuaikan dengan nama method di model
-])->findOrFail($auditId);
+    $audit = Audit::with([
+        'department',
+        'session'
+    ])->findOrFail($auditId);
 
-    // Ambil session lengkap dengan lead auditor
-    $session = DB::table('audit_sessions')
-        ->where('id', $audit->audit_session_id)
-        ->first();
+    // Gunakan relasi langsung, bukan query builder manual
+    $session = $audit->session;
 
     if (!$session) {
         abort(404, 'Audit session not found');
@@ -569,30 +567,29 @@ $audit = Audit::with([
         ->get();
 
     // Query items dengan finding_level dan finding_note dari answers
-  $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-    ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
-    ->leftJoin('answers', function($join) use ($auditId) {
-        $join->on('items.id', '=', 'answers.item_id')
-             ->where('answers.audit_id', '=', $auditId);
-    })
-    ->select(
-        'clauses.clause_code',
-        'clauses.title as clause_title', // ✅ GANTI KE 'title'
-        'items.item_text',
-        'maturity_levels.level_number',
-        'maturity_levels.description as maturity_desc',
-        'answers.answer as current_answer',
-        'answers.finding_level',
-        'answers.finding_note',
-        'answers.action_plan',
-        'answers.completion_date'
-    )
-    ->orderBy('maturity_levels.level_number', 'asc')
-    ->orderBy('clauses.clause_code', 'asc')
-    ->get();
+    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->join('maturity_levels', 'items.maturity_level_id', '=', 'maturity_levels.id')
+        ->leftJoin('answers', function($join) use ($auditId) {
+            $join->on('items.id', '=', 'answers.item_id')
+                 ->where('answers.audit_id', '=', $auditId);
+        })
+        ->select(
+            'clauses.clause_code',
+            'clauses.title as clause_title', // ✅ alias benar
+            'items.item_text',
+            'maturity_levels.level_number',
+            'maturity_levels.description as maturity_desc',
+            'answers.answer as current_answer',
+            'answers.finding_level',
+            'answers.finding_note'
+            // ❌ TIDAK ADA action_plan & completion_date
+        )
+        ->orderBy('maturity_levels.level_number', 'asc')
+        ->orderBy('clauses.clause_code', 'asc')
+        ->get();
 
     $detailedItems = [];
-    $findings = []; // Kumpulkan temuan terpisah
+    $findings = [];
     
     foreach ($allItems as $item) {
         // Status mapping
@@ -606,15 +603,14 @@ $audit = Audit::with([
 
         $itemData = [
             'sub_clause' => $item->clause_code,
-            'clause_text' => $item->clause_text,
+            'clause_text' => $item->clause_title, // ✅ gunakan clause_title
             'item_text' => $item->item_text,
             'status' => $status,
             'maturity_level' => $item->level_number, 
             'maturity_description' => $item->maturity_desc,
             'finding_level' => $item->finding_level,
             'finding_note' => $item->finding_note,
-            'action_plan' => $item->action_plan,
-            'completion_date' => $item->completion_date,
+            // ❌ TIDAK SIMPAN action_plan & completion_date
         ];
 
         $detailedItems[] = $itemData;
