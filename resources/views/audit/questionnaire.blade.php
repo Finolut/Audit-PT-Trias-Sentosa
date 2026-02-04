@@ -476,7 +476,7 @@
 
                         <div class="item-row"
      id="row_{{ $item->id }}"
-     data-locked="{{ $isAnsweredByAuthor ? '1' : '0' }}">
+     data-locked="0"
                             <div class="item-content-col">
                                 <p class="item-text">{{ $item->item_text }}</p>
                                 <div id="info_{{ $item->id }}" class="score-info-box"></div>
@@ -671,7 +671,39 @@
         });
     }
 
-    function restoreFromDB() {
+function restoreFromDB() {
+    if (!dbAnswers) return;
+
+    for (const [itemId, users] of Object.entries(dbAnswers)) {
+
+        // restore sessionAnswers
+        for (const [userName, data] of Object.entries(users)) {
+            sessionAnswers[`${itemId}_${userName}`] = data.answer;
+        }
+
+        // restore warna tombol auditor
+        if (users[auditorName]?.answer) {
+            const ans = users[auditorName].answer;
+            const group = document.getElementById(`btn_group_${itemId}`);
+
+            if (group) {
+                group.querySelectorAll('.answer-btn')
+                    .forEach(b => b.classList.remove('active-yes','active-no','active-na'));
+
+                if (ans === 'YES') group.children[0].classList.add('active-yes');
+                if (ans === 'NO')  group.children[1].classList.add('active-no');
+                if (ans === 'N/A') group.children[2].classList.add('active-na');
+            }
+
+            // 🔒 LOCK SETELAH WARNA DIPASANG
+            lockItem(itemId);
+        }
+
+        updateHiddenInputs(itemId);
+        updateInfoBox(itemId);
+    }
+}
+
         if (!dbAnswers) return;
         for (const [itemId, users] of Object.entries(dbAnswers)) {
             for (const [userName, data] of Object.entries(users)) {
@@ -688,9 +720,7 @@
             updateHiddenInputs(itemId);
             updateInfoBox(itemId);
         }
-    if (users[auditorName]?.answer) {
-        lockItem(itemId);
-    }
+
         for (const [itemId, users] of Object.entries(dbAnswers)) {
             if (users[auditorName]) {
                 const ans = users[auditorName].answer;
@@ -816,7 +846,23 @@
         const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
         if (wrapper) wrapper.style.display = value ? 'block' : 'none';
     }
-    function lockItem(itemId) {
+function lockItem(itemId) {
+    const row = document.getElementById(`row_${itemId}`);
+    if (!row || row.dataset.locked === '1') return;
+
+    row.dataset.locked = '1';
+    row.classList.add('item-locked');
+
+    row.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
+    row.querySelectorAll('select, textarea').forEach(el => {
+        el.disabled = true;
+        el.readOnly = true;
+    });
+
+    const moreBtn = row.querySelector('.btn-more');
+    if (moreBtn) moreBtn.disabled = true;
+}
+
 const row = document.getElementById(`row_${itemId}`);
 if (row?.dataset.locked === '1') {
     Swal.fire(
