@@ -328,40 +328,13 @@
         }
 
 .submit-bar {
-    position: relative;
-    z-index: 10; /* 🔑 angkat ke atas */
-
     margin-top: 2.5rem;
-    padding-top: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
     display: flex;
     justify-content: flex-end;
-
-    background-color: #f9fafb; /* sama dengan bg halaman */
-    border-top: 1px solid transparent;
-    box-shadow: none;
+    background-color: transparent; /* ✅ transparan */
 }
-
-.sub-clause-section:last-child .item-row:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 0;
-}
-
-.submit-bar::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(
-        to right,
-        transparent,
-        rgba(0,0,0,0.06),
-        transparent
-    );
-}
-
 
 
 
