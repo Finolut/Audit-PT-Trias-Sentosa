@@ -327,14 +327,23 @@
             background: #f1f5f9;
         }
 
-        .submit-bar {
-            margin-top: 2.5rem;
-            padding: 0;
-            display: flex;
-            justify-content: flex-end;
-            background: transparent;
-            border: none;
-        }
+.submit-bar {
+    position: relative;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+
+    /* 🔑 tutup area transisi card */
+    background-color: #f9fafb; /* sama dengan bg halaman */
+
+    /* 🔥 trik penting */
+    margin-top: -1px;          /* nutup garis halus */
+    box-shadow: none;
+    border: none;
+}
+
+
 
         .submit-audit {
             background-color: #0c2d5a;
@@ -577,7 +586,7 @@
 
         <div class="submit-bar">
             <button type="button" onclick="confirmSubmit()" class="submit-audit">
-                <i class="fas fa-save"></i> Simpan Klausul ini
+                <i class="fas fa-save"></i> Simpan
             </button>
         </div>
     </form>
