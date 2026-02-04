@@ -189,10 +189,12 @@
                 <!-- Departemen tags -->
                 <div class="flex flex-wrap gap-1 mb-2">
                     @if($audit->department_names && count($audit->department_names) > 0)
-                        @foreach($audit->department_names as $deptName)
-                            <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                            </span>
-                        @endforeach
+@foreach($audit->department_names as $deptName)
+    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+        {{ $deptName }}
+    </span>
+@endforeach
+
                     @else
                         <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
                     @endif
