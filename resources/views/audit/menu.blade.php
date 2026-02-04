@@ -219,6 +219,13 @@
             margin: 0.5rem 0;
         }
 
+        .finish-subtitle {
+            font-size: 1.1rem;
+            color: #065f46;
+            margin: 0.5rem 0 1.5rem;
+            font-weight: 600;
+        }
+
         .btn {
             padding: 0.6rem 1.2rem;
             border-radius: 6px;
@@ -226,11 +233,22 @@
             font-size: 0.95rem;
             border: none;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s;
         }
 
         .btn-success {
             background: #10b981;
             color: white;
+        }
+
+        .btn-success:hover {
+            background: #0ca678;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
         }
 
         .btn-outline {
@@ -239,9 +257,25 @@
             border: 1px solid #2563eb;
         }
 
+        .btn-outline:hover {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-next-dept {
+            background: #0c2d5a;
+            color: white;
+        }
+
+        .btn-next-dept:hover {
+            background: #0a254d;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(12, 45, 90, 0.3);
+        }
+
         /* Start Audit Button - SOLID COLOR (NO GRADIENT) */
         .start-audit-container {
-            background: #0c2d5a; /* Warna solid hijau */
+            background: #0c2d5a;
             border-radius: 12px;
             padding: 2rem;
             text-align: center;
@@ -249,29 +283,30 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-.btn-start-audit {
-    background: white;
-    color: #0c2d5a;
-    padding: 1rem 2.5rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-radius: 8px;
-    border: 2px solid white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-}
+        .btn-start-audit {
+            background: white;
+            color: #0c2d5a;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
 
-.btn-start-audit:hover {
-    background: #0a2547; /* Sedikit lebih gelap dari #0c2d5a */
-    color: white;
-    border-color: #0a2547;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(12, 45, 90, 0.4);
-}
+        .btn-start-audit:hover {
+            background: #0a2547;
+            color: white;
+            border-color: #0a2547;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(12, 45, 90, 0.4);
+        }
+
         .btn-start-audit:disabled {
             background: #94a3b8;
             cursor: not-allowed;
@@ -317,6 +352,14 @@
             color: var(--slate);
             margin-bottom: 1.5rem;
             line-height: 1.6;
+        }
+
+        .dept-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -462,19 +505,69 @@
             @endif
         </div>
 
-        <!-- Finish Banner -->
+        <!-- Finish Banner - DIPERBAIKI -->
         @if(isset($allFinished) && $allFinished)
         <div class="finish-banner">
             <div class="finish-message">Audit {{ $deptName }} Selesai!</div>
-            <p class="text-gray-600 mb-3">Semua klausul telah diisi dengan lengkap dan siap direview.</p>
-            <div class="flex justify-center gap-3">
+            <p class="finish-subtitle">
+                <i class="fas fa-check-circle mr-2"></i> Selamat! Semua klausul telah diisi dengan lengkap.
+            </p>
+            
+            @php
+                // Cari departemen berikutnya yang belum selesai
+                $nextDept = null;
+                if(isset($relatedAudits) && is_array($relatedAudits)) {
+                    foreach($relatedAudits as $dept) {
+                        // Cek apakah departemen ini bukan yang sedang selesai
+                        if($dept['dept_name'] !== $deptName) {
+                            // Cek apakah ada klausul yang belum selesai (percentage < 100)
+                            $hasIncomplete = false;
+                            foreach([4,5,6,7,8,9,10] as $clauseNum) {
+                                $p = $dept['clauses'][$clauseNum] ?? ['percentage' => 0];
+                                if($p['percentage'] < 100) {
+                                    $hasIncomplete = true;
+                                    break;
+                                }
+                            }
+                            
+                            // Jika ada klausul yang belum selesai, ini adalah next dept
+                            if($hasIncomplete) {
+                                $nextDept = $dept;
+                                break;
+                            }
+                        }
+                    }
+                }
+            @endphp
+
+            @if($nextDept)
+                <!-- Tombol Lanjutkan ke Departemen Berikutnya -->
+                <div class="mb-4">
+                    <p class="text-gray-700 font-medium mb-2">
+                        <i class="fas fa-arrow-right mr-2"></i> 
+                        Lanjutkan ke departemen berikutnya:
+                    </p>
+                    <a href="{{ route('audit.show', ['id' => $nextDept['id'], 'clause' => '4']) }}" 
+                       class="btn btn-next-dept">
+                        <i class="fas fa-building mr-2"></i>
+                        Lanjutkan ke {{ $nextDept['dept_name'] }}
+                    </a>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-3">
+                    Atau pilih opsi lainnya di bawah ini:
+                </p>
+            @endif
+
+            <div class="dept-buttons">
                 <a href="{{ route('audit.finish') }}" class="btn btn-success">
                     <i class="fas fa-check-circle mr-1"></i> Selesaikan Audit
                 </a>
+                
                 @if(isset($relatedAudits) && count($relatedAudits) > 1)
                     <a href="{{ route('audit.menu', ['id' => $relatedAudits[0]['id'] ?? $auditId]) }}" 
                        class="btn btn-outline">
-                        <i class="fas fa-arrow-left mr-1"></i> Audit Lainnya
+                        <i class="fas fa-list mr-1"></i> Lihat Semua Departemen
                     </a>
                 @endif
             </div>
@@ -489,6 +582,26 @@
 </script>
 
 <script src="{{ asset('js/audit-script.js') }}"></script>
+
+<script>
+    // Copy token functionality
+    document.getElementById('copy-token-btn')?.addEventListener('click', function() {
+        const tokenText = document.getElementById('audit-token').textContent;
+        navigator.clipboard.writeText(tokenText).then(() => {
+            // Show success message
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i>';
+            this.style.background = '#10b981';
+            
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-copy"></i>';
+                this.style.background = '';
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy token:', err);
+        });
+    });
+</script>
 @endpush
 </body>
 </html>
