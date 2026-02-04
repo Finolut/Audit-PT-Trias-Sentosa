@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-@php
-    $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
-    $isAnsweredByAuthor = !empty($authorAnswer['answer']);
-@endphp
 <html lang="id">
 <head>
     <meta charset="utf-8">
