@@ -168,154 +168,95 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-2 space-y-4">
-        <h3 class="font-bold text-gray-800 text-lg mb-3">Aktivitas Audit Terbaru</h3>
+<div class="lg:col-span-2 space-y-4">
+    <h3 class="font-bold text-gray-800 text-lg mb-3">Aktivitas Audit Terbaru</h3>
 
-        @forelse($recentAudits as $audit)
-            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="flex flex-wrap gap-1">
-                                @if($audit->department_names && count($audit->department_names) > 0)
-                                    @foreach($audit->department_names as $deptName)
-                                        <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
-                                            {{ Str::limit($deptName, 15, '...') }}
-                                        </span>
-                                    @endforeach
-                                @else
-                                    <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
-                                @endif
+    @forelse($recentAudits as $audit)
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <!-- Header Biru -->
+            <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                    <h4 class="text-white font-semibold text-sm">
+                        Audit #{{ $audit->audit_code ?? '–' }}
+                    </h4>
+                </div>
+                <span class="text-[10px] font-bold text-white uppercase tracking-wider">
+                    {{ $audit->created_at->diffForHumans() }}
+                </span>
+            </div>
 
-                                <span class="text-[10px] text-gray-400 italic ml-2">
-                                    {{ $audit->created_at->diffForHumans() }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <h4 class="text-sm font-semibold text-gray-800 mb-1">
-                            Scope:
-                            <span class="text-blue-700 font-medium">
-                                {{ $audit->scope_clean ?: '–' }}
+            <!-- Body -->
+            <div class="p-6">
+                <div class="flex flex-wrap gap-1 mb-4">
+                    @if($audit->department_names && count($audit->department_names) > 0)
+                        @foreach($audit->department_names as $deptName)
+                            <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                                {{ Str::limit($deptName, 18, '...') }}
                             </span>
-                        </h4>
+                        @endforeach
+                    @else
+                        <span class="text-[10px] text-gray-500 italic">Departemen tidak tersedia</span>
+                    @endif
+                </div>
 
-                        <h4 class="text-sm font-semibold text-gray-800 mb-3 mt-1">
-                            Metodologi:
-                            <span class="text-blue-700 font-medium">
-                                {{ $audit->methodology_clean ?: '–' }}
-                            </span>
-                        </h4>
-
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-[11px] text-gray-600 pt-3 border-t border-gray-100">
-                            <div>
-                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Mulai</p>
-                                <p class="text-gray-800 font-medium">
-                                    {{ $audit->audit_start_date ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d M Y') : '-' }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Selesai</p>
-                                <p class="text-gray-800 font-medium">
-                                    {{ $audit->audit_end_date ? \Carbon\Carbon::parse($audit->audit_end_date)->format('d M Y') : '-' }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Lead Auditor</p>
-                                <p class="text-gray-800 font-medium">{{ $audit->session->auditor_name ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Status</p>
-                                @php $statusNorm = strtoupper($audit->status); @endphp
-                                @if(in_array($statusNorm, ['COMPLETE', 'COMPLETED']))
-                                    <span class="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">SELESAI</span>
-                                @else
-                                    <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">BERJALAN</span>
-                                @endif
-                            </div>
-                        </div>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Scope</p>
+                        <p class="text-sm text-gray-800 font-medium">
+                            {{ $audit->scope_clean ?: '–' }}
+                        </p>
                     </div>
 
-                    <div class="flex items-start gap-3 shrink-0 mt-2 md:mt-0">
-                        <a href="{{ route('admin.audit.overview', $audit->id) }}"
-                           class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap">
-                            DETAIL
-                        </a>
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Metodologi</p>
+                        <p class="text-sm text-gray-800 font-medium">
+                            {{ $audit->methodology_clean ?: '–' }}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-gray-100">
+                        <div>
+                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Mulai</p>
+                            <p class="text-gray-800 font-medium">
+                                {{ $audit->audit_start_date ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d M Y') : '-' }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Selesai</p>
+                            <p class="text-gray-800 font-medium">
+                                {{ $audit->audit_end_date ? \Carbon\Carbon::parse($audit->audit_end_date)->format('d M Y') : '-' }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Lead Auditor</p>
+                            <p class="text-gray-800 font-medium">{{ $audit->session->auditor_name ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Status</p>
+                            @php $statusNorm = strtoupper($audit->status); @endphp
+                            @if(in_array($statusNorm, ['COMPLETE', 'COMPLETED']))
+                                <span class="inline-block text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">SELESAI</span>
+                            @else
+                                <span class="inline-block text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">BERJALAN</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            </div>
-        @empty
-            <div class="bg-white p-8 text-center text-gray-400 text-sm rounded-2xl border border-gray-100 shadow-sm">
-                Belum ada audit terbaru
-            </div>
-        @endforelse
-    </div>
 
-    {{-- ✅ BAGIAN TEMUAN AUDIT (TETAP SAMA, TAPI SESUAIKAN JUGA STYLING) --}}
-    <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 bg-[#7c1d1d] flex items-center gap-2">
-                <svg class="w-5 h-5 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
-                </svg>
-                <h3 class="font-bold text-white tracking-tight">Temuan Audit</h3>
-            </div>
-
-            <div class="p-4 space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
-                @forelse($findings as $f)
-                    @php
-                        $level = strtolower($f->finding_level ?? 'observed');
-                        $levelMap = [
-                            'observed' => ['label' => 'Observed', 'color' => 'blue'],
-                            'minor'    => ['label' => 'Minor NC', 'color' => 'yellow'],
-                            'major'    => ['label' => 'Major NC', 'color' => 'red'],
-                        ];
-                        $cfg = $levelMap[$level] ?? $levelMap['observed'];
-                    @endphp
-
-                    <div class="p-3 rounded-xl border bg-{{ $cfg['color'] }}-50 border-{{ $cfg['color'] }}-200">
-                        <div class="flex justify-between items-start mb-1">
-                            <div>
-                                <span class="text-[10px] font-black text-gray-500 uppercase">
-                                    {{ $f->dept_name }}
-                                </span>
-                                <div class="text-xs font-semibold text-gray-800">
-                                    Clause {{ $f->clause_code }}
-                                </div>
-                            </div>
-
-                            <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded 
-                                text-{{ $cfg['color'] }}-700 bg-white border border-{{ $cfg['color'] }}-200">
-                                {{ $cfg['label'] }}
-                            </span>
-                        </div>
-
-                        <p class="text-xs italic text-gray-700 leading-snug">
-                            "{{ Str::limit($f->finding_note, 120) }}"
-                        </p>
-
-                        <div class="flex justify-between text-[9px] text-gray-400 pt-2 border-t mt-2">
-                            <span>Auditor: <b class="text-gray-700">{{ $f->auditor_name ?? '-' }}</b></span>
-                            <span>{{ \Carbon\Carbon::parse($f->created_at)->format('d M Y') }}</span>
-                        </div>
-                    </div>
-                @empty
-                    <div class="py-10 text-center text-gray-400">
-                        <p class="text-sm italic">Belum ada temuan audit.</p>
-                    </div>
-                @endforelse
-            </div>
-
-            <div class="p-4 bg-slate-50 text-center border-t border-gray-200">
-                <a href="{{ route('admin.audit.findings') }}"
-                   class="text-red-700 text-xs font-bold hover:underline uppercase tracking-wider">
-                    Lihat Semua Temuan →
-                </a>
+                <div class="mt-6 flex justify-end">
+                    <a href="{{ route('admin.audit.overview', $audit->id) }}"
+                       class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                        DETAIL
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    @empty
+        <div class="bg-white p-8 text-center text-gray-400 text-sm rounded-2xl border border-gray-100 shadow-sm">
+            Belum ada audit terbaru
+        </div>
+    @endforelse
 </div>
 
 @push('scripts')

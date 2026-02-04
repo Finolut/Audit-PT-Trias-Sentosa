@@ -58,34 +58,51 @@ public function index(Request $request)
 
     // Ambil recent audits dan tambahkan department_names
  $recentAudits = Audit::whereNotNull('audit_session_id')
-    ->with('session','department')
+    ->with('session', 'department')
     ->orderBy('created_at', 'desc')
     ->take(5)
     ->get()
     ->map(function ($audit) {
-        $deptIds = json_decode($audit->department_ids, true) ?? [];
-
-        if (!is_array($deptIds) || empty($deptIds)) {
-            $audit->department_names = [];
-            return $audit;
+        // --- 1. Department Names ---
+        $deptIds = json_decode(trim($audit->department_ids ?? ''), true) ?? [];
+        if (!is_array($deptIds)) {
+            $deptIds = [];
         }
-
         $audit->department_names = DB::table('departments')
             ->whereIn('id', $deptIds)
             ->pluck('name')
             ->toArray();
-                // Department
-        $audit->department_name = $audit->department->name ?? '–';
 
-        // Scope (JSON → string)
-        $audit->scope_clean = collect(json_decode($audit->scope, true))
-            ->filter()
-            ->join(', ');
+        // --- 2. Scope (Aman dari null/empty/string) ---
+        $scopeRaw = trim($audit->scope ?? '');
+        $audit->scope_clean = '';
+        if ($scopeRaw) {
+            $decoded = json_decode($scopeRaw, true);
+            if (is_array($decoded)) {
+                $audit->scope_clean = collect($decoded)
+                    ->filter(fn($item) => is_string($item) && trim($item) !== '')
+                    ->map(fn($item) => trim($item))
+                    ->join(', ');
+            } else {
+                // Jika bukan array, coba parse sebagai string tunggal (fallback)
+                $audit->scope_clean = $scopeRaw;
+            }
+        }
 
-        // Methodology (JSON → string)
-        $audit->methodology_clean = collect(json_decode($audit->methodology, true))
-            ->filter()
-            ->join(', ');
+        // --- 3. Methodology ---
+        $methodRaw = trim($audit->methodology ?? '');
+        $audit->methodology_clean = '';
+        if ($methodRaw) {
+            $decoded = json_decode($methodRaw, true);
+            if (is_array($decoded)) {
+                $audit->methodology_clean = collect($decoded)
+                    ->filter(fn($item) => is_string($item) && trim($item) !== '')
+                    ->map(fn($item) => trim($item))
+                    ->join(', ');
+            } else {
+                $audit->methodology_clean = $methodRaw;
+            }
+        }
 
         return $audit;
     });
