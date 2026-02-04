@@ -253,51 +253,53 @@
 @endphp
 
 
-    @if($auditFindings->count() > 0)
-    <div class="findings-section">
-        <h2 class="audit-title-section">TEMUAN AUDIT</h2>
-        <table class="findings-table">
-            <thead>
-                <tr>
-                    <th style="width: 10%;">Klausul</th>
-                    <th style="width: 35%;">Item Pemeriksaan</th>
-                    <th style="width: 15%;">Temuan</th>
-                    <th style="width: 40%;">Catatan Temuan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($auditFindings as $finding)
-                <tr>
-                    <td style="text-align: center;"><strong>{{ $finding['sub_clause'] }}</strong></td>
-                    <td>{{ $finding['item_text'] }}</td>
-                    <td style="text-align: center;">
-                        @php
-    $level = strtolower($finding['finding_level'] ?? '');
-    $label = match($level) {
-        'observed'=> 'observed',
-        'minor' => 'Minor',
-        'major' => 'Major',
-        default => 'Observed'
-    };
-@endphp
-   @if($level === 'minor')
-    <span class="minor-nc">{{ $label }}</span>
-@elseif($level === 'major')
-    <span class="major-nc">{{ $label }}</span>
-@else
-    {{ $label }}
+@if($auditFindings->count() > 0)
+<div class="findings-section">
+    <h2 class="audit-title-section">TEMUAN AUDIT</h2>
+    <table class="findings-table">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Klausul</th>
+                <th style="width: 35%;">Item Pemeriksaan</th>
+                <th style="width: 15%;">Temuan</th>
+                <th style="width: 40%;">Catatan Temuan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($auditFindings as $finding)
+            <tr>
+                <td style="text-align: center;"><strong>{{ $finding['sub_clause'] }}</strong></td>
+                <td>{{ $finding['item_text'] }}</td>
+                <td style="text-align: center;">
+                    @php
+                        $level = strtolower($finding['finding_level'] ?? '');
+                        $label = match($level) {
+                            'observed' => 'Observed',
+                            'minor' => 'Minor',
+                            'major' => 'Major',
+                            default => 'Observed'
+                        };
+                    @endphp
+                    
+                    @if($level === 'minor')
+                        <span class="minor-nc">{{ $label }}</span>
+                    @elseif($level === 'major')
+                        <span class="major-nc">{{ $label }}</span>
+                    @elseif($level === 'observed')
+                        <span class="observed-nc">{{ $label }}</span>
+                    @else
+                        {{ $label }}
+                    @endif
+                </td>
+                <td>
+                    {{ trim($finding['finding_note'] ?? '') !== '' ? $finding['finding_note'] : '-' }}
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 @endif
-                    </td>
-<td>
-    {{ trim($finding['finding_note'] ?? '') !== '' ? $finding['finding_note'] : '-' }}
-</td>
-
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    @endif
 
     <table class="data-table">
         <thead>
