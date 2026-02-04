@@ -246,11 +246,12 @@
     </div>
 
     <!-- TEMUAN AUDIT SECTION -->
-    @php
-        $auditFindings = collect($detailedItems)->filter(function($item) {
-            return !empty($item['finding_level']) && in_array($item['finding_level'], ['Minor NC', 'Major NC']);
-        });
-    @endphp
+@php
+    $auditFindings = collect($detailedItems)->filter(function($item) {
+        return in_array(strtolower($item['finding_level'] ?? ''), ['minor', 'major']);
+    });
+@endphp
+
 
     @if($auditFindings->count() > 0)
     <div class="findings-section">
@@ -270,15 +271,26 @@
                     <td style="text-align: center;"><strong>{{ $finding['sub_clause'] }}</strong></td>
                     <td>{{ $finding['item_text'] }}</td>
                     <td style="text-align: center;">
-                        @if($finding['finding_level'] == 'Minor NC')
-                            <span class="minor-nc">{{ $finding['finding_level'] }}</span>
-                        @elseif($finding['finding_level'] == 'Major NC')
-                            <span class="major-nc">{{ $finding['finding_level'] }}</span>
-                        @else
-                            {{ $finding['finding_level'] }}
-                        @endif
+                        @php
+    $level = strtolower($finding['finding_level'] ?? '');
+    $label = match($level) {
+        'minor' => 'Minor NC',
+        'major' => 'Major NC',
+        default => 'Observed'
+    };
+@endphp
+   @if($level === 'minor')
+    <span class="minor-nc">{{ $label }}</span>
+@elseif($level === 'major')
+    <span class="major-nc">{{ $label }}</span>
+@else
+    {{ $label }}
+@endif
                     </td>
-                    <td>{{ $finding['finding_note'] ?? '-' }}</td>
+<td>
+    {{ trim($finding['finding_note'] ?? '') !== '' ? $finding['finding_note'] : '-' }}
+</td>
+
                 </tr>
                 @endforeach
             </tbody>

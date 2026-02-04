@@ -615,10 +615,10 @@ public function exportToPdf($auditId)
 
         $detailedItems[] = $itemData;
 
-        // Kumpulkan hanya item yang memiliki temuan
-        if (!empty($item->finding_level) && in_array($item->finding_level, ['Minor NC', 'Major NC'])) {
-            $findings[] = $itemData;
-        }
+if (in_array(strtolower($item->finding_level ?? ''), ['minor', 'major'])) {
+    $findings[] = $itemData;
+}
+
     }
 
     // Format scope dari JSON/array
