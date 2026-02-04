@@ -409,6 +409,17 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+
+                .item-row.active-scroll {
+            animation: highlight-scroll 1.5s ease-out;
+            box-shadow: 0 0 0 2px rgba(12, 45, 90, 0.3);
+        }
+        
+        @keyframes highlight-scroll {
+            0% { box-shadow: 0 0 0 0 rgba(12, 45, 90, 0.1); }
+            20% { box-shadow: 0 0 0 8px rgba(12, 45, 90, 0.15); }
+            100% { box-shadow: 0 0 0 0 rgba(12, 45, 90, 0); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -776,6 +787,73 @@ const dbAnswers = @json($existingAnswers ?? []);
         if (wrapper) wrapper.style.display = value ? 'block' : 'none';
     }
 
+    function autoScrollToNextItem(currentItemId) {
+        const currentRow = document.getElementById(`row_${currentItemId}`);
+        if (!currentRow) return;
+        
+        // Hapus highlight dari semua item
+        document.querySelectorAll('.item-row').forEach(row => {
+            row.classList.remove('active-scroll');
+        });
+        
+        // Tambahkan highlight ke item saat ini sebelum scroll
+        currentRow.classList.add('active-scroll');
+        
+        // Dapatkan semua item yang visible
+        const allItems = Array.from(document.querySelectorAll('.item-row')).filter(row => {
+            return row.offsetParent !== null; // Hanya item yang visible
+        });
+        
+        const currentIndex = allItems.indexOf(currentRow);
+        if (currentIndex === -1) return;
+        
+        // Jika ini adalah item terakhir, scroll ke tombol submit
+        if (currentIndex >= allItems.length - 1) {
+            const submitBar = document.querySelector('.submit-bar');
+            if (submitBar) {
+                // Tambahkan sedikit offset agar tidak terlalu rapat dengan elemen terakhir
+                const offset = 20;
+                const bodyRect = document.body.getBoundingClientRect().top;
+                const elementRect = submitBar.getBoundingClientRect().top;
+                const elementPosition = elementRect - bodyRect;
+                const offsetPosition = elementPosition - offset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+            return;
+        }
+        
+        // Dapatkan item berikutnya
+        const nextItem = allItems[currentIndex + 1];
+        if (!nextItem) return;
+        
+        // Tambahkan highlight ke item berikutnya
+        nextItem.classList.add('active-scroll');
+        
+        // Scroll dengan offset agar tidak terlalu rapat dengan header
+        const offset = 100; // Offset dari atas viewport
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = nextItem.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+        
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+        
+        // Fokus ke tombol pertama di item berikutnya jika ada
+        setTimeout(() => {
+            const firstButton = nextItem.querySelector('.answer-btn:not(:disabled)');
+            if (firstButton) {
+                firstButton.focus({ preventScroll: true });
+            }
+        }, 400);
+    }
+
     // Modal functions
     function openModal(itemId, text, isNA) {
         if (isNA || sessionAnswers[`${itemId}_${auditorName}`] === 'N/A') {
@@ -865,6 +943,83 @@ const dbAnswers = @json($existingAnswers ?? []);
         // Setup event untuk tombol Selesai di modal
         document.querySelector('#answerModal .submit-audit')?.addEventListener('click', closeModal);
     });
+
+    const unansweredItems = Array.from(document.querySelectorAll('.item-row')).filter(row => {
+            const itemId = row.id.replace('row_', '');
+            return !sessionAnswers[`${itemId}_${auditorName}`] && row.dataset.locked !== '1';
+        });
+        
+        if (unansweredItems.length > 0) {
+            // Delay sedikit agar halaman selesai load
+            setTimeout(() => {
+                unansweredItems[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Tambahkan highlight
+                unansweredItems[0].classList.add('active-scroll');
+            }, 500);
+        }
+
+        function bindButtons() {
+        document.querySelectorAll('.answer-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.disabled) return;
+                
+                const itemId = this.dataset.itemId;
+                const value = this.dataset.value;
+                const row = document.getElementById(`row_${itemId}`);
+                
+                // Cek apakah item terkunci
+                if (row.dataset.locked === '1') {
+                    Swal.fire('Terkunci', 'Jawaban sudah dikunci dan tidak dapat diubah.', 'info');
+                    return;
+                }
+                
+                // Update UI tombol
+                document.querySelectorAll(`#btn_group_${itemId} .answer-btn`).forEach(btn => {
+                    btn.classList.remove('active-yes', 'active-no', 'active-na');
+                });
+                
+                if (value === 'YES') this.classList.add('active-yes');
+                else if (value === 'NO') this.classList.add('active-no');
+                else if (value === 'N/A') this.classList.add('active-na');
+                
+                // Simpan ke session
+                sessionAnswers[`${itemId}_${auditorName}`] = value;
+                
+                // Update hidden input
+                const hiddenInput = document.getElementById(`hidden_ans_${itemId}_${auditorName}`);
+                if (hiddenInput) hiddenInput.value = value;
+                
+                // Handle tombol "Respon Lain"
+                const moreBtn = row.querySelector('.btn-more');
+                if (moreBtn) {
+                    moreBtn.disabled = (value === 'N/A');
+                    moreBtn.classList.toggle('disabled', value === 'N/A');
+                }
+                
+                // Update info box
+                updateInfoBox(itemId);
+                
+                // Toggle finding note
+                if (value !== 'N/A') {
+                    const findingSelect = document.getElementById(`finding_level_${itemId}_${auditorName}`);
+                    if (findingSelect) {
+                        toggleFindingNote(itemId, auditorName, findingSelect.value);
+                    }
+                } else {
+                    // Sembunyikan finding note jika N/A
+                    const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditorName}`);
+                    if (wrapper) wrapper.style.display = 'none';
+                }
+                
+                // ============ AUTO-SCROLL SETELAH MENJAWAB ============
+                // Delay 350ms untuk memastikan DOM sudah update (termasuk munculnya finding note)
+                setTimeout(() => {
+                    autoScrollToNextItem(itemId);
+                }, 350);
+                // ============ AKHIR AUTO-SCROLL ============
+            });
+        });
+    }
 </script>
 </body>
 </html>
