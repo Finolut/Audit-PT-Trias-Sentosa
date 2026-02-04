@@ -473,6 +473,11 @@
                     @endphp
 
                     @foreach ($items->where('maturity_level_id', $level->id) as $item)
+                    @php
+    $authorAnswer = $existingAnswers[$item->id][$auditorName] ?? null;
+    $isAnsweredByAuthor = !empty($authorAnswer['answer']);
+@endphp
+
                         <div class="item-row"
      id="row_{{ $item->id }}"
      data-locked="{{ $isAnsweredByAuthor ? '1' : '0' }}">
@@ -687,9 +692,9 @@
             updateHiddenInputs(itemId);
             updateInfoBox(itemId);
         }
-        if (users[auditorName]?.answer) {
-            lockItem(itemId);
-        }
+    if (users[auditorName]?.answer) {
+        lockItem(itemId);
+    }
         for (const [itemId, users] of Object.entries(dbAnswers)) {
             if (users[auditorName]) {
                 const ans = users[auditorName].answer;
