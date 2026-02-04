@@ -12,7 +12,6 @@
         </a>
     </div>
 
-    {{-- Search Lokal untuk Tabel --}}
     <div class="relative w-64 mb-4">
         <input type="text" id="tableSearch" placeholder="Cari nama auditor..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
         <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +79,6 @@
     </div>
 </div>
 
-{{-- Script Pencarian Lokal --}}
 <script>
     document.getElementById('tableSearch').addEventListener('keyup', function() {
         const searchTerm = this.value.toLowerCase();

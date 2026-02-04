@@ -12,9 +12,7 @@
             @csrf
             @method('PUT')
             
-            <!-- Klausul & Maturity Level -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Pilih Klausul -->
                 <div>
                     <label class="block text-xs font-medium text-gray-500 mb-2">Pilih Klausul</label>
                     <select 
@@ -30,7 +28,6 @@
                     </select>
                 </div>
 
-                <!-- Pilih Maturity Level -->
                 <div>
                     <label class="block text-xs font-medium text-gray-500 mb-2">Maturity Level</label>
                     <select 
@@ -47,7 +44,6 @@
                 </div>
             </div>
 
-            <!-- Urutan (Order) -->
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-2">Urutan (Order)</label>
                 <input 
@@ -59,7 +55,6 @@
                 >
             </div>
 
-            <!-- Teks Pertanyaan -->
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-2">Teks Pertanyaan (Item Text)</label>
                 <textarea 
@@ -70,7 +65,6 @@
                 >{{ $item->item_text }}</textarea>
             </div>
 
-            <!-- Tombol Aksi -->
             <div class="flex justify-end space-x-3 pt-4">
                 <a 
                     href="{{ route('admin.items.index') }}" 

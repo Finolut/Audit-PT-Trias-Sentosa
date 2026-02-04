@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 @section('content')
-    {{-- Header Section --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">Riwayat Audit</h2>
@@ -12,7 +11,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-            {{-- Form Filter Tahun --}}
             <form id="yearFilterForm" action="{{ url()->current() }}" method="GET" class="flex items-center bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
                 <label for="year" class="text-xs font-bold text-gray-400 uppercase mr-2">Tahun:</label>
                 <select name="year" id="year" class="text-sm border-none focus:ring-0 rounded-lg bg-transparent font-bold text-gray-700 cursor-pointer">
@@ -25,7 +23,6 @@
                 </select>
             </form>
 
-            {{-- Total Audit Badge --}}
             <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2">
                 <span class="text-blue-700 font-black text-lg">{{ $audits->count() }}</span>
                 <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">Total Audit</span>
@@ -33,7 +30,6 @@
         </div>
     </div>
 
-    {{-- Table Section --}}
     <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">

@@ -3,7 +3,6 @@
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
     
-    {{-- Header --}}
     <div class="flex items-center gap-4 mb-2">
         <a href="{{ route('admin.users.index') }}" class="text-gray-400 hover:text-gray-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,7 +12,6 @@
         <h2 class="text-2xl font-bold text-gray-800">Profil & Riwayat Auditor</h2>
     </div>
 
-    {{-- KARTU PROFIL --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center text-center lg:col-span-1">
             <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-3xl font-bold mb-4">
@@ -24,7 +22,6 @@
             <span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full mt-2">NIK: {{ $auditor->nik }}</span>
         </div>
 
-{{-- Statistik --}}
 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
     <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Statistik Kinerja</h4>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -52,7 +49,6 @@
 </div>
     </div>
 
-    {{-- TIMELINE HISTORY --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="p-6 border-b border-gray-100">
             <h3 class="font-bold text-gray-800 text-lg">Riwayat Pemeriksaan</h3>
@@ -65,10 +61,9 @@
                     
                     <div class="flex flex-col md:flex-row justify-between md:items-start gap-4">
                         <div class="flex-1">
-                            {{-- ID Audit --}}
+
                             <div class="text-[10px] font-mono text-gray-400 mb-1 uppercase">ID: {{ $audit->id }}</div>
-                            
- {{-- Tipe Audit --}}
+                        
 <div class="flex items-center gap-3 mb-3">
     @php
         $typeLabels = [
@@ -89,7 +84,6 @@
     </span>
 </div>
 
-                            {{-- Detail Audit --}}
                             <div class="space-y-2">
                                 @if($audit->audit_code)
                                     <div class="text-sm text-gray-600">
@@ -114,7 +108,6 @@
                             </div>
                         </div>
 
-                        {{-- Status --}}
                         <div class="flex flex-col items-end">
                             @php
                                 $currentStatus = strtoupper($audit->status ?? '');

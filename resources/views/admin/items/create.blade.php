@@ -11,7 +11,6 @@
         <form action="{{ route('admin.items.store') }}" method="POST">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {{-- Pilih Klausul --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Klausul</label>
                     <select name="clause_id" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 shadow-sm text-sm" required>
@@ -22,7 +21,6 @@
                     </select>
                 </div>
 
-                {{-- Pilih Maturity Level --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Maturity Level</label>
                     <select name="maturity_level_id" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 shadow-sm text-sm" required>
@@ -34,7 +32,6 @@
                 </div>
             </div>
 
-            {{-- HAPUS FIELD item_order --}}
 
             <div class="mb-8">
                 <label class="block text-sm font-bold text-gray-700 mb-2">Teks Pertanyaan (Item Text)</label>

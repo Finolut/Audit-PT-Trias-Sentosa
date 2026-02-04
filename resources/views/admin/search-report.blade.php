@@ -31,7 +31,7 @@
 
 @push('scripts')
 <script>
-    // Opsional: Tekan Enter untuk submit
+
     document.getElementById('searchForm').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();

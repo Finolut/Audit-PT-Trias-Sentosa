@@ -8,12 +8,10 @@
         </div>
     </div>
 
-    {{-- Tabel Full Width --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
             <h3 class="font-bold text-gray-800">Daftar Semua Departemen</h3>
 
-            {{-- Search Lokal --}}
             <div class="relative w-64">
                 <input type="text" id="tableSearch" placeholder="Cari nama departemen..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <svg class="w-3 h-3 text-gray-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -51,7 +49,6 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-center">
-                            {{-- Tambahkan class btn-detail di sini --}}
                             <a href="{{ route('admin.dept.show', $dept->id) }}" class="btn-detail text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm inline-block">
                                 DETAIL
                             </a>
@@ -68,7 +65,6 @@
 
     @push('scripts')
     <script>
-        // 1. Script Pencarian Lokal (Tetap Ada)
         document.getElementById('tableSearch').addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('.dept-row');

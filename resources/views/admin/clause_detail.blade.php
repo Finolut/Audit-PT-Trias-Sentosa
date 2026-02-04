@@ -1,14 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
-{{-- HEADER & NAVIGATION --}}
 <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm -mx-4 sm:-mx-6 lg:-mx-8 !-mt-18 mb-8 transition-all">
     <div class="w-full flex items-center justify-between px-8 lg:px-12 py-4">
         <div>
             <h2 class="text-2xl font-bold text-gray-800 mt-1">Main Clause {{ $mainClause }}</h2>
         </div>
         
-{{-- Mini Stats Summary --}}
 <div class="flex gap-3">
     <div class="px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1 border border-green-100">
         <div class="leading-tight">SESUAI<br><span class="text-lg font-bold">{{ $totalYes }}</span></div>
@@ -27,7 +25,6 @@
     </div>
 </div>
 
-{{-- CHART SECTION --}}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
@@ -93,7 +90,6 @@
         $isUnanswered = !$final || ($yesCount === 0 && $noCount === 0);
     @endphp
 
-    {{-- ROW SOAL --}}
     <tr class="hover:bg-gray-50 transition-colors {{ $isUnanswered ? 'bg-gray-50/50' : '' }}">
         <td class="px-4 py-3 text-gray-700 leading-snug">
             {{ $item->item_text }}
@@ -129,7 +125,6 @@
 
     </tr>
 
-    {{-- ✅ ROW TEMUAN (Jika Ada) --}}
  @if(!empty(trim($item->finding_note)))
 <tr class="bg-red-50/30 border-t border-red-100">
     <td colspan="5" class="px-4 py-1.5">

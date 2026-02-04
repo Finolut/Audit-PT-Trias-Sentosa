@@ -6,41 +6,6 @@
     <p class="text-gray-500 mt-1">Kelola token akses untuk sesi audit internal.</p>
 </div>
 
-<!-- Form Tambah Sesi -->
-{{-- <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
-    <h3 class="font-bold text-gray-800 mb-4">Tambah Sesi Baru</h3>
-    <form action="{{ route('admin.token-sessions.store') }}" method="POST">
-        @csrf
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Auditor</label>
-                <input type="text" name="auditor_name" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="auditor_email" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
-                <input type="text" name="auditor_nik" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
-                <input type="text" name="auditor_department" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-        </div>
-        <button type="submit"
-            class="mt-4 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Buat Sesi & Generate Token
-        </button>
-    </form>
-</div> --}}
-
-<!-- Daftar Sesi -->
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
     <div class="px-6 py-4 bg-blue-600">
         <h3 class="font-bold text-white">Daftar Sesi Audit</h3>
@@ -75,7 +40,6 @@
             <div class="flex flex-col gap-1">
 
 
-                <!-- Aksi -->
                 <div class="flex items-center gap-1 mt-1">
                     <a href="{{ route('admin.token-sessions.extend.form', $session) }}"
                        class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">

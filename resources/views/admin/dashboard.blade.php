@@ -12,7 +12,6 @@
         </div>
     </div>
 
-    {{-- 1. Stats Cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 active:scale-[0.98] transition-transform">
         <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-md transition-shadow">
             <div class="p-2 md:p-3 bg-blue-50 text-blue-600 rounded-lg md:rounded-xl">
@@ -60,17 +59,14 @@
         </div>
     </div>
 
-{{-- 2. CONTRIBUTION GRAPH SECTION --}}
 <div class="mb-8">
     <h3 class="font-bold text-gray-800 text-xl mb-4">Aktivitas Audit {{ $selectedYear }}</h3>
     
     <div class="flex flex-col lg:flex-row gap-6 items-start">
         
-        {{-- A. Kiri: Grafik (White Box) --}}
         <div class="flex-1 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm w-full overflow-hidden max-w-[800px] lg:max-w-none">
             <div class="w-full overflow-x-auto custom-scrollbar pb-2">
                 <div class="flex flex-col min-w-max">
-                    {{-- Baris Label Bulan --}}
                     <div class="flex gap-1 mb-1 pl-8"> 
                         @foreach($contributionData as $week)
                             <div class="w-3 text-[10px] text-gray-400 text-left overflow-visible whitespace-nowrap">
@@ -81,9 +77,9 @@
                         @endforeach
                     </div>
             
-                    {{-- Grid Utama --}}
+
                     <div class="flex gap-1">
-                        {{-- Label Hari --}}
+
                         <div class="flex flex-col gap-1 mr-2 pt-[1px]">
                             <span class="text-[9px] text-gray-300 h-3 leading-3">Mon</span>
                             <span class="text-[9px] text-transparent h-3 leading-3">Tue</span>
@@ -94,7 +90,6 @@
                             <span class="text-[9px] text-transparent h-3 leading-3">Sun</span>
                         </div>
             
-                        {{-- Kolom Kotak --}}
                         @foreach($contributionData as $week)
                             <div class="flex flex-col gap-1">
                                 @foreach($week['days'] as $day)
@@ -111,14 +106,12 @@
             };
         }
     @endphp
-    
-    {{-- Wrapper dengan group dan relative --}}
+
     <div class="group relative w-3 h-3">
         <div class="{{ $colorClass }} w-full h-full rounded-[2px] cursor-pointer transition-colors duration-200 hover:opacity-80"
              onclick="showAuditDetails('{{ $day['date'] }}', {{ $day['count'] }})">
         </div>
 
-        {{-- Tooltip: dipindah ke luar kotak kecil --}}
         @if($day['in_year'] && $day['count'] > 0)
             <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 w-max pointer-events-none">
                 <div class="bg-gray-800 text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap">
@@ -135,7 +128,6 @@
                 </div>
             </div>
 
-            {{-- Legend --}}
             <div class="mt-4 flex justify-between items-center border-t border-gray-50 pt-3">
                 <div class="flex items-center gap-1 text-[10px] text-gray-400">
                     <span>Less</span>
@@ -148,10 +140,8 @@
             </div>
         </div>
 
-{{-- B. Kanan: Year Selector + Detail Panel --}}
 <div class="w-full lg:w-auto flex flex-col gap-4">
 
-    {{-- Dropdown Tahun --}}
     <select onchange="window.location.href = this.value;" 
             class="block w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
         @foreach($availableYears as $year)
@@ -162,7 +152,6 @@
         @endforeach
     </select>
 
-    {{-- Panel Detail Audit (Default Hidden) --}}
     <div id="auditDetailPanel" class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hidden lg:block min-w-[280px] max-w-[320px]">
         <h4 class="font-bold text-gray-800 text-sm mb-3 flex items-center gap-2">
             <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 14h.01M18 14h.01M15 11h3M12 11h.01M9 11h.01M7 21h10v-2a3 3 0 005.356-2.678M7 11H5v8h2V11z"/></svg>
@@ -180,13 +169,11 @@
 </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    {{-- KOLOM KIRI (2/3): DAFTAR AUDIT --}}
     <div class="lg:col-span-2 space-y-4">
         @forelse($recentAudits as $audit)
             <div class="p-5 hover:bg-gray-50 transition-colors border border-gray-100 rounded-xl">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex-1">
-                        {{-- DEPARTEMEN --}}
                         <div class="flex items-center gap-2 mb-2">
                             <div class="flex flex-wrap gap-1">
 @forelse($audit->department_names as $deptName)
@@ -203,7 +190,6 @@
                             </div>
                         </div>
 
-                        {{-- SCOPE --}}
                         <h4 class="text-sm font-semibold text-gray-800 mb-1">
                             Audit Scope:
                             <span class="text-blue-700 font-medium">
@@ -211,7 +197,6 @@
                             </span>
                         </h4>
 
-                        {{-- DETAIL --}}
                         <div class="grid grid-cols-2 md:grid-cols-4 mt-3 gap-4 text-[11px] text-gray-600 pt-2 border-t border-gray-100">
                             <div>
                                 <p class="font-bold text-gray-500 uppercase text-[9px] tracking-wider">Metodologi</p>
@@ -230,7 +215,6 @@
                         </div>
                     </div>
 
-                    {{-- STATUS --}}
                     <div class="flex items-center gap-3 shrink-0">
                         @php $statusNorm = strtoupper($audit->status); @endphp
                         @if($statusNorm === 'COMPLETE' || $statusNorm === 'COMPLETED')
@@ -252,8 +236,6 @@
             </div>
         @endforelse
     </div>
-
-{{-- KOLOM KANAN (1/3): TEMUAN AUDIT --}}
 <div class="lg:col-span-1">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-6 py-4 bg-[#7c1d1d] flex items-center gap-2">
@@ -337,7 +319,7 @@
 <script>
 function showAuditDetails(dateString, count) {
     const panel = document.getElementById('auditDetailPanel');
-    const content = document.getElementById('detailContent'); // <--- PASTIKAN INI ADA
+    const content = document.getElementById('detailContent'); 
 
     if (!panel || !content) return;
 
@@ -380,7 +362,6 @@ function showAuditDetails(dateString, count) {
         }
     })
     .catch(err => {
-        // Tampilkan pesan error asli dari PHP di sini
         content.innerHTML = `<div class="text-[10px] text-red-600 p-3 bg-red-50 rounded-lg border border-red-200">
                                 <strong>SERVER ERROR:</strong><br> ${err.message}
                              </div>`;

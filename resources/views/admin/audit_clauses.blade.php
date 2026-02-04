@@ -2,8 +2,7 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    
-    {{-- HEADER --}}
+
     <div class="mb-8">
         <div class="flex justify-between items-center mb-6">
             <div>
@@ -24,7 +23,6 @@
             </div>
         </div>
 
-{{-- 📋 RINGKASAN DATA AUDIT --}}
 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 text-sm">
@@ -111,9 +109,8 @@
 
 
 
-    </div> {{-- AKHIR HEADER SECTION --}}
+    </div> 
 
-    {{-- GRAFIK SECTION --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
             <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Gambaran Per Klausul Utama</h3>
@@ -130,7 +127,6 @@
         </div>
     </div>
 
-    {{-- MENU GRID: Detail Audit per Klausul --}}
     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
         <span class="bg-blue-600 w-2 h-6 rounded-full mr-3"></span>
         Detail Audit per Klausul

@@ -3,7 +3,6 @@
 @section('content')
 <div class="p-6 bg-white">
 
-       <!-- TOMBOL TAMBAH SOAL -->
 <div class="mb-6 flex justify-end">
     <a 
         href="{{ route('admin.items.create') }}" 
@@ -12,7 +11,6 @@
         + Tambah Soal
     </a>
 </div>
-   <!-- FILTER CARD -->
    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
         <form method="GET" action="{{ route('admin.items.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             
@@ -84,7 +82,6 @@
         </form>
     </div>
 
-    <!-- TABLE -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -134,7 +131,6 @@
             </table>
         </div>
 
-        <!-- Empty State -->
         @if($items->isEmpty())
             <div class="text-center py-12 text-gray-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
