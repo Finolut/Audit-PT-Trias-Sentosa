@@ -713,10 +713,7 @@ foreach ($siblings as $sibling) {
             ->where('id', $audit->department_id)
             ->value('name') ?? 'Unknown Department';
 
-        $existingNotes = DB::table('audit_questions')
-            ->where('audit_id', $auditId)
-            ->whereIn('clause_code', $subCodes)
-            ->pluck('question_text', 'clause_code');
+        
 
 // Ambil jawaban yang sudah tersimpan
 $existingAnswers = [];
@@ -745,7 +742,6 @@ foreach ($rawAnswers as $ans) {
             'auditorName'    => $session->auditor_name,
             'targetDept'     => $targetDeptName,
             'itemsGrouped'   => $itemsGrouped,
-            'existingNotes'  => $existingNotes,
             'maturityLevels' => DB::table('maturity_levels')->orderBy('level_number')->get(),
             'responders'     => DB::table('audit_responders')->where('audit_session_id', $session->id)->get(),
             'existingAnswers'=> $existingAnswers,

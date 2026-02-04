@@ -404,6 +404,23 @@
             top: 1rem;
             left: 1rem;
         }
+        .item-locked {
+    opacity: 0.75;
+}
+
+.item-locked .answer-btn,
+.item-locked select,
+.item-locked textarea,
+.item-locked .btn-more {
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.item-locked .answer-btn {
+    background-color: #e5e7eb !important;
+    color: #6b7280 !important;
+}
+
     </style>
 </head>
 <body class="bg-gray-50 audit-body">
@@ -452,7 +469,9 @@
                     @endphp
 
                     @foreach ($items->where('maturity_level_id', $level->id) as $item)
-                        <div class="item-row" id="row_{{ $item->id }}">
+                        <div class="item-row"
+     id="row_{{ $item->id }}"
+     data-locked="{{ $isAnsweredByAuthor ? '1' : '0' }}">
                             <div class="item-content-col">
                                 <p class="item-text">{{ $item->item_text }}</p>
                                 <div id="info_{{ $item->id }}" class="score-info-box"></div>
@@ -510,13 +529,13 @@
                                                 onchange="toggleFindingNote('{{ $item->id }}', '{{ $auditorName }}', this.value)">
                                                 <option value="">-- No Finding --</option>
                                                 <option value="observed" {{ $authorFindingLevel === 'observed' ? 'selected' : '' }}>
-                                                    Observed (OFI)
+                                                    Observed
                                                 </option>
                                                 <option value="minor" {{ $authorFindingLevel === 'minor' ? 'selected' : '' }}>
-                                                    Minor NC
+                                                    Minor
                                                 </option>
                                                 <option value="major" {{ $authorFindingLevel === 'major' ? 'selected' : '' }}>
-                                                    Major NC
+                                                    Major
                                                 </option>
                                             </select>
                                         </div>
@@ -664,6 +683,9 @@
             updateHiddenInputs(itemId);
             updateInfoBox(itemId);
         }
+        if (users[auditorName]?.answer) {
+            lockItem(itemId);
+        }
         for (const [itemId, users] of Object.entries(dbAnswers)) {
             if (users[auditorName]) {
                 const ans = users[auditorName].answer;
@@ -789,6 +811,39 @@
         const wrapper = document.getElementById(`finding_note_wrapper_${itemId}_${auditor}`);
         if (wrapper) wrapper.style.display = value ? 'block' : 'none';
     }
+    function lockItem(itemId) {
+const row = document.getElementById(`row_${itemId}`);
+if (row?.dataset.locked === '1') {
+    Swal.fire(
+        'Terkunci',
+        'Jawaban sudah dikunci dan tidak dapat diubah.',
+        'info'
+    );
+    return;
+}
+
+    row.classList.add('item-locked');
+    row.dataset.locked = '1';
+
+    // Disable buttons
+    row.querySelectorAll('.answer-btn').forEach(btn => {
+        btn.disabled = true;
+    });
+
+    // Disable finding
+    row.querySelectorAll('select, textarea').forEach(el => {
+        el.disabled = true;
+        el.readOnly = true;
+    });
+
+    // Disable modal button
+    const moreBtn = row.querySelector('.btn-more');
+    if (moreBtn) {
+        moreBtn.disabled = true;
+        moreBtn.classList.add('disabled');
+    }
+}
+
 </script>
 </body>
 </html>
