@@ -28,25 +28,30 @@
         @else
             <div class="space-y-4">
                 @foreach($findings as $f)
-                    @php
-                        $levelConfig = match($f->finding_level) {
-                            'MAJOR_NC' => ['label' => 'MAJOR NC', 'color' => 'red'],
-                            'MINOR_NC' => ['label' => 'MINOR NC', 'color' => 'yellow'],
-                            default    => ['label' => 'OBSERVED', 'color' => 'blue'],
-                        };
+@php
+    $level = strtolower($f->finding_level ?? 'observed');
 
-                        $bgClass = match($levelConfig['color']) {
-                            'red'    => 'bg-red-50 border-red-200',
-                            'yellow' => 'bg-yellow-50 border-yellow-200',
-                            'blue'   => 'bg-blue-50 border-blue-200',
-                        };
+    $levelMap = [
+        'observed' => ['label' => 'Observed', 'color' => 'blue'],
+        'minor'    => ['label' => 'Minor NC', 'color' => 'yellow'],
+        'major'    => ['label' => 'Major NC', 'color' => 'red'],
+    ];
 
-                        $textClass = match($levelConfig['color']) {
-                            'red'    => 'text-red-700',
-                            'yellow' => 'text-yellow-700',
-                            'blue'   => 'text-blue-700',
-                        };
-                    @endphp
+    $cfg = $levelMap[$level] ?? $levelMap['observed'];
+
+    $bgClass = match($cfg['color']) {
+        'red'    => 'bg-red-50 border-red-200',
+        'yellow' => 'bg-yellow-50 border-yellow-200',
+        'blue'   => 'bg-blue-50 border-blue-200',
+    };
+
+    $textClass = match($cfg['color']) {
+        'red'    => 'text-red-700',
+        'yellow' => 'text-yellow-700',
+        'blue'   => 'text-blue-700',
+    };
+@endphp
+
 
                     <div class="p-4 rounded-xl border {{ $bgClass }} hover:shadow-sm transition">
                         <div class="flex justify-between items-start mb-2">
@@ -58,9 +63,10 @@
                                     Clause {{ $f->clause_code }}
                                 </span>
                             </div>
-                            <span class="px-2 py-1 text-xs font-bold rounded {{ $textClass }}">
-                                {{ $levelConfig['label'] }}
-                            </span>
+<span class="px-2 py-1 text-xs font-bold rounded {{ $textClass }}">
+    {{ $cfg['label'] }}
+</span>
+
                         </div>
 
                         <p class="text-gray-700 text-sm leading-relaxed italic mb-3">
