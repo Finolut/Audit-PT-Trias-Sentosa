@@ -602,7 +602,7 @@
     // Inisialisasi variabel global
     const auditorName = @json($auditorName);
     const responders = @json($responders);
-    const dbAnswers = @json($existingAnswers ?? );
+const dbAnswers = @json($existingAnswers ?? []);
     let sessionAnswers = {};
 
     // Fungsi lock item yang diperbaiki
