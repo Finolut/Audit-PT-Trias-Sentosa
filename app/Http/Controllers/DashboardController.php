@@ -260,174 +260,139 @@ if ($deptId) {
 
         return view('admin.department_audits', compact('departments', 'currentDept', 'audits', 'localStats'));
     }
-    public function showAuditOverview($auditId)
-    {
-        // Copy paste logic showAuditOverview Anda yang panjang di sini
-        // Pastikan return view('admin.audit_clauses', ...)
-        $departments = Department::all();
-       $audit = Audit::with('department')->findOrFail($auditId);
+public function showAuditOverview($auditId)
+{
+    $departments = Department::all();
+    $audit = Audit::with('department')->findOrFail($auditId);
 
-       // --- TAMBAHKAN INI AGAR NAMA AUDITOR MUNCUL ---
+    // --- DATA AUDITOR & TIM ---
     $session = DB::table('audit_sessions')
         ->where('id', $audit->audit_session_id)
         ->first();
 
-$leadAuditor = [
-    'name'  => $session->auditor_name ?? '-',
-    'email' => $session->auditor_email ?? '-',
-    'nik'   => $session->auditor_nik ?? '-',
-];
-
-$teamMembers = DB::table('audit_responders')
-    ->where('audit_session_id', $audit->audit_session_id)
-    ->where(function ($q) use ($leadAuditor) {
-        $q->where('responder_nik', '!=', $leadAuditor['nik'])
-          ->orWhereNull('responder_nik');
-    })
-    ->select(
-        'responder_name as name',
-        'responder_nik as nik',
-        'responder_department as department'
-    )
-    ->get();
-       
-        // --- LOGIKA GRAFIK ---
-        $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
-            ->leftJoin('answer_finals', function($join) use ($auditId) {
-                $join->on('items.id', '=', 'answer_finals.item_id')
-                     ->where('answer_finals.audit_id', '=', $auditId);
-            })
-            ->select(
-                'clauses.clause_code',
-                'answer_finals.final_yes',
-                'answer_finals.final_no',
-                'answer_finals.yes_count',
-                'answer_finals.no_count'
-            )
-            ->get();
-
-                // --- QUERY UNTUK FINDING LEVEL ---
-    $findingStats = DB::table('answers')
-        ->join('items', 'answers.item_id', '=', 'items.id')
-        ->join('clauses', 'items.clause_id', '=', 'clauses.id')
-        ->where('answers.audit_id', '=', $auditId)
-        ->whereNotNull('answers.finding_note')
-        ->where('answers.finding_note', '!=', '')
-        ->select(
-            'answers.finding_level',
-            DB::raw('count(*) as count')
-        )
-        ->groupBy('answers.finding_level')
-        ->pluck('count', 'finding_level')
-        ->toArray();
-
-    // Format data untuk chart
-    $findingChartData = [
-        'observed' => $findingStats['observed'] ?? 0,
-        'minor' => $findingStats['minor'] ?? 0,
-        'major' => $findingStats['major'] ?? 0,
+    $leadAuditor = [
+        'name'  => $session->auditor_name ?? '-',
+        'email' => $session->auditor_email ?? '-',
+        'nik'   => $session->auditor_nik ?? '-',
     ];
 
-        $detailedStats = []; 
-        $mainStats = [];     
+    $teamMembers = DB::table('audit_responders')
+        ->where('audit_session_id', $audit->audit_session_id)
+        ->where(function ($q) use ($leadAuditor) {
+            $q->where('responder_nik', '!=', $leadAuditor['nik'])
+              ->orWhereNull('responder_nik');
+        })
+        ->select(
+            'responder_name as name',
+            'responder_nik as nik',
+            'responder_department as department'
+        )
+        ->get();
+       
+    // --- LOGIKA GRAFIK ---
+    $allItems = Item::join('clauses', 'items.clause_id', '=', 'clauses.id')
+        ->leftJoin('answer_finals', function($join) use ($auditId) {
+            $join->on('items.id', '=', 'answer_finals.item_id')
+                 ->where('answer_finals.audit_id', '=', $auditId);
+        })
+        ->select(
+            'clauses.clause_code',
+            'answer_finals.final_yes',
+            'answer_finals.final_no',
+            'answer_finals.yes_count',
+            'answer_finals.no_count'
+        )
+        ->get();
 
-// 1. UBAH INISIALISASI ARRAY (Tambahkan key 'unanswered')
-foreach($this->mainClauses as $main => $subs) {
-    // Tambah 'unanswered' di sini
-    $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0]; 
-    foreach($subs as $sub) {
-        $detailedStats[$sub] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
-    }
-}
+    // --- ✅ PERBAIKAN QUERY FINDING LEVEL ---
+    $findingStats = DB::table('answers')
+        ->where('audit_id', $auditId)
+        ->whereNotNull('finding_level')
+        ->where('finding_level', '!=', '')
+        ->select(
+            // Normalisasi: lowercase + trim whitespace
+            DB::raw("LOWER(TRIM(finding_level)) as normalized_level"),
+            DB::raw('COUNT(*) as count')
+        )
+        ->groupBy('normalized_level')
+        ->pluck('count', 'normalized_level')
+        ->toArray();
 
-// 2. UBAH LOGIKA LOOPING STATUS
-// ... (Bagian atas method tetap sama)
+    // Mapping dengan fallback untuk variasi penulisan
+    $findingChartData = [
+        'observed' => $findingStats['observed'] ?? $findingStats['observation'] ?? $findingStats['observed finding'] ?? 0,
+        'minor'    => $findingStats['minor'] ?? $findingStats['minor finding'] ?? 0,
+        'major'    => $findingStats['major'] ?? $findingStats['major finding'] ?? 0,
+    ];
 
-foreach ($allItems as $item) {
-    $status = 'unanswered'; // Default status awal
+    $detailedStats = []; 
+    $mainStats = [];     
 
-    // LOGIKA PEMISAHAN:
-    
-    // 1. Cek apakah record jawaban ADA di database (bukan null)
-    if (is_null($item->final_yes)) {
-        // Jika null, berarti baris ini dihasilkan dari LEFT JOIN karena belum ada datanya
-        $status = 'unanswered'; // Warna ABU-ABU
-    } 
-    // 2. Jika data ADA, cek apakah hasil votingnya kosong (N/A)
-    elseif ($item->yes_count == 0 && $item->no_count == 0) {
-        // Sudah dikerjakan/disubmit tapi tidak ada pilihan Yes atau No (N/A)
-        $status = 'na'; // Warna KUNING
-    } 
-    // 3. Logika Yes/No/Partial seperti biasa
-    elseif ($item->final_yes > $item->final_no) {
-        $status = 'yes';
-    } elseif ($item->final_no > $item->final_yes) {
-        $status = 'no';
-    } else {
-        $status = 'partial'; // Seri
-    }
-
-    // Masukkan ke array statistics
-    if (isset($detailedStats[$item->clause_code])) {
-        $detailedStats[$item->clause_code][$status]++;
-    }
-
-    foreach($this->mainClauses as $mainKey => $subArray) {
-        if (in_array($item->clause_code, $subArray)) {
-            $mainStats[$mainKey][$status]++;
-            break;
+    // Inisialisasi array
+    foreach($this->mainClauses as $main => $subs) {
+        $mainStats[$main] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0]; 
+        foreach($subs as $sub) {
+            $detailedStats[$sub] = ['yes' => 0, 'no' => 0, 'partial' => 0, 'na' => 0, 'unanswered' => 0];
         }
     }
-}
 
-$auditSummary = [
-    'audit_code' => $audit->audit_code ?? '-',
-    'status'     => strtoupper($audit->status),
+    // Logika looping status
+    foreach ($allItems as $item) {
+        $status = 'unanswered';
 
-    'type' => $audit->type,
+        if (is_null($item->final_yes)) {
+            $status = 'unanswered';
+        } 
+        elseif ($item->yes_count == 0 && $item->no_count == 0) {
+            $status = 'na';
+        } 
+        elseif ($item->final_yes > $item->final_no) {
+            $status = 'yes';
+        } 
+        elseif ($item->final_no > $item->final_yes) {
+            $status = 'no';
+        } 
+        else {
+            $status = 'partial';
+        }
 
-    'objective' => $audit->objective,
+        if (isset($detailedStats[$item->clause_code])) {
+            $detailedStats[$item->clause_code][$status]++;
+        }
 
-    'scope' => $audit->scope
-        ? implode(', ', json_decode($audit->scope, true))
-        : '-',
-
-    'standards' => $audit->standards
-        ? implode(', ', json_decode($audit->standards, true))
-        : '-',
-
-    'methodology' => $audit->methodology
-        ? implode(', ', json_decode($audit->methodology, true))
-        : '-',
-
-    'start_date' => $audit->audit_start_date
-        ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d F Y')
-        : '-',
-
-    'end_date' => $audit->audit_end_date
-        ? \Carbon\Carbon::parse($audit->audit_end_date)->format('d F Y')
-        : '-',
-];
-
-
-
-
-// ... (Sisa method return view tetap sama)
-
-
-        return view('admin.audit_clauses', [
-            'departments' => $departments,
-            'audit' => $audit,
-            'leadAuditor' => $leadAuditor,
-            'teamMembers' => $teamMembers,
-            'auditSummary' => $auditSummary,
-            'mainClauses' => $this->mainClauses,
-            'titles' => $this->mainClauseTitles,
-            'detailedStats' => $detailedStats, 
-            'mainStats' => $mainStats,          
-            'findingChartData' => $findingChartData,
-        ]);
+        foreach($this->mainClauses as $mainKey => $subArray) {
+            if (in_array($item->clause_code, $subArray)) {
+                $mainStats[$mainKey][$status]++;
+                break;
+            }
+        }
     }
+
+    $auditSummary = [
+        'audit_code' => $audit->audit_code ?? '-',
+        'status'     => strtoupper($audit->status),
+        'type'       => $audit->type,
+        'objective'  => $audit->objective,
+        'scope'      => $audit->scope ? implode(', ', json_decode($audit->scope, true)) : '-',
+        'standards'  => $audit->standards ? implode(', ', json_decode($audit->standards, true)) : '-',
+        'methodology'=> $audit->methodology ? implode(', ', json_decode($audit->methodology, true)) : '-',
+        'start_date' => $audit->audit_start_date ? \Carbon\Carbon::parse($audit->audit_start_date)->format('d F Y') : '-',
+        'end_date'   => $audit->audit_end_date ? \Carbon\Carbon::parse($audit->audit_end_date)->format('d F Y') : '-',
+    ];
+
+    return view('admin.audit_clauses', [
+        'departments'       => $departments,
+        'audit'             => $audit,
+        'leadAuditor'       => $leadAuditor,
+        'teamMembers'       => $teamMembers,
+        'auditSummary'      => $auditSummary,
+        'mainClauses'       => $this->mainClauses,
+        'titles'            => $this->mainClauseTitles,
+        'detailedStats'     => $detailedStats, 
+        'mainStats'         => $mainStats,          
+        'findingChartData'  => $findingChartData,
+    ]);
+}
 
 public function showClauseDetail($auditId, $mainClause)
 {
