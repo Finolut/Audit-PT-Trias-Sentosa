@@ -382,12 +382,12 @@ function setValFromModal(itemId, userName, value, btnElement) {
 /**
 Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
 */
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const copyBtn = document.getElementById('copy-token-btn');
         const tokenElement = document.getElementById('audit-token');
         
-        if (copyBtn && tokenElement) {
-            copyBtn.addEventListener('click', async function() {
+        if (copyBtn && tokenElement && !copyBtn.disabled) {
+            copyBtn.addEventListener('click', function() {
                 const tokenText = tokenElement.textContent.trim();
                 
                 if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
@@ -395,18 +395,55 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
+                // Fallback copy method yang bekerja di semua browser
+                const textarea = document.createElement('textarea');
+                textarea.value = tokenText;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                textarea.style.top = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
                 try {
-                    // Modern clipboard API
-                    await navigator.clipboard.writeText(tokenText);
-                    showCopySuccess(this);
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        // Tampilkan feedback sukses
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.style.background = '#10b981';
+                        
+                        // Tooltip sederhana
+                        const tooltip = document.createElement('span');
+                        tooltip.textContent = '✓ Tersalin!';
+                        tooltip.style.position = 'absolute';
+                        tooltip.style.top = '-30px';
+                        tooltip.style.right = '0';
+                        tooltip.style.background = '#10b981';
+                        tooltip.style.color = 'white';
+                        tooltip.style.padding = '3px 8px';
+                        tooltip.style.borderRadius = '4px';
+                        tooltip.style.fontSize = '12px';
+                        tooltip.style.zIndex = '1000';
+                        this.parentElement.appendChild(tooltip);
+                        
+                        setTimeout(() => {
+                            this.innerHTML = '<i class="fas fa-copy"></i>';
+                            this.style.background = '';
+                            tooltip.remove();
+                        }, 2000);
+                    } else {
+                        alert('Gagal menyalin token. Silakan salin manual.');
+                    }
                 } catch (err) {
-                    // Fallback untuk browser yang tidak support navigator.clipboard
-                    fallbackCopyTextToClipboard(tokenText, this);
+                    console.error('Error copying text: ', err);
+                    alert('Gagal menyalin token. Silakan salin manual:\n' + tokenText);
                 }
+                
+                document.body.removeChild(textarea);
             });
         }
     });
-    
     // Fungsi fallback untuk copy text
     function fallbackCopyTextToClipboard(text, btnElement) {
         const textArea = document.createElement("textarea");
