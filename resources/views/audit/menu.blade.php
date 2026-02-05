@@ -595,6 +595,102 @@
             console.error('Failed to copy token:', err);
         });
     });
+
+      // Copy token functionality - DIPERBAIKI
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyBtn = document.getElementById('copy-token-btn');
+        const tokenElement = document.getElementById('audit-token');
+        
+        if (copyBtn && tokenElement) {
+            copyBtn.addEventListener('click', async function() {
+                const tokenText = tokenElement.textContent.trim();
+                
+                if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
+                    alert('Token tidak tersedia untuk disalin');
+                    return;
+                }
+                
+                try {
+                    // Modern clipboard API
+                    await navigator.clipboard.writeText(tokenText);
+                    showCopySuccess(this);
+                } catch (err) {
+                    // Fallback untuk browser yang tidak support navigator.clipboard
+                    fallbackCopyTextToClipboard(tokenText, this);
+                }
+            });
+        }
+    });
+    
+    // Fungsi fallback untuk copy text
+    function fallbackCopyTextToClipboard(text, btnElement) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showCopySuccess(btnElement);
+            } else {
+                showCopyError(btnElement);
+            }
+        } catch (err) {
+            showCopyError(btnElement);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+    
+    // Tampilkan pesan sukses
+    function showCopySuccess(btnElement) {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fas fa-check"></i>';
+        btnElement.style.background = '#10b981';
+        btnElement.style.color = 'white';
+        
+        // Tooltip sukses
+        const tooltip = document.createElement('span');
+        tooltip.textContent = 'Tersalin!';
+        tooltip.style.position = 'absolute';
+        tooltip.style.top = '-30px';
+        tooltip.style.right = '0';
+        tooltip.style.background = '#10b981';
+        tooltip.style.color = 'white';
+        tooltip.style.padding = '4px 8px';
+        tooltip.style.borderRadius = '4px';
+        tooltip.style.fontSize = '12px';
+        tooltip.style.zIndex = '1000';
+        btnElement.parentElement.appendChild(tooltip);
+        
+        setTimeout(() => {
+            btnElement.innerHTML = '<i class="fas fa-copy"></i>';
+            btnElement.style.background = '';
+            btnElement.style.color = '';
+            tooltip.remove();
+        }, 2000);
+    }
+    
+    // Tampilkan pesan error
+    function showCopyError(btnElement) {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fas fa-times"></i>';
+        btnElement.style.background = '#ef4444';
+        btnElement.style.color = 'white';
+        
+        setTimeout(() => {
+            btnElement.innerHTML = '<i class="fas fa-copy"></i>';
+            btnElement.style.background = '';
+            btnElement.style.color = '';
+        }, 2000);
+        
+        alert('Gagal menyalin token. Silakan salin manual.');
+    }
 </script>
 @endpush
 </body>
