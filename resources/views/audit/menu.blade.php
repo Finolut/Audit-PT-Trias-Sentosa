@@ -433,17 +433,19 @@
                 Tips: Simpan token di catatan kerja, dokumen internal, atau screenshot.
             </p>
 
-            <div class="flex items-center gap-1 mt-3">
-                <div id="audit-token" class="token-value">
-                    {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
-                </div>
-                <button id="copy-token-btn"
-                        class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
-                        {{ !$resumeToken ? 'disabled' : '' }}
-                        aria-label="Salin Kode Audit">
-                    <i class="fas fa-copy"></i>
-                </button>
-            </div>
+   <!-- GANTI BAGIAN TOKEN JADI INI (SALIN & TEMPATKAN LANGSUNG) -->
+<div class="flex items-center gap-2 mt-3">
+    <div id="audit-token" 
+         class="token-value bg-blue-50 border border-blue-200 rounded px-3 py-2 font-mono text-sm select-all"
+         onclick="navigator.clipboard.writeText(this.textContent.trim()).then(()=>{alert('✓ Token disalin!\n\n' + this.textContent.trim())}).catch(()=>{alert('Salin manual:\n' + this.textContent.trim())})">
+        {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+    </div>
+    <button type="button"
+            class="token-btn bg-blue-700 hover:bg-blue-800 transition-colors p-2 rounded"
+            onclick="navigator.clipboard.writeText(document.getElementById('audit-token').textContent.trim()).then(()=>{this.innerHTML='<i class=\'fas fa-check text-green-400\'></i>';setTimeout(()=>{this.innerHTML='<i class=\'fas fa-copy\'></i>'},2000)}).catch(()=>alert('Gagal salin. Salin manual dari kotak token'))">
+        <i class="fas fa-copy"></i>
+    </button>
+</div>
         </div>
     </div>
 </div>
