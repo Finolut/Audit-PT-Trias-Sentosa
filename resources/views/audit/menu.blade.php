@@ -418,33 +418,21 @@
         </div>
 
         <!-- Token -->
-        <div>
-            <h2 class="section-title">Token Audit (WAJIB DISIMPAN)</h2>
+<div class="flex items-center gap-1 mt-3 relative">
+    <div id="audit-token" class="token-value">
+        {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+    </div>
 
-            <!-- TEXT TAMBAHAN (INFORMATIF, TANPA UBAH DESAIN) -->
-            <p class="text-xs text-gray-600 mt-2">
-                <strong>Penting:</strong> Simpan token ini untuk melanjutkan audit di kemudian hari.
-                Dengan token ini, progress audit dapat dipulihkan.
-                Jika terjadi kendala, hubungi Admin
-                <strong>Brahmanto Anggoro Laksono - SSSE</strong>.
-            </p>
+    <button
+        id="copy-token-btn"
+        type="button"
+        class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+        {{ !$resumeToken ? 'disabled' : '' }}
+        aria-label="Salin Kode Audit">
+        <i class="fas fa-copy"></i>
+    </button>
+</div>
 
-            <p class="text-xs text-gray-500 mt-2">
-                Tips: Simpan token di catatan kerja, dokumen internal, atau screenshot.
-            </p>
-
-            <div class="flex items-center gap-1 mt-3">
-                <div id="audit-token" class="token-value">
-                    {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
-                </div>
-                <button id="copy-token-btn"
-                        class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
-                        {{ !$resumeToken ? 'disabled' : '' }}
-                        aria-label="Salin Kode Audit">
-                    <i class="fas fa-copy"></i>
-                </button>
-            </div>
-        </div>
     </div>
 </div>
 

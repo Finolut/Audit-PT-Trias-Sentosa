@@ -382,68 +382,51 @@ function setValFromModal(itemId, userName, value, btnElement) {
 /**
 Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
 */
-    document.addEventListener('DOMContentLoaded', function() {
-        const copyBtn = document.getElementById('copy-token-btn');
-        const tokenElement = document.getElementById('audit-token');
-        
-        if (copyBtn && tokenElement && !copyBtn.disabled) {
-            copyBtn.addEventListener('click', function() {
-                const tokenText = tokenElement.textContent.trim();
-                
-                if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
-                    alert('Token tidak tersedia untuk disalin');
-                    return;
-                }
-                
-                // Fallback copy method yang bekerja di semua browser
-                const textarea = document.createElement('textarea');
-                textarea.value = tokenText;
-                textarea.style.position = 'fixed';
-                textarea.style.left = '-9999px';
-                textarea.style.top = '-9999px';
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
-                
-                try {
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        // Tampilkan feedback sukses
-                        const originalHTML = this.innerHTML;
-                        this.innerHTML = '<i class="fas fa-check"></i>';
-                        this.style.background = '#10b981';
-                        
-                        // Tooltip sederhana
-                        const tooltip = document.createElement('span');
-                        tooltip.textContent = '✓ Tersalin!';
-                        tooltip.style.position = 'absolute';
-                        tooltip.style.top = '-30px';
-                        tooltip.style.right = '0';
-                        tooltip.style.background = '#10b981';
-                        tooltip.style.color = 'white';
-                        tooltip.style.padding = '3px 8px';
-                        tooltip.style.borderRadius = '4px';
-                        tooltip.style.fontSize = '12px';
-                        tooltip.style.zIndex = '1000';
-                        this.parentElement.appendChild(tooltip);
-                        
-                        setTimeout(() => {
-                            this.innerHTML = '<i class="fas fa-copy"></i>';
-                            this.style.background = '';
-                            tooltip.remove();
-                        }, 2000);
-                    } else {
-                        alert('Gagal menyalin token. Silakan salin manual.');
-                    }
-                } catch (err) {
-                    console.error('Error copying text: ', err);
-                    alert('Gagal menyalin token. Silakan salin manual:\n' + tokenText);
-                }
-                
-                document.body.removeChild(textarea);
-            });
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('copy-token-btn');
+    const tokenEl = document.getElementById('audit-token');
+
+    if (!btn || !tokenEl || btn.disabled) return;
+
+    btn.addEventListener('click', async () => {
+        const token = tokenEl.textContent.trim();
+
+        if (!token || token === 'TOKEN_TIDAK_TERSEDIA') return;
+
+        try {
+            await navigator.clipboard.writeText(token);
+
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.style.background = '#10b981';
+            btn.style.color = '#fff';
+
+            const tip = document.createElement('span');
+            tip.textContent = 'Tersalin!';
+            tip.style.position = 'absolute';
+            tip.style.top = '-28px';
+            tip.style.right = '0';
+            tip.style.background = '#10b981';
+            tip.style.color = '#fff';
+            tip.style.fontSize = '12px';
+            tip.style.padding = '3px 8px';
+            tip.style.borderRadius = '4px';
+
+            btn.parentElement.appendChild(tip);
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy"></i>';
+                btn.style.background = '';
+                btn.style.color = '';
+                tip.remove();
+            }, 1500);
+
+        } catch (e) {
+            console.error(e);
+            alert('Browser menolak copy otomatis. Salin manual.');
         }
     });
+});
+
     // Fungsi fallback untuk copy text
     function fallbackCopyTextToClipboard(text, btnElement) {
         const textArea = document.createElement("textarea");
