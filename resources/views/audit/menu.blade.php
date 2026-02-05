@@ -609,53 +609,91 @@
 @push('scripts')
 <script src="{{ asset('js/audit-script.js') }}"></script>
 <script>
-      // Set global variables for audit-script.js
+    // Set global variables for audit-script.js
     window.auditorName = @json($auditorName);
     window.responders  = @json($responders);
 
-    // Fungsi utama copy token dengan popup
+    // PERBAIKAN: Fungsi copy token yang lebih sederhana dan langsung
     document.addEventListener('DOMContentLoaded', function() {
         const copyBtn = document.getElementById('copy-token-btn');
         const tokenEl = document.getElementById('audit-token');
         
-        if (!copyBtn || !tokenEl || copyBtn.disabled) return;
+        // Debug: Cek apakah elemen ditemukan
+        console.log('Copy Button:', copyBtn);
+        console.log('Token Element:', tokenEl);
+        console.log('Token Text:', tokenEl ? tokenEl.textContent.trim() : 'N/A');
         
-        const tokenText = tokenEl.textContent.trim();
-        if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
-            copyBtn.disabled = true;
+        if (!copyBtn || !tokenEl) {
+            console.error('Elemen tidak ditemukan!');
             return;
         }
-
-        copyBtn.addEventListener('click', function() {
-            copyTokenWithFallback(tokenText);
+        
+        const tokenText = tokenEl.textContent.trim();
+        
+        // Hanya disable jika benar-benar tidak ada token
+        if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
+            copyBtn.disabled = true;
+            copyBtn.title = "Token tidak tersedia";
+            console.log('Token tidak tersedia, tombol disabled');
+            return;
+        }
+        
+        // Hapus disabled jika token ada
+        copyBtn.disabled = false;
+        copyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        copyBtn.classList.add('cursor-pointer', 'hover:bg-blue-700');
+        
+        console.log('Token tersedia, tombol aktif');
+        
+        // Event listener yang lebih sederhana
+        copyBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Tombol copy diklik!');
+            
+            copyToken(tokenText, copyBtn);
+        };
+        
+        // Juga tambahkan event listener untuk touch devices
+        copyBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            copyToken(tokenText, copyBtn);
         });
     });
 
-    // Fungsi copy dengan fallback yang reliable
-    function copyTokenWithFallback(text) {
-        // Metode 1: Clipboard API (modern)
+    // Fungsi copy yang lebih reliable
+    function copyToken(text, btn) {
+        // Metode 1: Clipboard API (modern browsers)
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => {
-                showCopySuccessPopup();
+                showCopySuccess(btn);
             }).catch(err => {
-                console.warn('Clipboard API failed, trying fallback:', err);
-                fallbackCopy(text);
+                console.warn('Clipboard API gagal:', err);
+                fallbackCopy(text, btn);
             });
         } 
-        // Metode 2: Fallback (semua browser)
+        // Metode 2: Fallback untuk browser lama
         else {
-            fallbackCopy(text);
+            fallbackCopy(text, btn);
         }
     }
 
-    // Fallback method untuk browser lama
-    function fallbackCopy(text) {
+    // Fallback method yang lebih aman
+    function fallbackCopy(text, btn) {
         const textarea = document.createElement('textarea');
         textarea.value = text;
+        
+        // Style untuk menyembunyikan textarea
         textarea.style.position = 'fixed';
         textarea.style.left = '-9999px';
         textarea.style.top = '-9999px';
+        textarea.style.opacity = '0';
+        textarea.style.width = '1px';
+        textarea.style.height = '1px';
+        
         document.body.appendChild(textarea);
+        textarea.focus();
         textarea.select();
         
         try {
@@ -663,41 +701,127 @@
             document.body.removeChild(textarea);
             
             if (successful) {
-                showCopySuccessPopup();
+                showCopySuccess(btn);
             } else {
-                showCopyError();
+                showCopyError(btn);
             }
         } catch (err) {
             document.body.removeChild(textarea);
-            showCopyError();
+            showCopyError(btn);
         }
     }
 
-    // Tampilkan popup sukses
-    function showCopySuccessPopup() {
-        const modal = document.getElementById('copySuccessModal');
-        modal.classList.remove('hidden');
+    // Tampilkan feedback sukses
+    function showCopySuccess(btn) {
+        const originalHTML = btn.innerHTML;
+        const originalBg = btn.style.backgroundColor;
         
-        // Auto close setelah 5 detik
+        // Update tombol
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.style.backgroundColor = '#10b981';
+        btn.style.color = 'white';
+        
+        // Tooltip sukses
+        const tooltip = document.createElement('div');
+        tooltip.textContent = '✓ Token berhasil disalin!';
+        tooltip.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+            font-weight: 600;
+        `;
+        
+        document.body.appendChild(tooltip);
+        
+        // Reset tombol setelah 2 detik
         setTimeout(() => {
-            closeCopyModal();
-        }, 5000);
+            btn.innerHTML = '<i class="fas fa-copy"></i>';
+            btn.style.backgroundColor = originalBg;
+            btn.style.color = '';
+        }, 2000);
+        
+        // Hapus tooltip setelah 3 detik
+        setTimeout(() => {
+            tooltip.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                if (tooltip.parentNode) {
+                    tooltip.parentNode.removeChild(tooltip);
+                }
+            }, 300);
+        }, 3000);
     }
 
-    // Tutup popup
-    function closeCopyModal() {
-        const modal = document.getElementById('copySuccessModal');
-        modal.classList.add('hidden');
+    // Tampilkan feedback error
+    function showCopyError(btn) {
+        const originalHTML = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="fas fa-times"></i>';
+        btn.style.backgroundColor = '#ef4444';
+        btn.style.color = 'white';
+        
+        alert('⚠️ Gagal menyalin token!\n\nSilakan salin manual:\n' + 
+              document.getElementById('audit-token').textContent.trim());
+        
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-copy"></i>';
+            btn.style.backgroundColor = '';
+            btn.style.color = '';
+        }, 2000);
     }
-
-    // Tutup popup saat klik di luar
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('copySuccessModal');
-        if (e.target === modal) {
-            closeCopyModal();
-        }
-    });
 </script>
+
+<style>
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+    
+    /* Pastikan tombol bisa diklik */
+    #copy-token-btn {
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        user-select: none;
+        transition: all 0.2s ease;
+    }
+    
+    #copy-token-btn:hover:not(:disabled) {
+        background-color: #1e40af !important;
+        transform: scale(1.05);
+    }
+    
+    #copy-token-btn:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+    
+    #copy-token-btn:disabled {
+        cursor: not-allowed !important;
+        opacity: 0.5 !important;
+    }
+</style>
 @endpush
 </body>
 </html>
