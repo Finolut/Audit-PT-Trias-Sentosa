@@ -418,21 +418,33 @@
         </div>
 
         <!-- Token -->
-<div class="flex items-center gap-1 mt-3 relative">
-    <div id="audit-token" class="token-value">
-        {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
-    </div>
+        <div>
+            <h2 class="section-title">Token Audit (WAJIB DISIMPAN)</h2>
 
-    <button
-        id="copy-token-btn"
-        type="button"
-        class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
-        {{ !$resumeToken ? 'disabled' : '' }}
-        aria-label="Salin Kode Audit">
-        <i class="fas fa-copy"></i>
-    </button>
-</div>
+            <!-- TEXT TAMBAHAN (INFORMATIF, TANPA UBAH DESAIN) -->
+            <p class="text-xs text-gray-600 mt-2">
+                <strong>Penting:</strong> Simpan token ini untuk melanjutkan audit di kemudian hari.
+                Dengan token ini, progress audit dapat dipulihkan.
+                Jika terjadi kendala, hubungi Admin
+                <strong>Brahmanto Anggoro Laksono - SSSE</strong>.
+            </p>
 
+            <p class="text-xs text-gray-500 mt-2">
+                Tips: Simpan token di catatan kerja, dokumen internal, atau screenshot.
+            </p>
+
+            <div class="flex items-center gap-1 mt-3">
+                <div id="audit-token" class="token-value">
+                    {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                </div>
+                <button id="copy-token-btn"
+                        class="token-btn {{ !$resumeToken ? 'opacity-50 cursor-not-allowed' : '' }}"
+                        {{ !$resumeToken ? 'disabled' : '' }}
+                        aria-label="Salin Kode Audit">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -558,42 +570,107 @@
     </div>
 
 @push('scripts')
-
 <script src="{{ asset('js/audit-script.js') }}"></script>
-
 <script>
-    
-       window.auditorName = @json($auditorName);
+    // Set global variables for audit-script.js
+    window.auditorName = @json($auditorName);
     window.responders  = @json($responders);
-    document.getElementById('copy-token-btn')?.addEventListener('click', function() {
-        const tokenText = document.getElementById('audit-token').textContent;
-        navigator.clipboard.writeText(tokenText).then(() => {
-            // Show success message
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-check"></i>';
-            this.style.background = '#10b981';
-            
-            setTimeout(() => {
-                this.innerHTML = '<i class="fas fa-copy"></i>';
-                this.style.background = '';
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy token:', err);
+
+    // PERBAIKAN UTAMA: Fungsi salin token yang robust dengan fallback
+    document.addEventListener('DOMContentLoaded', () => {
+        const copyBtn = document.getElementById('copy-token-btn');
+        const tokenEl = document.getElementById('audit-token');
+        
+        // Validasi elemen dan kondisi
+        if (!copyBtn || !tokenEl || copyBtn.disabled) return;
+        
+        const tokenText = tokenEl.textContent.trim();
+        if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
+            copyBtn.disabled = true;
+            copyBtn.title = "Token tidak tersedia";
+            return;
+        }
+
+        copyBtn.addEventListener('click', async () => {
+            try {
+                // Coba Clipboard API modern
+                await navigator.clipboard.writeText(tokenText);
+                showCopyFeedback(copyBtn, 'success', 'Tersalin!');
+            } catch (err) {
+                console.warn('Clipboard API gagal, menggunakan fallback:', err);
+                // Fallback ke metode lama
+                if (fallbackCopy(tokenText)) {
+                    showCopyFeedback(copyBtn, 'success', 'Tersalin!');
+                } else {
+                    showCopyFeedback(copyBtn, 'error', 'Gagal salin');
+                    setTimeout(() => alert('Gagal menyalin token. Silakan salin manual:\n' + tokenText), 300);
+                }
+            }
         });
     });
 
-        const originalHTML = btnElement.innerHTML;
-        btnElement.innerHTML = '<i class="fas fa-times"></i>';
-        btnElement.style.background = '#ef4444';
-        btnElement.style.color = 'white';
+    // Fungsi fallback yang lebih aman
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
         
+        try {
+            return document.execCommand('copy');
+        } catch (err) {
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+
+    // Feedback visual yang konsisten
+    function showCopyFeedback(btn, type, message) {
+        const originalIcon = btn.innerHTML;
+        const originalStyle = {
+            bg: btn.style.background,
+            color: btn.style.color
+        };
+        
+        // Update tampilan tombol
+        if (type === 'success') {
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.style.background = '#10b981';
+            btn.style.color = 'white';
+        } else {
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            btn.style.background = '#ef4444';
+            btn.style.color = 'white';
+        }
+        
+        // Tooltip feedback
+        const tooltip = document.createElement('span');
+        tooltip.textContent = message;
+        Object.assign(tooltip.style, {
+            position: 'absolute',
+            top: '-30px',
+            right: '0',
+            background: type === 'success' ? '#10b981' : '#ef4444',
+            color: 'white',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            zIndex: '1000',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+        });
+        btn.parentElement.appendChild(tooltip);
+        
+        // Reset setelah 1.8 detik
         setTimeout(() => {
-            btnElement.innerHTML = '<i class="fas fa-copy"></i>';
-            btnElement.style.background = '';
-            btnElement.style.color = '';
-        }, 2000);
-        
-        alert('Gagal menyalin token. Silakan salin manual.');
+            btn.innerHTML = '<i class="fas fa-copy"></i>';
+            btn.style.background = originalStyle.bg;
+            btn.style.color = originalStyle.color;
+            tooltip.remove();
+        }, 1800);
     }
 </script>
 @endpush
