@@ -569,109 +569,134 @@
         @endif
     </div>
 
+    <!-- Modal Popup untuk Copy Token -->
+<div id="copySuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4 animate-fade-in">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check-circle text-green-500 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Token Berhasil Disalin!</h3>
+            <p class="text-gray-600 mb-4">
+                Token audit telah disalin ke clipboard Anda.
+            </p>
+            <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                <p class="text-sm font-mono text-gray-800 break-all" id="modalTokenDisplay">
+                    {{ $resumeToken ?? 'TOKEN_TIDAK_TERSEDIA' }}
+                </p>
+            </div>
+            <p class="text-xs text-gray-500 mb-6">
+                <i class="fas fa-info-circle mr-1"></i>
+                Simpan token ini untuk melanjutkan audit di kemudian hari
+            </p>
+            <button onclick="closeCopyModal()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                <i class="fas fa-check mr-2"></i>OK, Saya Mengerti
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+</style>
+
 @push('scripts')
 <script src="{{ asset('js/audit-script.js') }}"></script>
 <script>
-    // Set global variables for audit-script.js
+      // Set global variables for audit-script.js
     window.auditorName = @json($auditorName);
     window.responders  = @json($responders);
 
-    // PERBAIKAN UTAMA: Fungsi salin token yang robust dengan fallback
-    document.addEventListener('DOMContentLoaded', () => {
+    // Fungsi utama copy token dengan popup
+    document.addEventListener('DOMContentLoaded', function() {
         const copyBtn = document.getElementById('copy-token-btn');
         const tokenEl = document.getElementById('audit-token');
         
-        // Validasi elemen dan kondisi
         if (!copyBtn || !tokenEl || copyBtn.disabled) return;
         
         const tokenText = tokenEl.textContent.trim();
         if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
             copyBtn.disabled = true;
-            copyBtn.title = "Token tidak tersedia";
             return;
         }
 
-        copyBtn.addEventListener('click', async () => {
-            try {
-                // Coba Clipboard API modern
-                await navigator.clipboard.writeText(tokenText);
-                showCopyFeedback(copyBtn, 'success', 'Tersalin!');
-            } catch (err) {
-                console.warn('Clipboard API gagal, menggunakan fallback:', err);
-                // Fallback ke metode lama
-                if (fallbackCopy(tokenText)) {
-                    showCopyFeedback(copyBtn, 'success', 'Tersalin!');
-                } else {
-                    showCopyFeedback(copyBtn, 'error', 'Gagal salin');
-                    setTimeout(() => alert('Gagal menyalin token. Silakan salin manual:\n' + tokenText), 300);
-                }
-            }
+        copyBtn.addEventListener('click', function() {
+            copyTokenWithFallback(tokenText);
         });
     });
 
-    // Fungsi fallback yang lebih aman
+    // Fungsi copy dengan fallback yang reliable
+    function copyTokenWithFallback(text) {
+        // Metode 1: Clipboard API (modern)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showCopySuccessPopup();
+            }).catch(err => {
+                console.warn('Clipboard API failed, trying fallback:', err);
+                fallbackCopy(text);
+            });
+        } 
+        // Metode 2: Fallback (semua browser)
+        else {
+            fallbackCopy(text);
+        }
+    }
+
+    // Fallback method untuk browser lama
     function fallbackCopy(text) {
         const textarea = document.createElement('textarea');
         textarea.value = text;
         textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
         document.body.appendChild(textarea);
         textarea.select();
         
         try {
-            return document.execCommand('copy');
-        } catch (err) {
-            return false;
-        } finally {
+            const successful = document.execCommand('copy');
             document.body.removeChild(textarea);
+            
+            if (successful) {
+                showCopySuccessPopup();
+            } else {
+                showCopyError();
+            }
+        } catch (err) {
+            document.body.removeChild(textarea);
+            showCopyError();
         }
     }
 
-    // Feedback visual yang konsisten
-    function showCopyFeedback(btn, type, message) {
-        const originalIcon = btn.innerHTML;
-        const originalStyle = {
-            bg: btn.style.background,
-            color: btn.style.color
-        };
+    // Tampilkan popup sukses
+    function showCopySuccessPopup() {
+        const modal = document.getElementById('copySuccessModal');
+        modal.classList.remove('hidden');
         
-        // Update tampilan tombol
-        if (type === 'success') {
-            btn.innerHTML = '<i class="fas fa-check"></i>';
-            btn.style.background = '#10b981';
-            btn.style.color = 'white';
-        } else {
-            btn.innerHTML = '<i class="fas fa-times"></i>';
-            btn.style.background = '#ef4444';
-            btn.style.color = 'white';
-        }
-        
-        // Tooltip feedback
-        const tooltip = document.createElement('span');
-        tooltip.textContent = message;
-        Object.assign(tooltip.style, {
-            position: 'absolute',
-            top: '-30px',
-            right: '0',
-            background: type === 'success' ? '#10b981' : '#ef4444',
-            color: 'white',
-            padding: '3px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            zIndex: '1000',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-        });
-        btn.parentElement.appendChild(tooltip);
-        
-        // Reset setelah 1.8 detik
+        // Auto close setelah 5 detik
         setTimeout(() => {
-            btn.innerHTML = '<i class="fas fa-copy"></i>';
-            btn.style.background = originalStyle.bg;
-            btn.style.color = originalStyle.color;
-            tooltip.remove();
-        }, 1800);
+            closeCopyModal();
+        }, 5000);
     }
+
+    // Tutup popup
+    function closeCopyModal() {
+        const modal = document.getElementById('copySuccessModal');
+        modal.classList.add('hidden');
+    }
+
+    // Tutup popup saat klik di luar
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('copySuccessModal');
+        if (e.target === modal) {
+            closeCopyModal();
+        }
+    });
 </script>
 @endpush
 </body>
