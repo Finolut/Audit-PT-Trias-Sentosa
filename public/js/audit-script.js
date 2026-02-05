@@ -383,69 +383,96 @@ function setValFromModal(itemId, userName, value, btnElement) {
 Inisialisasi Data: Memuat jawaban yang sudah ada di database ke dalam UI
 */
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof dbAnswers !== 'undefined' && dbAnswers !== null) {
-        console.log('✅ Loading saved answers:', dbAnswers); // ✅ DEBUG LOG
+        const copyBtn = document.getElementById('copy-token-btn');
+        const tokenElement = document.getElementById('audit-token');
         
-        // 1. Looping setiap jawaban dari database
-        Object.keys(dbAnswers).forEach(itemId => {
-            const userAnswers = dbAnswers[itemId]; // Berisi { "NamaUser": { answer, finding_level, finding_note, id } }
-            
-            Object.keys(userAnswers).forEach(userName => {
-                const answerData = userAnswers[userName];
-                const value = answerData.answer;
-
-                console.log(`  - Item ${itemId}, User ${userName}: ${value}`); // ✅ DEBUG LOG
-
-                // 2. Masukkan ke state sessionAnswers
-                const key = `${itemId}_${userName}`;
-                sessionAnswers[key] = value;
-
-                // 3. Jika ini adalah jawaban Auditor, beri warna pada tombol utama
-                if (userName === auditorName) {
-                    const group = document.getElementById(`btn_group_${itemId}`);
-                    if (group) {
-                        const buttons = group.querySelectorAll('.answer-btn');
-                        buttons.forEach(b => {
-                            b.classList.remove('active-yes', 'active-no', 'active-na');
-                        });
-                        
-                        if (value === 'YES') buttons[0]?.classList.add('active-yes');
-                        else if (value === 'NO') buttons[1]?.classList.add('active-no');
-                        else if (value === 'N/A') buttons[2]?.classList.add('active-na');
-                    }
-                }
-
-                // 4. Update input hidden
-                updateHiddenInputs(itemId);
-
-                // 5. Update info box perbedaan
-                updateInfoBox(itemId);
-
-                // 6. Isi Finding Level dan Finding Note jika ada
-                if (answerData.finding_level) {
-                    const findingSelect = document.querySelector(`select[name="finding_level[${itemId}][${userName}]"]`);
-                    if (findingSelect) {
-                        findingSelect.value = answerData.finding_level;
-                    }
+        if (copyBtn && tokenElement) {
+            copyBtn.addEventListener('click', async function() {
+                const tokenText = tokenElement.textContent.trim();
+                
+                if (!tokenText || tokenText === 'TOKEN_TIDAK_TERSEDIA') {
+                    alert('Token tidak tersedia untuk disalin');
+                    return;
                 }
                 
-                if (answerData.finding_note) {
-                    const findingTextarea = document.querySelector(`textarea[name="finding_note[${itemId}][${userName}]"]`);
-                    if (findingTextarea) {
-                        findingTextarea.value = answerData.finding_note;
-                    }
-                }
-                
-                // 7. Set Answer ID untuk update (bukan insert baru)
-                const answerIdInput = document.querySelector(`input[name="answer_id_map[${itemId}][${userName}]"]`);
-                if (answerIdInput && answerData.id) {
-                    answerIdInput.value = answerData.id;
+                try {
+                    // Modern clipboard API
+                    await navigator.clipboard.writeText(tokenText);
+                    showCopySuccess(this);
+                } catch (err) {
+                    // Fallback untuk browser yang tidak support navigator.clipboard
+                    fallbackCopyTextToClipboard(tokenText, this);
                 }
             });
-        });
+        }
+    });
+    
+    // Fungsi fallback untuk copy text
+    function fallbackCopyTextToClipboard(text, btnElement) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
         
-        console.log('✅ Answers loaded successfully!'); // ✅ DEBUG LOG
-    } else {
-        console.log('⚠️ No saved answers found'); // ✅ DEBUG LOG
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showCopySuccess(btnElement);
+            } else {
+                showCopyError(btnElement);
+            }
+        } catch (err) {
+            showCopyError(btnElement);
+        }
+        
+        document.body.removeChild(textArea);
     }
-});
+    
+    // Tampilkan pesan sukses
+    function showCopySuccess(btnElement) {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fas fa-check"></i>';
+        btnElement.style.background = '#10b981';
+        btnElement.style.color = 'white';
+        
+        // Tooltip sukses
+        const tooltip = document.createElement('span');
+        tooltip.textContent = 'Tersalin!';
+        tooltip.style.position = 'absolute';
+        tooltip.style.top = '-30px';
+        tooltip.style.right = '0';
+        tooltip.style.background = '#10b981';
+        tooltip.style.color = 'white';
+        tooltip.style.padding = '4px 8px';
+        tooltip.style.borderRadius = '4px';
+        tooltip.style.fontSize = '12px';
+        tooltip.style.zIndex = '1000';
+        btnElement.parentElement.appendChild(tooltip);
+        
+        setTimeout(() => {
+            btnElement.innerHTML = '<i class="fas fa-copy"></i>';
+            btnElement.style.background = '';
+            btnElement.style.color = '';
+            tooltip.remove();
+        }, 2000);
+    }
+    
+    // Tampilkan pesan error
+    function showCopyError(btnElement) {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fas fa-times"></i>';
+        btnElement.style.background = '#ef4444';
+        btnElement.style.color = 'white';
+        
+        setTimeout(() => {
+            btnElement.innerHTML = '<i class="fas fa-copy"></i>';
+            btnElement.style.background = '';
+            btnElement.style.color = '';
+        }, 2000);
+        
+        alert('Gagal menyalin token. Silakan salin manual.');
+    }
