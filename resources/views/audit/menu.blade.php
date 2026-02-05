@@ -570,15 +570,13 @@
     </div>
 
 @push('scripts')
-<script>
-    window.auditorName = @json($auditorName);
-    window.responders  = @json($responders);
-</script>
 
 <script src="{{ asset('js/audit-script.js') }}"></script>
 
 <script>
-    // Copy token functionality
+    
+       window.auditorName = @json($auditorName);
+    window.responders  = @json($responders);
     document.getElementById('copy-token-btn')?.addEventListener('click', function() {
         const tokenText = document.getElementById('audit-token').textContent;
         navigator.clipboard.writeText(tokenText).then(() => {
