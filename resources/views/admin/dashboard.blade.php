@@ -364,7 +364,7 @@ function showAuditDetails(dateString, count) {
                         <div class="text-[9px] text-gray-400 font-mono mb-2">
                             ID: ${audit.id.substring(0, 50)}
                         </div>
-<a href="{{ route('admin.audit.overview', $audit->id) }}" 
+                        <a href="/admin/audit/overview/${audit.id}" 
                            class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-sm">
                             DETAIL
                         </a>
